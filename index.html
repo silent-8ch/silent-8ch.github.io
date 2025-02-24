@@ -14,7 +14,18 @@
 </head>
 <body>
   <div class="container">
-    <h1>silent_8ch</h1>
+    <h1>silent_8ch's links</h1>
+    <a id="mail-link">email</a>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        var user = "silent8ch"; // change this
+        var domain = "gmail.com"; // change this
+        var email = user + "@" + domain;
+        var link = document.getElementById("mail-link");
+        link.href = "mailto:" + email;
+        link.textContent = email;
+      });
+    </script>
     <a href="https://silent8ch.blogspot.com/">silent8ch.blogspot.com/</a>
     <a href="https://github.com/silent-8ch">github.com/silent-8ch</a>
     <a href="https://open.spotify.com/user/phlusko">open.spotify.com/user/silent_8ch</a>
