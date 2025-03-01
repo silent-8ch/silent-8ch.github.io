@@ -21,54 +21,7 @@
   <div class="container">
     <h1>silent_8ch links</h1>
     <a id="mail-link">email</a>
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        var user = "paul";
-        var domain = "p4u1.com";
-        var email = user + "@" + domain;
-        var link = document.getElementById("mail-link");
-        link.href = "mailto:" + email;
-        link.textContent = email;
-      });
-    </script>
-	 <script>
-    const SINGLE_VIDEO_DURATION = 290;
-    const NUM_VIDEOS = 8;
-    const TOTAL_DURATION = SINGLE_VIDEO_DURATION * NUM_VIDEOS;
-
-    const apngList = [
-      "1.apng",
-      "2.apng",
-      "3.apng",
-      "4.apng",
-      "5.apng",
-      "6.apng",
-      "7.apng",
-      "8.apng"
-    ];
-
-    function getApngIndexForCurrentTime() {
-      const now = new Date();
-      const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const secondsSinceMidnight = (now - midnight) / 1000;
-      const cyclePosition = secondsSinceMidnight % TOTAL_DURATION;
-      const videoIndex = Math.floor(cyclePosition / SINGLE_VIDEO_DURATION);
-      return videoIndex;
-    }
-
-    function setBackgroundApng() {
-      const idx = getApngIndexForCurrentTime();
-      const chosenApng = apngList[idx] || apngList[0];
-      const bgDiv = document.querySelector(".background-container");
-      bgDiv.style.backgroundImage = `url("${chosenApng}")`;
-    }
-    document.addEventListener("DOMContentLoaded", () => {
-      setBackgroundApng();
-      setTimeout(() => {
-        window.location.reload();
-      }, 290000);
-    });
-  </script>
+    <script src="js/js.js"></script>
     <a href="https://blog.p4u1.com">blog.p4u1.com</a>
     <a href="https://github.com/silent-8ch">github.com/silent-8ch</a>
     <a href="https://open.spotify.com/user/phlusko">open.spotify.com/user/silent_8ch</a>
