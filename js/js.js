@@ -14,8 +14,8 @@ const apngList = [
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
-	var user = "paul";
-	var domain = "p4u1.com";
+	var user = "silent8ch";
+	var domain = "gmail.com";
 	var email = user + "@" + domain;
 	var link = document.getElementById("mail-link");
 	link.href = "mailto:" + email;
