@@ -24,6 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
 	setTimeout(() => {
 	window.location.reload();
 	}, 290000);
+	const params = new URLSearchParams(window.location.search);
+    const playerVal = params.get("player");
+
+    if (playerVal === "1") {
+    	document.querySelectorAll(".container").forEach(container => {
+        	container.style.display = "none";
+    	});
+    }
 });
 
 function getApngIndexForCurrentTime() {
