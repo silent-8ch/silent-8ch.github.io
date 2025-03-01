@@ -3,14 +3,14 @@ const NUM_VIDEOS = 8;
 const TOTAL_DURATION = SINGLE_VIDEO_DURATION * NUM_VIDEOS;
 
 const apngList = [
-	"1.apng",
-	"2.apng",
-	"3.apng",
-	"4.apng",
-	"5.apng",
-	"6.apng",
-	"7.apng",
-	"8.apng"
+	"background_apngs/1.apng",
+	"background_apngs/2.apng",
+	"background_apngs/3.apng",
+	"background_apngs/4.apng",
+	"background_apngs/5.apng",
+	"background_apngs/6.apng",
+	"background_apngs/7.apng",
+	"background_apngs/8.apng"
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
