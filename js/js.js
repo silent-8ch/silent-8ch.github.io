@@ -3,14 +3,14 @@ const NUM_VIDEOS = 8;
 const TOTAL_DURATION = SINGLE_VIDEO_DURATION * NUM_VIDEOS;
 
 const apngList = [
-	"background_apngs/1.apng",
-	"background_apngs/2.apng",
-	"background_apngs/3.apng",
-	"background_apngs/4.apng",
-	"background_apngs/5.apng",
-	"background_apngs/6.apng",
-	"background_apngs/7.apng",
-	"background_apngs/8.apng"
+	"background_apngs/part1.apng",
+	"background_apngs/part2.apng",
+	"background_apngs/part3.apng",
+	"background_apngs/part4.apng",
+	"background_apngs/part5.apng",
+	"background_apngs/part6.apng",
+	"background_apngs/part7.apng",
+	"background_apngs/part8.apng"
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
