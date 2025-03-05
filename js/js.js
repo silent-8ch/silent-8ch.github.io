@@ -1,7 +1,7 @@
 const SINGLE_VIDEO_DURATION = 290;
 const NUM_VIDEOS = 8;
 const TOTAL_DURATION = SINGLE_VIDEO_DURATION * NUM_VIDEOS;
-
+/*
 const apngList = [
 	"background_apngs/part1.apng",
 	"background_apngs/part2.apng",
@@ -12,7 +12,10 @@ const apngList = [
 	"background_apngs/part7.apng",
 	"background_apngs/part8.apng"
 ];
-
+*/
+const apngList = [
+	"background_apngs/dream1.apng"
+];
 document.addEventListener("DOMContentLoaded", () => {
 	var user = "silent8ch";
 	var domain = "gmail.com";
