@@ -1,0 +1,16 @@
+{
+  "name": "swim-certificates",
+  "version": "1.0.0",
+  "description": "A simple form to generate swim certificates for swimmers.",
+  "main": "src/index.html",
+  "scripts": {
+    "start": "live-server src",
+    "build": "echo 'Build step can be added here'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.1"
+  },
+  "author": "",
+  "license": "ISC"
+}

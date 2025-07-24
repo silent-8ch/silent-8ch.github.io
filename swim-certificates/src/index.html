@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Swim Team Certificate Generator</title>
+  <link rel="stylesheet" href="certificate.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tangerine:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    @page { size: letter landscape; margin: 0; }
+    body {
+      background: #eee;
+      font-family: Calibri, Trebuchet MS, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 1056px;
+      height: 816px;
+      margin: 20px auto;
+      background: #fff;
+      box-shadow: 0 0 10px #aaa;
+      position: relative;
+      padding: 0;
+      overflow: hidden; /* Prevent overflow */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .form-area {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .certificate {
+      position: relative;
+      width: 1056px;
+      height: 816px;
+      margin: 24px auto;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .cert-logo {
+      max-width: 200px;
+      max-height: 200px;
+      display: inline-block; /* Change to inline-block for centering */
+      margin: 20px;
+      /* Remove margin-left: 40px; */
+    }
+    .cert-title {
+      font-family: 'Trebuchet MS', Arial, sans-serif;
+      font-size: 4em;
+      font-weight: bold;
+      margin-top: 16px;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+      color: #2b852d; /* updated accent color */
+      text-align: center;
+    }
+    .cert-year {
+      font-size: 1.2em;
+      color: #2b852d; /* updated accent color */
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .cert-body,
+    .cert-dateline,
+    .go-gators {
+      font-family: 'Tangerine', cursive, serif;
+      font-weight: 700;
+      letter-spacing: 1px;
+      font-size: 2em;
+    }
+    .go-gators {
+      font-family: 'Tangerine', cursive, serif;
+      font-size: 4em; /* Match .cert-title */
+      font-weight: bold;
+      color: #2b852d; /* accent color */
+      margin-bottom: 10px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    .cert-body {
+      color: #222;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .cert-dateline {
+      color: #222; /* updated accent color */
+      margin-bottom: 30px;
+      font-style: italic;
+      text-align: center;
+    }
+    .cert-name {
+      font-family: 'Lucida Calligraphy', cursive, serif;
+      font-size: 2em;
+      color: #222;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .cert-recipient-line {
+      width:700px;
+      border-bottom: 2px solid #222;
+      margin: 30px auto 30px auto;
+      height: 2em;
+    }
+    .cert-footer {
+      position: absolute;
+      bottom: 60px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 1em;
+      color: #555;
+    }
+    .cert-signatories {
+      height: 120px;
+      display: flex;
+      justify-content: space-evenly; /* Evenly space signatories */
+      align-items: flex-end;
+      gap: 0; /* Remove extra gap, spacing handled by flex */
+      width: 100%; /* Ensure it spans the table cell */
+    }
+    .signatory-block, .info-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 120px;
+    }
+    .info-box {
+      justify-content: flex-end;
+      text-align: center;
+      padding-left: 20px;
+      padding-right: 0;
+    }
+    .signatory-line {
+      width: 200px;
+      border-bottom: 2px solid #222;
+      margin-bottom: 5px;
+      height: 2em;
+    }
+    .signatory-name {
+      font-family: 'Tangerine', cursive, serif;
+      font-size: 1em;
+      color: #222;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 2px;
+    }
+    .signatory-title {
+      font-size: 0.9em;
+      color: #555;
+      text-align: center;
+    }
+    .cert-for-blank-line {
+      display: inline-block;
+      width: 500px;
+      border-bottom: 2px solid #222;
+      vertical-align: middle;
+      margin-left: 10px;
+      height: 1.2em;
+    }
+    @media print {
+      body { background: none; }
+      .container { box-shadow: none; margin: 0; }
+      .form-area { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-area">
+      <label>
+        Dateline:
+        <input type="text" id="dateline" value="Awarded: July 26, 2025" style="width:200px;">
+      </label>
+      <label style="margin-left:20px;">
+        Certificate Type:
+        <input type="text" id="type" value="Certificate Type" style="width:200px;">
+      </label>
+      <label style="margin-left:20px;">
+        For:
+        <input type="text" id="for-field" value="Outstanding Achievement" style="width:200px;">
+      </label>
+      <label style="margin-left:10px;">
+        <input type="checkbox" id="for-blank" onchange="updateCertificate()"> leave blank
+      </label>
+      <label style="margin-left:20px;">
+        Signatories:
+        <select id="signatory-count" onchange="renderSignatoryInputs()">
+          <!-- Options 1-10 -->
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+      </label>
+      <div id="signatory-inputs" style="margin-top:10px;"></div>
+      <button onclick="updateCertificate()">Update</button>
+      <button onclick="window.print()">Print Certificate</button>
+    </div>
+    <div class="certificate" id="certificate">
+      <div class="cert-title">College Heights Swim Team</div>
+      <div class="cert-title" id="cert-type">Certificate Type</div>
+      <div class="cert-body" style="margin-top: 32px;">is hereby granted to</div>
+      <div class="cert-recipient-line"></div>
+      <div class="cert-body" id="cert-for">for Outstanding Achievement</div>
+      <!-- Place inside .certificate -->
+<table style="width:100%; height:180px; border-collapse:collapse; position:absolute; left:0; bottom:0;">
+  <tr>
+    <td colspan="2" style="vertical-align:bottom; text-align:center; height:80px;">
+      <div class="cert-signatories" id="cert-signatories"></div>
+    </td>
+  </tr>
+  <tr>
+    <td style="vertical-align:bottom; width:50%; text-align:center;">
+      <img src="chst_logo_2025.png" alt="CHST Logo" class="cert-logo">
+    </td>
+    <td style="vertical-align:bottom; text-align:right; width:50%;">
+      <div class="go-gators">Go Gators!</div>
+      <div class="cert-dateline" id="cert-dateline">Awarded: July 26, 2025</div>
+    </td>
+  </tr>
+</table>
+    </div>
+  </div>
+  <script>
+    // Store signatory data
+    let signatoryData = [];
+
+    function renderSignatoryInputs() {
+      const count = parseInt(document.getElementById('signatory-count').value, 10);
+
+      // Save current input values before re-rendering
+      for (let i = 0; i < signatoryData.length; i++) {
+        const nameInput = document.getElementById(`signatory-name-${i}`);
+        const titleInput = document.getElementById(`signatory-title-${i}`);
+        if (nameInput && titleInput) {
+          signatoryData[i] = {
+            name: nameInput.value,
+            title: titleInput.value
+          };
+        }
+      }
+
+      // Adjust array length
+      while (signatoryData.length < count) {
+        signatoryData.push({ name: `Name ${signatoryData.length + 1}`, title: `Title ${signatoryData.length + 1}` });
+      }
+      while (signatoryData.length > count) {
+        signatoryData.pop();
+      }
+
+      const container = document.getElementById('signatory-inputs');
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const nameId = `signatory-name-${i}`;
+        const titleId = `signatory-title-${i}`;
+        container.innerHTML += `
+          <div style="margin-bottom:8px;">
+            <label>Name: <input type="text" id="${nameId}" value="${signatoryData[i].name}" style="width:120px;"></label>
+            <label style="margin-left:8px;">Title: <input type="text" id="${titleId}" value="${signatoryData[i].title}" style="width:120px;"></label>
+          </div>
+        `;
+      }
+    }
+
+    function updateCertificate() {
+      document.getElementById('cert-type').textContent =
+        document.getElementById('type').value;
+      document.getElementById('cert-dateline').textContent =
+        document.getElementById('dateline').value;
+
+      // For field logic
+      const forBlank = document.getElementById('for-blank').checked;
+      const certForDiv = document.getElementById('cert-for');
+      if (forBlank) {
+        certForDiv.innerHTML = `for <span class="cert-for-blank-line"></span>`;
+      } else {
+        certForDiv.textContent = `for ${document.getElementById('for-field').value}`;
+      }
+
+      // Update signatoryData with current input values
+      const count = parseInt(document.getElementById('signatory-count').value, 10);
+      for (let i = 0; i < count; i++) {
+        const nameInput = document.getElementById(`signatory-name-${i}`);
+        const titleInput = document.getElementById(`signatory-title-${i}`);
+        if (nameInput && titleInput) {
+          signatoryData[i] = {
+            name: nameInput.value,
+            title: titleInput.value
+          };
+        }
+      }
+
+      // Render signatories
+      const signatoriesDiv = document.getElementById('cert-signatories');
+      signatoriesDiv.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const name = signatoryData[i].name;
+        const title = signatoryData[i].title;
+        signatoriesDiv.innerHTML += `
+          <div class="signatory-block">
+            <div class="signatory-line"></div>
+            <div class="signatory-name">${name}</div>
+            <div class="signatory-title">${title}</div>
+          </div>
+        `;
+      }
+    }
+
+    // Initialize certificate and signatory inputs on load
+    window.onload = function() {
+      renderSignatoryInputs();
+      updateCertificate();
+    };
+
+    // Update certificate whenever inputs change
+    document.addEventListener('input', function(e) {
+      if (e.target.id.startsWith('signatory-name-') || e.target.id.startsWith('signatory-title-')) {
+        updateCertificate();
+      }
+    });
+  </script>
+</body>
+</html>
