@@ -285,7 +285,7 @@
       if (forBlank) {
         certForDiv.innerHTML = `for <span class="cert-for-blank-line"></span>`;
       } else {
-        certForDiv.textContent = `for ${document.getElementById('for-field').value}`;
+        certForDiv.textContent = `${document.getElementById('for-field').value}`;
       }
 
       // Update signatoryData with current input values
