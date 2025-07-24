@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Triple Winner Finder</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .winner {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        .file-input {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .file-input:hover {
+            border-color: #28a745;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .event {
+            color: #666;
+            margin-left: 20px;
+            white-space: pre;
+            font-family: monospace;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .events {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .event {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .event-number {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+        .event-time {
+            color: #666;
+            font-family: monospace;
+            font-size: 1.1em;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .winner strong {
+            font-size: 1.2em;
+            color: #333;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .team-name {
+            margin-bottom: 10px;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.8em;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Triple Winner Finder</h1>
+        <div style="background:#e9ecef;padding:16px 20px;border-radius:6px;margin-bottom:20px;">
+            <strong>How to Export and Upload Your SD3 File:</strong>
+            <ol style="margin:10px 0 0 20px;">
+                <li>In Meet Maestro, go to <b>Settings &gt; Reports &gt; Finish &amp; Export</b>.</li>
+                <li>Under the <b>Downloads</b> tab, set:<br>
+                    <b>Export Type:</b> Results<br>
+                    <b>Export Format:</b> SDIF SD3<br>
+                    <b>Team:</b> All Teams (or your desired team)
+                </li>
+                <li>Click <b>Generate File</b>.</li>
+                <li>Download the generated file to your computer.</li>
+                <li>Upload that file here. (ZIP files are supported; the SD3 will be extracted automatically.)</li>
+            </ol>
+        </div>
+        <div class="file-input">
+            <input type="file" id="fileInput" accept=".sd3,.zip">
+            <p>Upload your Meet Maestro SD3 file</p>
+        </div>
+        <div id="results"></div>
+        <div class="footer">2025 Paul Hlusko - College Heights Gators - RSL</div>
+    </div>
+
+    <script src="https://unpkg.com/fflate"></script>
+    <script>
+        let nicknames = new Map(); // Store nicknames from D3 rows
+
+        async function extractSD3FromZip(file) {
+            // Use fflate to extract and decompress .sd3 from ZIP
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const uint8 = new Uint8Array(e.target.result);
+                        const entries = fflate.unzipSync(uint8);
+                        for (const [name, data] of Object.entries(entries)) {
+                            if (name.toLowerCase().endsWith('.sd3')) {
+                                resolve(new File([data], name, {type: 'application/octet-stream'}));
+                                return;
+                            }
+                        }
+                        console.error('No .sd3 file found in ZIP. Entries:', Object.keys(entries));
+                        reject(new Error('No .sd3 file found in ZIP.'));
+                    } catch (err) {
+                        console.error('Error during ZIP extraction:', err);
+                        reject(err);
+                    }
+                };
+                reader.onerror = () => {
+                    console.error('FileReader error:', reader.error);
+                    reject(reader.error);
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        async function readSD3File(file) {
+            const buffer = await file.arrayBuffer();
+            const view = new DataView(buffer);
+            const results = [];
+            
+            console.log('File size:', buffer.byteLength);
+            
+            try {
+                // Convert buffer to text
+                const text = new TextDecoder().decode(buffer);
+                console.log('First 500 chars of file:', text.slice(0, 500));
+                // Split lines (current logic)
+                const lines = text.split('\r\n');
+                console.log('First 5 lines:', lines.slice(0, 5));
+                console.log('Found', lines.length, 'lines');
+                
+                // First pass: collect nicknames from D3 rows
+                nicknames.clear(); // Clear any existing nicknames
+                for (const line of lines) {
+                    if (line.startsWith('D3')) {
+                        const nameEnd = line.indexOf('X');
+                        if (nameEnd > 0) {
+                            const name = line.substring(2, nameEnd).trim();
+                            const nickname = name.split(/\s+/)[0]; // First word is nickname
+                            const lastName = line.substring(nameEnd + 1).trim().split(/\s+/)[0];
+                            nicknames.set(lastName, nickname);
+                        }
+                    }
+                }
+                
+                // Parse each line
+                for (const line of lines) {
+                    if (line.startsWith('B11')) {
+                        // Meet info
+                        console.log('Meet:', line.substring(10).trim());
+                    } else if (line.startsWith('D01')) {
+                        // Individual Event Record (D01)
+                        // Format: D01 + spaces + Name (32 chars) + USS# (14 chars) + Birthdate (8 chars) + Sex (2 chars) + Event (4 chars) + Course (2 chars) + Date (8 chars) + Time (8 chars) + Place (2 chars) + Points (4 chars)
+                        
+                        const name = line.substring(4, 36).trim();
+                        const nameParts = name.split(/\s+/);
+                        const team = nameParts.length > 2 ? nameParts.slice(2).join(' ') : '';
+                        console.log('D01 Team extraction:', { name, nameParts, team });
+                        
+                        // Event number is after the first space following the event code (any number)
+                        const eventCodeMatch = line.match(/\s(\d+)\s/);
+                        if (eventCodeMatch) {
+                            const officialEventIndex = eventCodeMatch.index + 1; // +1 to skip the leading space
+                            // Find the first space after the event code
+                            const firstSpaceAfterCode = line.indexOf(' ', officialEventIndex);
+                            if (firstSpaceAfterCode !== -1) {
+                                // Get the next two characters after the space
+                                let eventNum = line.substring(firstSpaceAfterCode + 1, firstSpaceAfterCode + 3).trim();
+                                
+                                // If it's a single digit, pad with leading zero
+                                if (eventNum.length === 1) {
+                                    eventNum = '0' + eventNum;
+                                }
+                                
+                                // Find the time and place section
+                                const timeIndex = line.lastIndexOf('S');
+                                if (timeIndex > 0) {
+                                    const afterTime = line.substring(timeIndex + 1).trim();
+                                    
+                                    // Format is: "2 1 1 6.0UO" where:
+                                    // First number is heat
+                                    // Second number is lane
+                                    // Third number is place
+                                    // Last part is points
+                                    const parts = afterTime.split(/\s+/);
+                                    const place = parseInt(parts[2], 10);
+                                    
+                                    if (name && eventNum && !isNaN(place) && place > 0) {
+                                        // Check if we already have this exact result
+                                        const isDuplicate = results.some(r => 
+                                            r.swimmer_name === name && 
+                                            r.event_number === eventNum
+                                        );
+                                        
+                                        if (!isDuplicate) {
+                                            results.push({
+                                                swimmer_name: name,
+                                                event_name: `Event ${eventNum}`,
+                                                event_number: eventNum,
+                                                place: place,
+                                                raw_line: line
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error parsing SD3 file:', error);
+                throw new Error(`Error parsing SD3 file: ${error.message}`);
+            }
+            
+            console.log('Total results found:', results.length);
+            console.log('Results by swimmer:', Object.fromEntries(
+                Object.entries(
+                    results.reduce((acc, r) => {
+                        if (!acc[r.swimmer_name]) acc[r.swimmer_name] = [];
+                        acc[r.swimmer_name].push(r);
+                        return acc;
+                    }, {})
+                ).map(([name, results]) => [name, results.map(r => `${r.event_name}: ${r.place}`)])
+            ));
+            return results;
+        }
+
+        function findTripleWinners(results) {
+            const swimmerResults = {};
+            for (const result of results) {
+                if (!swimmerResults[result.swimmer_name]) {
+                    swimmerResults[result.swimmer_name] = [];
+                }
+                // Only add if we don't already have this exact event
+                const isDuplicate = swimmerResults[result.swimmer_name].some(r => 
+                    r.event_number === result.event_number
+                );
+                if (!isDuplicate) {
+                    // Extract time from the raw line
+                    const timeIndex = result.raw_line.lastIndexOf('S');
+                    const time = result.raw_line.substring(timeIndex - 8, timeIndex + 1).trim();
+                    result.time = time;
+                    swimmerResults[result.swimmer_name].push(result);
+                }
+            }
+            
+            const tripleWinners = [];
+            for (const [name, results] of Object.entries(swimmerResults)) {
+                const firstPlaces = results.filter(r => r.place === 1);
+                if (firstPlaces.length === 3) {
+                    tripleWinners.push({
+                        name: name,
+                        events: firstPlaces.map(r => ({
+                            number: r.event_number,
+                            time: r.time
+                        }))
+                    });
+                }
+            }
+            return tripleWinners;
+        }
+
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            // If ZIP, extract SD3
+            if (file.name.toLowerCase().endsWith('.zip')) {
+                try {
+                    file = await extractSD3FromZip(file);
+                } catch (err) {
+                    document.getElementById('results').innerHTML = `<p style="color: red">${err.message}</p>`;
+                    console.error('ZIP extraction failed:', err);
+                    return;
+                }
+            }
+            try {
+                const results = await readSD3File(file);
+                const resultsDiv = document.getElementById('results');
+                const tripleWinners = findTripleWinners(results);
+                if (tripleWinners.length === 0) {
+                    resultsDiv.innerHTML = '<p>No triple winners found.</p>';
+                } else {
+                    resultsDiv.innerHTML = '<h2>Triple Winners:</h2>';
+                    tripleWinners.forEach(winner => {
+                        // Extract last name for nickname lookup
+                        const lastName = winner.name.split(',')[0].trim();
+                        const nickname = nicknames.get(lastName) || '';
+                        const displayName = nickname ? `${winner.name} (${nickname})` : winner.name;
+                        
+                        resultsDiv.innerHTML += `
+                            <div class="winner">
+                                <strong>${displayName}</strong>
+                                <div class="events">
+                                    ${winner.events.map(e => `
+                                        <div class="event">
+                                            <span class="event-number">Event ${e.number}</span>
+                                            <span class="event-time">${e.time}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (error) {
+                document.getElementById('results').innerHTML = 
+                    `<p style="color: red">Error reading file: ${error.message}</p>`;
+                console.error('SD3 file reading failed:', error);
+            }
+        });
+    </script>
+</body>
+</html>
