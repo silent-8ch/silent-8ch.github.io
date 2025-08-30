@@ -60,31 +60,37 @@ document.addEventListener("DOMContentLoaded", () => {
 	var domain = "gmail.com";
 	var email = user + "@" + domain;
 	var link = document.getElementById("mail-link");
-	link.href = "mailto:" + email;
-	link.textContent = email;
+	//check if link is null
+	if (link) {
+		link.href = "mailto:" + email;
+		link.textContent = email;		
+	}
 
 	var stageLink = document.getElementById("stage-link");
+	var stageString = ""
+	var stageHref = ""
 	switch (stage) {
 		case "dream":
-			stageLink.href = "?stage=woke"
-			stageLink.textContent = "Wake up.";
+			stageHref = "?stage=woke"
+			stageString = "Wake up.";
 		break;
 		case "woke":
-			stageLink.href = "?stage=filtered"
-			stageLink.textContent = "Filter reality.";
+			stageHref = "?stage=filtered"
+			stageString = "Filter reality.";
 		break;
 		case "filtered":
-			stageLink.href = "?stage=dream"
-			stageLink.textContent = "Enter the dream.";
+			stageHref = "?stage=dream"
+			stageString = "Enter the dream.";
 		break;
 		default:
-			stageLink.href = "?stage=woke"
-			stageLink.textContent = "Wake up.";
+			stageHref = "?stage=woke"
+			stageString = "Wake up.";
 		break;
 	}
-	if (stage === "dream") {
-
-	} 
+	if (stageLink) {
+		stageLink.href = stageHref;
+		stageLink.textContent = stageString
+	}
 	setBackgroundApng();
 	setTimeout(() => {
 	window.location.reload();
