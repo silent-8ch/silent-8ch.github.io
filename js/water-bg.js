@@ -26,9 +26,13 @@
   const planeDistance = 1.0;
   const tmpDir = new THREE.Vector3();
 
-  // shader material (copied from water.html)
+  // shader material (copied from water.html) with mouse interaction uniforms
   const mat = new THREE.ShaderMaterial({
-    uniforms: { t: { value: 0.0 } },
+    uniforms: { 
+      t: { value: 0.0 },
+      u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
+      u_mouseStrength: { value: 1.0 } // baseline; will be updated each frame
+    },
     vertexShader: `
       varying vec2 vUv;
       void main(){
@@ -38,6 +42,8 @@
     fragmentShader: `
       varying vec2 vUv;
       uniform float t;
+      uniform vec2 u_mouse;
+      uniform float u_mouseStrength;
 
       float hash(vec2 p) {
         return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453123);
@@ -57,7 +63,13 @@
       float causticLayer(vec2 uv, float time, float scale, float baseDistort, float cellOffsetBase, float animSpeed) {
         float lf = lfnoise(uv * 0.6 + vec2(time * 0.02, -time * 0.015));
         float distortAmp = baseDistort + lf * 0.02;
-        uv += vec2(sin(uv.y * 6.0 + time * 0.6 * animSpeed), cos(uv.x * 6.0 - time * 0.5 * animSpeed)) * distortAmp;
+
+        // add mouse-based local distortion
+        float md = distance(uv, u_mouse);
+        float influence = exp(-md * md * 60.0) * u_mouseStrength; // very local
+        // subtle ripple outward from mouse
+        float ripple = sin((1.0 - md) * 40.0 - time * 6.0) * influence * 0.6;
+        uv += vec2(sin(uv.y * 6.0 + time * 0.6 * animSpeed), cos(uv.x * 6.0 - time * 0.5 * animSpeed)) * (distortAmp + ripple * 0.02);
 
         uv *= scale;
         vec2 i = floor(uv);
@@ -162,10 +174,38 @@
   // call resize once to initialize sizes
   resize();
 
+  // mouse interaction state (normalized UV in [0,1], smoothed)
+  const targetMouse = new THREE.Vector2(0.5, 0.5);
+  const smoothMouse = new THREE.Vector2(0.5, 0.5);
+  // pointer events on container (canvas pointerEvents CSS is none so attach to container)
+  container.style.touchAction = container.style.touchAction || 'none';
+  container.addEventListener('pointermove', (e) => {
+    const rect = container.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = 1.0 - (e.clientY - rect.top) / rect.height; // flip Y to match uv
+    targetMouse.set(THREE.MathUtils.clamp(x, 0, 1), THREE.MathUtils.clamp(y, 0, 1));
+  }, { passive: true });
+
+  // set mouse strength every frame to match the click intensity: 1.0 + ambient
+  function updateMouseUniforms(dt) {
+    // smooth target -> smoothMouse
+    smoothMouse.lerp(targetMouse, 0.12);
+    mat.uniforms.u_mouse.value.set(smoothMouse.x, smoothMouse.y);
+
+    // ambient influence based on distance from center
+    const centerDist = Math.hypot(smoothMouse.x - 0.5, smoothMouse.y - 0.5);
+    const ambient = 0.45 * (1.0 - centerDist * 1.6);
+
+    // use the same intensity that clicking previously produced (1.0 + ambient)
+    mat.uniforms.u_mouseStrength.value = 1.0 + ambient;
+  }
+
   (function animate(){
     requestAnimationFrame(animate);
-    mat.uniforms.t.value = clock.getElapsedTime();
+    const elapsed = clock.getElapsedTime();
+    mat.uniforms.t.value = elapsed;
     updateFullscreenPlane();
+    updateMouseUniforms(1/60);
     renderer.render(scene, camera);
   })();
 
