@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fun Times — Clocks</title>
+  <style>
+    :root{
+      --bg:#0f1720;
+      --card:#0b1220;
+      --accent:#ffd166;
+      --muted:#9aa6b2;
+      --glass: rgba(255,255,255,0.03);
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#07101a 0%,var(--bg) 100%);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;color:#e6eef6}
+    .wrap{max-width:980px;margin:28px auto;padding:20px;display:flex;flex-direction:column;gap:18px}
+    /* enable absolutely positioned celebration overlay inside the page wrapper */
+    .wrap{position:relative}
+    .top{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap}
+    /* celebration (confetti) styles */
+    .celebration{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:60}
+    .celebration .confetti{position:absolute;will-change:transform,opacity;opacity:0.95;border-radius:2px}
+    @keyframes confetti-fall {
+      0% { transform: translateY(-10vh) rotate(0deg); opacity:1 }
+      100% { transform: translateY(110vh) rotate(720deg); opacity:0 }
+    }
+    .clock-card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6);display:flex;flex-direction:column;align-items:center;min-width:260px}
+    canvas{background:linear-gradient(180deg,#07202b,#04121a);border-radius:50%}
+    .digital{font-size:36px;font-weight:600;letter-spacing:2px;padding:6px 12px;border-radius:8px;background:var(--glass);color:var(--accent)}
+    .small-digital{font-size:28px;font-weight:600;letter-spacing:1px;padding:6px 10px;border-radius:8px;background:var(--glass);color:var(--accent)}
+    .label{font-size:13px;color:var(--muted);margin-top:8px}
+    .debug{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px;color:#cfe6f9;font-family:monospace;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;align-items:start}
+    .debug b{color:var(--accent)}
+    .row{display:flex;gap:8px;align-items:center}
+    .small{font-size:13px;color:var(--muted)}
+    footer{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
+
+    /* debug area button styles */
+    .debug .controls{grid-column:1/-1;display:flex;justify-content:center;margin-top:6px}
+    .debug .btn{background:var(--accent);color:#07131a;border:none;padding:8px 12px;border-radius:8px;font-weight:600;cursor:pointer;box-shadow:0 6px 14px rgba(255,209,102,0.12)}
+    .debug .btn:active{transform:translateY(1px)}
+
+    /* new: debug console textbox */
+    #debugConsole {
+      grid-column:1/-1;
+      width:100%;
+      height:120px;            /* set size */
+      resize:none;
+      background: rgba(0,0,0,0.25);
+      color: #e6eef6;
+      border: 1px solid rgba(255,255,255,0.04);
+      padding:8px;
+      border-radius:8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Lucida Console", monospace;
+      font-size:13px;
+      overflow:auto;
+      outline:none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="clock-card" id="analogCard">
+        <canvas id="analog" width="300" height="300" aria-label="Analog clock"></canvas>
+        <div class="label">Analog Clock</div>
+      </div>
+
+      <div class="clock-card" id="digitalCard" style="min-width:320px;align-items:center">
+        <div id="digital" class="digital" aria-live="polite">--:--:--</div>
+        <div class="label">Digital Clock (24h)</div>
+      </div>
+
+      <!-- NEW: analog without seconds -->
+      <div class="clock-card" id="analogNoSecCard">
+        <canvas id="analogNoSec" width="260" height="260" aria-label="Analog clock without seconds"></canvas>
+        <div class="label">Analog (no seconds)</div>
+      </div>
+
+      <!-- NEW: digital without seconds (HH:MM) -->
+      <div class="clock-card" id="digitalNoSecCard" style="min-width:220px;align-items:center">
+        <div id="digitalNoSec" class="small-digital" aria-live="polite">--:--</div>
+        <div class="label">Digital (24h, no seconds)</div>
+      </div>
+    </div>
+
+    <div class="debug" id="debugPanel" aria-live="polite">
+      <div>
+        <div class="small">Hour hand angle</div>
+        <div id="angleHour"><b>0°</b></div>
+      </div>
+      <div>
+        <div class="small">Minute hand angle</div>
+        <div id="angleMinute"><b>0°</b></div>
+      </div>
+      <div>
+        <div class="small">Second hand angle</div>
+        <div id="angleSecond"><b>0°</b></div>
+      </div>
+      <div>
+        <div class="small">Digital display</div>
+        <div id="digitalDebug"><b>--:--:--</b></div>
+      </div>
+
+      <!-- NEW debug entries for no-seconds clocks -->
+      <div>
+        <div class="small">Hour (no-sec)</div>
+        <div id="angleHourNoSec"><b>0°</b></div>
+      </div>
+      <div>
+        <div class="small">Minute (no-sec)</div>
+        <div id="angleMinuteNoSec"><b>0°</b></div>
+      </div>
+      <div>
+        <div class="small">Digital (no-sec)</div>
+        <div id="digitalNoSecDebug"><b>--:--</b></div>
+      </div>
+
+      <!-- new: console output textbox -->
+      <div style="grid-column:1/-1">
+        <div class="small">Console</div>
+        <textarea id="debugConsole" readonly aria-label="Debug console output" spellcheck="false"></textarea>
+      </div>
+
+      <!-- added button at bottom of debug area -->
+      <div class="controls">
+        <button id="debugBtn" class="btn" type="button" aria-label="Refresh clocks">Test Celebration</button>
+      </div>
+    </div>
+    <!-- celebration overlay (confetti will be injected here) -->
+    <div id="celebration" class="celebration" aria-hidden="true"></div>
+   </div>
+
+  <script>
+    // Utility: two-digit format
+    const z = n => n.toString().padStart(2,'0');
+
+    // DOM refs
+    const canvas = document.getElementById('analog');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const cx = w/2, cy = h/2, radius = Math.min(cx,cy) * 0.92;
+    const digitalEl = document.getElementById('digital');
+    const angleHourEl = document.getElementById('angleHour');
+    const angleMinuteEl = document.getElementById('angleMinute');
+    const angleSecondEl = document.getElementById('angleSecond');
+    const digitalDebugEl = document.getElementById('digitalDebug');
+
+    // NEW: no-seconds refs
+    const canvasNoSec = document.getElementById('analogNoSec');
+    const ctxNoSec = canvasNoSec.getContext('2d');
+    const wNS = canvasNoSec.width, hNS = canvasNoSec.height;
+    const cxNS = wNS/2, cyNS = hNS/2, radiusNS = Math.min(cxNS,cyNS) * 0.92;
+    const digitalNoSecEl = document.getElementById('digitalNoSec');
+    const angleHourNoSecEl = document.getElementById('angleHourNoSec');
+    const angleMinuteNoSecEl = document.getElementById('angleMinuteNoSec');
+    const digitalNoSecDebugEl = document.getElementById('digitalNoSecDebug');
+
+    // debug console ref
+    const debugConsole = document.getElementById('debugConsole');
+
+    // NEW: simple logger used by celebration/tests — writes to the debug console and console.log
+    function logDebug(msg){
+      try {
+        const now = new Date();
+        const ts = now.toLocaleTimeString();
+        const line = `[${ts}] ${msg}\n`;
+        if (debugConsole) {
+          debugConsole.value += line;
+          debugConsole.scrollTop = debugConsole.scrollHeight;
+        }
+        // also print to developer console for easier troubleshooting
+        console.log(line);
+      } catch (err) {
+        // ensure logging never throws and breaks the UI
+        console.log('logDebug error', err);
+      }
+    }
+
+    // Draw clock face (static) - original for main clock
+    function drawFace(){
+      ctx.clearRect(0,0,w,h);
+
+      // outer ring
+      ctx.beginPath();
+      const grad = ctx.createLinearGradient(0,0,w,h);
+      grad.addColorStop(0,'#183344'); grad.addColorStop(1,'#07131a');
+      ctx.fillStyle = grad;
+      ctx.arc(cx,cy,radius,0,Math.PI*2);
+      ctx.fill();
+
+      // rim
+      ctx.lineWidth = radius*0.06;
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.beginPath();
+      ctx.arc(cx,cy,radius - ctx.lineWidth/2,0,Math.PI*2);
+      ctx.stroke();
+
+      // ticks
+      for(let i=0;i<60;i++){
+        const ang = i * Math.PI/30;
+        const inner = radius * (i%5 ? 0.90 : 0.82);
+        const outer = radius * 0.98;
+        ctx.beginPath();
+        ctx.strokeStyle = i%5 ? 'rgba(255,255,255,0.06)' : 'rgba(255,209,102,0.9)';
+        ctx.lineWidth = i%5 ? 2 : 4;
+        ctx.moveTo(cx + inner*Math.cos(ang - Math.PI/2), cy + inner*Math.sin(ang - Math.PI/2));
+        ctx.lineTo(cx + outer*Math.cos(ang - Math.PI/2), cy + outer*Math.sin(ang - Math.PI/2));
+        ctx.stroke();
+      }
+
+      // center dot
+      ctx.beginPath();
+      ctx.fillStyle = '#ffd166';
+      ctx.arc(cx,cy,5,0,Math.PI*2);
+      ctx.fill();
+    }
+
+    // Draw hands given angles in degrees (0 at 12 o'clock, increasing clockwise)
+    function drawHands(degHour, degMin, degSec){
+      // convert degrees to radians where 0 rad is at 12 o'clock
+      const rHour = (degHour - 90) * Math.PI/180;
+      const rMin  = (degMin  - 90) * Math.PI/180;
+      const rSec  = (degSec  - 90) * Math.PI/180;
+
+      // hour hand
+      ctx.beginPath();
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#ffd166';
+      ctx.lineWidth = Math.max(6, radius*0.06);
+      ctx.moveTo(cx - Math.cos(rHour)*10, cy - Math.sin(rHour)*10);
+      ctx.lineTo(cx + Math.cos(rHour)*(radius*0.5), cy + Math.sin(rHour)*(radius*0.5));
+      ctx.stroke();
+
+      // minute hand
+      ctx.beginPath();
+      ctx.strokeStyle = '#cfe6f9';
+      ctx.lineWidth = Math.max(4, radius*0.045);
+      ctx.moveTo(cx - Math.cos(rMin)*8, cy - Math.sin(rMin)*8);
+      ctx.lineTo(cx + Math.cos(rMin)*(radius*0.72), cy + Math.sin(rMin)*(radius*0.72));
+      ctx.stroke();
+
+      // second hand
+      ctx.beginPath();
+      ctx.strokeStyle = '#ff6b6b';
+      ctx.lineWidth = Math.max(2, radius*0.02);
+      ctx.moveTo(cx - Math.cos(rSec)*20, cy - Math.sin(rSec)*20);
+      ctx.lineTo(cx + Math.cos(rSec)*(radius*0.82), cy + Math.sin(rSec)*(radius*0.82));
+      ctx.stroke();
+
+      // second tail (thin)
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(255,107,107,0.35)';
+      ctx.lineWidth = 1;
+      ctx.moveTo(cx,cy);
+      ctx.lineTo(cx - Math.cos(rSec)*(radius*0.16), cy - Math.sin(rSec)*(radius*0.16));
+      ctx.stroke();
+    }
+
+    // NEW: draw face for no-seconds analog (uses its own ctx & sizes)
+    function drawFaceNoSec(){
+      ctxNoSec.clearRect(0,0,wNS,hNS);
+
+      // outer ring
+      ctxNoSec.beginPath();
+      const grad = ctxNoSec.createLinearGradient(0,0,wNS,hNS);
+      grad.addColorStop(0,'#183344'); grad.addColorStop(1,'#07131a');
+      ctxNoSec.fillStyle = grad;
+      ctxNoSec.arc(cxNS,cyNS,radiusNS,0,Math.PI*2);
+      ctxNoSec.fill();
+
+      // rim
+      ctxNoSec.lineWidth = radiusNS*0.06;
+      ctxNoSec.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctxNoSec.beginPath();
+      ctxNoSec.arc(cxNS,cyNS,radiusNS - ctxNoSec.lineWidth/2,0,Math.PI*2);
+      ctxNoSec.stroke();
+
+      // ticks
+      for(let i=0;i<60;i++){
+        const ang = i * Math.PI/30;
+        const inner = radiusNS * (i%5 ? 0.90 : 0.82);
+        const outer = radiusNS * 0.98;
+        ctxNoSec.beginPath();
+        ctxNoSec.strokeStyle = i%5 ? 'rgba(255,255,255,0.06)' : 'rgba(255,209,102,0.9)';
+        ctxNoSec.lineWidth = i%5 ? 1.8 : 3;
+        ctxNoSec.moveTo(cxNS + inner*Math.cos(ang - Math.PI/2), cyNS + inner*Math.sin(ang - Math.PI/2));
+        ctxNoSec.lineTo(cxNS + outer*Math.cos(ang - Math.PI/2), cyNS + outer*Math.sin(ang - Math.PI/2));
+        ctxNoSec.stroke();
+      }
+
+      // center dot
+      ctxNoSec.beginPath();
+      ctxNoSec.fillStyle = '#ffd166';
+      ctxNoSec.arc(cxNS,cyNS,4,0,Math.PI*2);
+      ctxNoSec.fill();
+    }
+
+    // NEW: draw hands for no-seconds analog (hour + minute only)
+    function drawHandsNoSec(degHour, degMin){
+      const rHour = (degHour - 90) * Math.PI/180;
+      const rMin  = (degMin  - 90) * Math.PI/180;
+
+      // hour hand
+      ctxNoSec.beginPath();
+      ctxNoSec.lineCap = 'round';
+      ctxNoSec.strokeStyle = '#ffd166';
+      ctxNoSec.lineWidth = Math.max(5, radiusNS*0.06);
+      ctxNoSec.moveTo(cxNS - Math.cos(rHour)*8, cyNS - Math.sin(rHour)*8);
+      ctxNoSec.lineTo(cxNS + Math.cos(rHour)*(radiusNS*0.48), cyNS + Math.sin(rHour)*(radiusNS*0.48));
+      ctxNoSec.stroke();
+
+      // minute hand
+      ctxNoSec.beginPath();
+      ctxNoSec.strokeStyle = '#cfe6f9';
+      ctxNoSec.lineWidth = Math.max(3, radiusNS*0.045);
+      ctxNoSec.moveTo(cxNS - Math.cos(rMin)*6, cyNS - Math.sin(rMin)*6);
+      ctxNoSec.lineTo(cxNS + Math.cos(rMin)*(radiusNS*0.72), cyNS + Math.sin(rMin)*(radiusNS*0.72));
+      ctxNoSec.stroke();
+    }
+
+    // Compute angles from Date object
+    function computeAngles(date){
+      const ms = date.getMilliseconds();
+      const sec = date.getSeconds() + ms/1000;
+      const min = date.getMinutes() + sec/60;
+      const hr  = (date.getHours() % 12) + min/60;
+
+      const degSec = sec * 6;            // 360/60
+      const degMin = min * 6;            // 360/60
+      const degHour = hr * 30;           // 360/12
+
+      return {degHour, degMin, degSec};
+    }
+
+    // NEW: compute angles ignoring seconds (i.e. minute is integer)
+    function computeAnglesNoSec(date){
+      const min = date.getMinutes(); // ignore seconds for this computation
+      const hr  = (date.getHours() % 12) + min/60;
+
+      const degMin = min * 6;
+      const degHour = hr * 30;
+
+      return {degHour, degMin};
+    }
+
+    // === NEW: celebration / detection helpers ===
+    const lastTriggered = new Map(); // event -> last value that triggered
+
+    function angDiff(a,b){
+      // shortest angular distance (0..180)
+      return Math.abs(((a - b + 180) % 360) - 180);
+    }
+
+    function areColinear3(a,b,c,eps=2){
+      // true when each pair is either roughly equal or roughly opposite (180deg)
+      const ab = angDiff(a,b), ac = angDiff(a,c), bc = angDiff(b,c);
+      const close = x => x <= eps || Math.abs(x - 180) <= eps;
+      return close(ab) && close(ac) && close(bc);
+    }
+
+    function stripCols(s){ return s.replace(/:/g,''); }
+
+    function isPalindrome(s){
+      const t = stripCols(s);
+      return t === t.split('').reverse().join('');
+    }
+
+    function isSymmetrical(s){
+      // left half is mirror of right half (requires even length)
+      const t = stripCols(s);
+      if (t.length % 2 !== 0) return false;
+      const half = t.length/2;
+      const left = t.slice(0,half);
+      const right = t.slice(half);
+      return left === right.split('').reverse().join('');
+    }
+
+    function isRepeatingPattern(s){
+      const t = stripCols(s);
+      const n = t.length;
+      for (let len = 1; len <= Math.floor(n/2); len++){
+        if (n % len !== 0) continue;
+        const part = t.slice(0,len);
+        if (part.repeat(n/len) === t) return true;
+      }
+      return false;
+    }
+
+    function isRunOfNumbers(s){
+      const t = stripCols(s);
+      if (t.length < 3) return false;
+      for (let i = 1; i < t.length; i++){
+        const prev = parseInt(t[i-1],10), cur = parseInt(t[i],10);
+        if (Number.isNaN(prev) || Number.isNaN(cur)) return false;
+        if (((prev + 1) % 10) !== cur) return false;
+      }
+      return true;
+    }
+
+    function maybeTrigger(name, value, opts = {}){
+      // only trigger once per distinct value to avoid repeated firings while condition holds
+      const prev = lastTriggered.get(name);
+      if (prev === value) return;
+      lastTriggered.set(name, value);
+      logDebug(`${name} => ${value}`);
+      triggerCelebration(opts);
+    }
+
+    function checkAndCelebrate(now, degHour, degMin, degSec, digital, digitalNoSec){
+      // hands alignment (main analog)
+      if (areColinear3(degHour, degMin, degSec, 1.5)){
+        maybeTrigger('hands-alignment', digital, {count: 80});
+      }
+
+      // palindrome checks
+      if (isPalindrome(digital)) maybeTrigger('digital-palindrome', digital, {count: 60});
+      if (isPalindrome(digitalNoSec)) maybeTrigger('digital-palindrome-nosec', digitalNoSec, {count: 36});
+
+      // symmetrical (mirror halves)
+      if (isSymmetrical(digital)) maybeTrigger('digital-symmetrical', digital, {count: 50});
+      if (isSymmetrical(digitalNoSec)) maybeTrigger('digital-symmetrical-nosec', digitalNoSec, {count: 30});
+
+      // runs of numbers
+      if (isRunOfNumbers(digital)) maybeTrigger('digital-run', digital, {count: 48});
+      if (isRunOfNumbers(digitalNoSec)) maybeTrigger('digital-run-nosec', digitalNoSec, {count: 28});
+
+      // repeating patterns
+      if (isRepeatingPattern(digital)) maybeTrigger('digital-repeat', digital, {count: 48});
+      if (isRepeatingPattern(digitalNoSec)) maybeTrigger('digital-repeat-nosec', digitalNoSec, {count: 28});
+    }
+    // === end new helpers ===
+
+    // Update loop
+    function tick(){
+      const now = new Date();
+      const hh = z(now.getHours()), mm = z(now.getMinutes()), ss = z(now.getSeconds());
+      const digital = `${hh}:${mm}:${ss}`;
+      digitalEl.textContent = digital;
+
+      // digital no-seconds
+      const digitalNoSec = `${hh}:${mm}`;
+      digitalNoSecEl.textContent = digitalNoSec;
+
+      const {degHour,degMin,degSec} = computeAngles(now);
+
+      // draw analog (with seconds)
+      drawFace();
+      drawHands(degHour,degMin,degSec);
+
+      // draw analog no-seconds
+      const {degHour:degHourNS, degMin:degMinNS} = computeAnglesNoSec(now);
+      drawFaceNoSec();
+      drawHandsNoSec(degHourNS, degMinNS);
+
+      // update debug (round degrees to nearest integer)
+      angleHourEl.innerHTML = `<b>${Math.round(degHour)}°</b>`;
+      angleMinuteEl.innerHTML = `<b>${Math.round(degMin)}°</b>`;
+      angleSecondEl.innerHTML = `<b>${Math.round(degSec)}°</b>`;
+      digitalDebugEl.innerHTML = `<b>${digital}</b>`;
+
+      // update no-seconds debug (round to nearest degree)
+      angleHourNoSecEl.innerHTML = `<b>${Math.round(degHourNS)}°</b>`;
+      angleMinuteNoSecEl.innerHTML = `<b>${Math.round(degMinNS)}°</b>`;
+      digitalNoSecDebugEl.innerHTML = `<b>${digitalNoSec}</b>`;
+
+      // NEW: check celebration conditions (deduped by lastTriggered map)
+      checkAndCelebrate(now, degHour, degMin, degSec, digital, digitalNoSec);
+    }
+
+    // initial draw and start interval (update every 100ms for smooth second hand)
+    drawFace();
+    drawFaceNoSec();
+    tick();
+    setInterval(tick, 100);
+
+    // debug button: manual refresh and brief feedback animation
+    const debugBtn = document.getElementById('debugBtn');
+    const celebrationEl = document.getElementById('celebration');
+
+   // simple confetti burst - creates many small colored bars that fall and rotate
+   function triggerCelebration({count = 36} = {}) {
+     if (!celebrationEl) return;
+     const colors = ['#ffd166','#06d6a0','#4cc9f0','#ff6b6b','#c792ea','#f9c74f'];
+     const frag = document.createDocumentFragment();
+     const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+     for (let i = 0; i < count; i++) {
+       const el = document.createElement('div');
+       el.className = 'confetti';
+       const w = 6 + Math.round(Math.random()*10);
+       const h = 10 + Math.round(Math.random()*18);
+       el.style.width = w + 'px';
+       el.style.height = h + 'px';
+       el.style.background = colors[Math.floor(Math.random() * colors.length)];
+       // start roughly from the top-center area (over the clocks)
+       const left = 20 + Math.random() * 60; // percent
+       el.style.left = left + '%';
+       // small random horizontal drift applied via animation-delay and transform
+       const delay = Math.random() * 300;
+       const duration = 900 + Math.random() * 700;
+       el.style.animation = `confetti-fall ${duration}ms cubic-bezier(.2,.7,.2,1) ${delay}ms forwards`;
+       // random initial rotation
+       el.style.transform = `rotate(${Math.floor(Math.random()*360)}deg)`;
+       // slight tilt via transform-origin
+       el.style.transformOrigin = `${Math.random()*100}% ${Math.random()*100}%`;
+       frag.appendChild(el);
+       // cleanup after animation
+       setTimeout(() => el.remove(), duration + delay + 100);
+     }
+     celebrationEl.appendChild(frag);
+   }
+
+    if (debugBtn) {
+      debugBtn.addEventListener('click', () => {
+        // log to debug console each press
+        logDebug('debug input');
+        tick();
+        triggerCelebration({count:40});
+        if (debugBtn.animate) {
+          debugBtn.animate(
+            [{ transform: 'scale(1)' }, { transform: 'scale(0.96)' }, { transform: 'scale(1)' }],
+            { duration: 180, easing: 'ease-out' }
+          );
+        }
+      });
+    }
+
+  </script>
+</body>
+</html>
