@@ -71,6 +71,12 @@
         <div class="label">Digital Clock (24h)</div>
       </div>
 
+      <!-- NEW: 12-hour digital with AM/PM -->
+      <div class="clock-card" id="digital12Card" style="min-width:320px;align-items:center">
+        <div id="digital12" class="digital" aria-live="polite">--:--:-- --</div>
+        <div class="label">Digital Clock (12h)</div>
+      </div>
+
       <!-- NEW: analog without seconds -->
       <div class="clock-card" id="analogNoSecCard">
         <canvas id="analogNoSec" width="260" height="260" aria-label="Analog clock without seconds"></canvas>
@@ -81,6 +87,12 @@
       <div class="clock-card" id="digitalNoSecCard" style="min-width:220px;align-items:center">
         <div id="digitalNoSec" class="small-digital" aria-live="polite">--:--</div>
         <div class="label">Digital (24h, no seconds)</div>
+      </div>
+
+      <!-- NEW: 12-hour digital without seconds -->
+      <div class="clock-card" id="digital12NoSecCard" style="min-width:220px;align-items:center">
+        <div id="digital12NoSec" class="small-digital" aria-live="polite">--:-- --</div>
+        <div class="label">Digital (12h, no seconds)</div>
       </div>
     </div>
 
@@ -100,6 +112,16 @@
       <div>
         <div class="small">Digital display</div>
         <div id="digitalDebug"><b>--:--:--</b></div>
+      </div>
+
+      <!-- NEW debug entries for 12h displays -->
+      <div>
+        <div class="small">Digital (12h)</div>
+        <div id="digital12Debug"><b>--:--:-- --</b></div>
+      </div>
+      <div>
+        <div class="small">Digital (12h, no-sec)</div>
+        <div id="digital12NoSecDebug"><b>--:-- --</b></div>
       </div>
 
       <!-- NEW debug entries for no-seconds clocks -->
@@ -145,6 +167,12 @@
     const angleMinuteEl = document.getElementById('angleMinute');
     const angleSecondEl = document.getElementById('angleSecond');
     const digitalDebugEl = document.getElementById('digitalDebug');
+
+    // NEW: 12-hour display refs
+    const digital12El = document.getElementById('digital12');
+    const digital12DebugEl = document.getElementById('digital12Debug');
+    const digital12NoSecEl = document.getElementById('digital12NoSec');
+    const digital12NoSecDebugEl = document.getElementById('digital12NoSecDebug');
 
     // NEW: no-seconds refs
     const canvasNoSec = document.getElementById('analogNoSec');
@@ -434,9 +462,20 @@
       const digital = `${hh}:${mm}:${ss}`;
       digitalEl.textContent = digital;
 
+      // 12-hour formatting with AM/PM
+      const rawHour = now.getHours();
+      const ampm = rawHour >= 12 ? 'PM' : 'AM';
+      const hh12 = z((rawHour % 12) || 12);
+      const digital12 = `${hh12}:${mm}:${ss} ${ampm}`;
+      if (digital12El) digital12El.textContent = digital12;
+
       // digital no-seconds
       const digitalNoSec = `${hh}:${mm}`;
       digitalNoSecEl.textContent = digitalNoSec;
+
+      // 12-hour no-seconds
+      const digital12NoSec = `${hh12}:${mm} ${ampm}`;
+      if (digital12NoSecEl) digital12NoSecEl.textContent = digital12NoSec;
 
       const {degHour,degMin,degSec} = computeAngles(now);
 
@@ -454,6 +493,10 @@
       angleMinuteEl.innerHTML = `<b>${Math.round(degMin)}°</b>`;
       angleSecondEl.innerHTML = `<b>${Math.round(degSec)}°</b>`;
       digitalDebugEl.innerHTML = `<b>${digital}</b>`;
+
+      // update 12h debug entries
+      if (digital12DebugEl) digital12DebugEl.innerHTML = `<b>${digital12}</b>`;
+      if (digital12NoSecDebugEl) digital12NoSecDebugEl.innerHTML = `<b>${digital12NoSec}</b>`;
 
       // update no-seconds debug (round to nearest degree)
       angleHourNoSecEl.innerHTML = `<b>${Math.round(degHourNS)}°</b>`;
