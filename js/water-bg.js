@@ -3,6 +3,32 @@
   const container = document.querySelector('.background-container');
   if(!container) return;
 
+  // static-black flag: if true, make the background a static black and skip the
+  // procedural renderer. Supported ways to enable:
+  //  - Add `data-static-black="true"` to the .background-container element
+  //  - Use URL param `?bg=black`
+  //  - Set `window.BG_STATIC_BLACK = true` before this script runs
+  try {
+    const urlParams = new URLSearchParams(window.location.search || '');
+    const bgParam = urlParams.get('bg');
+    const staticBlack = (container.dataset && container.dataset.staticBlack === 'true')
+                        || bgParam === 'black'
+                        || window.BG_STATIC_BLACK === true;
+    if (staticBlack) {
+      // ensure container shows solid black and remove any children that might
+      // otherwise display procedural canvases. Leave the container in place so
+      // existing layout is unchanged.
+      container.style.background = '#000';
+      container.style.backgroundColor = '#000';
+      // remove any auto-inserted children (safety)
+      while (container.firstChild) container.removeChild(container.firstChild);
+      return;
+    }
+  } catch (e) {
+    // If URL parsing or access to window fails for any reason, fall back to
+    // continuing with the procedural background.
+  }
+
   // three.js setup
   const scene = new THREE.Scene();
   const clock = new THREE.Clock();

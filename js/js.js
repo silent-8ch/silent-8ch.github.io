@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	switch (stage) {
 		case "dream":
 			stageHref = "funtimes.html"
-			stageString = "Fun Times";
+			stageString = "K's Clock";
 		break;
 		case "woke":
 			stageHref = "?stage=filtered"
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		break;
 		default:
 			stageHref = "funtimes.html"
-			stageString = "Fun Times";
+			stageString = "K's Clock";
 		break;
 	}
 	if (stageLink) {

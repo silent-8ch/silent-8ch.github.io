@@ -9,23 +9,27 @@
   <meta name="author" content="Pauly Christ Hlusko">
   <title>Pauly Hlusko Links</title>
   <style>
-    a { display: block; margin: 10px 0; padding: 10px; background: #1e1e1e; border: 1px solid #333; border-radius: 4px; text-decoration: none; color: #ccc; }
+    a { display: block; margin: 10px 0; padding: 10px; background: #1e1e1e; border: 1px solid #333; border-radius: 4px; text-decoration: none; color: #000000; }
     a:hover { background: #333; }
-    body { font-family: sans-serif; margin: 0; padding: 20px; background: #121212; color: #eee; }
-    h1 {display: block; margin: 10px 0; padding: 10px; background: #1e1e1e; border: 1px solid #333; border-radius: 4px; text-decoration: none; color: #ccc;}
+    body { font-family: sans-serif; margin: 0; padding: 20px; background: #121212; color: #000000; }
+    h1 {display: block; margin: 10px 0; padding: 10px; background: #1e1e1e; border: 1px solid #333; border-radius: 4px; text-decoration: none; color: #000000;}
     .background-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-repeat: repeat; background-size: 100% auto; z-index: -1;}
     .container { max-width: 600px; margin: auto; }
-    .highlight {color: #b60e0e;}
+    .highlight {color: #000000;}
   </style>
 </head>
 <body>
-  <div class="background-container"></div>
+  <div class="background-container" data-static-black="true"></div>
   <div class="container">
     <h1>Pauly Hlusko Links</h1>
     <a id="mail-link">email</a>
     <script src="js/js.js"></script>
     <!-- three.js and procedural water background (no iframe) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      // Set global flag so the background script will use a static black background
+      window.BG_STATIC_BLACK = true;
+    </script>
     <script src="js/water-bg.js"></script>
     <a href="https://www.youtube.com/@silent_8ch">youtube.com/@silent_8ch</a>
     <a href="https://www.strava.com/athletes/81077024">strava.com/athletes/81077024</a>
