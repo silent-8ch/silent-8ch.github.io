@@ -11,9 +11,9 @@
   try {
     const urlParams = new URLSearchParams(window.location.search || '');
     const bgParam = urlParams.get('bg');
-    const staticBlack = (container.dataset && container.dataset.staticBlack === 'true')
+    const staticBlack = false;/*(container.dataset && container.dataset.staticBlack === 'true')
                         || bgParam === 'black'
-                        || window.BG_STATIC_BLACK === true;
+                        || window.BG_STATIC_BLACK === true;*/
     if (staticBlack) {
       // ensure container shows solid black and remove any children that might
       // otherwise display procedural canvases. Leave the container in place so
