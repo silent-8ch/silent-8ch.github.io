@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Display</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="clock">
+            <div class="time-display" id="time-12"></div>
+            <div class="date-display" id="date-12"></div>
+        </div>
+        <div class="celebration-title" id="celebration-title" aria-live="polite">
+            Fun Time!
+        </div>
+        <div class="celebration-reason" id="celebration-reason" aria-live="polite"></div>
+        <button class="celebrate-button debug-only" id="debug-celebrate" type="button">
+            Debug Celebration
+        </button>
+        <div class="debug-controls debug-only" aria-label="Debug time warp">
+            <input
+                class="debug-input debug-only"
+                id="debug-time"
+                type="text"
+                inputmode="numeric"
+                placeholder="1:23"
+                aria-label="Debug time"
+            />
+            <button class="debug-warp debug-only" id="debug-warp" type="button">
+                Warp
+            </button>
+        </div>
+    </div>
+    <div class="confetti" id="confetti-container" aria-hidden="true"></div>
+    <script src="script.js"></script>
+</body>
+</html>

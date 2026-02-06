@@ -1,0 +1,188 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #000000;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    display: grid;
+    gap: 24px;
+}
+
+.celebrate-button {
+    justify-self: center;
+    padding: 12px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.celebrate-button:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.28);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.celebrate-button:active {
+    transform: translateY(0);
+}
+
+.confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.confetti-piece {
+    position: absolute;
+    top: -10vh;
+    width: 8px;
+    height: 14px;
+    opacity: 0.85;
+    border-radius: 2px;
+    animation: confetti-fall var(--fall-duration) linear forwards;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translate3d(0, -10vh, 0);
+    }
+    100% {
+        transform: translate3d(0, 110vh, 0);
+    }
+}
+
+.clock {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 60px 80px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.time-display {
+    font-size: 72px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+}
+
+.date-display {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+.celebration-title,
+.celebration-reason {
+    min-height: 28px;
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 1px;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.celebration-title {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.celebration-reason {
+    font-weight: 600;
+}
+
+.celebration-title.is-active,
+.celebration-reason.is-active {
+    opacity: 1;
+}
+
+.debug-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.debug-input {
+    width: 120px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-size: 14px;
+    text-align: center;
+}
+
+.debug-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.debug-warp {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.debug-warp:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .clock {
+        padding: 40px 50px;
+    }
+    
+    .time-display {
+        font-size: 48px;
+    }
+    
+    .date-display {
+        font-size: 18px;
+    }
+
+    .celebration-title,
+    .celebration-reason {
+        font-size: 18px;
+    }
+
+    .celebrate-button {
+        font-size: 12px;
+        padding: 10px 16px;
+    }
+}
