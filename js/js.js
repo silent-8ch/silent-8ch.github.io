@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			stageString = "Enter the dream.";
 		break;
 		default:
-			stageHref = "funtimes.html"
+			stageHref = "/klock"
 			stageString = "K's Clock";
 		break;
 	}
