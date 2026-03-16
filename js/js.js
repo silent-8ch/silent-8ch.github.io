@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		break;
 	}
 	if (stageLink) {
-		stageLink.href = stageHref;
-		stageLink.textContent = stageString
-	}	
+		//stageLink.href = stageHref;
+		//stageLink.textContent = stageString
+	}	 
 });
