@@ -2,7 +2,7 @@ const params = new URLSearchParams(window.location.search);
 const stage =  params.get("stage");
 
 document.addEventListener("DOMContentLoaded", () => {
-	var user = "silent8ch";
+	var user = "paul.hlusko";
 	var domain = "gmail.com";
 	var email = user + "@" + domain;
 	var link = document.getElementById("mail-link");
