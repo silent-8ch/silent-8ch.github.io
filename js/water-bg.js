@@ -175,6 +175,10 @@
   const mesh = new THREE.Mesh(geom, mat);
   scene.add(mesh);
 
+  // Render at a fixed internal pixel budget, then upscale via CSS.
+  // This keeps GPU cost predictable regardless of viewport size.
+  const TARGET_RENDER_PIXELS = 640 * 360;
+
   function updateFullscreenPlane() {
     camera.updateMatrixWorld();
     camera.getWorldDirection(tmpDir);
@@ -189,9 +193,17 @@
   function resize() {
     const w = container.clientWidth || window.innerWidth;
     const h = container.clientHeight || window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    renderer.setPixelRatio(dpr);
-    renderer.setSize(w, h, false);
+    const safeW = Math.max(1, w);
+    const safeH = Math.max(1, h);
+    const aspect = safeW / safeH;
+
+    let renderW = Math.round(Math.sqrt(TARGET_RENDER_PIXELS * aspect));
+    let renderH = Math.round(renderW / aspect);
+    renderW = Math.max(64, renderW);
+    renderH = Math.max(64, renderH);
+
+    renderer.setPixelRatio(1);
+    renderer.setSize(renderW, renderH, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     updateFullscreenPlane();
