@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anniversary Zoom</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: #0a0a0f;
+    color: #ddd;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.screen { display: none; position: absolute; inset: 0; }
+.screen.active { display: flex; }
+
+/* === Load Screen === */
+#load-screen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+}
+h1 { font-weight: 300; font-size: 2.2em; letter-spacing: -0.02em; }
+.subtitle { color: #777; text-align: center; max-width: 420px; line-height: 1.5; }
+
+.file-label {
+    display: inline-block;
+    padding: 12px 28px;
+    background: #2563eb;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background 0.2s;
+}
+.file-label:hover { background: #1d4ed8; }
+input[type="file"] { display: none; }
+
+#thumb-strip {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90%;
+    min-height: 20px;
+}
+.thumb {
+    position: relative;
+    cursor: grab;
+    user-select: none;
+    transition: opacity 0.15s;
+}
+.thumb:active { cursor: grabbing; }
+.thumb.dragging { opacity: 0.3; }
+.thumb.over { outline: 2px solid #2563eb; outline-offset: 2px; border-radius: 4px; }
+.thumb img {
+    height: 70px;
+    border-radius: 4px;
+    border: 2px solid #222;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+.thumb-num {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+    pointer-events: none;
+}
+.drag-hint { color: #555; font-size: 0.8em; }
+
+.btn {
+    padding: 10px 24px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background 0.2s;
+}
+.btn:hover { background: #1d4ed8; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn.secondary { background: #333; }
+.btn.secondary:hover { background: #444; }
+
+/* === Corner / Crop Screen === */
+#corner-screen {
+    flex-direction: column;
+    background: #000;
+}
+#corner-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 14px 20px;
+    background: rgba(0,0,0,0.85);
+    text-align: center;
+    z-index: 10;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+#corner-bar strong { color: #60a5fa; }
+#corner-bar .green { color: #22c55e; }
+#corner-canvas { display: block; cursor: crosshair; }
+#corner-btns {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; z-index: 10;
+}
+
+/* === Animate Screen === */
+#animate-screen {
+    flex-direction: column;
+    background: #000;
+}
+#animate-canvas { display: block; }
+#anim-controls {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(0,0,0,0.75);
+    padding: 10px 24px;
+    border-radius: 28px;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+}
+#scrubber { width: 220px; accent-color: #2563eb; }
+select {
+    background: #222;
+    color: #ddd;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.85em;
+}
+label { font-size: 0.85em; color: #aaa; display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+
+<!-- LOAD SCREEN -->
+<div id="load-screen" class="screen active">
+    <h1>Anniversary Zoom</h1>
+    <p class="subtitle">
+        Load your anniversary photos in chronological order.
+        You'll mark the canvas in each photo, crop the next photo to fit,
+        then watch them zoom infinitely into each other.
+    </p>
+    <label class="file-label">
+        Choose Photos
+        <input type="file" id="file-input" multiple accept="image/*">
+    </label>
+    <div id="thumb-strip"></div>
+    <p class="drag-hint" id="drag-hint" style="display:none">Drag thumbnails to reorder</p>
+    <button class="btn" id="go-corners" style="display:none">
+        Define Canvas Corners &rarr;
+    </button>
+    <button class="btn secondary" id="load-saved" style="display:none">
+        Restore Saved Setup &rarr;
+    </button>
+</div>
+
+<!-- CORNER / CROP SCREEN -->
+<div id="corner-screen" class="screen">
+    <div id="corner-bar"></div>
+    <canvas id="corner-canvas"></canvas>
+    <div id="corner-btns">
+        <button class="btn secondary" id="corner-prev" style="display:none">&larr; Prev</button>
+        <button class="btn secondary" id="corner-mid">Undo</button>
+        <button class="btn" id="corner-next" disabled>Next &rarr;</button>
+    </div>
+</div>
+
+<!-- ANIMATION SCREEN -->
+<div id="animate-screen" class="screen">
+    <canvas id="animate-canvas"></canvas>
+    <div id="anim-controls">
+        <button class="btn" id="play-btn">&#9654; Play</button>
+        <input type="range" id="scrubber" min="0" max="1000" value="0">
+        <label>Speed
+            <select id="speed-sel">
+                <option value="0.25">0.25&times;</option>
+                <option value="0.5">0.5&times;</option>
+                <option value="1" selected>1&times;</option>
+                <option value="2">2&times;</option>
+                <option value="4">4&times;</option>
+            </select>
+        </label>
+        <label>Ease
+            <select id="ease-sel">
+                <option value="linear">Linear</option>
+                <option value="ease" selected>Ease</option>
+                <option value="cubic">Cubic</option>
+            </select>
+        </label>
+        <label>Dir
+            <select id="dir-sel">
+                <option value="forward" selected>Forward</option>
+                <option value="reverse">Reverse</option>
+            </select>
+        </label>
+        <button class="btn" id="export-btn">&#11044; Export</button>
+        <button class="btn secondary" id="back-btn">&#9881; Setup</button>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// STATE
+// ==========================================
+const S = {
+    imgs: [],
+    corners: [],       // corners[i] = [{x,y} x 4] in image coords
+    crops: [],         // crops[i] = {x,y,w,h} in image i's coords (null = full)
+    mode: 'corners',   // 'corners' | 'crop'
+    cIdx: 0,           // current image index for corner placement
+    cPts: [],          // temp corner points
+    dragging: -1,      // corner point drag index
+    cropRect: null,    // current crop rect being edited
+    cropAspect: 1,     // locked W/H for crop resize (set by initCropMode)
+    cropDrag: null,    // 'tl'|'tr'|'br'|'bl'|'move'|null
+    cropStart: null,   // {mx, my, rect} drag start state
+    playing: false,
+    t: 0,
+    speed: 1,
+    easeFn: 'ease',
+    direction: 'forward',  // 'forward' (zoom in) | 'reverse' (zoom out)
+    lastTs: 0,
+    pairDur: 4000,
+};
+
+// ==========================================
+// UTILS
+// ==========================================
+const lerp  = (a, b, t) => a + (b - a) * t;
+const dist  = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+function bilinear(q, u, v) {
+    return {
+        x: (1-u)*(1-v)*q[0].x + u*(1-v)*q[1].x + u*v*q[2].x + (1-u)*v*q[3].x,
+        y: (1-u)*(1-v)*q[0].y + u*(1-v)*q[1].y + u*v*q[2].y + (1-u)*v*q[3].y,
+    };
+}
+
+function quadArea(q) {
+    return 0.5 * Math.abs(
+        q[0].x*q[1].y - q[1].x*q[0].y +
+        q[1].x*q[2].y - q[2].x*q[1].y +
+        q[2].x*q[3].y - q[3].x*q[2].y +
+        q[3].x*q[0].y - q[0].x*q[3].y
+    );
+}
+
+function easeValue(t, fn) {
+    t = clamp(t, 0, 1);
+    if (fn === 'linear') return t;
+    if (fn === 'ease') return t < 0.5 ? 2*t*t : 1 - (-2*t+2)**2 / 2;
+    return t < 0.5 ? 4*t*t*t : 1 - (-2*t+2)**3 / 2;
+}
+
+// Solve NxN linear system Ax=b via Gaussian elimination with partial pivoting
+function solveLinear(A, b) {
+    const n = b.length;
+    const M = A.map((row, i) => [...row, b[i]]);
+    for (let col = 0; col < n; col++) {
+        let maxR = col;
+        for (let r = col + 1; r < n; r++)
+            if (Math.abs(M[r][col]) > Math.abs(M[maxR][col])) maxR = r;
+        [M[col], M[maxR]] = [M[maxR], M[col]];
+        if (Math.abs(M[col][col]) < 1e-12) return null;
+        for (let r = col + 1; r < n; r++) {
+            const f = M[r][col] / M[col][col];
+            for (let j = col; j <= n; j++) M[r][j] -= f * M[col][j];
+        }
+    }
+    const x = new Array(n);
+    for (let i = n - 1; i >= 0; i--) {
+        x[i] = M[i][n];
+        for (let j = i + 1; j < n; j++) x[i] -= M[i][j] * x[j];
+        x[i] /= M[i][i];
+    }
+    return x;
+}
+
+// Compute 3x3 homography mapping 4 src points → 4 dst points
+// Returns [h0..h7] with h8=1, or null on failure
+function findHomography(src, dst) {
+    const A = [], b = [];
+    for (let i = 0; i < 4; i++) {
+        const { x: sx, y: sy } = src[i];
+        const { x: dx, y: dy } = dst[i];
+        A.push([sx, sy, 1, 0, 0, 0, -sx * dx, -sy * dx]);
+        b.push(dx);
+        A.push([0, 0, 0, sx, sy, 1, -sx * dy, -sy * dy]);
+        b.push(dy);
+    }
+    return solveLinear(A, b);
+}
+
+// Apply homography h to point p
+function applyH(h, p) {
+    const w = h[6] * p.x + h[7] * p.y + 1;
+    return {
+        x: (h[0] * p.x + h[1] * p.y + h[2]) / w,
+        y: (h[3] * p.x + h[4] * p.y + h[5]) / w,
+    };
+}
+
+// Intersection of line through (a,b) and line through (c,d)
+function lineIntersect(a, b, c, d) {
+    const dx1 = b.x - a.x, dy1 = b.y - a.y;
+    const dx2 = d.x - c.x, dy2 = d.y - c.y;
+    const denom = dx1 * dy2 - dy1 * dx2;
+    if (Math.abs(denom) < 0.1) return null; // parallel
+    const t = ((c.x - a.x) * dy2 - (c.y - a.y) * dx2) / denom;
+    return { x: a.x + t * dx1, y: a.y + t * dy1 };
+}
+
+// Compute the true W/H aspect ratio of a rectangle seen in perspective.
+// Uses vanishing points + focal length estimation to undo perspective.
+function rectifiedAspect(quad, imgW, imgH) {
+    const topW = dist(quad[0], quad[1]), botW = dist(quad[3], quad[2]);
+    const leftH = dist(quad[0], quad[3]), rightH = dist(quad[1], quad[2]);
+    const avgW = (topW + botW) / 2, avgH = (leftH + rightH) / 2;
+    if (avgH < 1) return 1;
+
+    // Vanishing points of the two edge pairs
+    const vh = lineIntersect(quad[0], quad[1], quad[3], quad[2]);
+    const vv = lineIntersect(quad[0], quad[3], quad[1], quad[2]);
+    if (!vh || !vv) return avgW / avgH;
+
+    // Focal length from orthogonality (pinhole camera, square pixels, centered PP)
+    const cx = imgW / 2, cy = imgH / 2;
+    const f2 = -((vh.x - cx) * (vv.x - cx) + (vh.y - cy) * (vv.y - cy));
+    if (f2 < 100) return avgW / avgH;
+
+    const f = Math.sqrt(f2);
+
+    // Angular extent between midpoints of opposite edges → true size ratio
+    const mL = { x: (quad[0].x + quad[3].x) / 2, y: (quad[0].y + quad[3].y) / 2 };
+    const mR = { x: (quad[1].x + quad[2].x) / 2, y: (quad[1].y + quad[2].y) / 2 };
+    const mT = { x: (quad[0].x + quad[1].x) / 2, y: (quad[0].y + quad[1].y) / 2 };
+    const mB = { x: (quad[3].x + quad[2].x) / 2, y: (quad[3].y + quad[2].y) / 2 };
+
+    function ang(p1, p2) {
+        const r1 = [(p1.x - cx) / f, (p1.y - cy) / f, 1];
+        const r2 = [(p2.x - cx) / f, (p2.y - cy) / f, 1];
+        const d = r1[0]*r2[0] + r1[1]*r2[1] + r1[2]*r2[2];
+        const m1 = Math.hypot(r1[0], r1[1], r1[2]);
+        const m2 = Math.hypot(r2[0], r2[1], r2[2]);
+        return Math.acos(clamp(d / (m1 * m2), -1, 1));
+    }
+
+    const angW = ang(mL, mR), angH = ang(mT, mB);
+    return angH > 1e-6 ? angW / angH : avgW / avgH;
+}
+
+// ==========================================
+// SCREEN MANAGEMENT
+// ==========================================
+function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+// ==========================================
+// 1. LOAD SCREEN — with drag-to-reorder
+// ==========================================
+const fileInput    = document.getElementById('file-input');
+const thumbStrip   = document.getElementById('thumb-strip');
+const goBtn        = document.getElementById('go-corners');
+const loadSavedBtn = document.getElementById('load-saved');
+const dragHint     = document.getElementById('drag-hint');
+let thumbDragIdx = -1;
+
+// ---- Persistence: key a saved setup by the (order-independent) set of loaded files.
+const SETTINGS_KEY_PREFIX = 'aniZoom:v1:';
+
+function fingerprintFiles(files) {
+    return [...files].map(f => `${f.name}|${f.size}`).sort().join('::');
+}
+
+function saveSettings() {
+    const files = S.imgs.map(img => img._file);
+    if (files.some(f => !f) || !S.corners.length) return;
+    const fp = fingerprintFiles(files);
+    const data = {
+        order:   S.imgs.map(img => img._file.name),
+        corners: S.corners,
+        crops:   S.crops,
+    };
+    try {
+        localStorage.setItem(SETTINGS_KEY_PREFIX + fp, JSON.stringify(data));
+    } catch (e) { /* quota exceeded — silent */ }
+}
+
+function loadSavedSettingsFor(files) {
+    try {
+        const raw = localStorage.getItem(SETTINGS_KEY_PREFIX + fingerprintFiles(files));
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+}
+
+fileInput.addEventListener('change', e => {
+    const files = [...e.target.files].sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+    if (!files.length) return;
+    S.imgs = [];
+    S.corners = [];
+    S.crops = [];
+    let loaded = 0;
+    files.forEach((f, i) => {
+        const url = URL.createObjectURL(f);
+        const img = new Image();
+        img._file = f;
+        img.onload = () => {
+            if (++loaded === files.length) rebuildThumbnails();
+        };
+        img.src = url;
+        S.imgs[i] = img;
+    });
+});
+
+function rebuildThumbnails() {
+    thumbStrip.innerHTML = '';
+    S.imgs.forEach((img, i) => {
+        const div = document.createElement('div');
+        div.className = 'thumb';
+        div.draggable = true;
+        div.dataset.idx = i;
+
+        const num = document.createElement('span');
+        num.className = 'thumb-num';
+        num.textContent = i + 1;
+
+        const th = document.createElement('img');
+        th.src = img.src;
+
+        div.appendChild(num);
+        div.appendChild(th);
+        thumbStrip.appendChild(div);
+
+        div.addEventListener('dragstart', () => {
+            thumbDragIdx = i;
+            setTimeout(() => div.classList.add('dragging'), 0);
+        });
+        div.addEventListener('dragend', () => {
+            div.classList.remove('dragging');
+            document.querySelectorAll('.thumb.over').forEach(el => el.classList.remove('over'));
+        });
+        div.addEventListener('dragover', e => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            div.classList.add('over');
+        });
+        div.addEventListener('dragleave', () => div.classList.remove('over'));
+        div.addEventListener('drop', e => {
+            e.preventDefault();
+            div.classList.remove('over');
+            if (thumbDragIdx < 0 || thumbDragIdx === i) return;
+            const [moved] = S.imgs.splice(thumbDragIdx, 1);
+            S.imgs.splice(i, 0, moved);
+            thumbDragIdx = -1;
+            rebuildThumbnails();
+        });
+    });
+
+    goBtn.style.display = S.imgs.length >= 2 ? '' : 'none';
+    dragHint.style.display = S.imgs.length >= 2 ? '' : 'none';
+
+    // Show restore-saved-setup only when the loaded set matches a saved fingerprint
+    const files = S.imgs.map(img => img._file).filter(Boolean);
+    loadSavedBtn.style.display =
+        (files.length === S.imgs.length && files.length >= 2 && loadSavedSettingsFor(files))
+            ? '' : 'none';
+}
+
+loadSavedBtn.addEventListener('click', () => {
+    const files = S.imgs.map(img => img._file).filter(Boolean);
+    const saved = loadSavedSettingsFor(files);
+    if (!saved) return;
+
+    // Reorder S.imgs to match the saved order (by filename match).
+    const byName = new Map();
+    for (const img of S.imgs) byName.set(img._file.name, img);
+    const reordered = saved.order.map(n => byName.get(n)).filter(Boolean);
+    if (reordered.length !== S.imgs.length) {
+        alert('Saved setup does not match the loaded files. Redefine corners manually.');
+        return;
+    }
+    S.imgs = reordered;
+    S.corners = saved.corners.map(c => c ? c.map(p => ({ x: p.x, y: p.y })) : c);
+    S.crops   = saved.crops.map(c => c ? { ...c } : c);
+    rebuildThumbnails();
+    show('animate-screen');
+    initAnim();
+});
+
+goBtn.addEventListener('click', () => {
+    S.corners = [];
+    S.crops = [];
+    S.cIdx = 0;
+    S.cPts = [];
+    S.mode = 'corners';
+    show('corner-screen');
+    initCornerScreen();
+});
+
+// ==========================================
+// 2. CORNER + CROP SCREEN
+// ==========================================
+const cCanvas = document.getElementById('corner-canvas');
+const cCtx    = cCanvas.getContext('2d');
+const barEl   = document.getElementById('corner-bar');
+let cScale = 1, cOx = 0, cOy = 0;
+
+function initCornerScreen() {
+    resizeCornerCanvas();
+    if (S.mode === 'corners') drawCorners();
+    else drawCropView();
+    updateUI();
+}
+
+function resizeCornerCanvas() {
+    cCanvas.width  = window.innerWidth;
+    cCanvas.height = window.innerHeight;
+}
+
+// --- image display helper ---
+function fitImage(img, cw, ch) {
+    const s = Math.min(cw / img.naturalWidth, ch / img.naturalHeight) * 0.85;
+    const w = img.naturalWidth * s, h = img.naturalHeight * s;
+    return { s, x: (cw - w) / 2, y: (ch - h) / 2, w, h };
+}
+
+function screenToImg(mx, my) {
+    return { x: (mx - cOx) / cScale, y: (my - cOy) / cScale };
+}
+function imgToScreen(p) {
+    return { x: p.x * cScale + cOx, y: p.y * cScale + cOy };
+}
+
+// ---- CORNERS MODE ----
+function drawCorners() {
+    const img = S.imgs[S.cIdx];
+    const crop = S.crops[S.cIdx] || null;
+    const cw = cCanvas.width, ch = cCanvas.height;
+    cCtx.clearRect(0, 0, cw, ch);
+
+    // Show only the cropped region when a crop exists (image is already "locked in")
+    const sx = crop ? crop.x : 0;
+    const sy = crop ? crop.y : 0;
+    const sw = crop ? crop.w : img.naturalWidth;
+    const sh = crop ? crop.h : img.naturalHeight;
+
+    const s = Math.min(cw / sw, ch / sh) * 0.85;
+    const dw = sw * s, dh = sh * s;
+    const dx = (cw - dw) / 2, dy = (ch - dh) / 2;
+
+    // Coordinate transform stays in full-image coords so corners are consistent
+    cScale = s;
+    cOx = dx - sx * s;
+    cOy = dy - sy * s;
+
+    cCtx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+
+    const pts = S.cPts;
+    if (!pts.length) return;
+    const sp = pts.map(imgToScreen);
+
+    cCtx.lineWidth = 2;
+    cCtx.strokeStyle = '#f43f5e';
+    if (sp.length > 1) {
+        cCtx.beginPath();
+        sp.forEach((s, i) => i ? cCtx.lineTo(s.x, s.y) : cCtx.moveTo(s.x, s.y));
+        if (sp.length === 4) {
+            cCtx.closePath();
+            cCtx.fillStyle = 'rgba(244,63,94,0.18)';
+            cCtx.fill();
+        }
+        cCtx.stroke();
+    }
+
+    const labels = ['TL', 'TR', 'BR', 'BL'];
+    sp.forEach((s, i) => {
+        cCtx.beginPath();
+        cCtx.arc(s.x, s.y, 7, 0, Math.PI * 2);
+        cCtx.fillStyle = '#f43f5e';
+        cCtx.fill();
+        cCtx.strokeStyle = '#fff';
+        cCtx.lineWidth = 2;
+        cCtx.stroke();
+        cCtx.fillStyle = '#fff';
+        cCtx.font = 'bold 13px sans-serif';
+        cCtx.fillText(labels[i], s.x + 12, s.y - 10);
+    });
+}
+
+// ---- CROP MODE ----
+// Largest aspect-matched rect that fits inside the image, centered.
+function defaultCropForAspect(img, aspect) {
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    if (iw / ih > aspect) {
+        const cw = ih * aspect;
+        return { x: (iw - cw) / 2, y: 0, w: cw, h: ih };
+    } else {
+        const ch = iw / aspect;
+        return { x: 0, y: (ih - ch) / 2, w: iw, h: ch };
+    }
+}
+
+function initCropMode() {
+    const nextImg = S.imgs[S.cIdx + 1];
+    const corners = S.corners[S.cIdx];
+
+    // True aspect ratio of the canvas, corrected for perspective (as if viewed head-on)
+    const baseImg = S.imgs[S.cIdx];
+    const aspect = rectifiedAspect(corners, baseImg.naturalWidth, baseImg.naturalHeight);
+    S.cropAspect = aspect;
+
+    // If we already have a saved crop, use it (preserves user's chosen scale/position)
+    if (S.crops[S.cIdx + 1]) {
+        S.cropRect = { ...S.crops[S.cIdx + 1] };
+    } else {
+        S.cropRect = defaultCropForAspect(nextImg, aspect);
+    }
+    S.cropDrag = null;
+    drawCropView();
+}
+
+function drawCropView() {
+    const img = S.imgs[S.cIdx + 1];
+    const cw = cCanvas.width, ch = cCanvas.height;
+    cCtx.clearRect(0, 0, cw, ch);
+    const f = fitImage(img, cw, ch);
+    cScale = f.s; cOx = f.x; cOy = f.y;
+
+    // Draw full image
+    cCtx.drawImage(img, f.x, f.y, f.w, f.h);
+
+    if (!S.cropRect) return;
+    const cr = S.cropRect;
+
+    // Dim overlay outside crop
+    cCtx.fillStyle = 'rgba(0,0,0,0.55)';
+    // Top
+    cCtx.fillRect(f.x, f.y, f.w, cr.y * cScale);
+    // Bottom
+    const botY = f.y + (cr.y + cr.h) * cScale;
+    cCtx.fillRect(f.x, botY, f.w, f.y + f.h - botY);
+    // Left
+    cCtx.fillRect(f.x, f.y + cr.y * cScale, cr.x * cScale, cr.h * cScale);
+    // Right
+    const rightX = f.x + (cr.x + cr.w) * cScale;
+    cCtx.fillRect(rightX, f.y + cr.y * cScale, f.x + f.w - rightX, cr.h * cScale);
+
+    // Crop border
+    cCtx.strokeStyle = '#22c55e';
+    cCtx.lineWidth = 2;
+    const rx = f.x + cr.x * cScale, ry = f.y + cr.y * cScale;
+    const rw = cr.w * cScale, rh = cr.h * cScale;
+    cCtx.strokeRect(rx, ry, rw, rh);
+
+    // Corner handles
+    const handles = [
+        { x: rx,      y: ry },
+        { x: rx + rw, y: ry },
+        { x: rx + rw, y: ry + rh },
+        { x: rx,      y: ry + rh },
+    ];
+    handles.forEach(h => {
+        cCtx.fillStyle = '#22c55e';
+        cCtx.fillRect(h.x - 6, h.y - 6, 12, 12);
+        cCtx.strokeStyle = '#fff';
+        cCtx.lineWidth = 1.5;
+        cCtx.strokeRect(h.x - 6, h.y - 6, 12, 12);
+    });
+
+    // Rule-of-thirds guides
+    cCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+    cCtx.lineWidth = 1;
+    for (let i = 1; i <= 2; i++) {
+        cCtx.beginPath();
+        cCtx.moveTo(rx + rw * i / 3, ry);
+        cCtx.lineTo(rx + rw * i / 3, ry + rh);
+        cCtx.stroke();
+        cCtx.beginPath();
+        cCtx.moveTo(rx, ry + rh * i / 3);
+        cCtx.lineTo(rx + rw, ry + rh * i / 3);
+        cCtx.stroke();
+    }
+}
+
+function getCropHandle(mx, my) {
+    if (!S.cropRect) return null;
+    const cr = S.cropRect;
+    const corners = [
+        { id: 'tl', x: cr.x,        y: cr.y },
+        { id: 'tr', x: cr.x + cr.w, y: cr.y },
+        { id: 'br', x: cr.x + cr.w, y: cr.y + cr.h },
+        { id: 'bl', x: cr.x,        y: cr.y + cr.h },
+    ];
+    for (const c of corners) {
+        const sp = imgToScreen(c);
+        if ((mx - sp.x) ** 2 + (my - sp.y) ** 2 < 256) return c.id;
+    }
+    const ip = screenToImg(mx, my);
+    if (ip.x >= cr.x && ip.x <= cr.x + cr.w && ip.y >= cr.y && ip.y <= cr.y + cr.h) return 'move';
+    return null;
+}
+
+// ---- UNIFIED UI UPDATE ----
+function updateUI() {
+    const prevBtn = document.getElementById('corner-prev');
+    const midBtn  = document.getElementById('corner-mid');
+    const nextBtn = document.getElementById('corner-next');
+
+    if (S.mode === 'corners') {
+        barEl.innerHTML =
+            `Click the 4 corners of the canvas: <strong>TL &rarr; TR &rarr; BR &rarr; BL</strong>` +
+            `<br>Photo ${S.cIdx + 1} of ${S.imgs.length}` +
+            ` &nbsp;|&nbsp; Points: ${S.cPts.length}/4` +
+            ` &nbsp;|&nbsp; Drag points to adjust`;
+        prevBtn.style.display = (S.cIdx > 0 || S.mode === 'crop') ? '' : 'none';
+        prevBtn.innerHTML = '&larr; Prev';
+        midBtn.textContent = 'Undo';
+        nextBtn.innerHTML = 'Next &rarr;';
+        nextBtn.disabled = S.cPts.length < 4;
+        cCanvas.style.cursor = 'crosshair';
+    } else {
+        barEl.innerHTML =
+            `<span class="green">Crop photo ${S.cIdx + 2}</span> to fit inside the canvas you just defined.` +
+            `<br>Drag corners to resize, drag inside to move.` +
+            ` &nbsp;|&nbsp; Photos ${S.cIdx + 1}&ndash;${S.cIdx + 2} of ${S.imgs.length}`;
+        prevBtn.style.display = '';
+        prevBtn.innerHTML = '&larr; Back';
+        midBtn.textContent = 'Reset Crop';
+        nextBtn.innerHTML = 'Confirm &rarr;';
+        nextBtn.disabled = false;
+        cCanvas.style.cursor = 'crosshair';
+    }
+}
+
+// ---- MOUSE EVENTS (unified) ----
+cCanvas.addEventListener('mousedown', e => {
+    const rect = cCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+
+    if (S.mode === 'corners') {
+        // Drag existing point?
+        for (let i = 0; i < S.cPts.length; i++) {
+            const sp = imgToScreen(S.cPts[i]);
+            if ((mx - sp.x) ** 2 + (my - sp.y) ** 2 < 225) {
+                S.dragging = i;
+                return;
+            }
+        }
+        // Add new point (constrained to visible crop area)
+        if (S.cPts.length < 4) {
+            const ip = screenToImg(mx, my);
+            const cr = S.crops[S.cIdx];
+            const bx0 = cr ? cr.x : 0, by0 = cr ? cr.y : 0;
+            const bx1 = cr ? cr.x + cr.w : S.imgs[S.cIdx].naturalWidth;
+            const by1 = cr ? cr.y + cr.h : S.imgs[S.cIdx].naturalHeight;
+            if (ip.x >= bx0 && ip.x <= bx1 && ip.y >= by0 && ip.y <= by1) {
+                S.cPts.push(ip);
+                drawCorners();
+                updateUI();
+            }
+        }
+    } else {
+        const handle = getCropHandle(mx, my);
+        if (handle) {
+            S.cropDrag = handle;
+            S.cropStart = { mx, my, rect: { ...S.cropRect } };
+        }
+    }
+});
+
+cCanvas.addEventListener('mousemove', e => {
+    const rect = cCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+
+    if (S.mode === 'corners') {
+        if (S.dragging < 0) return;
+        S.cPts[S.dragging] = screenToImg(mx, my);
+        drawCorners();
+    } else {
+        // Update cursor
+        if (!S.cropDrag) {
+            const h = getCropHandle(mx, my);
+            if (h === 'tl' || h === 'br') cCanvas.style.cursor = 'nwse-resize';
+            else if (h === 'tr' || h === 'bl') cCanvas.style.cursor = 'nesw-resize';
+            else if (h === 'move') cCanvas.style.cursor = 'move';
+            else cCanvas.style.cursor = 'default';
+        }
+
+        if (!S.cropDrag) return;
+        const ip = screenToImg(mx, my);
+        const startIp = screenToImg(S.cropStart.mx, S.cropStart.my);
+        const dx = ip.x - startIp.x, dy = ip.y - startIp.y;
+        const or = S.cropStart.rect;
+        const img = S.imgs[S.cIdx + 1];
+        const maxW = img.naturalWidth, maxH = img.naturalHeight;
+        const aspect = S.cropAspect;
+        // Min size keeps both w>=40 and h>=40
+        const minW = Math.max(40, 40 * aspect);
+
+        // Corner resize: pick the drag axis with larger effect (dx vs dy*aspect), derive w, then h=w/aspect.
+        // Anchor is the corner diagonally opposite the handle being dragged.
+        switch (S.cropDrag) {
+            case 'tl': {
+                const ax = or.x + or.w, ay = or.y + or.h;
+                const wFromDx = or.w - dx, wFromDy = (or.h - dy) * aspect;
+                const newW = Math.abs(wFromDx - or.w) > Math.abs(wFromDy - or.w) ? wFromDx : wFromDy;
+                const w = clamp(newW, minW, Math.min(ax, ay * aspect));
+                const h = w / aspect;
+                S.cropRect = { x: ax - w, y: ay - h, w, h };
+                break;
+            }
+            case 'tr': {
+                const ax = or.x, ay = or.y + or.h;
+                const wFromDx = or.w + dx, wFromDy = (or.h - dy) * aspect;
+                const newW = Math.abs(wFromDx - or.w) > Math.abs(wFromDy - or.w) ? wFromDx : wFromDy;
+                const w = clamp(newW, minW, Math.min(maxW - ax, ay * aspect));
+                const h = w / aspect;
+                S.cropRect = { x: ax, y: ay - h, w, h };
+                break;
+            }
+            case 'br': {
+                const ax = or.x, ay = or.y;
+                const wFromDx = or.w + dx, wFromDy = (or.h + dy) * aspect;
+                const newW = Math.abs(wFromDx - or.w) > Math.abs(wFromDy - or.w) ? wFromDx : wFromDy;
+                const w = clamp(newW, minW, Math.min(maxW - ax, (maxH - ay) * aspect));
+                const h = w / aspect;
+                S.cropRect = { x: ax, y: ay, w, h };
+                break;
+            }
+            case 'bl': {
+                const ax = or.x + or.w, ay = or.y;
+                const wFromDx = or.w - dx, wFromDy = (or.h + dy) * aspect;
+                const newW = Math.abs(wFromDx - or.w) > Math.abs(wFromDy - or.w) ? wFromDx : wFromDy;
+                const w = clamp(newW, minW, Math.min(ax, (maxH - ay) * aspect));
+                const h = w / aspect;
+                S.cropRect = { x: ax - w, y: ay, w, h };
+                break;
+            }
+            case 'move': {
+                S.cropRect = {
+                    x: clamp(or.x + dx, 0, maxW - or.w),
+                    y: clamp(or.y + dy, 0, maxH - or.h),
+                    w: or.w, h: or.h,
+                };
+                break;
+            }
+        }
+        drawCropView();
+    }
+});
+
+cCanvas.addEventListener('mouseup', () => {
+    S.dragging = -1;
+    S.cropDrag = null;
+    S.cropStart = null;
+});
+
+// ---- BUTTON EVENTS ----
+document.getElementById('corner-mid').addEventListener('click', () => {
+    if (S.mode === 'corners') {
+        S.cPts.pop();
+        drawCorners();
+    } else {
+        // Reset to default aspect-matched crop (largest rect of locked aspect, centered)
+        S.cropRect = defaultCropForAspect(S.imgs[S.cIdx + 1], S.cropAspect);
+        drawCropView();
+    }
+    updateUI();
+});
+
+document.getElementById('corner-prev').addEventListener('click', () => {
+    if (S.mode === 'crop') {
+        // Back to corners for same image
+        S.mode = 'corners';
+        drawCorners();
+    } else if (S.cIdx > 0) {
+        // Back to previous image's crop step
+        S.cIdx--;
+        S.cPts = S.corners[S.cIdx] ? [...S.corners[S.cIdx]] : [];
+        S.mode = 'crop';
+        S.cropRect = S.crops[S.cIdx + 1] ? { ...S.crops[S.cIdx + 1] } : null;
+        if (!S.cropRect) initCropMode(); else drawCropView();
+    }
+    updateUI();
+});
+
+document.getElementById('corner-next').addEventListener('click', () => {
+    if (S.mode === 'corners') {
+        if (S.cPts.length !== 4) return;
+        S.corners[S.cIdx] = [...S.cPts];
+        S.mode = 'crop';
+        initCropMode();
+        updateUI();
+    } else {
+        // Save crop and advance
+        S.crops[S.cIdx + 1] = S.cropRect ? { ...S.cropRect } : null;
+        S.cIdx++;
+        S.cPts = S.corners[S.cIdx] ? [...S.corners[S.cIdx]] : [];
+
+        if (S.cIdx >= S.imgs.length - 1) {
+            show('animate-screen');
+            initAnim();
+            return;
+        }
+        S.mode = 'corners';
+        drawCorners();
+        updateUI();
+    }
+});
+
+// ==========================================
+// 3. ANIMATION
+// ==========================================
+const aCanvas = document.getElementById('animate-canvas');
+const aCtx    = aCanvas.getContext('2d');
+const scrub   = document.getElementById('scrubber');
+const playBtn = document.getElementById('play-btn');
+
+function resizeAnimCanvas() {
+    aCanvas.width  = window.innerWidth;
+    aCanvas.height = window.innerHeight;
+}
+
+function initAnim() {
+    resizeAnimCanvas();
+    S.t = 0;
+    S.playing = false;
+    scrub.value = 0;
+    playBtn.innerHTML = '&#9654; Play';
+    saveSettings();
+    renderAnim();
+}
+
+playBtn.addEventListener('click', () => {
+    S.playing = !S.playing;
+    playBtn.innerHTML = S.playing ? '&#9646;&#9646; Pause' : '&#9654; Play';
+    if (S.playing) {
+        const maxT = S.imgs.length - 1;
+        // If we're at the end (for the current direction), rewind to the start.
+        if (S.direction === 'reverse') {
+            if (S.t <= 0) S.t = maxT - 0.001;
+        } else {
+            if (S.t >= maxT - 0.001) S.t = 0;
+        }
+        S.lastTs = performance.now();
+        requestAnimationFrame(tick);
+    }
+});
+
+document.getElementById('speed-sel').addEventListener('change', e => S.speed = +e.target.value);
+document.getElementById('ease-sel').addEventListener('change', e => S.easeFn = e.target.value);
+document.getElementById('dir-sel').addEventListener('change', e => S.direction = e.target.value);
+
+const exportBtn = document.getElementById('export-btn');
+exportBtn.addEventListener('click', async () => {
+    if (!S.imgs.length || exportBtn.disabled) return;
+
+    // Pick the best mimeType the browser supports (MP4 on Safari/Chrome, WebM elsewhere)
+    const candidates = [
+        'video/mp4;codecs=avc1.42E01E',
+        'video/mp4',
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm',
+    ];
+    const mimeType = candidates.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m));
+    if (!mimeType) {
+        alert('MediaRecorder video export is not supported in this browser.');
+        return;
+    }
+    const ext = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+
+    // Stop any in-progress playback, rewind to the direction-appropriate start
+    S.playing = false;
+    playBtn.innerHTML = '&#9654; Play';
+    const maxTExport = S.imgs.length - 1;
+    S.t = S.direction === 'reverse' ? maxTExport - 0.001 : 0;
+    scrub.value = Math.round((S.t / maxTExport) * 1000);
+    renderAnim();
+
+    // Disable controls during export
+    const wasDisabled = { play: playBtn.disabled, back: document.getElementById('back-btn').disabled };
+    exportBtn.disabled = true;
+    playBtn.disabled = true;
+    scrub.disabled = true;
+    const origExportLabel = exportBtn.innerHTML;
+    exportBtn.innerHTML = '&#9679; Recording…';
+
+    const stream = aCanvas.captureStream(60);
+    const chunks = [];
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 12_000_000 });
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+    const done = new Promise(resolve => { recorder.onstop = resolve; });
+    recorder.start();
+
+    // Drive the animation across the full range in the chosen direction, then stop.
+    const maxT = S.imgs.length - 1;
+    const dir = S.direction === 'reverse' ? -1 : 1;
+    await new Promise(resolve => {
+        let last = performance.now();
+        function loop(ts) {
+            const dt = ts - last;
+            last = ts;
+            S.t += dir * (dt / S.pairDur) * S.speed;
+            if (dir > 0 && S.t >= maxT) {
+                S.t = maxT - 0.001;
+                scrub.value = 1000;
+                renderAnim();
+                resolve();
+                return;
+            }
+            if (dir < 0 && S.t <= 0) {
+                S.t = 0;
+                scrub.value = 0;
+                renderAnim();
+                resolve();
+                return;
+            }
+            scrub.value = Math.round((S.t / maxT) * 1000);
+            renderAnim();
+            requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+    });
+
+    // Let the recorder capture the final frame before stopping.
+    await new Promise(r => setTimeout(r, 150));
+    recorder.stop();
+    await done;
+
+    const blob = new Blob(chunks, { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `anniversary-zoom.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    exportBtn.disabled = wasDisabled.play ? true : false;
+    exportBtn.disabled = false;
+    playBtn.disabled = false;
+    scrub.disabled = false;
+    exportBtn.innerHTML = origExportLabel;
+});
+
+document.getElementById('back-btn').addEventListener('click', () => {
+    S.playing = false;
+    playBtn.innerHTML = '&#9654; Play';
+    S.cIdx = 0;
+    S.cPts = S.corners[0] ? [...S.corners[0]] : [];
+    S.mode = 'corners';
+    show('corner-screen');
+    initCornerScreen();
+});
+
+scrub.addEventListener('input', () => {
+    const maxT = S.imgs.length - 1;
+    S.t = (scrub.value / 1000) * maxT;
+    renderAnim();
+});
+
+function tick(ts) {
+    if (!S.playing) return;
+    const dt = ts - S.lastTs;
+    S.lastTs = ts;
+    const maxT = S.imgs.length - 1;
+    const dir = S.direction === 'reverse' ? -1 : 1;
+    S.t += dir * (dt / S.pairDur) * S.speed;
+    if (dir > 0 && S.t >= maxT) {
+        S.t = maxT - 0.001;
+        S.playing = false;
+        playBtn.innerHTML = '&#9654; Play';
+    } else if (dir < 0 && S.t <= 0) {
+        S.t = 0;
+        S.playing = false;
+        playBtn.innerHTML = '&#9654; Play';
+    }
+    scrub.value = Math.round((S.t / maxT) * 1000);
+    renderAnim();
+    if (S.playing) requestAnimationFrame(tick);
+}
+
+// --- RENDER ---
+function renderAnim() {
+    const cw = aCanvas.width, ch = aCanvas.height;
+    aCtx.fillStyle = '#000';
+    aCtx.fillRect(0, 0, cw, ch);
+
+    const maxT = S.imgs.length - 1;
+    if (maxT <= 0) return;
+    const t = clamp(S.t, 0, maxT - 0.001);
+
+    const pi  = Math.floor(t);
+    const raw = t - pi;
+    const p   = easeValue(raw, S.easeFn);
+
+    const img     = S.imgs[pi];
+    const corners = S.corners[pi];
+    if (!img || !corners) return;
+
+    // Base image crop — the definitive visible region
+    const baseCrop = S.crops[pi] || null;
+    const srcX = baseCrop ? baseCrop.x : 0;
+    const srcY = baseCrop ? baseCrop.y : 0;
+    const srcW = baseCrop ? baseCrop.w : img.naturalWidth;
+    const srcH = baseCrop ? baseCrop.h : img.naturalHeight;
+
+    // ---- Destination quad for crop region at p=0 (fitted to viewport) ----
+    const bs = Math.min(cw / srcW, ch / srcH);
+    const ox = (cw - srcW * bs) / 2;
+    const oy = (ch - srcH * bs) / 2;
+    const dst0 = [
+        { x: ox,             y: oy },
+        { x: ox + srcW * bs, y: oy },
+        { x: ox + srcW * bs, y: oy + srcH * bs },
+        { x: ox,             y: oy + srcH * bs },
+    ];
+
+    // ---- Compute where photo pi+1 will sit at its own p=0 (matches viewport "contain" fit) ----
+    // By targeting this (not the full screen) as the zoom endpoint, the swap at t=pi+1 has no aspect jump.
+    const nextImg  = S.imgs[pi + 1];
+    const nextCrop = S.crops[pi + 1] || null;
+    const nSrcW = nextCrop ? nextCrop.w : nextImg.naturalWidth;
+    const nSrcH = nextCrop ? nextCrop.h : nextImg.naturalHeight;
+    const nbs = Math.min(cw / nSrcW, ch / nSrcH);
+    const nox = (cw - nSrcW * nbs) / 2;
+    const noy = (ch - nSrcH * nbs) / 2;
+    const nextDst0 = [
+        { x: nox,              y: noy },
+        { x: nox + nSrcW * nbs, y: noy },
+        { x: nox + nSrcW * nbs, y: noy + nSrcH * nbs },
+        { x: nox,              y: noy + nSrcH * nbs },
+    ];
+
+    // ---- Destination quad at p=1 via homography (canvas corners → nextDst0) ----
+    const H = findHomography(corners, nextDst0);
+    const cropCorners = [
+        { x: srcX,        y: srcY },
+        { x: srcX + srcW, y: srcY },
+        { x: srcX + srcW, y: srcY + srcH },
+        { x: srcX,        y: srcY + srcH },
+    ];
+    const dst1 = H ? cropCorners.map(pt => applyH(H, pt)) : dst0;
+
+    // ---- Interpolate photo pi's destination quad ----
+    const imgDst = dst0.map((d, i) => ({
+        x: lerp(d.x, dst1[i].x, p),
+        y: lerp(d.y, dst1[i].y, p),
+    }));
+
+    // ---- Draw back layers (pi-1, pi-2, ...) so previous photos keep framing the zoom ----
+    // Invariant: photo (pi-d)'s canvas on screen == photo (pi-d+1)'s crop on screen.
+    // So pi-1's canvas → imgDst, pi-2's canvas → pi-1's screen quad, etc.
+    // Paint deepest-first so each inner layer correctly covers the outer one.
+    {
+        const backLayers = [];
+        let innerQuad = imgDst;
+        for (let d = 1; d <= 2 && pi - d >= 0; d++) {
+            const prevIdx = pi - d;
+            const prevImg = S.imgs[prevIdx];
+            const prevCornersInPrev = S.corners[prevIdx];
+            if (!prevImg || !prevCornersInPrev) break;
+            const prevCrop = S.crops[prevIdx] || null;
+            const psx = prevCrop ? prevCrop.x : 0;
+            const psy = prevCrop ? prevCrop.y : 0;
+            const psw = prevCrop ? prevCrop.w : prevImg.naturalWidth;
+            const psh = prevCrop ? prevCrop.h : prevImg.naturalHeight;
+            const prevCropCorners = [
+                { x: psx,       y: psy },
+                { x: psx + psw, y: psy },
+                { x: psx + psw, y: psy + psh },
+                { x: psx,       y: psy + psh },
+            ];
+            const Hback = findHomography(prevCornersInPrev, innerQuad);
+            if (!Hback) break;
+            const prevDst = prevCropCorners.map(pt => applyH(Hback, pt));
+            const side = Math.max(
+                dist(prevDst[0], prevDst[1]), dist(prevDst[1], prevDst[2]),
+                dist(prevDst[2], prevDst[3]), dist(prevDst[3], prevDst[0])
+            );
+            const subs = clamp(Math.ceil(Math.min(side, cw * 2) / 60), 4, 20);
+            backLayers.push({ img: prevImg, dst: prevDst, crop: prevCrop, subs });
+            innerQuad = prevDst;
+        }
+        for (let k = backLayers.length - 1; k >= 0; k--) {
+            const bl = backLayers[k];
+            drawPerspective(aCtx, bl.img, bl.dst, bl.subs, bl.crop);
+        }
+    }
+
+    // ---- Draw base image (cropped) with perspective warp ----
+    const visSide = Math.max(
+        dist(imgDst[0], imgDst[1]), dist(imgDst[1], imgDst[2]),
+        dist(imgDst[2], imgDst[3]), dist(imgDst[3], imgDst[0])
+    );
+    const baseSubs = clamp(Math.ceil(Math.min(visSide, cw * 2) / 60), 4, 20);
+    drawPerspective(aCtx, img, imgDst, baseSubs, baseCrop);
+
+    // ---- Nested canvas quad via the SAME homography drawPerspective uses for the base ----
+    // Canvas corners map through Hp (cropCorners → imgDst). This keeps the base photo's
+    // rendered canvas region and the nested photo locked together at every p, not just endpoints.
+    // At p=0: imgDst=dst0 (rect), Hp is affine → canvas lands at its natural in-frame position.
+    // At p=1: imgDst=dst1=H(cropCorners), so Hp=H → canvas lands exactly on nextDst0.
+    const Hp = findHomography(cropCorners, imgDst);
+    const quadStart = corners.map(c => bilinear(dst0,
+        (c.x - srcX) / srcW,
+        (c.y - srcY) / srcH
+    ));
+    let quad = Hp
+        ? corners.map(c => applyH(Hp, c))
+        : quadStart.map((q, i) => ({
+            x: lerp(q.x, nextDst0[i].x, p),
+            y: lerp(q.y, nextDst0[i].y, p),
+        }));
+
+    // ---- Draw nested images (go deep so future photos are on-screen well before they take over) ----
+    for (let d = 1; d <= 6 && pi + d < S.imgs.length; d++) {
+        if (quadArea(quad) < 4) break;
+
+        const nImg  = S.imgs[pi + d];
+        const crop  = S.crops[pi + d] || null;
+        const side  = Math.max(
+            dist(quad[0], quad[1]), dist(quad[1], quad[2]),
+            dist(quad[2], quad[3]), dist(quad[3], quad[0])
+        );
+        const subs = clamp(Math.ceil(side / 40), 3, 14);
+
+        drawPerspective(aCtx, nImg, quad, subs, crop);
+
+        // Compute next-level quad
+        if (pi + d < S.corners.length) {
+            const nc = S.corners[pi + d];
+            const nw = nImg.naturalWidth, nh = nImg.naturalHeight;
+
+            if (crop) {
+                quad = nc.map(c => bilinear(quad,
+                    (c.x - crop.x) / crop.w,
+                    (c.y - crop.y) / crop.h
+                ));
+            } else {
+                quad = nc.map(c => bilinear(quad, c.x / nw, c.y / nh));
+            }
+        } else {
+            break;
+        }
+    }
+}
+
+// ==========================================
+// PERSPECTIVE WARP (triangle mesh)
+// ==========================================
+function drawPerspective(ctx, img, quad, subs, crop) {
+    const sx = crop ? crop.x : 0;
+    const sy = crop ? crop.y : 0;
+    const sw = crop ? crop.w : img.naturalWidth;
+    const sh = crop ? crop.h : img.naturalHeight;
+
+    // True homography from the source rectangle to the destination quad.
+    // Using this (instead of bilinear interp of quad corners) means every interior
+    // point — including the canvas region — lands at its true perspective location,
+    // so nested content drawn at that same homography stays aligned.
+    const srcCorners = [
+        { x: sx,      y: sy },
+        { x: sx + sw, y: sy },
+        { x: sx + sw, y: sy + sh },
+        { x: sx,      y: sy + sh },
+    ];
+    const H = findHomography(srcCorners, quad);
+    const mapPt = H
+        ? (p) => applyH(H, p)
+        : (p) => bilinear(quad, (p.x - sx) / sw, (p.y - sy) / sh);
+
+    for (let i = 0; i < subs; i++) {
+        for (let j = 0; j < subs; j++) {
+            const u0 = i / subs, u1 = (i + 1) / subs;
+            const v0 = j / subs, v1 = (j + 1) / subs;
+
+            const s00 = { x: sx + u0 * sw, y: sy + v0 * sh };
+            const s10 = { x: sx + u1 * sw, y: sy + v0 * sh };
+            const s11 = { x: sx + u1 * sw, y: sy + v1 * sh };
+            const s01 = { x: sx + u0 * sw, y: sy + v1 * sh };
+
+            const d00 = mapPt(s00);
+            const d10 = mapPt(s10);
+            const d11 = mapPt(s11);
+            const d01 = mapPt(s01);
+
+            drawTri(ctx, img, s00, s10, s11, d00, d10, d11);
+            drawTri(ctx, img, s00, s11, s01, d00, d11, d01);
+        }
+    }
+}
+
+function drawTri(ctx, img, s0, s1, s2, d0, d1, d2) {
+    const det = s0.x * (s1.y - s2.y) - s0.y * (s1.x - s2.x) + s1.x * s2.y - s2.x * s1.y;
+    if (Math.abs(det) < 1e-8) return;
+
+    const c00 = s1.y - s2.y,  c01 = s2.x - s1.x,  c02 = s1.x * s2.y - s2.x * s1.y;
+    const c10 = s2.y - s0.y,  c11 = s0.x - s2.x,  c12 = s2.x * s0.y - s0.x * s2.y;
+    const c20 = s0.y - s1.y,  c21 = s1.x - s0.x,  c22 = s0.x * s1.y - s1.x * s0.y;
+
+    const a  = (c00 * d0.x + c10 * d1.x + c20 * d2.x) / det;
+    const b  = (c00 * d0.y + c10 * d1.y + c20 * d2.y) / det;
+    const c  = (c01 * d0.x + c11 * d1.x + c21 * d2.x) / det;
+    const dd = (c01 * d0.y + c11 * d1.y + c21 * d2.y) / det;
+    const e  = (c02 * d0.x + c12 * d1.x + c22 * d2.x) / det;
+    const f  = (c02 * d0.y + c12 * d1.y + c22 * d2.y) / det;
+
+    // Expand the clip path outward from the centroid by ~0.6px so adjacent triangles
+    // overlap slightly, hiding anti-aliased seams between them. The affine transform
+    // is unchanged, so image content stays aligned across triangle boundaries.
+    const cxp = (d0.x + d1.x + d2.x) / 3;
+    const cyp = (d0.y + d1.y + d2.y) / 3;
+    const push = (p) => {
+        const vx = p.x - cxp, vy = p.y - cyp;
+        const len = Math.hypot(vx, vy) || 1;
+        const k = 0.6 / len;
+        return { x: p.x + vx * k, y: p.y + vy * k };
+    };
+    const e0 = push(d0), e1 = push(d1), e2 = push(d2);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(e0.x, e0.y);
+    ctx.lineTo(e1.x, e1.y);
+    ctx.lineTo(e2.x, e2.y);
+    ctx.closePath();
+    ctx.clip();
+    ctx.setTransform(a, b, c, dd, e, f);
+    ctx.drawImage(img, 0, 0);
+    ctx.restore();
+}
+
+// ==========================================
+// KEYBOARD SHORTCUTS
+// ==========================================
+document.addEventListener('keydown', e => {
+    if (!document.getElementById('animate-screen').classList.contains('active')) return;
+    const maxT = S.imgs.length - 1;
+    if (e.code === 'Space') { e.preventDefault(); playBtn.click(); }
+    if (e.code === 'ArrowRight') {
+        S.t = clamp(S.t + 0.02, 0, maxT - 0.001);
+        scrub.value = Math.round((S.t / maxT) * 1000);
+        renderAnim();
+    }
+    if (e.code === 'ArrowLeft') {
+        S.t = clamp(S.t - 0.02, 0, maxT - 0.001);
+        scrub.value = Math.round((S.t / maxT) * 1000);
+        renderAnim();
+    }
+});
+
+// ==========================================
+// RESIZE
+// ==========================================
+window.addEventListener('resize', () => {
+    if (document.getElementById('corner-screen').classList.contains('active')) {
+        resizeCornerCanvas();
+        if (S.mode === 'corners') drawCorners(); else drawCropView();
+    }
+    if (document.getElementById('animate-screen').classList.contains('active')) {
+        resizeAnimCanvas();
+        renderAnim();
+    }
+});
+</script>
+</body>
+</html>
