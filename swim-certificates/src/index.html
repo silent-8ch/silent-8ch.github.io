@@ -116,18 +116,19 @@
       color: #555;
     }
     .cert-signatories {
-      height: 120px;
       display: flex;
-      justify-content: space-evenly; /* Evenly space signatories */
+      flex-wrap: wrap;
+      justify-content: space-evenly;
       align-items: flex-end;
-      gap: 0; /* Remove extra gap, spacing handled by flex */
-      width: 100%; /* Ensure it spans the table cell */
+      width: 100%;
     }
     .signatory-block, .info-box {
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 120px;
+      width: 30%;
+      box-sizing: border-box;
+      margin-bottom: 8px;
     }
     .info-box {
       justify-content: flex-end;
