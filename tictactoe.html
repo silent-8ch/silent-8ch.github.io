@@ -233,10 +233,11 @@
         // Create a new game and wait in lobby
         gameId = db.ref('ttt/games').push().key;
         myMark = 'X';
+        const firstTurn = Math.random() < 0.5 ? 'X' : 'O';
 
         await db.ref('ttt/games/' + gameId).set({
           board: ['','','','','','','','',''],
-          turn: 'X',
+          turn: firstTurn,
           playerX: playerId,
           playerO: null,
           status: 'waiting',
@@ -308,7 +309,7 @@
           if (myMark === 'X') {
             gameRef.update({
               board: ['','','','','','','','',''],
-              turn: 'X',
+              turn: Math.random() < 0.5 ? 'X' : 'O',
               winner: null,
               winLine: null,
               rematchX: false,
