@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tic Tac Toe</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.6em;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+    #status {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      min-height: 1.4em;
+      color: #aaa;
+    }
+    #status.highlight { color: #4fc3f7; }
+    #status.win { color: #66bb6a; }
+    #status.lose { color: #ef5350; }
+    #status.draw { color: #ffa726; }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin: 0 auto 24px;
+      max-width: 300px;
+      aspect-ratio: 1;
+    }
+    .cell {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 6px;
+      font-size: 3em;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      user-select: none;
+      aspect-ratio: 1;
+    }
+    .cell:hover:not(.taken) { background: #2a2a2a; }
+    .cell.taken { cursor: default; }
+    .cell.x { color: #4fc3f7; }
+    .cell.o { color: #ef5350; }
+    .cell.win-cell { background: #1b5e20; }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 28px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: #333; }
+
+    #lobby { margin-bottom: 20px; }
+    #lobby .waiting {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .scoreboard {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+      font-size: 0.95em;
+      color: #aaa;
+    }
+    .scoreboard span { font-weight: 700; color: #fff; }
+
+    .game-over-actions { margin-top: 12px; }
+    .game-over-actions .btn { margin: 0 6px; }
+
+    #online-count {
+      position: fixed;
+      top: 12px;
+      right: 16px;
+      font-size: 0.8em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tic Tac Toe</h1>
+    <div id="online-count"></div>
+
+    <div id="lobby">
+      <button class="btn" id="play-btn" onclick="findGame()">Play</button>
+    </div>
+
+    <div id="game" style="display:none;">
+      <div class="scoreboard">
+        <div>You (<span id="my-mark">X</span>): <span id="my-score">0</span></div>
+        <div>Them (<span id="their-mark">O</span>): <span id="their-score">0</span></div>
+        <div>Draws: <span id="draw-score">0</span></div>
+      </div>
+      <div id="status">Waiting...</div>
+      <div class="board" id="board"></div>
+      <div id="game-over-actions" class="game-over-actions" style="display:none;">
+        <button class="btn" onclick="requestRematch()">Rematch</button>
+        <button class="btn" onclick="leaveGame()">Leave</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase 9 compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script>
+    // ── Firebase config ─────────────────────────────────────────────
+    // Replace these with your Firebase project values
+    const firebaseConfig = {
+      apiKey: "AIzaSyDOHBS-ILRBi_qlYOvAm3qQlWcHKVBwuek",
+      authDomain: "titato-c2897.firebaseapp.com",
+      databaseURL: "https://titato-c2897-default-rtdb.firebaseio.com",
+      projectId: "titato-c2897"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ── State ───────────────────────────────────────────────────────
+    const playerId = crypto.randomUUID();
+    let gameRef = null;
+    let gameId = null;
+    let myMark = null;   // 'X' or 'O'
+    let myScore = 0;
+    let theirScore = 0;
+    let drawScore = 0;
+    let gameListener = null;
+
+    const WINS = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    // ── Board rendering ─────────────────────────────────────────────
+    function renderBoard(board, turn, winner, winLine) {
+      const el = document.getElementById('board');
+      el.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (board[i]) {
+          cell.textContent = board[i];
+          cell.classList.add('taken', board[i].toLowerCase());
+        }
+        if (winLine && winLine.includes(i)) {
+          cell.classList.add('win-cell');
+        }
+        if (!board[i] && !winner && turn === myMark) {
+          cell.addEventListener('click', () => makeMove(i));
+        }
+        el.appendChild(cell);
+      }
+    }
+
+    function setStatus(text, cls) {
+      const el = document.getElementById('status');
+      el.textContent = text;
+      el.className = cls || '';
+    }
+
+    function updateScoreboard() {
+      document.getElementById('my-score').textContent = myScore;
+      document.getElementById('their-score').textContent = theirScore;
+      document.getElementById('draw-score').textContent = drawScore;
+      document.getElementById('my-mark').textContent = myMark;
+      document.getElementById('their-mark').textContent = myMark === 'X' ? 'O' : 'X';
+    }
+
+    // ── Matchmaking ─────────────────────────────────────────────────
+    async function findGame() {
+      document.getElementById('play-btn').disabled = true;
+      document.getElementById('play-btn').textContent = 'Finding game...';
+      document.getElementById('play-btn').classList.add('waiting');
+
+      const lobbyRef = db.ref('ttt/lobby');
+
+      // Try to find an open game
+      const snap = await lobbyRef.orderByChild('created').limitToFirst(1).once('value');
+      let found = false;
+
+      snap.forEach(child => {
+        const data = child.val();
+        if (data.playerId !== playerId) {
+          // Join this game
+          gameId = child.key;
+          myMark = 'O';
+          found = true;
+          // Remove from lobby
+          child.ref.remove();
+          // Set player 2
+          db.ref('ttt/games/' + gameId + '/playerO').set(playerId);
+          db.ref('ttt/games/' + gameId + '/status').set('playing');
+        }
+      });
+
+      if (!found) {
+        // Create a new game and wait in lobby
+        gameId = db.ref('ttt/games').push().key;
+        myMark = 'X';
+
+        await db.ref('ttt/games/' + gameId).set({
+          board: ['','','','','','','','',''],
+          turn: 'X',
+          playerX: playerId,
+          playerO: null,
+          status: 'waiting',
+          winner: null,
+          winLine: null,
+          rematchX: false,
+          rematchO: false,
+          created: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        await lobbyRef.child(gameId).set({
+          playerId: playerId,
+          created: firebase.database.ServerValue.TIMESTAMP
+        });
+      }
+
+      gameRef = db.ref('ttt/games/' + gameId);
+      startListening();
+    }
+
+    function startListening() {
+      document.getElementById('lobby').style.display = 'none';
+      document.getElementById('game').style.display = '';
+      updateScoreboard();
+
+      if (gameListener) gameRef.off('value', gameListener);
+
+      gameListener = gameRef.on('value', snap => {
+        const g = snap.val();
+        if (!g) {
+          // Game was deleted (opponent left)
+          setStatus('Opponent left', 'lose');
+          document.getElementById('game-over-actions').style.display = '';
+          return;
+        }
+
+        const board = g.board || ['','','','','','','','',''];
+        const turn = g.turn;
+        const winner = g.winner;
+        const winLine = g.winLine;
+
+        renderBoard(board, turn, winner, winLine);
+
+        if (g.status === 'waiting') {
+          setStatus('Waiting for opponent...', 'highlight');
+          document.getElementById('status').classList.add('waiting');
+        } else if (winner === 'draw') {
+          setStatus('Draw!', 'draw');
+          document.getElementById('game-over-actions').style.display = '';
+          // Update rematch button text
+          updateRematchUI(g);
+        } else if (winner) {
+          if (winner === myMark) {
+            setStatus('You win!', 'win');
+          } else {
+            setStatus('You lose!', 'lose');
+          }
+          document.getElementById('game-over-actions').style.display = '';
+          updateRematchUI(g);
+        } else if (turn === myMark) {
+          setStatus('Your turn', 'highlight');
+        } else {
+          setStatus("Opponent's turn");
+        }
+
+        // Handle rematch
+        if (g.rematchX && g.rematchO && (g.winner || g.winner === 'draw')) {
+          // Both want rematch — reset the board
+          if (myMark === 'X') {
+            gameRef.update({
+              board: ['','','','','','','','',''],
+              turn: 'X',
+              winner: null,
+              winLine: null,
+              rematchX: false,
+              rematchO: false,
+              status: 'playing'
+            });
+          }
+          document.getElementById('game-over-actions').style.display = 'none';
+        }
+      });
+
+      // Clean up on disconnect
+      gameRef.child('player' + myMark).onDisconnect().remove();
+      if (myMark === 'X') {
+        db.ref('ttt/lobby/' + gameId).onDisconnect().remove();
+      }
+    }
+
+    function updateRematchUI(g) {
+      const myRematch = myMark === 'X' ? g.rematchX : g.rematchO;
+      const theirRematch = myMark === 'X' ? g.rematchO : g.rematchX;
+      const btn = document.querySelector('#game-over-actions .btn');
+      if (myRematch && !theirRematch) {
+        btn.textContent = 'Waiting for opponent...';
+        btn.disabled = true;
+      } else {
+        btn.textContent = 'Rematch';
+        btn.disabled = false;
+      }
+    }
+
+    // ── Gameplay ────────────────────────────────────────────────────
+    function makeMove(index) {
+      gameRef.transaction(g => {
+        if (!g) return g;
+        if (g.turn !== myMark) return;
+        if (g.board[index]) return;
+        if (g.winner) return;
+        if (g.status !== 'playing') return;
+
+        g.board[index] = myMark;
+
+        // Check for win
+        for (const combo of WINS) {
+          if (combo.every(i => g.board[i] === myMark)) {
+            g.winner = myMark;
+            g.winLine = combo;
+            return g;
+          }
+        }
+
+        // Check for draw
+        if (g.board.every(c => c)) {
+          g.winner = 'draw';
+          return g;
+        }
+
+        // Switch turn
+        g.turn = myMark === 'X' ? 'O' : 'X';
+        return g;
+      }).then(result => {
+        if (result.committed) {
+          const g = result.snapshot.val();
+          if (g && g.winner) {
+            if (g.winner === myMark) myScore++;
+            else if (g.winner === 'draw') drawScore++;
+            else theirScore++;
+            updateScoreboard();
+          }
+        }
+      });
+    }
+
+    function requestRematch() {
+      const key = 'rematch' + myMark;
+      gameRef.child(key).set(true);
+    }
+
+    function leaveGame() {
+      if (gameListener) gameRef.off('value', gameListener);
+      gameRef.child('player' + myMark).remove();
+      // Clean up empty games
+      gameRef.once('value', snap => {
+        const g = snap.val();
+        if (g && !g.playerX && !g.playerO) {
+          gameRef.remove();
+        }
+      });
+
+      gameId = null;
+      gameRef = null;
+      myMark = null;
+      myScore = 0;
+      theirScore = 0;
+      drawScore = 0;
+
+      document.getElementById('game').style.display = 'none';
+      document.getElementById('game-over-actions').style.display = 'none';
+      document.getElementById('lobby').style.display = '';
+      document.getElementById('play-btn').disabled = false;
+      document.getElementById('play-btn').textContent = 'Play';
+      document.getElementById('play-btn').classList.remove('waiting');
+    }
+  </script>
+</body>
+</html>
