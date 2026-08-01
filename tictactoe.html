@@ -17,7 +17,7 @@
       padding: 20px;
     }
     .container {
-      max-width: 400px;
+      max-width: 420px;
       width: 100%;
       text-align: center;
     }
@@ -25,6 +25,11 @@
       font-size: 1.6em;
       margin-bottom: 16px;
       color: #fff;
+    }
+    h2 {
+      font-size: 1.2em;
+      margin-bottom: 12px;
+      color: #aaa;
     }
     #status {
       font-size: 1.1em;
@@ -79,9 +84,15 @@
       transition: background 0.15s;
     }
     .btn:hover { background: #333; }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .btn.google-btn {
+      background: #4285f4;
+      border-color: #4285f4;
+      margin-bottom: 12px;
+    }
+    .btn.google-btn:hover { background: #3367d6; }
 
-    #lobby { margin-bottom: 20px; }
-    #lobby .waiting {
+    .waiting {
       animation: pulse 1.5s ease-in-out infinite;
     }
     @keyframes pulse {
@@ -102,46 +113,180 @@
     .game-over-actions { margin-top: 12px; }
     .game-over-actions .btn { margin: 0 6px; }
 
-    #online-count {
-      position: fixed;
-      top: 12px;
-      right: 16px;
-      font-size: 0.8em;
-      color: #555;
+    /* Auth */
+    #auth {
+      margin-bottom: 20px;
     }
+    #auth input {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 1em;
+    }
+    #auth input::placeholder { color: #666; }
+    #auth-error {
+      color: #ef5350;
+      font-size: 0.85em;
+      margin-bottom: 8px;
+      min-height: 1.2em;
+    }
+    .auth-divider {
+      color: #555;
+      margin: 12px 0;
+      font-size: 0.85em;
+    }
+    .auth-toggle {
+      color: #4fc3f7;
+      cursor: pointer;
+      font-size: 0.85em;
+      margin-top: 8px;
+    }
+    .auth-toggle:hover { text-decoration: underline; }
+
+    /* User bar */
+    #user-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    #user-bar .name { color: #4fc3f7; font-weight: 600; }
+    #user-bar .logout {
+      color: #666;
+      cursor: pointer;
+      font-size: 0.8em;
+    }
+    #user-bar .logout:hover { color: #ef5350; }
+
+    /* Leaderboard */
+    .leaderboard {
+      margin-top: 24px;
+      text-align: left;
+    }
+    .leaderboard table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .leaderboard th {
+      text-align: left;
+      color: #666;
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 8px;
+      border-bottom: 1px solid #333;
+    }
+    .leaderboard td {
+      padding: 8px;
+      border-bottom: 1px solid #1e1e1e;
+      font-size: 0.9em;
+    }
+    .leaderboard tr.me td { color: #4fc3f7; }
+    .leaderboard .rank { color: #666; width: 30px; }
+    .leaderboard .name-col { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .leaderboard .num { text-align: right; color: #aaa; }
+
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      margin-bottom: 16px;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      color: #666;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.15s;
+    }
+    .tab:first-child { border-radius: 4px 0 0 4px; }
+    .tab:last-child { border-radius: 0 4px 4px 0; }
+    .tab.active { background: #333; color: #fff; }
+    .tab:hover:not(.active) { background: #252525; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Tic Tac Toe</h1>
-    <div id="online-count"></div>
 
-    <div id="lobby">
-      <button class="btn" id="play-btn" onclick="findGame()">Play</button>
+    <!-- Auth screen -->
+    <div id="auth">
+      <button class="btn google-btn" onclick="googleLogin()" style="width:100%">Sign in with Google</button>
+      <div class="auth-divider">or</div>
+      <div id="auth-error"></div>
+      <input type="email" id="auth-email" placeholder="Email">
+      <div id="auth-password-row">
+        <input type="password" id="auth-password" placeholder="Password">
+      </div>
+      <button class="btn" id="auth-submit" onclick="emailLogin()" style="width:100%">Sign In</button>
+      <div style="margin-top:8px; display:flex; justify-content:space-between; font-size:0.85em;">
+        <span class="auth-toggle" id="auth-toggle" onclick="toggleAuthMode()">Don't have an account? Sign Up</span>
+        <span class="auth-toggle" id="auth-link-toggle" onclick="toggleEmailLink()">Use email link instead</span>
+      </div>
+      <div id="auth-link-sent" style="display:none; color:#66bb6a; margin-top:12px; font-size:0.9em;">
+        Sign-in link sent! Check your email.
+      </div>
     </div>
 
-    <div id="game" style="display:none;">
-      <div class="scoreboard">
-        <div>You (<span id="my-mark">X</span>): <span id="my-score">0</span></div>
-        <div>Them (<span id="their-mark">O</span>): <span id="their-score">0</span></div>
-        <div>Draws: <span id="draw-score">0</span></div>
+    <!-- Main screen (after login) -->
+    <div id="main" style="display:none;">
+      <div id="user-bar">
+        <span class="name" id="user-name"></span>
+        <span class="logout" onclick="logout()">Sign Out</span>
       </div>
-      <div id="status">Waiting...</div>
-      <div class="board" id="board"></div>
-      <div id="game-over-actions" class="game-over-actions" style="display:none;">
-        <button class="btn" onclick="requestRematch()">Rematch</button>
-        <button class="btn" onclick="leaveGame()">Leave</button>
+
+      <div class="tab-bar">
+        <div class="tab active" id="tab-play" onclick="showTab('play')">Play</div>
+        <div class="tab" id="tab-leaderboard" onclick="showTab('leaderboard')">Leaderboard</div>
+      </div>
+
+      <!-- Play tab -->
+      <div id="play-tab">
+        <div id="lobby">
+          <button class="btn" id="play-btn" onclick="findGame()">Play</button>
+        </div>
+
+        <div id="game" style="display:none;">
+          <div class="scoreboard">
+            <div>You (<span id="my-mark">X</span>): <span id="my-score">0</span></div>
+            <div>Them (<span id="their-mark">O</span>): <span id="their-score">0</span></div>
+            <div>Draws: <span id="draw-score">0</span></div>
+          </div>
+          <div id="status">Waiting...</div>
+          <div class="board" id="board"></div>
+          <div id="game-over-actions" class="game-over-actions" style="display:none;">
+            <button class="btn" onclick="requestRematch()">Rematch</button>
+            <button class="btn" onclick="leaveGame()">Leave</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard tab -->
+      <div id="leaderboard-tab" style="display:none;">
+        <div class="leaderboard" id="leaderboard-content"></div>
       </div>
     </div>
   </div>
 
-  <!-- Firebase 9 compat (CDN) -->
+  <!-- Firebase compat CDN -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <script>
     // ── Firebase config ─────────────────────────────────────────────
-    // Replace these with your Firebase project values
     const firebaseConfig = {
       apiKey: "AIzaSyDOHBS-ILRBi_qlYOvAm3qQlWcHKVBwuek",
       authDomain: "titato-c2897.firebaseapp.com",
@@ -150,22 +295,195 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const auth = firebase.auth();
 
     // ── State ───────────────────────────────────────────────────────
-    const playerId = crypto.randomUUID();
+    let currentUser = null;
     let gameRef = null;
     let gameId = null;
-    let myMark = null;   // 'X' or 'O'
+    let myMark = null;
     let myScore = 0;
     let theirScore = 0;
     let drawScore = 0;
     let gameListener = null;
+    let authIsSignUp = false;
+    let authIsEmailLink = false;
+    let statsUpdatedForGame = false;
 
     const WINS = [
       [0,1,2],[3,4,5],[6,7,8],
       [0,3,6],[1,4,7],[2,5,8],
       [0,4,8],[2,4,6]
     ];
+
+    // ── Auth ────────────────────────────────────────────────────────
+    // Check if returning from email link sign-in
+    if (auth.isSignInWithEmailLink(window.location.href)) {
+      let email = window.localStorage.getItem('tttEmailForSignIn');
+      if (!email) {
+        email = window.prompt('Enter your email to confirm sign-in');
+      }
+      if (email) {
+        auth.signInWithEmailLink(email, window.location.href)
+          .then(() => {
+            window.localStorage.removeItem('tttEmailForSignIn');
+            // Clean up the URL
+            window.history.replaceState(null, '', window.location.pathname);
+          })
+          .catch(showAuthError);
+      }
+    }
+
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      if (user) {
+        document.getElementById('auth').style.display = 'none';
+        document.getElementById('main').style.display = '';
+        document.getElementById('user-name').textContent = user.displayName || user.email;
+        // Ensure player record exists
+        const pRef = db.ref('ttt/players/' + user.uid);
+        pRef.once('value', snap => {
+          if (!snap.exists()) {
+            pRef.set({
+              name: user.displayName || user.email,
+              wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0
+            });
+          } else {
+            // Update name in case it changed
+            pRef.child('name').set(user.displayName || user.email);
+          }
+        });
+      } else {
+        document.getElementById('auth').style.display = '';
+        document.getElementById('main').style.display = 'none';
+      }
+    });
+
+    function googleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(showAuthError);
+    }
+
+    function emailLogin() {
+      const email = document.getElementById('auth-email').value.trim();
+      if (!email) return showAuthError({ message: 'Enter your email' });
+
+      if (authIsEmailLink) {
+        // Send sign-in link
+        const actionCodeSettings = {
+          url: window.location.origin + window.location.pathname,
+          handleCodeInApp: true
+        };
+        auth.sendSignInLinkToEmail(email, actionCodeSettings)
+          .then(() => {
+            window.localStorage.setItem('tttEmailForSignIn', email);
+            document.getElementById('auth-link-sent').style.display = '';
+            document.getElementById('auth-error').textContent = '';
+          })
+          .catch(showAuthError);
+        return;
+      }
+
+      const password = document.getElementById('auth-password').value;
+      if (!password) return showAuthError({ message: 'Enter your password' });
+
+      if (authIsSignUp) {
+        auth.createUserWithEmailAndPassword(email, password).catch(showAuthError);
+      } else {
+        auth.signInWithEmailAndPassword(email, password).catch(showAuthError);
+      }
+    }
+
+    function toggleAuthMode() {
+      authIsSignUp = !authIsSignUp;
+      document.getElementById('auth-submit').textContent = authIsSignUp ? 'Sign Up' : 'Sign In';
+      document.getElementById('auth-toggle').textContent = authIsSignUp
+        ? 'Already have an account? Sign In'
+        : "Don't have an account? Sign Up";
+      document.getElementById('auth-error').textContent = '';
+    }
+
+    function toggleEmailLink() {
+      authIsEmailLink = !authIsEmailLink;
+      document.getElementById('auth-password-row').style.display = authIsEmailLink ? 'none' : '';
+      document.getElementById('auth-submit').textContent = authIsEmailLink ? 'Send Sign-In Link' : (authIsSignUp ? 'Sign Up' : 'Sign In');
+      document.getElementById('auth-link-toggle').textContent = authIsEmailLink ? 'Use password instead' : 'Use email link instead';
+      document.getElementById('auth-toggle').style.display = authIsEmailLink ? 'none' : '';
+      document.getElementById('auth-link-sent').style.display = 'none';
+      document.getElementById('auth-error').textContent = '';
+    }
+
+    function showAuthError(err) {
+      document.getElementById('auth-error').textContent = err.message;
+    }
+
+    function logout() {
+      if (gameRef) leaveGame();
+      auth.signOut();
+    }
+
+    // ── Tabs ────────────────────────────────────────────────────────
+    function showTab(tab) {
+      document.getElementById('tab-play').classList.toggle('active', tab === 'play');
+      document.getElementById('tab-leaderboard').classList.toggle('active', tab === 'leaderboard');
+      document.getElementById('play-tab').style.display = tab === 'play' ? '' : 'none';
+      document.getElementById('leaderboard-tab').style.display = tab === 'leaderboard' ? '' : 'none';
+      if (tab === 'leaderboard') loadLeaderboard();
+    }
+
+    // ── Leaderboard ─────────────────────────────────────────────────
+    function loadLeaderboard() {
+      const el = document.getElementById('leaderboard-content');
+      el.innerHTML = '<p style="color:#666">Loading...</p>';
+
+      db.ref('ttt/players').orderByChild('wins').limitToLast(25).once('value', snap => {
+        const players = [];
+        snap.forEach(child => {
+          players.push({ uid: child.key, ...child.val() });
+        });
+        players.reverse(); // highest wins first
+
+        if (players.length === 0) {
+          el.innerHTML = '<p style="color:#666">No games played yet.</p>';
+          return;
+        }
+
+        let html = `<table>
+          <tr>
+            <th>#</th>
+            <th>Player</th>
+            <th>W</th>
+            <th>L</th>
+            <th>D</th>
+            <th>Win %</th>
+            <th>Streak</th>
+          </tr>`;
+
+        players.forEach((p, i) => {
+          const total = (p.wins || 0) + (p.losses || 0) + (p.draws || 0);
+          const pct = total > 0 ? Math.round(((p.wins || 0) / total) * 100) : 0;
+          const isMe = currentUser && p.uid === currentUser.uid;
+          html += `<tr class="${isMe ? 'me' : ''}">
+            <td class="rank">${i + 1}</td>
+            <td class="name-col">${escHtml(p.name || 'Anonymous')}</td>
+            <td class="num">${p.wins || 0}</td>
+            <td class="num">${p.losses || 0}</td>
+            <td class="num">${p.draws || 0}</td>
+            <td class="num">${pct}%</td>
+            <td class="num">${p.bestStreak || 0}</td>
+          </tr>`;
+        });
+
+        html += '</table>';
+        el.innerHTML = html;
+      });
+    }
+
+    function escHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
 
     // ── Board rendering ─────────────────────────────────────────────
     function renderBoard(board, turn, winner, winLine) {
@@ -204,33 +522,28 @@
 
     // ── Matchmaking ─────────────────────────────────────────────────
     async function findGame() {
+      if (!currentUser) return;
       document.getElementById('play-btn').disabled = true;
       document.getElementById('play-btn').textContent = 'Finding game...';
       document.getElementById('play-btn').classList.add('waiting');
 
       const lobbyRef = db.ref('ttt/lobby');
-
-      // Try to find an open game
       const snap = await lobbyRef.orderByChild('created').limitToFirst(1).once('value');
       let found = false;
 
       snap.forEach(child => {
         const data = child.val();
-        if (data.playerId !== playerId) {
-          // Join this game
+        if (data.playerId !== currentUser.uid) {
           gameId = child.key;
           myMark = 'O';
           found = true;
-          // Remove from lobby
           child.ref.remove();
-          // Set player 2
-          db.ref('ttt/games/' + gameId + '/playerO').set(playerId);
+          db.ref('ttt/games/' + gameId + '/playerO').set(currentUser.uid);
           db.ref('ttt/games/' + gameId + '/status').set('playing');
         }
       });
 
       if (!found) {
-        // Create a new game and wait in lobby
         gameId = db.ref('ttt/games').push().key;
         myMark = 'X';
         const firstTurn = Math.random() < 0.5 ? 'X' : 'O';
@@ -238,7 +551,7 @@
         await db.ref('ttt/games/' + gameId).set({
           board: ['','','','','','','','',''],
           turn: firstTurn,
-          playerX: playerId,
+          playerX: currentUser.uid,
           playerO: null,
           status: 'waiting',
           winner: null,
@@ -249,11 +562,12 @@
         });
 
         await lobbyRef.child(gameId).set({
-          playerId: playerId,
+          playerId: currentUser.uid,
           created: firebase.database.ServerValue.TIMESTAMP
         });
       }
 
+      statsUpdatedForGame = false;
       gameRef = db.ref('ttt/games/' + gameId);
       startListening();
     }
@@ -268,7 +582,6 @@
       gameListener = gameRef.on('value', snap => {
         const g = snap.val();
         if (!g) {
-          // Game was deleted (opponent left)
           setStatus('Opponent left', 'lose');
           document.getElementById('game-over-actions').style.display = '';
           return;
@@ -287,13 +600,15 @@
         } else if (winner === 'draw') {
           setStatus('Draw!', 'draw');
           document.getElementById('game-over-actions').style.display = '';
-          // Update rematch button text
           updateRematchUI(g);
+          recordResult('draw');
         } else if (winner) {
           if (winner === myMark) {
             setStatus('You win!', 'win');
+            recordResult('win');
           } else {
             setStatus('You lose!', 'lose');
+            recordResult('loss');
           }
           document.getElementById('game-over-actions').style.display = '';
           updateRematchUI(g);
@@ -305,7 +620,6 @@
 
         // Handle rematch
         if (g.rematchX && g.rematchO && (g.winner || g.winner === 'draw')) {
-          // Both want rematch — reset the board
           if (myMark === 'X') {
             gameRef.update({
               board: ['','','','','','','','',''],
@@ -317,11 +631,11 @@
               status: 'playing'
             });
           }
+          statsUpdatedForGame = false;
           document.getElementById('game-over-actions').style.display = 'none';
         }
       });
 
-      // Clean up on disconnect
       gameRef.child('player' + myMark).onDisconnect().remove();
       if (myMark === 'X') {
         db.ref('ttt/lobby/' + gameId).onDisconnect().remove();
@@ -341,6 +655,35 @@
       }
     }
 
+    // ── Stats ───────────────────────────────────────────────────────
+    function recordResult(result) {
+      if (statsUpdatedForGame || !currentUser) return;
+      statsUpdatedForGame = true;
+
+      const pRef = db.ref('ttt/players/' + currentUser.uid);
+      pRef.transaction(p => {
+        if (!p) return p;
+        if (result === 'win') {
+          p.wins = (p.wins || 0) + 1;
+          p.streak = (p.streak || 0) + 1;
+          if (p.streak > (p.bestStreak || 0)) p.bestStreak = p.streak;
+        } else if (result === 'loss') {
+          p.losses = (p.losses || 0) + 1;
+          p.streak = 0;
+        } else {
+          p.draws = (p.draws || 0) + 1;
+          p.streak = 0;
+        }
+        return p;
+      });
+
+      // Update local session scores
+      if (result === 'win') myScore++;
+      else if (result === 'loss') theirScore++;
+      else drawScore++;
+      updateScoreboard();
+    }
+
     // ── Gameplay ────────────────────────────────────────────────────
     function makeMove(index) {
       gameRef.transaction(g => {
@@ -352,7 +695,6 @@
 
         g.board[index] = myMark;
 
-        // Check for win
         for (const combo of WINS) {
           if (combo.every(i => g.board[i] === myMark)) {
             g.winner = myMark;
@@ -361,25 +703,13 @@
           }
         }
 
-        // Check for draw
         if (g.board.every(c => c)) {
           g.winner = 'draw';
           return g;
         }
 
-        // Switch turn
         g.turn = myMark === 'X' ? 'O' : 'X';
         return g;
-      }).then(result => {
-        if (result.committed) {
-          const g = result.snapshot.val();
-          if (g && g.winner) {
-            if (g.winner === myMark) myScore++;
-            else if (g.winner === 'draw') drawScore++;
-            else theirScore++;
-            updateScoreboard();
-          }
-        }
       });
     }
 
@@ -390,14 +720,15 @@
 
     function leaveGame() {
       if (gameListener) gameRef.off('value', gameListener);
-      gameRef.child('player' + myMark).remove();
-      // Clean up empty games
-      gameRef.once('value', snap => {
-        const g = snap.val();
-        if (g && !g.playerX && !g.playerO) {
-          gameRef.remove();
-        }
-      });
+      if (gameRef) {
+        gameRef.child('player' + myMark).remove();
+        gameRef.once('value', snap => {
+          const g = snap.val();
+          if (g && !g.playerX && !g.playerO) {
+            gameRef.remove();
+          }
+        });
+      }
 
       gameId = null;
       gameRef = null;
@@ -413,6 +744,11 @@
       document.getElementById('play-btn').textContent = 'Play';
       document.getElementById('play-btn').classList.remove('waiting');
     }
+
+    // Allow enter key to submit email login
+    document.getElementById('auth-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') emailLogin();
+    });
   </script>
 </body>
 </html>
