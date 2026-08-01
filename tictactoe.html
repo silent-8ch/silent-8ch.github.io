@@ -240,10 +240,19 @@
       </div>
     </div>
 
+    <!-- Display name picker -->
+    <div id="name-picker" style="display:none;">
+      <h2>Choose a display name</h2>
+      <div id="name-error" style="color:#ef5350; font-size:0.85em; min-height:1.2em; margin-bottom:8px;"></div>
+      <input type="text" id="name-input" placeholder="Display name" maxlength="20"
+        style="display:block; width:100%; padding:10px; margin-bottom:8px; background:#1e1e1e; border:1px solid #333; border-radius:4px; color:#fff; font-size:1em;">
+      <button class="btn" onclick="submitName()" style="width:100%">Set Name</button>
+    </div>
+
     <!-- Main screen (after login) -->
     <div id="main" style="display:none;">
       <div id="user-bar">
-        <span class="name" id="user-name"></span>
+        <span class="name" id="user-name" onclick="editName()" title="Click to change name" style="cursor:pointer;"></span>
         <span class="logout" onclick="logout()">Sign Out</span>
       </div>
 
@@ -267,7 +276,8 @@
           <div id="status">Waiting...</div>
           <div class="board" id="board"></div>
           <div id="game-over-actions" class="game-over-actions" style="display:none;">
-            <button class="btn" onclick="requestRematch()">Rematch</button>
+            <button class="btn" id="rematch-btn" onclick="requestRematch()">Rematch</button>
+            <button class="btn" id="newgame-btn" onclick="newGame()" style="display:none;">Find New Game</button>
             <button class="btn" onclick="leaveGame()">Leave</button>
           </div>
         </div>
@@ -309,6 +319,10 @@
     let authIsSignUp = false;
     let authIsEmailLink = false;
     let statsUpdatedForGame = false;
+    let heartbeatInterval = null;
+    let disconnectCheckInterval = null;
+    const HEARTBEAT_MS = 3000;
+    const DISCONNECT_THRESHOLD_MS = 10000;
 
     const WINS = [
       [0,1,2],[3,4,5],[6,7,8],
@@ -338,26 +352,69 @@
       currentUser = user;
       if (user) {
         document.getElementById('auth').style.display = 'none';
-        document.getElementById('main').style.display = '';
-        document.getElementById('user-name').textContent = user.displayName || user.email;
-        // Ensure player record exists
+        // Check if player has a display name set
         const pRef = db.ref('ttt/players/' + user.uid);
         pRef.once('value', snap => {
-          if (!snap.exists()) {
-            pRef.set({
-              name: user.displayName || user.email,
-              wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0
-            });
+          if (snap.exists() && snap.val().name) {
+            showMain(snap.val().name);
           } else {
-            // Update name in case it changed
-            pRef.child('name').set(user.displayName || user.email);
+            // Show name picker
+            document.getElementById('name-picker').style.display = '';
+            document.getElementById('main').style.display = 'none';
           }
         });
       } else {
         document.getElementById('auth').style.display = '';
         document.getElementById('main').style.display = 'none';
+        document.getElementById('name-picker').style.display = 'none';
       }
     });
+
+    function showMain(displayName) {
+      document.getElementById('name-picker').style.display = 'none';
+      document.getElementById('main').style.display = '';
+      document.getElementById('user-name').textContent = displayName;
+    }
+
+    async function submitName() {
+      const name = document.getElementById('name-input').value.trim();
+      if (!name) return document.getElementById('name-error').textContent = 'Enter a name';
+      if (name.length < 2) return document.getElementById('name-error').textContent = 'Name must be at least 2 characters';
+
+      const nameLower = name.toLowerCase();
+
+      // Check uniqueness in ttt/names (lowercase key → uid)
+      const existing = await db.ref('ttt/names/' + nameLower).once('value');
+      if (existing.exists() && existing.val() !== currentUser.uid) {
+        document.getElementById('name-error').textContent = 'That name is taken';
+        return;
+      }
+
+      // Remove old name if changing
+      const pSnap = await db.ref('ttt/players/' + currentUser.uid + '/name').once('value');
+      if (pSnap.exists() && pSnap.val()) {
+        await db.ref('ttt/names/' + pSnap.val().toLowerCase()).remove();
+      }
+
+      // Reserve new name and update player
+      await db.ref('ttt/names/' + nameLower).set(currentUser.uid);
+      await db.ref('ttt/players/' + currentUser.uid).transaction(p => {
+        if (!p) {
+          return { name: name, wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0 };
+        }
+        p.name = name;
+        return p;
+      });
+
+      showMain(name);
+    }
+
+    function editName() {
+      document.getElementById('main').style.display = 'none';
+      document.getElementById('name-input').value = document.getElementById('user-name').textContent;
+      document.getElementById('name-error').textContent = '';
+      document.getElementById('name-picker').style.display = '';
+    }
 
     function googleLogin() {
       const provider = new firebase.auth.GoogleAuthProvider();
@@ -578,12 +635,15 @@
       updateScoreboard();
 
       if (gameListener) gameRef.off('value', gameListener);
+      stopHeartbeat();
 
       gameListener = gameRef.on('value', snap => {
         const g = snap.val();
         if (!g) {
-          setStatus('Opponent left', 'lose');
-          document.getElementById('game-over-actions').style.display = '';
+          setStatus('Opponent left', 'draw');
+          recordResult('draw');
+          showGameOverActions(true);
+          stopHeartbeat();
           return;
         }
 
@@ -597,11 +657,23 @@
         if (g.status === 'waiting') {
           setStatus('Waiting for opponent...', 'highlight');
           document.getElementById('status').classList.add('waiting');
+        } else if (g.status === 'disconnected') {
+          // Opponent disconnected mid-game
+          if (g.disconnectedPlayer === myMark) {
+            setStatus('You disconnected - loss', 'lose');
+            recordResult('loss');
+          } else {
+            setStatus('Opponent disconnected - draw', 'draw');
+            recordResult('draw');
+          }
+          showGameOverActions(true);
+          stopHeartbeat();
         } else if (winner === 'draw') {
           setStatus('Draw!', 'draw');
-          document.getElementById('game-over-actions').style.display = '';
+          showGameOverActions(false);
           updateRematchUI(g);
           recordResult('draw');
+          stopHeartbeat();
         } else if (winner) {
           if (winner === myMark) {
             setStatus('You win!', 'win');
@@ -610,16 +682,22 @@
             setStatus('You lose!', 'lose');
             recordResult('loss');
           }
-          document.getElementById('game-over-actions').style.display = '';
+          showGameOverActions(false);
           updateRematchUI(g);
+          stopHeartbeat();
         } else if (turn === myMark) {
           setStatus('Your turn', 'highlight');
         } else {
           setStatus("Opponent's turn");
         }
 
+        // Start heartbeat once game is playing
+        if (g.status === 'playing' && !heartbeatInterval) {
+          startHeartbeat();
+        }
+
         // Handle rematch
-        if (g.rematchX && g.rematchO && (g.winner || g.winner === 'draw')) {
+        if (g.rematchX && g.rematchO && (g.winner || g.status === 'disconnected')) {
           if (myMark === 'X') {
             gameRef.update({
               board: ['','','','','','','','',''],
@@ -628,7 +706,10 @@
               winLine: null,
               rematchX: false,
               rematchO: false,
-              status: 'playing'
+              status: 'playing',
+              disconnectedPlayer: null,
+              heartbeatX: firebase.database.ServerValue.TIMESTAMP,
+              heartbeatO: firebase.database.ServerValue.TIMESTAMP
             });
           }
           statsUpdatedForGame = false;
@@ -642,16 +723,87 @@
       }
     }
 
+    function startHeartbeat() {
+      // Write heartbeat immediately, then every HEARTBEAT_MS
+      const hbKey = 'heartbeat' + myMark;
+      gameRef.child(hbKey).set(firebase.database.ServerValue.TIMESTAMP);
+      heartbeatInterval = setInterval(() => {
+        if (gameRef) gameRef.child(hbKey).set(firebase.database.ServerValue.TIMESTAMP);
+      }, HEARTBEAT_MS);
+
+      // Check opponent's heartbeat
+      disconnectCheckInterval = setInterval(() => {
+        if (!gameRef) return;
+        gameRef.once('value', snap => {
+          const g = snap.val();
+          if (!g || g.winner || g.status !== 'playing') return;
+
+          const opponentMark = myMark === 'X' ? 'O' : 'X';
+          const opponentHb = g['heartbeat' + opponentMark];
+          if (!opponentHb) return; // opponent hasn't started heartbeating yet
+
+          const now = Date.now();
+          if (now - opponentHb > DISCONNECT_THRESHOLD_MS) {
+            // Opponent disconnected — record on the game
+            gameRef.update({
+              status: 'disconnected',
+              disconnectedPlayer: opponentMark
+            });
+            // Record loss for the disconnected player
+            const opponentUid = g['player' + opponentMark];
+            if (opponentUid) {
+              db.ref('ttt/players/' + opponentUid).transaction(p => {
+                if (!p) return p;
+                p.losses = (p.losses || 0) + 1;
+                p.streak = 0;
+                return p;
+              });
+            }
+          }
+        });
+      }, HEARTBEAT_MS);
+    }
+
+    function showGameOverActions(isDisconnect) {
+      document.getElementById('game-over-actions').style.display = '';
+      document.getElementById('rematch-btn').style.display = isDisconnect ? 'none' : '';
+      document.getElementById('newgame-btn').style.display = isDisconnect ? '' : 'none';
+    }
+
+    function newGame() {
+      // Clean up current game and re-queue
+      stopHeartbeat();
+      if (gameListener) gameRef.off('value', gameListener);
+      if (gameRef) {
+        gameRef.child('player' + myMark).remove();
+        gameRef.once('value', snap => {
+          const g = snap.val();
+          if (g && !g.playerX && !g.playerO) gameRef.remove();
+        });
+      }
+      gameId = null;
+      gameRef = null;
+      myMark = null;
+      document.getElementById('game').style.display = 'none';
+      document.getElementById('game-over-actions').style.display = 'none';
+      findGame();
+    }
+
+    function stopHeartbeat() {
+      if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
+      if (disconnectCheckInterval) { clearInterval(disconnectCheckInterval); disconnectCheckInterval = null; }
+    }
+
     function updateRematchUI(g) {
       const myRematch = myMark === 'X' ? g.rematchX : g.rematchO;
       const theirRematch = myMark === 'X' ? g.rematchO : g.rematchX;
-      const btn = document.querySelector('#game-over-actions .btn');
+      const rematchBtn = document.querySelector('#game-over-actions .btn');
       if (myRematch && !theirRematch) {
-        btn.textContent = 'Waiting for opponent...';
-        btn.disabled = true;
+        rematchBtn.textContent = 'Waiting for opponent...';
+        rematchBtn.disabled = true;
       } else {
-        btn.textContent = 'Rematch';
-        btn.disabled = false;
+        rematchBtn.textContent = 'Rematch';
+        rematchBtn.disabled = false;
       }
     }
 
@@ -719,6 +871,7 @@
     }
 
     function leaveGame() {
+      stopHeartbeat();
       if (gameListener) gameRef.off('value', gameListener);
       if (gameRef) {
         gameRef.child('player' + myMark).remove();
@@ -745,9 +898,12 @@
       document.getElementById('play-btn').classList.remove('waiting');
     }
 
-    // Allow enter key to submit email login
+    // Allow enter key to submit
     document.getElementById('auth-password').addEventListener('keydown', e => {
       if (e.key === 'Enter') emailLogin();
+    });
+    document.getElementById('name-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitName();
     });
   </script>
 </body>
