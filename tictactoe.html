@@ -276,8 +276,7 @@
           <div id="status">Waiting...</div>
           <div class="board" id="board"></div>
           <div id="game-over-actions" class="game-over-actions" style="display:none;">
-            <button class="btn" id="rematch-btn" onclick="requestRematch()">Rematch</button>
-            <button class="btn" id="newgame-btn" onclick="newGame()" style="display:none;">Find New Game</button>
+            <button class="btn" onclick="newGame()">Play Again</button>
             <button class="btn" onclick="leaveGame()">Leave</button>
           </div>
         </div>
@@ -613,8 +612,6 @@
           status: 'waiting',
           winner: null,
           winLine: null,
-          rematchX: false,
-          rematchO: false,
           created: firebase.database.ServerValue.TIMESTAMP
         });
 
@@ -642,7 +639,7 @@
         if (!g) {
           setStatus('Opponent left', 'draw');
           recordResult('draw');
-          showGameOverActions(true);
+          document.getElementById('game-over-actions').style.display = '';
           stopHeartbeat();
           return;
         }
@@ -658,7 +655,6 @@
           setStatus('Waiting for opponent...', 'highlight');
           document.getElementById('status').classList.add('waiting');
         } else if (g.status === 'disconnected') {
-          // Opponent disconnected mid-game
           if (g.disconnectedPlayer === myMark) {
             setStatus('You disconnected - loss', 'lose');
             recordResult('loss');
@@ -666,12 +662,11 @@
             setStatus('Opponent disconnected - draw', 'draw');
             recordResult('draw');
           }
-          showGameOverActions(true);
+          document.getElementById('game-over-actions').style.display = '';
           stopHeartbeat();
         } else if (winner === 'draw') {
           setStatus('Draw!', 'draw');
-          showGameOverActions(false);
-          updateRematchUI(g);
+          document.getElementById('game-over-actions').style.display = '';
           recordResult('draw');
           stopHeartbeat();
         } else if (winner) {
@@ -682,8 +677,7 @@
             setStatus('You lose!', 'lose');
             recordResult('loss');
           }
-          showGameOverActions(false);
-          updateRematchUI(g);
+          document.getElementById('game-over-actions').style.display = '';
           stopHeartbeat();
         } else if (turn === myMark) {
           setStatus('Your turn', 'highlight');
@@ -691,33 +685,8 @@
           setStatus("Opponent's turn");
         }
 
-        // Start heartbeat once game is playing
         if (g.status === 'playing' && !heartbeatInterval) {
           startHeartbeat();
-        }
-
-        // Handle rematch — X player writes the reset, both players react to the new state
-        if (g.rematchX && g.rematchO && (g.winner || g.status === 'disconnected')) {
-          if (myMark === 'X') {
-            gameRef.update({
-              board: ['','','','','','','','',''],
-              turn: Math.random() < 0.5 ? 'X' : 'O',
-              winner: null,
-              winLine: null,
-              rematchX: false,
-              rematchO: false,
-              status: 'playing',
-              disconnectedPlayer: null,
-              heartbeatX: firebase.database.ServerValue.TIMESTAMP,
-              heartbeatO: firebase.database.ServerValue.TIMESTAMP
-            });
-          }
-        }
-
-        // Both players reset local state when a new round starts
-        if (g.status === 'playing' && !g.winner && statsUpdatedForGame) {
-          statsUpdatedForGame = false;
-          document.getElementById('game-over-actions').style.display = 'none';
         }
       });
 
@@ -768,12 +737,6 @@
       }, HEARTBEAT_MS);
     }
 
-    function showGameOverActions(isDisconnect) {
-      document.getElementById('game-over-actions').style.display = '';
-      document.getElementById('rematch-btn').style.display = isDisconnect ? 'none' : '';
-      document.getElementById('newgame-btn').style.display = isDisconnect ? '' : 'none';
-    }
-
     function newGame() {
       // Clean up current game and re-queue
       stopHeartbeat();
@@ -796,19 +759,6 @@
     function stopHeartbeat() {
       if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
       if (disconnectCheckInterval) { clearInterval(disconnectCheckInterval); disconnectCheckInterval = null; }
-    }
-
-    function updateRematchUI(g) {
-      const myRematch = myMark === 'X' ? g.rematchX : g.rematchO;
-      const theirRematch = myMark === 'X' ? g.rematchO : g.rematchX;
-      const rematchBtn = document.querySelector('#game-over-actions .btn');
-      if (myRematch && !theirRematch) {
-        rematchBtn.textContent = 'Waiting for opponent...';
-        rematchBtn.disabled = true;
-      } else {
-        rematchBtn.textContent = 'Rematch';
-        rematchBtn.disabled = false;
-      }
     }
 
     // ── Stats ───────────────────────────────────────────────────────
@@ -867,11 +817,6 @@
         g.turn = myMark === 'X' ? 'O' : 'X';
         return g;
       });
-    }
-
-    function requestRematch() {
-      const key = 'rematch' + myMark;
-      gameRef.child(key).set(true);
     }
 
     function leaveGame() {
