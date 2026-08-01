@@ -696,7 +696,7 @@
           startHeartbeat();
         }
 
-        // Handle rematch
+        // Handle rematch — X player writes the reset, both players react to the new state
         if (g.rematchX && g.rematchO && (g.winner || g.status === 'disconnected')) {
           if (myMark === 'X') {
             gameRef.update({
@@ -712,6 +712,10 @@
               heartbeatO: firebase.database.ServerValue.TIMESTAMP
             });
           }
+        }
+
+        // Both players reset local state when a new round starts
+        if (g.status === 'playing' && !g.winner && statsUpdatedForGame) {
           statsUpdatedForGame = false;
           document.getElementById('game-over-actions').style.display = 'none';
         }
