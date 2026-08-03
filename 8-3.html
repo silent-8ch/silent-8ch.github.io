@@ -426,8 +426,9 @@ function loop(ts){
     state.hunger = clamp(state.hunger - CONFIG.decay.hunger*dt);
     state.fun    = clamp(state.fun    - CONFIG.decay.fun*dt);
     state.love   = clamp(state.love   - CONFIG.decay.love*dt);
-    if (state.hunger < 100) state.overfed = 0;
-    if (state.fun < 100) state.overdraw = 0;
+    // Reset overfed/overdraw only when stats drop significantly below full
+    if (state.hunger < 80) state.overfed = 0;
+    if (state.fun < 80) state.overdraw = 0;
     if (cooldown>0) cooldown -= dt;
     maybeNag(dt);
     updatePet(dt);
