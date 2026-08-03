@@ -576,29 +576,6 @@
     }
 
     // ── Matchmaking ─────────────────────────────────────────────────
-    async function tryJoinLobby(lobbyRef) {
-      // Read up to 5 lobby entries and try to claim one
-      const snap = await lobbyRef.orderByChild('created').limitToFirst(5).once('value');
-      const entries = [];
-      snap.forEach(child => entries.push(child));
-
-      for (const child of entries) {
-        if (child.val().playerId === currentUser.uid) continue;
-        const result = await child.ref.transaction(current => {
-          if (current === null) return;
-          return null;
-        });
-        if (result.committed && result.snapshot.val() === null) {
-          gameId = child.key;
-          myMark = 'O';
-          await db.ref('ttt/games/' + gameId + '/playerO').set(currentUser.uid);
-          await db.ref('ttt/games/' + gameId + '/status').set('playing');
-          return true;
-        }
-      }
-      return false;
-    }
-
     async function findGame() {
       if (!currentUser) return;
       document.getElementById('play-btn').disabled = true;
@@ -606,11 +583,32 @@
       document.getElementById('play-btn').classList.add('waiting');
 
       const lobbyRef = db.ref('ttt/lobby');
+      let found = false;
 
-      // Try to join an existing game, or create one and wait
-      const joined = await tryJoinLobby(lobbyRef);
-      if (!joined) {
-        // No one to join — create a game and listen for someone to join us
+      // Read lobby entries and try to join one
+      const snap = await lobbyRef.orderByChild('created').limitToFirst(5).once('value');
+      const entries = [];
+      snap.forEach(child => entries.push(child));
+
+      for (const child of entries) {
+        if (child.val().playerId === currentUser.uid) continue;
+        const gId = child.key;
+        // Atomically claim playerO on the game
+        const result = await db.ref('ttt/games/' + gId + '/playerO').transaction(current => {
+          if (current !== null) return; // already taken
+          return currentUser.uid;
+        });
+        if (result.committed && result.snapshot.val() === currentUser.uid) {
+          gameId = gId;
+          myMark = 'O';
+          found = true;
+          await db.ref('ttt/games/' + gameId + '/status').set('playing');
+          await child.ref.remove();
+          break;
+        }
+      }
+
+      if (!found) {
         gameId = db.ref('ttt/games').push().key;
         myMark = 'X';
         const firstTurn = Math.random() < 0.5 ? 'X' : 'O';
