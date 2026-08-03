@@ -502,6 +502,7 @@ function loop(ts){
   }
 
   sceneTime += dt;
+  updateWaves(dt);
   render();
   if (speech.classList.contains('show')) positionSpeech();
   requestAnimationFrame(loop);
@@ -603,30 +604,31 @@ function drawBeach(){
   ctx.fillStyle = ocean;
   ctx.fillRect(0, oceanTop, W, oceanBot - oceanTop);
 
-  // Procedural waves — multiple layers with different speeds and amplitudes
-  drawWaveLayer(oceanTop + 2, t, 1.8, 12, 0.03, 'rgba(255,255,255,0.35)');
-  drawWaveLayer(oceanTop + 14, t, 1.3, 8, 0.04, 'rgba(255,255,255,0.25)');
-  drawWaveLayer(oceanTop + 28, t, 0.9, 6, 0.05, 'rgba(255,255,255,0.18)');
+  // Open ocean swells (far out, gentle)
+  drawSwell(oceanTop + 4, t, 1.4, 6, 0.025, '#2080a8');
+  drawSwell(oceanTop + 12, t, 1.0, 4, 0.035, '#2590b8');
 
-  // Shore waves — foam that rolls up onto the sand
-  const shoreY = oceanBot - 4;
-  drawShoreWave(shoreY, t, 2.2, 10, 'rgba(255,255,255,0.6)');
-  drawShoreWave(shoreY + 6, t, 1.6, 7, 'rgba(255,255,255,0.4)');
+  // Breaking waves
+  for (const wave of waves) drawBreakingWave(wave, oceanTop, oceanBot);
 
-  // Wet sand strip
-  const wetSand = ctx.createLinearGradient(0, oceanBot - 6, 0, oceanBot + 12);
-  wetSand.addColorStop(0, '#c4a86a');
+  // Wet sand — darkened where water has reached
+  const wetReach = getMaxWashReach();
+  const wetTop = oceanBot - 4;
+  const wetBot = Math.max(oceanBot + 6, wetReach + 8);
+  const wetSand = ctx.createLinearGradient(0, wetTop, 0, wetBot);
+  wetSand.addColorStop(0, '#a8905a');
+  wetSand.addColorStop(0.5, '#c4a86a');
   wetSand.addColorStop(1, '#dcc08a');
   ctx.fillStyle = wetSand;
-  ctx.fillRect(0, oceanBot - 2, W, 16);
+  ctx.fillRect(0, wetTop, W, wetBot - wetTop);
 
-  // Sand
-  const sand = ctx.createLinearGradient(0, oceanBot + 10, 0, H);
-  sand.addColorStop(0, '#f0d9a0');
-  sand.addColorStop(0.5, '#e8cc8e');
+  // Dry sand
+  const sand = ctx.createLinearGradient(0, wetBot - 4, 0, H);
+  sand.addColorStop(0, '#e8cc8e');
+  sand.addColorStop(0.4, '#f0d9a0');
   sand.addColorStop(1, '#dfc07a');
   ctx.fillStyle = sand;
-  ctx.fillRect(0, oceanBot + 10, W, H - oceanBot - 10);
+  ctx.fillRect(0, wetBot - 4, W, H - wetBot + 4);
 
   // Sand texture — little dots
   ctx.fillStyle = 'rgba(180,150,90,0.3)';
@@ -677,35 +679,241 @@ function drawCloud(cx, cy, scale) {
   ctx.fill();
 }
 
-function drawWaveLayer(baseY, t, speed, amp, freq, color) {
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.moveTo(0, baseY);
-  for (let x = 0; x <= W; x += 4) {
-    const y = baseY
-      + Math.sin(x * freq + t * speed) * amp
-      + Math.sin(x * freq * 2.3 + t * speed * 1.7 + 1.5) * amp * 0.4
-      + Math.sin(x * freq * 0.7 + t * speed * 0.5 + 3.0) * amp * 0.3;
-    ctx.lineTo(x, y);
-  }
-  ctx.lineTo(W, baseY + amp + 10);
-  ctx.lineTo(0, baseY + amp + 10);
-  ctx.closePath();
-  ctx.fill();
-}
-
-function drawShoreWave(baseY, t, speed, amp, color) {
+// Gentle open-ocean swells
+function drawSwell(baseY, t, speed, amp, freq, color) {
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(0, baseY + amp);
-  for (let x = 0; x <= W; x += 3) {
-    const y = baseY + Math.sin(x * 0.025 + t * speed) * amp * (0.5 + 0.5 * Math.sin(t * 0.4));
+  for (let x = 0; x <= W; x += 4) {
+    const y = baseY + Math.sin(x * freq + t * speed) * amp
+      + Math.sin(x * freq * 1.7 + t * speed * 0.6 + 2) * amp * 0.3;
     ctx.lineTo(x, y);
   }
   ctx.lineTo(W, baseY + amp + 6);
   ctx.lineTo(0, baseY + amp + 6);
   ctx.closePath();
   ctx.fill();
+}
+
+/* ── Breaking wave system ──
+   Each wave goes through a lifecycle:
+   0. approach  — swell moves toward shore, growing taller
+   1. crest     — wave peaks and curls over
+   2. break     — crashes down, splash spray
+   3. wash      — white foam rushes up the beach
+   4. recede    — foam thins, pulls back, fades away
+*/
+const waves = [];
+const WAVE_COUNT = 3;
+const WAVE_CYCLE = 6.5; // seconds per full wave lifecycle
+
+// Stagger the waves so they don't all break at once
+for (let i = 0; i < WAVE_COUNT; i++) {
+  waves.push({
+    phase: (i / WAVE_COUNT) * WAVE_CYCLE,
+    seed: Math.random() * 100, // unique shape per wave
+    amplitude: 0.8 + Math.random() * 0.4,
+  });
+}
+
+function updateWaves(dt) {
+  for (const w of waves) {
+    w.phase = (w.phase + dt) % WAVE_CYCLE;
+  }
+}
+
+function getMaxWashReach() {
+  let maxY = 0;
+  for (const w of waves) {
+    const p = w.phase / WAVE_CYCLE;
+    if (p > 0.45 && p < 0.85) {
+      const washP = (p - 0.45) / 0.4;
+      const reach = H * 0.62 + washP * H * 0.08 * w.amplitude;
+      if (reach > maxY) maxY = reach;
+    }
+  }
+  return maxY;
+}
+
+function drawBreakingWave(wave, oceanTop, oceanBot) {
+  const p = wave.phase / WAVE_CYCLE; // 0-1 normalized phase
+  const amp = wave.amplitude;
+  const seed = wave.seed;
+  const shoreY = oceanBot;
+
+  if (p < 0.35) {
+    // ── APPROACH & CREST ──
+    // Wave builds from back of ocean toward shore
+    const approachP = p / 0.35;
+    const waveY = oceanTop + (shoreY - oceanTop) * (0.3 + approachP * 0.65);
+    const height = (6 + approachP * 16) * amp;
+    const width = W * 0.9;
+
+    // Wave body (dark water mound)
+    const bodyGrad = ctx.createLinearGradient(0, waveY - height, 0, waveY + 4);
+    bodyGrad.addColorStop(0, `rgba(30,100,160,${0.2 + approachP * 0.5})`);
+    bodyGrad.addColorStop(1, `rgba(40,130,180,${0.1 + approachP * 0.3})`);
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(0, waveY + 4);
+    for (let x = 0; x <= W; x += 3) {
+      const shape = Math.sin((x / width) * Math.PI + seed) *
+        Math.sin((x / width) * Math.PI); // bell curve envelope
+      const ripple = Math.sin(x * 0.08 + seed * 3) * 2 * approachP;
+      ctx.lineTo(x, waveY - shape * height + ripple);
+    }
+    ctx.lineTo(W, waveY + 4);
+    ctx.closePath();
+    ctx.fill();
+
+    // Crest foam (white cap forming at the top as wave steepens)
+    if (approachP > 0.6) {
+      const foamAlpha = (approachP - 0.6) / 0.4;
+      ctx.fillStyle = `rgba(255,255,255,${foamAlpha * 0.7})`;
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 3) {
+        const shape = Math.sin((x / width) * Math.PI + seed) *
+          Math.sin((x / width) * Math.PI);
+        if (shape > 0.4) {
+          const fx = x;
+          const fy = waveY - shape * height - 1;
+          ctx.moveTo(fx, fy);
+          ctx.arc(fx, fy, 3 * foamAlpha * amp, 0, 7);
+        }
+      }
+      ctx.fill();
+
+      // Curling lip — the top pitches forward
+      if (approachP > 0.8) {
+        const curlP = (approachP - 0.8) / 0.2;
+        ctx.fillStyle = `rgba(200,235,255,${curlP * 0.6})`;
+        ctx.beginPath();
+        for (let x = W * 0.1; x <= W * 0.9; x += 4) {
+          const shape = Math.sin((x / width) * Math.PI + seed) *
+            Math.sin((x / width) * Math.PI);
+          if (shape > 0.5) {
+            const fy = waveY - shape * height;
+            // Lip curls forward (downward)
+            ctx.moveTo(x, fy);
+            ctx.quadraticCurveTo(x + 4 * curlP, fy + 6 * curlP * amp, x + 2, fy + 10 * curlP * amp);
+          }
+        }
+        ctx.stroke();
+        ctx.fill();
+      }
+    }
+
+  } else if (p < 0.45) {
+    // ── BREAK / CRASH ──
+    // The wave crashes down — big white splash
+    const breakP = (p - 0.35) / 0.1;
+    const crashY = shoreY - 6;
+    const spread = (10 + breakP * 30) * amp;
+
+    // Splash — white burst spreading outward
+    ctx.fillStyle = `rgba(255,255,255,${0.8 - breakP * 0.3})`;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 5) {
+      const envl = Math.sin((x / W) * Math.PI);
+      const splash = envl * spread * (1 + Math.sin(x * 0.15 + seed) * 0.3);
+      if (envl > 0.2) {
+        ctx.moveTo(x, crashY);
+        ctx.arc(x, crashY - splash * 0.3, 4 + splash * 0.15, 0, 7);
+      }
+    }
+    ctx.fill();
+
+    // Spray droplets above the crash
+    ctx.fillStyle = `rgba(255,255,255,${0.6 - breakP * 0.4})`;
+    for (let i = 0; i < 12; i++) {
+      const dx = Math.sin(seed * (i + 1) * 7.3) * W * 0.4 + W * 0.5;
+      const dy = crashY - spread * 0.5 - Math.abs(Math.sin(seed * i * 3.1)) * 20 * (1 - breakP);
+      const r = (1 + Math.sin(seed * i) * 0.5) * (1 - breakP * 0.5);
+      ctx.beginPath(); ctx.arc(dx, dy, r, 0, 7); ctx.fill();
+    }
+
+    // Turbulent foam at water level
+    ctx.fillStyle = `rgba(220,240,255,${0.7 - breakP * 0.2})`;
+    ctx.beginPath();
+    ctx.moveTo(0, crashY + 2);
+    for (let x = 0; x <= W; x += 3) {
+      const turb = Math.sin(x * 0.12 + seed + breakP * 8) * 5 * (1 - breakP * 0.3);
+      ctx.lineTo(x, crashY + turb);
+    }
+    ctx.lineTo(W, crashY + 8);
+    ctx.lineTo(0, crashY + 8);
+    ctx.closePath();
+    ctx.fill();
+
+  } else if (p < 0.7) {
+    // ── WASH (swash) ──
+    // Foam rushes up the beach, spreading thin
+    const washP = (p - 0.45) / 0.25;
+    const startY = shoreY - 2;
+    const reachY = startY + H * 0.08 * amp * washP;
+    const alpha = 0.65 - washP * 0.35;
+    const thickness = (8 - washP * 5) * amp;
+
+    // Leading edge of foam
+    const foamGrad = ctx.createLinearGradient(0, reachY - thickness, 0, reachY + 2);
+    foamGrad.addColorStop(0, `rgba(255,255,255,${alpha * 0.3})`);
+    foamGrad.addColorStop(0.6, `rgba(255,255,255,${alpha})`);
+    foamGrad.addColorStop(1, `rgba(220,240,255,${alpha * 0.5})`);
+    ctx.fillStyle = foamGrad;
+    ctx.beginPath();
+    ctx.moveTo(0, startY);
+    for (let x = 0; x <= W; x += 3) {
+      const edge = reachY + Math.sin(x * 0.06 + seed + washP * 2) * 3 * (1 - washP * 0.5);
+      ctx.lineTo(x, edge);
+    }
+    ctx.lineTo(W, startY);
+    ctx.closePath();
+    ctx.fill();
+
+    // Foam bubbles/texture
+    ctx.fillStyle = `rgba(255,255,255,${alpha * 0.5})`;
+    for (let i = 0; i < 15; i++) {
+      const bx = (Math.sin(seed * (i + 1) * 5.7) * 0.5 + 0.5) * W;
+      const by = startY + (reachY - startY) * (Math.sin(seed * i * 2.3) * 0.5 + 0.5);
+      const br = 1.5 + Math.sin(seed * i) * 0.8;
+      ctx.beginPath(); ctx.arc(bx, by, br, 0, 7); ctx.fill();
+    }
+
+  } else {
+    // ── RECEDE (backwash) ──
+    // Foam pulls back toward ocean, thinning and fading
+    const recedeP = (p - 0.7) / 0.3;
+    const maxReachY = shoreY + H * 0.08 * amp;
+    const currentEdge = maxReachY - (maxReachY - shoreY + 4) * recedeP;
+    const alpha = 0.3 * (1 - recedeP);
+
+    if (alpha > 0.01) {
+      // Thin receding film of water
+      const filmGrad = ctx.createLinearGradient(0, shoreY - 4, 0, currentEdge);
+      filmGrad.addColorStop(0, `rgba(160,210,230,${alpha * 0.3})`);
+      filmGrad.addColorStop(1, `rgba(255,255,255,${alpha})`);
+      ctx.fillStyle = filmGrad;
+      ctx.beginPath();
+      ctx.moveTo(0, shoreY - 4);
+      for (let x = 0; x <= W; x += 4) {
+        const edge = currentEdge + Math.sin(x * 0.05 + seed - recedeP * 3) * 2 * (1 - recedeP);
+        ctx.lineTo(x, edge);
+      }
+      ctx.lineTo(W, shoreY - 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Scattered remaining foam
+      ctx.fillStyle = `rgba(255,255,255,${alpha * 0.6})`;
+      for (let i = 0; i < 8; i++) {
+        const bx = (Math.sin(seed * (i + 1) * 4.1) * 0.5 + 0.5) * W;
+        const by = shoreY + (currentEdge - shoreY) * Math.abs(Math.sin(seed * i * 1.7));
+        if (by < currentEdge) {
+          ctx.beginPath(); ctx.arc(bx, by, 1 + (1 - recedeP), 0, 7); ctx.fill();
+        }
+      }
+    }
+  }
 }
 
 function drawPet(){
