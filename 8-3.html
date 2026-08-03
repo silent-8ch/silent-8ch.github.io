@@ -194,6 +194,7 @@ const SHEETS = {
           rowMap:{ down:0, left:1, right:2, up:3 } },
   eat:  { src:"k-eating.png",   cols:4, rows:1, fps:7, displayH:158, footInset:0.11 },
   draw: { src:"k-drawing.png",  cols:4, rows:1, fps:6, displayH:158, footInset:0.00 },
+  cry:  { src:"k-crying.png",   cols:4, rows:1, fps:5, displayH:158, footInset:0.11 },
 };
 
 /* Things she "says" — pulled at random per action/mood. Personalize freely. */
@@ -301,6 +302,14 @@ function moodInfo(){
   if (m > 35) return {emoji:'😐', label:'okay',      key:'idle'};
   if (m > 18) return {emoji:'🙁', label:'grumpy',    key:'sad'};
   return           {emoji:'😢', label:'sad',       key:'sad'};
+}
+
+/* ---------- crying ----------
+   She cries when everything is neglected (all three stats below 15%).
+   The "c" debug key force-toggles it on/off regardless of stats. */
+let debugCry = false;
+function isCrying(){
+  return debugCry || (state.hunger < 15 && state.fun < 15 && state.love < 15);
 }
 
 /* ---------- actions ---------- */
@@ -524,6 +533,15 @@ function updatePet(dt){
     return;
   }
 
+  // crying — everything neglected (all stats < 15%) or toggled with the "c" key.
+  // She stands still and sobs until you cheer her up.
+  if (isCrying() && sheets.cry && sheets.cry.ready){
+    pet.moving = false;
+    pet.dir = 'down';
+    advanceFrame(dt, SHEETS.cry.fps, SHEETS.cry.cols);
+    return;
+  }
+
   // wander: pick a new spot on the floor now and then
   pet.wanderTimer -= dt;
   if (pet.wanderTimer <= 0){
@@ -570,11 +588,15 @@ const SCENES = ['beach', 'backyard', 'river'];
 let currentScene = 0;
 let sceneChangeTimer = 60; // seconds
 
-// Debug: press 1/2/3 to switch scenes
+// Debug: press 1/2/3 to switch scenes, c to toggle crying
 document.addEventListener('keydown', e => {
   if (e.key === '1') { currentScene = 0; sceneChangeTimer = 60; }
   if (e.key === '2') { currentScene = 1; sceneChangeTimer = 60; }
   if (e.key === '3') { currentScene = 2; sceneChangeTimer = 60; }
+  if (e.key === 'c' || e.key === 'C') {
+    debugCry = !debugCry;
+    say(debugCry ? '(debug: crying on)' : '(debug: crying off)');
+  }
 });
 
 function updateScene(dt) {
@@ -1403,6 +1425,10 @@ function drawPet(){
   let sh, row, frame;
   if (acting && (pet.action==='eat' || pet.action==='draw') && sheets[pet.action] && sheets[pet.action].ready){
     sh = sheets[pet.action];                         // dedicated action animation
+    row = 0;
+    frame = pet.frame % sh.cfg.cols;
+  } else if (!acting && isCrying() && sheets.cry && sheets.cry.ready){
+    sh = sheets.cry;                                 // sobbing when neglected
     row = 0;
     frame = pet.frame % sh.cfg.cols;
   } else if (sheets.walk && sheets.walk.ready){
