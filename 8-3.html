@@ -504,6 +504,7 @@ function loop(ts){
 
   sceneTime += dt;
   updateWaves(dt);
+  if (started) updateScene(dt);
   render();
   if (speech.classList.contains('show')) positionSpeech();
   requestAnimationFrame(loop);
@@ -565,10 +566,30 @@ function resize(){
 window.addEventListener('resize', resize);
 
 let sceneTime = 0;
+const SCENES = ['beach', 'backyard', 'river'];
+let currentScene = 0;
+let sceneChangeTimer = 60; // seconds
+
+// Debug: press 1/2/3 to switch scenes
+document.addEventListener('keydown', e => {
+  if (e.key === '1') { currentScene = 0; sceneChangeTimer = 60; }
+  if (e.key === '2') { currentScene = 1; sceneChangeTimer = 60; }
+  if (e.key === '3') { currentScene = 2; sceneChangeTimer = 60; }
+});
+
+function updateScene(dt) {
+  sceneChangeTimer -= dt;
+  if (sceneChangeTimer <= 0) {
+    currentScene = (currentScene + 1) % SCENES.length;
+    sceneChangeTimer = 60;
+  }
+}
 
 function render(){
   ctx.clearRect(0,0,W,H);
-  drawBeach();
+  if (SCENES[currentScene] === 'beach') drawBeach();
+  else if (SCENES[currentScene] === 'backyard') drawBackyard();
+  else if (SCENES[currentScene] === 'river') drawRiver();
   drawPet();
 }
 
@@ -930,6 +951,448 @@ function drawBreakingWave(wave, oceanTop, oceanBot) {
         }
       }
     }
+  }
+}
+
+/* ══════════════════════ BACKYARD SCENE ══════════════════════ */
+
+// Backyard critters — birds and squirrels visit the feeders
+const critters = [];
+let critterTimer = 0;
+function updateCritters(dt) {
+  critterTimer -= dt;
+  if (critterTimer <= 0 && critters.length < 6) {
+    critterTimer = rand(1.5, 4);
+    const type = Math.random() < 0.7 ? 'bird' : 'squirrel';
+    const isLeft = Math.random() < 0.5;
+    const feederX = isLeft ? W * 0.28 : W * 0.72;
+    const feederY = isLeft ? H * 0.55 : H * 0.52;
+    critters.push({
+      type,
+      x: type === 'bird' ? rand(-20, W + 20) : (Math.random() < 0.5 ? -20 : W + 20),
+      y: type === 'bird' ? rand(H * 0.15, H * 0.3) : H * 0.86,
+      tx: feederX + rand(-10, 10),
+      ty: type === 'bird' ? feederY - 6 + rand(-3, 3) : feederY + 6,
+      poleBaseX: feederX,
+      poleBaseY: feederY + H * 0.3,
+      feederTopY: feederY - 4,
+      phase: type === 'squirrel' ? 'approach' : null,
+      atFeeder: false,
+      feedTime: 0,
+      maxFeed: rand(3, 7),
+      leaving: false,
+      leaveX: Math.random() < 0.5 ? -30 : W + 30,
+      leaveY: type === 'bird' ? rand(H * 0.1, H * 0.25) : H * 0.86,
+      bob: rand(0, 6),
+      color: type === 'bird' ? pick(['#e04040','#4080e0','#e0a020','#40b040','#8040c0']) : '#8B6914',
+    });
+  }
+  for (let i = critters.length - 1; i >= 0; i--) {
+    const c = critters[i];
+    c.bob += dt;
+
+    if (c.type === 'bird') {
+      const speed = 80;
+      if (!c.atFeeder && !c.leaving) {
+        const dx = c.tx - c.x, dy = c.ty - c.y;
+        const d = Math.hypot(dx, dy);
+        if (d > 2) { c.x += dx/d * speed * dt; c.y += dy/d * speed * dt; }
+        else { c.atFeeder = true; }
+      } else if (c.atFeeder) {
+        c.feedTime += dt;
+        if (c.feedTime >= c.maxFeed) { c.leaving = true; c.atFeeder = false; }
+      } else {
+        const dx = c.leaveX - c.x, dy = c.leaveY - c.y;
+        const d = Math.hypot(dx, dy);
+        if (d > 2) { c.x += dx/d * speed * 1.3 * dt; c.y += dy/d * speed * 1.3 * dt; }
+        else { critters.splice(i, 1); }
+      }
+    } else {
+      // Squirrel: approach pole → climb up → eat → climb down → scamper away
+      const runSpeed = 60;
+      const climbSpeed = 45;
+      if (c.phase === 'approach') {
+        // Run along ground to pole base
+        const dx = c.poleBaseX - c.x;
+        if (Math.abs(dx) > 3) { c.x += Math.sign(dx) * runSpeed * dt; }
+        else { c.x = c.poleBaseX; c.phase = 'climb'; }
+      } else if (c.phase === 'climb') {
+        // Climb straight up the pole
+        if (c.y > c.feederTopY + 3) { c.y -= climbSpeed * dt; }
+        else { c.y = c.feederTopY; c.phase = 'eat'; c.atFeeder = true; }
+      } else if (c.phase === 'eat') {
+        c.feedTime += dt;
+        if (c.feedTime >= c.maxFeed) { c.phase = 'descend'; c.atFeeder = false; }
+      } else if (c.phase === 'descend') {
+        // Climb back down
+        if (c.y < c.poleBaseY - 3) { c.y += climbSpeed * dt; }
+        else { c.y = H * 0.86; c.phase = 'leave'; }
+      } else if (c.phase === 'leave') {
+        const dx = c.leaveX - c.x;
+        if (Math.abs(dx) > 3) { c.x += Math.sign(dx) * runSpeed * 1.3 * dt; }
+        else { critters.splice(i, 1); }
+      }
+    }
+  }
+}
+
+function drawBackyard() {
+  const t = sceneTime;
+
+  // Sky
+  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.5);
+  sky.addColorStop(0, '#6aafe6');
+  sky.addColorStop(1, '#b8ddf5');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H * 0.5);
+
+  // Clouds
+  drawCloud(W * 0.2 + Math.sin(t * 0.1) * 6, H * 0.08, 0.8);
+  drawCloud(W * 0.65 + Math.sin(t * 0.07 + 3) * 8, H * 0.12, 0.6);
+
+  // Houses behind fence — wide, half hidden by fence, cropped off screen edges
+  // Left house (extends off left edge)
+  const lhx = -30, lhy = H * 0.14;
+  ctx.fillStyle = '#c4a882'; ctx.fillRect(lhx, lhy, 160, 100);
+  ctx.fillStyle = '#a0522d'; // roof
+  ctx.beginPath(); ctx.moveTo(lhx - 8, lhy); ctx.lineTo(lhx + 80, lhy - 50);
+  ctx.lineTo(lhx + 168, lhy); ctx.closePath(); ctx.fill();
+  // second story windows
+  ctx.fillStyle = '#6a9fd8';
+  ctx.fillRect(lhx + 20, lhy + 12, 22, 20); ctx.fillRect(lhx + 60, lhy + 12, 22, 20);
+  ctx.fillRect(lhx + 100, lhy + 12, 22, 20);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(lhx + 20, lhy + 12, 22, 20); ctx.strokeRect(lhx + 60, lhy + 12, 22, 20);
+  ctx.strokeRect(lhx + 100, lhy + 12, 22, 20);
+  // window cross frames
+  for (const wx of [lhx + 31, lhx + 71, lhx + 111]) {
+    ctx.beginPath(); ctx.moveTo(wx, lhy + 12); ctx.lineTo(wx, lhy + 32); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(wx - 11, lhy + 22); ctx.lineTo(wx + 11, lhy + 22); ctx.stroke();
+  }
+
+  // Right house (extends off right edge)
+  const rhx = W * 0.55, rhy = H * 0.11;
+  ctx.fillStyle = '#d4c4a8'; ctx.fillRect(rhx, rhy, 180, 110);
+  ctx.fillStyle = '#7a4a3a'; // roof
+  ctx.beginPath(); ctx.moveTo(rhx - 8, rhy); ctx.lineTo(rhx + 90, rhy - 55);
+  ctx.lineTo(rhx + 188, rhy); ctx.closePath(); ctx.fill();
+  // second story windows
+  ctx.fillStyle = '#6a9fd8';
+  ctx.fillRect(rhx + 20, rhy + 14, 24, 22); ctx.fillRect(rhx + 70, rhy + 14, 24, 22);
+  ctx.fillRect(rhx + 120, rhy + 14, 24, 22);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(rhx + 20, rhy + 14, 24, 22); ctx.strokeRect(rhx + 70, rhy + 14, 24, 22);
+  ctx.strokeRect(rhx + 120, rhy + 14, 24, 22);
+  for (const wx of [rhx + 32, rhx + 82, rhx + 132]) {
+    ctx.beginPath(); ctx.moveTo(wx, rhy + 14); ctx.lineTo(wx, rhy + 36); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(wx - 12, rhy + 25); ctx.lineTo(wx + 12, rhy + 25); ctx.stroke();
+  }
+
+  // Tall trees behind fence — thick trunks, canopies off the top of the screen
+  function drawTallTree(tx, trunkW) {
+    // Trunk from fence line up and off screen
+    ctx.fillStyle = '#5a3a20';
+    ctx.fillRect(tx - trunkW / 2, -20, trunkW, H * 0.36 + 20 + 50); // extends to fence
+    // Bark texture
+    ctx.strokeStyle = '#4a2a15'; ctx.lineWidth = 1;
+    for (let i = 0; i < 6; i++) {
+      const ly = i * 25 + 10;
+      ctx.beginPath(); ctx.moveTo(tx - trunkW / 2 + 2, ly); ctx.lineTo(tx + trunkW / 2 - 2, ly + 8); ctx.stroke();
+    }
+    // Canopy — big, mostly off screen top, just the bottom edge visible
+    ctx.fillStyle = '#2d7a2d';
+    ctx.beginPath(); ctx.arc(tx - 10, -10, 50, 0, 7); ctx.fill();
+    ctx.fillStyle = '#3a9a3a';
+    ctx.beginPath(); ctx.arc(tx + 15, -20, 45, 0, 7); ctx.fill();
+    ctx.fillStyle = '#258a25';
+    ctx.beginPath(); ctx.arc(tx, 10, 40, 0, 7); ctx.fill();
+  }
+  drawTallTree(W * 0.42, 14);
+  drawTallTree(W * 0.15, 10);
+  drawTallTree(W * 0.88, 12);
+
+  // White picket fence — tall, solid
+  const fenceY = H * 0.36;
+  const fenceH = 50;
+  // solid white fence body
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, fenceY, W, fenceH);
+  // horizontal rails (subtle lines for board detail)
+  ctx.fillStyle = '#e8e8e8';
+  ctx.fillRect(0, fenceY + 12, W, 2);
+  ctx.fillRect(0, fenceY + fenceH - 12, W, 2);
+  // vertical board lines
+  ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 18) {
+    ctx.beginPath(); ctx.moveTo(x, fenceY); ctx.lineTo(x, fenceY + fenceH); ctx.stroke();
+  }
+  // pointed tops
+  ctx.fillStyle = '#fff';
+  for (let x = 0; x < W; x += 18) {
+    ctx.beginPath(); ctx.moveTo(x, fenceY); ctx.lineTo(x + 9, fenceY - 8); ctx.lineTo(x + 18, fenceY); ctx.fill();
+  }
+  // shadow under fence
+  ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.fillRect(0, fenceY + fenceH, W, 4);
+
+  // Grass
+  const grass = ctx.createLinearGradient(0, fenceY + fenceH, 0, H);
+  grass.addColorStop(0, '#5a9e3a');
+  grass.addColorStop(0.4, '#4a8e2e');
+  grass.addColorStop(1, '#3a7a22');
+  ctx.fillStyle = grass; ctx.fillRect(0, fenceY + fenceH, W, H - fenceY - fenceH);
+
+  // Grass texture
+  ctx.strokeStyle = 'rgba(30,80,15,0.3)'; ctx.lineWidth = 1;
+  for (let i = 0; i < 50; i++) {
+    const gx = (i * 67 + 13) % W;
+    const gy = fenceY + fenceH + 6 + ((i * 43 + 7) % (H * 0.35));
+    ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx + rand(-3, 3), gy - rand(4, 8)); ctx.stroke();
+  }
+
+  // Bird feeders
+  function drawFeeder(fx, fy) {
+    // pole
+    ctx.fillStyle = '#6a5a4a'; ctx.fillRect(fx - 2, fy, 4, H * 0.3);
+    // platform
+    ctx.fillStyle = '#8B7355'; roundRect(fx - 18, fy - 4, 36, 6, 2); ctx.fill();
+    // roof
+    ctx.fillStyle = '#a0522d';
+    ctx.beginPath(); ctx.moveTo(fx - 22, fy - 4); ctx.lineTo(fx, fy - 20); ctx.lineTo(fx + 22, fy - 4); ctx.closePath(); ctx.fill();
+    // seed
+    ctx.fillStyle = '#d4b06a';
+    ctx.beginPath(); ctx.ellipse(fx, fy - 1, 12, 3, 0, 0, 7); ctx.fill();
+  }
+  drawFeeder(W * 0.28, H * 0.55);
+  drawFeeder(W * 0.72, H * 0.52);
+
+  // Cookie plate on the grass
+  const px = W * 0.50, py = H * 0.85;
+  ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(px, py, 26, 9, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#c98a4b'; ctx.beginPath(); ctx.arc(px - 6, py - 3, 7, 0, 7); ctx.arc(px + 7, py - 2, 7, 0, 7); ctx.fill();
+
+  // Draw critters
+  updateCritters(1/60);
+  for (const c of critters) {
+    if (c.type === 'bird') {
+      const wingFlap = c.atFeeder ? 0 : Math.sin(c.bob * 12) * 0.4;
+      ctx.fillStyle = c.color;
+      ctx.beginPath(); ctx.ellipse(c.x, c.y, 7, 5, 0, 0, 7); ctx.fill(); // body
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.arc(c.x + 5, c.y - 2, 3, 0, 7); ctx.fill(); // head
+      ctx.fillStyle = '#fa0'; // beak
+      ctx.beginPath(); ctx.moveTo(c.x + 8, c.y - 2); ctx.lineTo(c.x + 12, c.y - 1); ctx.lineTo(c.x + 8, c.y); ctx.fill();
+      // wings
+      ctx.fillStyle = c.color;
+      ctx.save(); ctx.translate(c.x - 2, c.y - 3);
+      ctx.beginPath(); ctx.ellipse(0, 0, 8, 3, -0.3 + wingFlap, 0, Math.PI); ctx.fill();
+      ctx.restore();
+      // tail
+      ctx.fillStyle = c.color;
+      ctx.beginPath(); ctx.moveTo(c.x - 7, c.y); ctx.lineTo(c.x - 13, c.y - 3); ctx.lineTo(c.x - 12, c.y + 2); ctx.fill();
+      // eye
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(c.x + 6, c.y - 3, 1.5, 0, 7); ctx.fill();
+      ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(c.x + 6.5, c.y - 3, 0.7, 0, 7); ctx.fill();
+      // pecking animation
+      if (c.atFeeder && Math.sin(c.bob * 6) > 0.3) {
+        ctx.fillStyle = '#d4b06a'; ctx.beginPath(); ctx.arc(c.x + 10, c.y + 2, 1.5, 0, 7); ctx.fill();
+      }
+    } else {
+      // Squirrel
+      const bob = c.atFeeder ? Math.sin(c.bob * 4) * 1.5 : 0;
+      ctx.fillStyle = c.color;
+      ctx.beginPath(); ctx.ellipse(c.x, c.y + bob, 8, 6, 0, 0, 7); ctx.fill(); // body
+      ctx.beginPath(); ctx.arc(c.x + 6, c.y - 4 + bob, 5, 0, 7); ctx.fill(); // head
+      // fluffy tail
+      ctx.fillStyle = '#a07a20';
+      ctx.beginPath(); ctx.ellipse(c.x - 10, c.y - 6 + bob, 5, 10, -0.4, 0, 7); ctx.fill();
+      // ears
+      ctx.fillStyle = c.color;
+      ctx.beginPath(); ctx.arc(c.x + 4, c.y - 8 + bob, 2, 0, 7); ctx.arc(c.x + 8, c.y - 8 + bob, 2, 0, 7); ctx.fill();
+      // eye
+      ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(c.x + 8, c.y - 4 + bob, 1, 0, 7); ctx.fill();
+      // eating
+      if (c.atFeeder && Math.sin(c.bob * 5) > 0) {
+        ctx.fillStyle = '#d4b06a'; ctx.beginPath(); ctx.arc(c.x + 10, c.y - 2 + bob, 1.5, 0, 7); ctx.fill();
+      }
+    }
+  }
+}
+
+/* ══════════════════════ RIVER SCENE ══════════════════════ */
+
+const floaters = [];
+let floaterTimer = 0;
+function updateFloaters(dt) {
+  floaterTimer -= dt;
+  if (floaterTimer <= 0 && floaters.length < 3) {
+    floaterTimer = rand(4, 9);
+    floaters.push({
+      type: Math.random() < 0.5 ? 'kayak' : 'tube',
+      x: W + 40,
+      y: H * 0.46 + rand(-8, 8),
+      speed: rand(18, 35),
+      bob: rand(0, 6),
+      color: pick(['#e04040','#4080e0','#e0a020','#40b040','#e07a8b','#8040c0']),
+      personColor: pick(['#ffe0c2','#d4a574','#8d6e4c','#f5d0b0']),
+    });
+  }
+  for (let i = floaters.length - 1; i >= 0; i--) {
+    const f = floaters[i];
+    f.x -= f.speed * dt;
+    f.bob += dt;
+    if (f.x < -50) floaters.splice(i, 1);
+  }
+}
+
+function drawRiver() {
+  const t = sceneTime;
+
+  // Sky
+  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.35);
+  sky.addColorStop(0, '#5a9ed6');
+  sky.addColorStop(1, '#a8d4f0');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H * 0.35);
+
+  // Clouds
+  drawCloud(W * 0.25 + Math.sin(t * 0.08) * 10, H * 0.07, 0.7);
+  drawCloud(W * 0.7 + Math.sin(t * 0.06 + 2) * 8, H * 0.11, 0.9);
+
+  // Far tree line
+  ctx.fillStyle = '#2a6a2a';
+  for (let x = 0; x < W; x += 18) {
+    const h = 25 + Math.sin(x * 0.07 + 1) * 10 + Math.sin(x * 0.13) * 6;
+    ctx.beginPath(); ctx.arc(x, H * 0.35, h, Math.PI, 0); ctx.fill();
+  }
+
+  // River bank (far side)
+  ctx.fillStyle = '#6a9a40';
+  ctx.fillRect(0, H * 0.33, W, H * 0.07);
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(0, H * 0.38, W, 4);
+
+  // River water
+  const riverTop = H * 0.39;
+  const riverBot = H * 0.58;
+  const river = ctx.createLinearGradient(0, riverTop, 0, riverBot);
+  river.addColorStop(0, '#2878a8');
+  river.addColorStop(0.5, '#1a6898');
+  river.addColorStop(1, '#2080a8');
+  ctx.fillStyle = river;
+  ctx.fillRect(0, riverTop, W, riverBot - riverTop);
+
+  // River current ripples
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1.5;
+  for (let row = 0; row < 4; row++) {
+    const ry = riverTop + 5 + row * (riverBot - riverTop) / 4;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 3) {
+      const y = ry + Math.sin(x * 0.04 + t * 0.8 + row * 2) * 2;
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  // Sun sparkles on water
+  ctx.fillStyle = 'rgba(255,255,200,0.4)';
+  for (let i = 0; i < 8; i++) {
+    const sx = ((i * 97 + t * 15) % (W + 40)) - 20;
+    const sy = riverTop + ((i * 53 + 11) % (riverBot - riverTop - 4));
+    if (Math.sin(t * 3 + i * 1.7) > 0.6) {
+      ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, 7); ctx.fill();
+    }
+  }
+
+  // Draw floaters (kayakers and tubers)
+  updateFloaters(1/60);
+  for (const f of floaters) {
+    const bobY = Math.sin(f.bob * 2.5) * 3;
+    const fy = f.y + bobY;
+
+    if (f.type === 'kayak') {
+      // Kayak hull
+      ctx.fillStyle = f.color;
+      ctx.beginPath();
+      ctx.moveTo(f.x - 20, fy); ctx.quadraticCurveTo(f.x - 24, fy + 6, f.x - 16, fy + 6);
+      ctx.lineTo(f.x + 16, fy + 6); ctx.quadraticCurveTo(f.x + 24, fy + 6, f.x + 20, fy);
+      ctx.closePath(); ctx.fill();
+      // Person
+      ctx.fillStyle = f.personColor;
+      ctx.beginPath(); ctx.arc(f.x, fy - 5, 4, 0, 7); ctx.fill(); // head
+      ctx.fillStyle = pick(['#e04040','#4080e0','#e0a020']);
+      ctx.fillRect(f.x - 3, fy - 1, 6, 5); // torso/pfd
+      // Paddle
+      const paddleAngle = Math.sin(f.bob * 3) * 0.6;
+      ctx.save(); ctx.translate(f.x, fy);
+      ctx.strokeStyle = '#666'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(-14, -4); ctx.lineTo(14, 4 + paddleAngle * 8); ctx.stroke();
+      ctx.fillStyle = '#888';
+      ctx.fillRect(-16, -6, 5, 4); ctx.fillRect(12, 2 + paddleAngle * 8, 5, 4);
+      ctx.restore();
+      // Wake
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(f.x + 22, fy + 3);
+      ctx.quadraticCurveTo(f.x + 35, fy + 6, f.x + 50, fy + 2); ctx.stroke();
+    } else {
+      // Inner tube
+      ctx.fillStyle = f.color;
+      ctx.beginPath(); ctx.ellipse(f.x, fy + 2, 14, 10, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.beginPath(); ctx.ellipse(f.x, fy + 2, 8, 5, 0, 0, 7); ctx.fill(); // hole
+      // Person lounging
+      ctx.fillStyle = f.personColor;
+      ctx.beginPath(); ctx.arc(f.x - 4, fy - 6, 4, 0, 7); ctx.fill(); // head
+      ctx.fillRect(f.x - 6, fy - 2, 8, 4); // body reclined
+      // Legs dangling in water
+      ctx.fillStyle = f.personColor;
+      ctx.fillRect(f.x + 4, fy + 2, 3, 8);
+      ctx.fillRect(f.x + 9, fy + 3, 3, 7);
+      // Sunglasses
+      ctx.fillStyle = '#222';
+      ctx.fillRect(f.x - 6, fy - 7, 5, 2);
+    }
+  }
+
+  // Near river bank
+  ctx.fillStyle = '#8B7355';
+  ctx.fillRect(0, riverBot - 2, W, 4);
+  ctx.fillStyle = '#6a9a40';
+  ctx.fillRect(0, riverBot + 1, W, 6);
+
+  // Grassy ground
+  const ground = ctx.createLinearGradient(0, riverBot + 4, 0, H);
+  ground.addColorStop(0, '#5a9e3a');
+  ground.addColorStop(0.5, '#4a8e2e');
+  ground.addColorStop(1, '#3a7a22');
+  ctx.fillStyle = ground; ctx.fillRect(0, riverBot + 4, W, H - riverBot - 4);
+
+  // Grass blades
+  ctx.strokeStyle = 'rgba(30,80,15,0.3)'; ctx.lineWidth = 1;
+  for (let i = 0; i < 40; i++) {
+    const gx = (i * 73 + 11) % W;
+    const gy = riverBot + 10 + ((i * 47 + 9) % (H * 0.3));
+    ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx + rand(-3, 3), gy - rand(4, 8)); ctx.stroke();
+  }
+
+  // Rocks by the river
+  ctx.fillStyle = '#8a8070';
+  ctx.beginPath(); ctx.ellipse(W * 0.15, riverBot + 6, 12, 7, 0.2, 0, 7); ctx.fill();
+  ctx.fillStyle = '#9a9080';
+  ctx.beginPath(); ctx.ellipse(W * 0.85, riverBot + 8, 10, 6, -0.1, 0, 7); ctx.fill();
+  ctx.fillStyle = '#7a7060';
+  ctx.beginPath(); ctx.ellipse(W * 0.82, riverBot + 5, 6, 4, 0.3, 0, 7); ctx.fill();
+
+  // Cookie plate on the grass
+  const px = W * 0.50, py = H * 0.82;
+  ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(px, py, 26, 9, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#c98a4b'; ctx.beginPath(); ctx.arc(px - 6, py - 3, 7, 0, 7); ctx.arc(px + 7, py - 2, 7, 0, 7); ctx.fill();
+
+  // Wildflowers
+  const flowers = ['#e07a8b','#e0a020','#9060c0','#fff'];
+  for (let i = 0; i < 12; i++) {
+    const fx = (i * 83 + 23) % W;
+    const fy = riverBot + 16 + ((i * 59 + 17) % (H * 0.28));
+    ctx.fillStyle = flowers[i % flowers.length];
+    ctx.beginPath(); ctx.arc(fx, fy, 2.5, 0, 7); ctx.fill();
+    ctx.fillStyle = '#3a7a22'; ctx.fillRect(fx - 0.5, fy, 1, 5);
   }
 }
 
