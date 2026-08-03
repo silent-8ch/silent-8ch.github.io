@@ -188,7 +188,10 @@ const SHEETS = {
 /* Things she "says" — pulled at random per action/mood. Personalize freely. */
 const LINES = {
   feed:  ["Cookies! 🍪", "Mmm, thank you!", "My favorite 😋", "One more?"],
+  feedFull: ["I'm pretty full…", "Maybe no more cookies…", "My tummy hurts a little 🤢"],
+  throwup: ["🤢 I don't feel so good…", "Too many cookies… 🤮", "I told you I was full! 😣"],
   draw:  ["Let's draw! 🎨", "I love this ✏️", "Look what I made!", "So fun 🌈"],
+  drawHungry: ["Drawing makes me hungry…", "I need a snack break 🍪", "My tummy's growling…"],
   hug:   ["Aww 🥰", "I feel safe.", "Hold me longer 💗", "You're the best."],
   happy: ["I'm so happy!", "Best day ever 💛", "I love you!"],
   sad:   ["I'm a little lonely…", "Play with me?", "Hungry…", "Come back 🥺"],
@@ -226,6 +229,7 @@ for (const key in SHEETS) loadSheet(key, SHEETS[key]);
 /* ---------- game state ---------- */
 const DEFAULT_STATE = {
   hunger: 70, fun: 70, love: 70,
+  overfed: 0, overdraw: 0,
   x: W/2, y: H*0.68,
   lastSeen: null,
 };
@@ -294,9 +298,39 @@ function doAction(kind){
   if (cooldown > 0) return;
   cooldown = 0.6;
 
-  if (kind === 'feed'){ state.hunger = clamp(state.hunger + CONFIG.gains.feed); playAnim('eat', 1.6); say(pick(LINES.feed)); burst('🍪'); }
-  if (kind === 'draw'){ state.fun    = clamp(state.fun    + CONFIG.gains.draw); state.love = clamp(state.love+6); playAnim('draw',1.8); say(pick(LINES.draw)); burst('🎨'); burst('🌈'); }
-  if (kind === 'hug' ){ state.love   = clamp(state.love   + CONFIG.gains.hug ); state.fun  = clamp(state.fun +8); playAnim('hug', 1.4); say(pick(LINES.hug)); hearts(); }
+  if (kind === 'feed'){
+    if (state.hunger >= 100) {
+      state.overfed += CONFIG.gains.feed;
+      if (state.overfed >= 70) {
+        // Throw up — all stats halved
+        state.hunger = state.hunger * 0.5;
+        state.fun = state.fun * 0.5;
+        state.love = state.love * 0.5;
+        state.overfed = 0;
+        playAnim('eat', 1.6); say(pick(LINES.throwup)); burst('🤢'); burst('🤮');
+      } else {
+        playAnim('eat', 1.6); say(pick(LINES.feedFull)); burst('🍪');
+      }
+    } else {
+      state.hunger = clamp(state.hunger + CONFIG.gains.feed);
+      state.overfed = 0;
+      playAnim('eat', 1.6); say(pick(LINES.feed)); burst('🍪');
+    }
+  }
+  if (kind === 'draw'){
+    if (state.fun >= 100) {
+      state.overdraw += CONFIG.gains.draw;
+      state.hunger = clamp(state.hunger - state.overdraw * 0.3);
+      state.love = clamp(state.love+6);
+      playAnim('draw',1.8); say(pick(LINES.drawHungry)); burst('🎨');
+    } else {
+      state.fun = clamp(state.fun + CONFIG.gains.draw);
+      state.love = clamp(state.love+6);
+      state.overdraw = 0;
+      playAnim('draw',1.8); say(pick(LINES.draw)); burst('🎨'); burst('🌈');
+    }
+  }
+  if (kind === 'hug' ){ state.love = clamp(state.love + CONFIG.gains.hug); state.fun = clamp(state.fun+8); playAnim('hug', 1.4); say(pick(LINES.hug)); hearts(); }
   pet.wanderTimer = 0.4;   // resume wandering shortly after the action
 
   refreshHUD();
@@ -380,6 +414,8 @@ function loop(ts){
     state.hunger = clamp(state.hunger - CONFIG.decay.hunger*dt);
     state.fun    = clamp(state.fun    - CONFIG.decay.fun*dt);
     state.love   = clamp(state.love   - CONFIG.decay.love*dt);
+    if (state.hunger < 100) state.overfed = 0;
+    if (state.fun < 100) state.overdraw = 0;
     if (cooldown>0) cooldown -= dt;
     maybeNag(dt);
     updatePet(dt);
