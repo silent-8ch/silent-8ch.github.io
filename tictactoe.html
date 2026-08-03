@@ -737,22 +737,39 @@
       }, HEARTBEAT_MS);
     }
 
-    function newGame() {
-      // Clean up current game and re-queue
+    async function newGame() {
+      // Clean up current game fully before re-queuing
       stopHeartbeat();
-      if (gameListener) gameRef.off('value', gameListener);
+      if (gameListener && gameRef) {
+        gameRef.off('value', gameListener);
+        gameListener = null;
+      }
       if (gameRef) {
-        gameRef.child('player' + myMark).remove();
-        gameRef.once('value', snap => {
-          const g = snap.val();
-          if (g && !g.playerX && !g.playerO) gameRef.remove();
-        });
+        // Cancel any onDisconnect handlers from the old game
+        gameRef.child('player' + myMark).onDisconnect().cancel();
+        await gameRef.child('player' + myMark).remove();
+        const snap = await gameRef.once('value');
+        const g = snap.val();
+        if (g && !g.playerX && !g.playerO) {
+          await gameRef.remove();
+        }
       }
       gameId = null;
       gameRef = null;
       myMark = null;
+      myScore = 0;
+      theirScore = 0;
+      drawScore = 0;
+      statsUpdatedForGame = false;
+
+      // Reset UI fully before re-queuing
       document.getElementById('game').style.display = 'none';
       document.getElementById('game-over-actions').style.display = 'none';
+      document.getElementById('lobby').style.display = '';
+      document.getElementById('play-btn').disabled = false;
+      document.getElementById('play-btn').textContent = 'Play';
+      document.getElementById('play-btn').classList.remove('waiting');
+
       findGame();
     }
 
