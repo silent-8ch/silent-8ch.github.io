@@ -6,10 +6,10 @@
 <title>Happy Birthday 💛</title>
 <style>
   :root{
-    --wall:#f4e3d0;
-    --wall2:#efd7bf;
-    --floor:#c9a479;
-    --floor2:#bd946a;
+    --wall:#87ceeb;
+    --wall2:#5fb5d9;
+    --floor:#f0d9a0;
+    --floor2:#e6c888;
     --ink:#4a3a30;
     --accent:#e07a8b;
     --accent2:#f2a6b3;
@@ -501,6 +501,7 @@ function loop(ts){
     saveAccum += dt; if (saveAccum > 5){ save(); saveAccum = 0; }
   }
 
+  sceneTime += dt;
   render();
   if (speech.classList.contains('show')) positionSpeech();
   requestAnimationFrame(loop);
@@ -561,48 +562,150 @@ function resize(){
 }
 window.addEventListener('resize', resize);
 
+let sceneTime = 0;
+
 function render(){
   ctx.clearRect(0,0,W,H);
-  drawRoom();
+  drawBeach();
   drawPet();
 }
 
-function drawRoom(){
-  // wall
-  const wall = ctx.createLinearGradient(0,0,0,H*0.62);
-  wall.addColorStop(0, getVar('--wall')); wall.addColorStop(1, getVar('--wall2'));
-  ctx.fillStyle = wall; ctx.fillRect(0,0,W,H*0.62);
-  // floor
-  const floor = ctx.createLinearGradient(0,H*0.62,0,H);
-  floor.addColorStop(0, getVar('--floor')); floor.addColorStop(1, getVar('--floor2'));
-  ctx.fillStyle = floor; ctx.fillRect(0,H*0.62,W,H*0.38);
-  // baseboard
-  ctx.fillStyle = 'rgba(0,0,0,.06)'; ctx.fillRect(0,H*0.62-4,W,4);
+function drawBeach(){
+  const t = sceneTime;
 
-  // a cozy window
-  ctx.fillStyle = '#bfe0ef'; roundRect(W*0.10, H*0.12, W*0.24, H*0.20, 8); ctx.fill();
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = 6; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W*0.22, H*0.12); ctx.lineTo(W*0.22, H*0.32);
-  ctx.moveTo(W*0.10, H*0.22); ctx.lineTo(W*0.34, H*0.22); ctx.stroke();
+  // Sky gradient
+  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.45);
+  sky.addColorStop(0, '#4a90d9');
+  sky.addColorStop(0.5, '#87ceeb');
+  sky.addColorStop(1, '#b5e0f5');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H * 0.45);
 
-  // an easel (she likes drawing 🎨)
-  const ex = W*0.74, ey = H*0.30;
-  ctx.strokeStyle = '#8a5a3a'; ctx.lineWidth = 4;
-  ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex-14, ey+70); ctx.moveTo(ex, ey); ctx.lineTo(ex+14, ey+70); ctx.stroke();
-  ctx.fillStyle = '#fffdf7'; roundRect(ex-22, ey-4, 44, 40, 3); ctx.fill();
-  ctx.fillStyle = getVar('--accent'); ctx.fillRect(ex-14, ey+6, 12, 12);
-  ctx.fillStyle = getVar('--good');   ctx.fillRect(ex+2,  ey+16, 14, 10);
+  // Sun
+  const sunX = W * 0.82, sunY = H * 0.10;
+  ctx.fillStyle = '#fff4b0';
+  ctx.beginPath(); ctx.arc(sunX, sunY, 28, 0, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(255,244,176,.3)';
+  ctx.beginPath(); ctx.arc(sunX, sunY, 42, 0, 7); ctx.fill();
 
-  // a cookie plate near the floor
-  const px = W*0.20, py = H*0.80;
-  ctx.fillStyle='#e9e2d6'; ctx.beginPath(); ctx.ellipse(px,py,26,9,0,0,7); ctx.fill();
-  ctx.fillStyle='#c98a4b'; ctx.beginPath(); ctx.arc(px-6,py-3,7,0,7); ctx.arc(px+7,py-2,7,0,7); ctx.fill();
-  ctx.fillStyle='#5a3b22';
-  ctx.fillRect(px-8,py-4,1.6,1.6); ctx.fillRect(px-3,py-6,1.6,1.6); ctx.fillRect(px+8,py-3,1.6,1.6);
+  // Clouds
+  drawCloud(W * 0.15 + Math.sin(t * 0.15) * 8, H * 0.08, 0.9);
+  drawCloud(W * 0.55 + Math.sin(t * 0.1 + 2) * 10, H * 0.14, 0.7);
+  drawCloud(W * 0.85 + Math.sin(t * 0.12 + 4) * 6, H * 0.06, 0.5);
 
-  // little rug
-  ctx.fillStyle = 'rgba(224,122,139,.25)';
-  ctx.beginPath(); ctx.ellipse(W*0.5, H*0.82, W*0.34, H*0.09, 0, 0, 7); ctx.fill();
+  // Ocean
+  const oceanTop = H * 0.38;
+  const oceanBot = H * 0.62;
+  const ocean = ctx.createLinearGradient(0, oceanTop, 0, oceanBot);
+  ocean.addColorStop(0, '#2e8bc0');
+  ocean.addColorStop(0.4, '#1a6fa0');
+  ocean.addColorStop(1, '#3aa5c8');
+  ctx.fillStyle = ocean;
+  ctx.fillRect(0, oceanTop, W, oceanBot - oceanTop);
+
+  // Procedural waves — multiple layers with different speeds and amplitudes
+  drawWaveLayer(oceanTop + 2, t, 1.8, 12, 0.03, 'rgba(255,255,255,0.35)');
+  drawWaveLayer(oceanTop + 14, t, 1.3, 8, 0.04, 'rgba(255,255,255,0.25)');
+  drawWaveLayer(oceanTop + 28, t, 0.9, 6, 0.05, 'rgba(255,255,255,0.18)');
+
+  // Shore waves — foam that rolls up onto the sand
+  const shoreY = oceanBot - 4;
+  drawShoreWave(shoreY, t, 2.2, 10, 'rgba(255,255,255,0.6)');
+  drawShoreWave(shoreY + 6, t, 1.6, 7, 'rgba(255,255,255,0.4)');
+
+  // Wet sand strip
+  const wetSand = ctx.createLinearGradient(0, oceanBot - 6, 0, oceanBot + 12);
+  wetSand.addColorStop(0, '#c4a86a');
+  wetSand.addColorStop(1, '#dcc08a');
+  ctx.fillStyle = wetSand;
+  ctx.fillRect(0, oceanBot - 2, W, 16);
+
+  // Sand
+  const sand = ctx.createLinearGradient(0, oceanBot + 10, 0, H);
+  sand.addColorStop(0, '#f0d9a0');
+  sand.addColorStop(0.5, '#e8cc8e');
+  sand.addColorStop(1, '#dfc07a');
+  ctx.fillStyle = sand;
+  ctx.fillRect(0, oceanBot + 10, W, H - oceanBot - 10);
+
+  // Sand texture — little dots
+  ctx.fillStyle = 'rgba(180,150,90,0.3)';
+  for (let i = 0; i < 40; i++) {
+    const sx = ((i * 73 + 17) % W);
+    const sy = oceanBot + 14 + ((i * 47 + 31) % (H * 0.34));
+    ctx.fillRect(sx, sy, 1.5, 1.5);
+  }
+
+  // Beach towel
+  ctx.fillStyle = 'rgba(224,122,139,0.4)';
+  ctx.save();
+  ctx.translate(W * 0.75, H * 0.78);
+  ctx.rotate(-0.15);
+  roundRect(-30, -12, 60, 24, 3); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.fillRect(-30, -4, 60, 3);
+  ctx.fillRect(-30, 4, 60, 3);
+  ctx.restore();
+
+  // Cookie plate on the sand
+  const px = W * 0.20, py = H * 0.82;
+  ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(px, py, 26, 9, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#c98a4b'; ctx.beginPath(); ctx.arc(px - 6, py - 3, 7, 0, 7); ctx.arc(px + 7, py - 2, 7, 0, 7); ctx.fill();
+  ctx.fillStyle = '#5a3b22';
+  ctx.fillRect(px - 8, py - 4, 1.6, 1.6); ctx.fillRect(px - 3, py - 6, 1.6, 1.6); ctx.fillRect(px + 8, py - 3, 1.6, 1.6);
+
+  // Sand castle
+  const cx = W * 0.88, cy = H * 0.86;
+  ctx.fillStyle = '#d4b06a';
+  ctx.fillRect(cx - 12, cy - 16, 24, 16);
+  ctx.fillRect(cx - 16, cy - 10, 32, 10);
+  ctx.fillRect(cx - 6, cy - 24, 12, 10);
+  // flag
+  ctx.strokeStyle = '#8a5a3a'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(cx, cy - 24); ctx.lineTo(cx, cy - 36); ctx.stroke();
+  ctx.fillStyle = '#e07a8b';
+  ctx.beginPath(); ctx.moveTo(cx, cy - 36); ctx.lineTo(cx + 10, cy - 32); ctx.lineTo(cx, cy - 28); ctx.fill();
+}
+
+function drawCloud(cx, cy, scale) {
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 16 * scale, 0, 7);
+  ctx.arc(cx + 14 * scale, cy - 6 * scale, 12 * scale, 0, 7);
+  ctx.arc(cx + 24 * scale, cy, 14 * scale, 0, 7);
+  ctx.arc(cx - 12 * scale, cy + 2 * scale, 10 * scale, 0, 7);
+  ctx.fill();
+}
+
+function drawWaveLayer(baseY, t, speed, amp, freq, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(0, baseY);
+  for (let x = 0; x <= W; x += 4) {
+    const y = baseY
+      + Math.sin(x * freq + t * speed) * amp
+      + Math.sin(x * freq * 2.3 + t * speed * 1.7 + 1.5) * amp * 0.4
+      + Math.sin(x * freq * 0.7 + t * speed * 0.5 + 3.0) * amp * 0.3;
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W, baseY + amp + 10);
+  ctx.lineTo(0, baseY + amp + 10);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawShoreWave(baseY, t, speed, amp, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(0, baseY + amp);
+  for (let x = 0; x <= W; x += 3) {
+    const y = baseY + Math.sin(x * 0.025 + t * speed) * amp * (0.5 + 0.5 * Math.sin(t * 0.4));
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W, baseY + amp + 6);
+  ctx.lineTo(0, baseY + amp + 6);
+  ctx.closePath();
+  ctx.fill();
 }
 
 function drawPet(){
