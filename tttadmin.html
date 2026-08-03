@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TTT Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: #fff;
+      padding: 20px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 1.4em; margin-bottom: 20px; }
+    h2 { font-size: 1.1em; color: #aaa; margin: 24px 0 12px; }
+
+    #denied, #loading { text-align: center; margin-top: 100px; color: #666; }
+
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 0.85em;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin: 2px;
+    }
+    .btn:hover { background: #333; }
+    .btn.danger { border-color: #ef5350; color: #ef5350; }
+    .btn.danger:hover { background: #ef5350; color: #fff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      font-size: 0.85em;
+    }
+    th {
+      text-align: left;
+      color: #666;
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 8px;
+      border-bottom: 1px solid #333;
+    }
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #1e1e1e;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    tr:hover td { background: #1a1a1a; }
+
+    .stat-bar {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 4px;
+    }
+    .stat-bar div { font-size: 0.9em; color: #aaa; }
+    .stat-bar span { color: #fff; font-weight: 700; }
+
+    .actions { margin-bottom: 8px; }
+    .section {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 4px;
+      background: #121212;
+      border: 1px solid #333;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 0.85em;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loading"><p>Loading...</p></div>
+    <div id="denied" style="display:none;"><p>Access denied.</p></div>
+    <div id="admin" style="display:none;">
+      <h1>TTT Admin</h1>
+
+      <div class="stat-bar" id="stats"></div>
+
+      <div class="section">
+        <h2>Lobby</h2>
+        <div class="actions">
+          <button class="btn danger" onclick="clearLobby()">Clear All Lobby Entries</button>
+          <button class="btn" onclick="loadAll()">Refresh</button>
+        </div>
+        <div id="lobby-table"></div>
+      </div>
+
+      <div class="section">
+        <h2>Active Games</h2>
+        <div class="actions">
+          <button class="btn danger" onclick="clearGames()">Delete All Games</button>
+        </div>
+        <div id="games-table"></div>
+      </div>
+
+      <div class="section">
+        <h2>Players</h2>
+        <div class="actions">
+          <button class="btn danger" onclick="resetAllStats()">Reset All Stats</button>
+        </div>
+        <div id="players-table"></div>
+      </div>
+
+      <div class="section">
+        <h2>Heartbeats</h2>
+        <div class="actions">
+          <button class="btn danger" onclick="clearHeartbeats()">Clear All Heartbeats</button>
+        </div>
+        <div id="heartbeats-table"></div>
+      </div>
+
+      <div class="section">
+        <h2>Names</h2>
+        <div id="names-table"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script>
+    const ADMIN_UID = 'mzw5E3iY70NlnxYBupyZWVKdhiC2';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDOHBS-ILRBi_qlYOvAm3qQlWcHKVBwuek",
+      authDomain: "titato-c2897.firebaseapp.com",
+      databaseURL: "https://titato-c2897-default-rtdb.firebaseio.com",
+      projectId: "titato-c2897"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    auth.onAuthStateChanged(user => {
+      document.getElementById('loading').style.display = 'none';
+      if (user && user.uid === ADMIN_UID) {
+        document.getElementById('admin').style.display = '';
+        loadAll();
+      } else if (user) {
+        document.getElementById('denied').style.display = '';
+      } else {
+        // Auto-redirect to login via Google
+        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      }
+    });
+
+    function escHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function timeAgo(ts) {
+      if (!ts) return '-';
+      const s = Math.floor((Date.now() - ts) / 1000);
+      if (s < 60) return s + 's ago';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+      return Math.floor(s / 86400) + 'd ago';
+    }
+
+    async function loadAll() {
+      const [lobby, games, players, heartbeats, names] = await Promise.all([
+        db.ref('ttt/lobby').once('value'),
+        db.ref('ttt/games').once('value'),
+        db.ref('ttt/players').once('value'),
+        db.ref('ttt/heartbeats').once('value'),
+        db.ref('ttt/names').once('value')
+      ]);
+
+      const lobbyData = lobby.val() || {};
+      const gamesData = games.val() || {};
+      const playersData = players.val() || {};
+      const hbData = heartbeats.val() || {};
+      const namesData = names.val() || {};
+
+      // Stats
+      document.getElementById('stats').innerHTML = `
+        <div>Lobby: <span>${Object.keys(lobbyData).length}</span></div>
+        <div>Games: <span>${Object.keys(gamesData).length}</span></div>
+        <div>Players: <span>${Object.keys(playersData).length}</span></div>
+        <div>Names: <span>${Object.keys(namesData).length}</span></div>
+      `;
+
+      // Lobby
+      const lobbyEntries = Object.entries(lobbyData);
+      if (lobbyEntries.length === 0) {
+        document.getElementById('lobby-table').innerHTML = '<p style="color:#666;font-size:0.85em;">Empty</p>';
+      } else {
+        let html = '<table><tr><th>Game ID</th><th>Player ID</th><th>Created</th><th></th></tr>';
+        for (const [id, entry] of lobbyEntries) {
+          html += `<tr>
+            <td>${escHtml(id)}</td>
+            <td>${escHtml(entry.playerId || '')}</td>
+            <td>${timeAgo(entry.created)}</td>
+            <td><button class="btn danger" onclick="removeLobby('${id}')">Del</button></td>
+          </tr>`;
+        }
+        html += '</table>';
+        document.getElementById('lobby-table').innerHTML = html;
+      }
+
+      // Games
+      const gameEntries = Object.entries(gamesData);
+      if (gameEntries.length === 0) {
+        document.getElementById('games-table').innerHTML = '<p style="color:#666;font-size:0.85em;">None</p>';
+      } else {
+        let html = '<table><tr><th>ID</th><th>Status</th><th>Turn</th><th>Winner</th><th>X</th><th>O</th><th>Created</th><th></th></tr>';
+        for (const [id, g] of gameEntries) {
+          html += `<tr>
+            <td title="${id}">${id.slice(-6)}</td>
+            <td>${g.status || '-'}</td>
+            <td>${g.turn || '-'}</td>
+            <td>${g.winner || '-'}</td>
+            <td title="${g.playerX || ''}">${(g.playerX || '-').slice(0, 8)}</td>
+            <td title="${g.playerO || ''}">${(g.playerO || '-').slice(0, 8)}</td>
+            <td>${timeAgo(g.created)}</td>
+            <td><button class="btn danger" onclick="removeGame('${id}')">Del</button></td>
+          </tr>`;
+        }
+        html += '</table>';
+        document.getElementById('games-table').innerHTML = html;
+      }
+
+      // Players
+      const playerEntries = Object.entries(playersData);
+      if (playerEntries.length === 0) {
+        document.getElementById('players-table').innerHTML = '<p style="color:#666;font-size:0.85em;">None</p>';
+      } else {
+        let html = '<table><tr><th>UID</th><th>Name</th><th>W</th><th>L</th><th>D</th><th>Streak</th><th>Best</th><th></th></tr>';
+        for (const [uid, p] of playerEntries) {
+          html += `<tr>
+            <td title="${uid}">${uid.slice(0, 8)}</td>
+            <td>${escHtml(p.name || '-')}</td>
+            <td><input type="number" value="${p.wins || 0}" onchange="updateStat('${uid}','wins',this.value)"></td>
+            <td><input type="number" value="${p.losses || 0}" onchange="updateStat('${uid}','losses',this.value)"></td>
+            <td><input type="number" value="${p.draws || 0}" onchange="updateStat('${uid}','draws',this.value)"></td>
+            <td><input type="number" value="${p.streak || 0}" onchange="updateStat('${uid}','streak',this.value)"></td>
+            <td><input type="number" value="${p.bestStreak || 0}" onchange="updateStat('${uid}','bestStreak',this.value)"></td>
+            <td>
+              <button class="btn" onclick="resetPlayer('${uid}')">Reset</button>
+              <button class="btn danger" onclick="deletePlayer('${uid}','${escHtml(p.name || '')}')">Del</button>
+            </td>
+          </tr>`;
+        }
+        html += '</table>';
+        document.getElementById('players-table').innerHTML = html;
+      }
+
+      // Heartbeats
+      const hbEntries = Object.entries(hbData);
+      if (hbEntries.length === 0) {
+        document.getElementById('heartbeats-table').innerHTML = '<p style="color:#666;font-size:0.85em;">None</p>';
+      } else {
+        let html = '<table><tr><th>Game ID</th><th>X</th><th>O</th><th></th></tr>';
+        for (const [id, hb] of hbEntries) {
+          html += `<tr>
+            <td title="${id}">${id.slice(-6)}</td>
+            <td>${timeAgo(hb.X)}</td>
+            <td>${timeAgo(hb.O)}</td>
+            <td><button class="btn danger" onclick="removeHeartbeat('${id}')">Del</button></td>
+          </tr>`;
+        }
+        html += '</table>';
+        document.getElementById('heartbeats-table').innerHTML = html;
+      }
+
+      // Names
+      const nameEntries = Object.entries(namesData);
+      if (nameEntries.length === 0) {
+        document.getElementById('names-table').innerHTML = '<p style="color:#666;font-size:0.85em;">None</p>';
+      } else {
+        let html = '<table><tr><th>Name</th><th>UID</th><th></th></tr>';
+        for (const [name, uid] of nameEntries) {
+          html += `<tr>
+            <td>${escHtml(name)}</td>
+            <td title="${uid}">${uid.slice(0, 8)}</td>
+            <td><button class="btn danger" onclick="removeName('${escHtml(name)}')">Del</button></td>
+          </tr>`;
+        }
+        html += '</table>';
+        document.getElementById('names-table').innerHTML = html;
+      }
+    }
+
+    // ── Actions ──────────────────────────────────────────────────────
+    async function removeLobby(id) {
+      await db.ref('ttt/lobby/' + id).remove();
+      loadAll();
+    }
+
+    async function clearLobby() {
+      if (!confirm('Clear all lobby entries?')) return;
+      await db.ref('ttt/lobby').remove();
+      loadAll();
+    }
+
+    async function removeGame(id) {
+      await db.ref('ttt/games/' + id).remove();
+      await db.ref('ttt/heartbeats/' + id).remove();
+      loadAll();
+    }
+
+    async function clearGames() {
+      if (!confirm('Delete ALL games?')) return;
+      await db.ref('ttt/games').remove();
+      await db.ref('ttt/heartbeats').remove();
+      loadAll();
+    }
+
+    async function clearHeartbeats() {
+      if (!confirm('Clear all heartbeats?')) return;
+      await db.ref('ttt/heartbeats').remove();
+      loadAll();
+    }
+
+    async function removeHeartbeat(id) {
+      await db.ref('ttt/heartbeats/' + id).remove();
+      loadAll();
+    }
+
+    async function updateStat(uid, field, value) {
+      await db.ref('ttt/players/' + uid + '/' + field).set(parseInt(value) || 0);
+    }
+
+    async function resetPlayer(uid) {
+      if (!confirm('Reset this player stats to 0?')) return;
+      await db.ref('ttt/players/' + uid).update({
+        wins: 0, losses: 0, draws: 0, streak: 0, bestStreak: 0
+      });
+      loadAll();
+    }
+
+    async function deletePlayer(uid, name) {
+      if (!confirm('Delete player ' + name + '? This removes their stats and frees their name.')) return;
+      if (name) await db.ref('ttt/names/' + name.toLowerCase()).remove();
+      await db.ref('ttt/players/' + uid).remove();
+      loadAll();
+    }
+
+    async function resetAllStats() {
+      if (!confirm('Reset ALL player stats to 0?')) return;
+      const snap = await db.ref('ttt/players').once('value');
+      const updates = {};
+      snap.forEach(child => {
+        updates[child.key + '/wins'] = 0;
+        updates[child.key + '/losses'] = 0;
+        updates[child.key + '/draws'] = 0;
+        updates[child.key + '/streak'] = 0;
+        updates[child.key + '/bestStreak'] = 0;
+      });
+      await db.ref('ttt/players').update(updates);
+      loadAll();
+    }
+
+    async function removeName(name) {
+      await db.ref('ttt/names/' + name).remove();
+      loadAll();
+    }
+  </script>
+</body>
+</html>
