@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Happy Birthday 💛</title>
+<style>
+  :root{
+    --wall:#f4e3d0;
+    --wall2:#efd7bf;
+    --floor:#c9a479;
+    --floor2:#bd946a;
+    --ink:#4a3a30;
+    --accent:#e07a8b;
+    --accent2:#f2a6b3;
+    --good:#7fb77e;
+    --warn:#e0a35a;
+    --bad:#d46a6a;
+    --panel:#fff7ef;
+    --shadow:rgba(74,58,48,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:#2a211c;
+    color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    min-height:100%;
+    overflow:hidden;
+    -webkit-user-select:none;user-select:none;
+    touch-action:manipulation;
+  }
+  #game{
+    position:relative;
+    width:min(96vw, 96vh * 0.62);
+    max-width:520px;
+    aspect-ratio:9/16;
+    background:var(--panel);
+    border-radius:22px;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  /* ---- top status bar ---- */
+  #hud{
+    padding:12px 14px 6px;
+    display:flex;flex-direction:column;gap:8px;
+    background:linear-gradient(#fff7ef,#fdeee0);
+    z-index:5;
+  }
+  #titlebar{display:flex;align-items:center;justify-content:space-between;}
+  #petname{font-weight:700;font-size:17px;letter-spacing:.3px;}
+  #mood{font-size:13px;font-weight:600;padding:3px 10px;border-radius:20px;background:#fff;box-shadow:0 1px 3px var(--shadow);}
+  .meters{display:flex;flex-direction:column;gap:6px;}
+  .meter{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;}
+  .meter .lbl{width:74px;display:flex;align-items:center;gap:4px;}
+  .bar{flex:1;height:12px;border-radius:8px;background:#e9dccd;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);}
+  .fill{height:100%;width:50%;border-radius:8px;transition:width .35s ease, background-color .35s ease;}
+  /* ---- stage / canvas ---- */
+  #stagewrap{position:relative;flex:1;min-height:0;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  /* floating bubbles / hearts */
+  .fx{position:absolute;pointer-events:none;font-size:26px;transform:translate(-50%,-50%);
+      animation:floatUp 1.3s ease-out forwards;z-index:6;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));}
+  @keyframes floatUp{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}
+    20%{opacity:1;transform:translate(-50%,-90%) scale(1.15);}
+    100%{opacity:0;transform:translate(-50%,-220%) scale(1);}
+  }
+  #speech{
+    position:absolute;left:50%;top:14px;transform:translateX(-50%);
+    background:#fff;color:var(--ink);padding:8px 14px;border-radius:16px;
+    font-size:14px;font-weight:600;box-shadow:0 4px 12px var(--shadow);
+    opacity:0;transition:opacity .25s;max-width:80%;text-align:center;z-index:7;
+  }
+  #speech.show{opacity:1;}
+  #speech:after{content:"";position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);
+    border:8px solid transparent;border-top-color:#fff;border-bottom:0;}
+  /* ---- action buttons ---- */
+  #actions{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+    padding:12px 14px 16px;background:linear-gradient(#fdeee0,#fbe6d4);z-index:5;
+  }
+  .btn{
+    border:0;border-radius:16px;padding:12px 6px 10px;cursor:pointer;
+    background:#fff;box-shadow:0 3px 0 var(--shadow),0 5px 12px rgba(0,0,0,.06);
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:12px;font-weight:700;color:var(--ink);
+    transition:transform .08s ease, box-shadow .08s ease;
+  }
+  .btn .ic{font-size:26px;line-height:1;}
+  .btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--shadow),0 2px 6px rgba(0,0,0,.08);}
+  .btn:disabled{opacity:.5;cursor:default;}
+  /* birthday sparkle banner */
+  #banner{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:14px;background:rgba(42,33,28,.78);color:#fff;z-index:20;
+    text-align:center;padding:24px;backdrop-filter:blur(3px);
+  }
+  #banner h1{margin:0;font-size:30px;line-height:1.2;}
+  #banner p{margin:0;opacity:.9;font-size:15px;max-width:320px;}
+  #banner button{
+    margin-top:8px;border:0;border-radius:30px;padding:14px 30px;font-size:16px;font-weight:800;
+    background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 6px 20px rgba(224,122,139,.5);
+  }
+  #banner.hide{display:none;}
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div id="titlebar">
+      <span id="petname">Loading…</span>
+      <span id="mood">🙂 okay</span>
+    </div>
+    <div class="meters">
+      <div class="meter"><span class="lbl">🍪 Hunger</span><div class="bar"><div class="fill" id="f-hunger"></div></div></div>
+      <div class="meter"><span class="lbl">🎨 Fun</span><div class="bar"><div class="fill" id="f-fun"></div></div></div>
+      <div class="meter"><span class="lbl">💗 Love</span><div class="bar"><div class="fill" id="f-love"></div></div></div>
+    </div>
+  </div>
+
+  <div id="stagewrap">
+    <canvas id="cv"></canvas>
+    <div id="speech"></div>
+  </div>
+
+  <div id="actions">
+    <button class="btn" data-action="feed"><span class="ic">🍪</span>Cookie</button>
+    <button class="btn" data-action="draw"><span class="ic">🎨</span>Draw</button>
+    <button class="btn" data-action="hug"><span class="ic">🤗</span>Hug</button>
+  </div>
+
+  <div id="banner">
+    <h1>Happy Birthday! 🎂</h1>
+    <p>I made you a little you. Feed her cookies, draw together, and give her hugs. Take care of her today. 💛</p>
+    <button id="startBtn">Say hi 👋</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   BIRTHDAY VIRTUAL PET  —  engine
+   ----------------------------------------------------------------------------
+   Everything you'll want to change lives in CONFIG below.
+   The art comes from the sprite sheets defined in the SHEETS block below.
+   A placeholder character shows only during the brief moment the art loads.
+   ============================================================================ */
+
+const CONFIG = {
+  name: "My Love",              // <-- put her name here
+
+  // How fast needs drain (points lost per real-time second). Lower = more relaxed.
+  decay: { hunger: 0.35, fun: 0.30, love: 0.25 },
+
+  // How much each action gives back (0-100 scale)
+  gains: { feed: 34, draw: 30, hug: 40 },
+
+  // Movement
+  walkSpeed: 42,                // pixels per second (in the canvas's internal coords)
+  idleWanderEvery: [2.5, 6.0],  // she picks a new spot every N seconds (random in range)
+
+  // Persist progress between visits
+  save: true,
+};
+
+/* ----------------------------------------------------------------------------
+   SPRITE SHEETS
+   ----------------------------------------------------------------------------
+   Each sheet is a grid of frames laid out cols x rows.
+     cols          frames across (the animation frames)
+     rows          rows down. For `walk` each row is a facing direction.
+     fps           playback speed
+     displayH      on-screen height in canvas px (feet pinned to the floor)
+     rowMap        (walk only) which row holds which facing direction
+     keyBackground true  -> sample the top-left pixel and make that flat colour
+                            transparent (magenta sheets)
+                   false -> draw as-is (sheets that already have transparency;
+                            also lets the page work from a plain file:// open)
+   To add/replace a sheet later, just edit the entry (src / cols / rows / fps).
+   ---------------------------------------------------------------------------- */
+const SHEETS = {
+  // footInset = fraction of empty space below her feet in each frame; she is
+  // shifted down by this much so her feet rest on the floor (raise if floating).
+  walk: { src:"k-walking3.png", cols:4, rows:4, fps:8, displayH:150, footInset:0.07,
+          keyBackground:false, rowMap:{ down:0, left:1, right:2, up:3 } },
+  eat:  { src:"k-eating.png",   cols:4, rows:1, fps:7, displayH:158, footInset:0.11, keyBackground:true },
+  draw: { src:"k-drawing.png",  cols:4, rows:1, fps:6, displayH:158, footInset:0.00, keyBackground:true },
+};
+const BG_TOLERANCE = 90;                          // colour-key sensitivity (0-441)
+
+/* Things she "says" — pulled at random per action/mood. Personalize freely. */
+const LINES = {
+  feed:  ["Cookies! 🍪", "Mmm, thank you!", "My favorite 😋", "One more?"],
+  draw:  ["Let's draw! 🎨", "I love this ✏️", "Look what I made!", "So fun 🌈"],
+  hug:   ["Aww 🥰", "I feel safe.", "Hold me longer 💗", "You're the best."],
+  happy: ["I'm so happy!", "Best day ever 💛", "I love you!"],
+  sad:   ["I'm a little lonely…", "Play with me?", "Hungry…", "Come back 🥺"],
+  hungry:["I could go for a cookie…"],
+  bored: ["I'm bored 😪"],
+  needlove:["Need a hug 🥺"],
+};
+
+/* ==========================  ENGINE  (edit below with care)  ============== */
+
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const stagewrap = document.getElementById('stagewrap');
+
+// Internal resolution the game logic uses; canvas scales to fit its box.
+const W = 360, H = 420;
+
+/* ---------- sprite loading ----------
+   Load each sheet, colour-key its background if asked, and stash a ready-to-blit
+   canvas + per-frame dimensions. `sheets[key]` mirrors SHEETS[key] plus runtime. */
+const sheets = {};
+function loadSheet(key, cfg){
+  const rec = { cfg, ready:false, canvas:null, fw:0, fh:0 };
+  sheets[key] = rec;
+  const img = new Image();
+  img.onload = ()=>{
+    const fw = Math.floor(img.width  / cfg.cols);
+    const fh = Math.floor(img.height / cfg.rows);
+    const oc = document.createElement('canvas');
+    oc.width = img.width; oc.height = img.height;
+    const octx = oc.getContext('2d');
+    octx.drawImage(img, 0, 0);
+    if (cfg.keyBackground){
+      try{
+        const id = octx.getImageData(0,0,img.width,img.height);
+        const d = id.data;
+        const kr=d[0], kg=d[1], kb=d[2];           // background = top-left pixel
+        const tol = BG_TOLERANCE * BG_TOLERANCE;
+        for (let i=0;i<d.length;i+=4){
+          const dr=d[i]-kr, dg=d[i+1]-kg, db=d[i+2]-kb;
+          if (dr*dr+dg*dg+db*db < tol) d[i+3]=0;   // knock out background
+        }
+        octx.putImageData(id,0,0);
+      }catch(e){ /* browser blocked pixel access (file:// CORS): raw sheet is used */ }
+    }
+    rec.canvas = oc; rec.fw = fw; rec.fh = fh; rec.ready = true;
+  };
+  img.src = cfg.src;
+}
+for (const key in SHEETS) loadSheet(key, SHEETS[key]);
+
+/* ---------- game state ---------- */
+const DEFAULT_STATE = {
+  hunger: 70, fun: 70, love: 70,
+  x: W/2, y: H*0.68,
+  lastSeen: null,
+};
+let state = load();
+
+// visual / animation runtime (not persisted)
+const pet = {
+  x: state.x, y: state.y,
+  tx: state.x, ty: state.y,     // target position she walks toward
+  dir: 'down',                  // 'down' | 'left' | 'right' | 'up'
+  moving: false,
+  action: null,                 // 'eat' | 'draw' | 'hug' while a scripted action plays
+  animLock: 0,                  // seconds remaining that lock a scripted action
+  frame: 0, frameTime: 0,
+  wanderTimer: 1.5,
+  bob: 0,
+};
+
+/* ---------- save / load ---------- */
+function load(){
+  if (CONFIG.save){
+    try{
+      const raw = localStorage.getItem('bpet');
+      if (raw){
+        const s = {...DEFAULT_STATE, ...JSON.parse(raw)};
+        applyAwayDecay(s);
+        return s;
+      }
+    }catch(e){}
+  }
+  return {...DEFAULT_STATE};
+}
+function save(){
+  if (!CONFIG.save) return;
+  state.x = pet.x; state.y = pet.y; state.lastSeen = Date.now();
+  try{ localStorage.setItem('bpet', JSON.stringify(state)); }catch(e){}
+}
+// While the tab was closed, needs drift down (gently, capped).
+function applyAwayDecay(s){
+  if (!s.lastSeen) return;
+  const secs = Math.min((Date.now()-s.lastSeen)/1000, 60*60*8); // cap at 8h
+  s.hunger = clamp(s.hunger - CONFIG.decay.hunger*secs*0.4);
+  s.fun    = clamp(s.fun    - CONFIG.decay.fun*secs*0.4);
+  s.love   = clamp(s.love   - CONFIG.decay.love*secs*0.4);
+}
+
+/* ---------- helpers ---------- */
+function clamp(v){ return Math.max(0, Math.min(100, v)); }
+function rand(a,b){ return a + Math.random()*(b-a); }
+function pick(arr){ return arr[(Math.random()*arr.length)|0]; }
+
+/* ---------- mood ---------- */
+function moodScore(){ return (state.hunger + state.fun + state.love)/3; }
+function moodInfo(){
+  const m = moodScore();
+  if (m > 75) return {emoji:'😄', label:'delighted', key:'happy'};
+  if (m > 55) return {emoji:'🙂', label:'happy',     key:'idle'};
+  if (m > 35) return {emoji:'😐', label:'okay',      key:'idle'};
+  if (m > 18) return {emoji:'🙁', label:'grumpy',    key:'sad'};
+  return           {emoji:'😢', label:'sad',       key:'sad'};
+}
+
+/* ---------- actions ---------- */
+let cooldown = 0;
+function doAction(kind){
+  if (cooldown > 0) return;
+  cooldown = 0.6;
+
+  if (kind === 'feed'){ state.hunger = clamp(state.hunger + CONFIG.gains.feed); playAnim('eat', 1.6); say(pick(LINES.feed)); burst('🍪'); }
+  if (kind === 'draw'){ state.fun    = clamp(state.fun    + CONFIG.gains.draw); state.love = clamp(state.love+6); playAnim('draw',1.8); say(pick(LINES.draw)); burst('🎨'); burst('🌈'); }
+  if (kind === 'hug' ){ state.love   = clamp(state.love   + CONFIG.gains.hug ); state.fun  = clamp(state.fun +8); playAnim('hug', 1.4); say(pick(LINES.hug)); hearts(); }
+  pet.wanderTimer = 0.4;   // resume wandering shortly after the action
+
+  refreshHUD();
+  save();
+}
+document.querySelectorAll('.btn[data-action]').forEach(b=>{
+  b.addEventListener('click', ()=> doAction(b.dataset.action));
+});
+// Tap the pet for a hug too.
+stagewrap.addEventListener('pointerdown', (e)=>{
+  const r = cv.getBoundingClientRect();
+  const px = (e.clientX - r.left) / r.width * W;
+  const py = (e.clientY - r.top)  / r.height * H;
+  // sprite occupies roughly a box above the feet point (pet.x, pet.y)
+  const h = SHEETS.walk.displayH;
+  const halfW = h * 0.32;
+  if (px > pet.x-halfW && px < pet.x+halfW && py > pet.y-h && py < pet.y+12) doAction('hug');
+});
+
+/* ---------- scripted animation ---------- */
+function playAnim(action, dur){
+  pet.action = action; pet.animLock = dur; pet.frame = 0; pet.frameTime = 0;
+  pet.dir = 'down';                    // face the player during an action
+}
+
+/* ---------- speech + fx ---------- */
+const speech = document.getElementById('speech');
+let speechTimer = null;
+function say(text){
+  speech.textContent = text; speech.classList.add('show');
+  clearTimeout(speechTimer);
+  speechTimer = setTimeout(()=> speech.classList.remove('show'), 1800);
+}
+function fxAt(px, py, chars){
+  const r = cv.getBoundingClientRect();
+  const wrapR = stagewrap.getBoundingClientRect();
+  const sx = (px/W)*r.width  + (r.left - wrapR.left);
+  const sy = (py/H)*r.height + (r.top  - wrapR.top);
+  const el = document.createElement('div');
+  el.className = 'fx'; el.textContent = chars;
+  el.style.left = sx+'px'; el.style.top = sy+'px';
+  stagewrap.appendChild(el);
+  setTimeout(()=> el.remove(), 1300);
+}
+function burst(ch){ for(let i=0;i<3;i++) setTimeout(()=> fxAt(pet.x + rand(-24,24), pet.y-30, ch), i*90); }
+function hearts(){ for(let i=0;i<5;i++) setTimeout(()=> fxAt(pet.x + rand(-30,30), pet.y-30, pick(['💗','💛','💖'])), i*80); }
+
+/* ---------- HUD ---------- */
+const fills = { hunger:document.getElementById('f-hunger'), fun:document.getElementById('f-fun'), love:document.getElementById('f-love') };
+function barColor(v){ return v>55 ? 'var(--good)' : v>28 ? 'var(--warn)' : 'var(--bad)'; }
+function refreshHUD(){
+  for (const k of ['hunger','fun','love']){
+    fills[k].style.width = state[k] + '%';
+    fills[k].style.background = barColor(state[k]);
+  }
+  const mi = moodInfo();
+  document.getElementById('mood').textContent = mi.emoji + ' ' + mi.label;
+}
+document.getElementById('petname').textContent = CONFIG.name;
+
+/* ---------- nagging when a need gets low ---------- */
+let nagTimer = 0;
+function maybeNag(dt){
+  nagTimer -= dt;
+  if (nagTimer > 0) return;
+  nagTimer = 9;
+  if (state.hunger < 25){ say(pick(LINES.hungry)); }
+  else if (state.love < 25){ say(pick(LINES.needlove)); }
+  else if (state.fun < 25){ say(pick(LINES.bored)); }
+}
+
+/* ---------- main loop ---------- */
+let last = 0, started = false;
+function loop(ts){
+  if (!last) last = ts;
+  let dt = (ts - last)/1000; last = ts;
+  if (dt > 0.1) dt = 0.1;            // clamp big gaps (tab switch)
+
+  if (started){
+    // needs decay
+    state.hunger = clamp(state.hunger - CONFIG.decay.hunger*dt);
+    state.fun    = clamp(state.fun    - CONFIG.decay.fun*dt);
+    state.love   = clamp(state.love   - CONFIG.decay.love*dt);
+    if (cooldown>0) cooldown -= dt;
+    maybeNag(dt);
+    updatePet(dt);
+    // refresh bars periodically (cheap)
+    hudAccum += dt; if (hudAccum > 0.25){ refreshHUD(); hudAccum = 0; }
+    saveAccum += dt; if (saveAccum > 5){ save(); saveAccum = 0; }
+  }
+
+  render();
+  requestAnimationFrame(loop);
+}
+let hudAccum = 0, saveAccum = 0;
+
+function updatePet(dt){
+  pet.bob += dt;
+
+  // scripted action (eat/draw/hug) — stand facing forward and play the action art
+  if (pet.animLock > 0){
+    pet.animLock -= dt;
+    pet.moving = false;
+    const s = SHEETS[pet.action] || SHEETS.walk;   // eat/draw have their own sheets
+    advanceFrame(dt, s.fps, s.cols);
+    if (pet.animLock <= 0){ pet.action = null; pet.frame = 0; pet.frameTime = 0; }
+    return;
+  }
+
+  // wander: pick a new spot on the floor now and then
+  pet.wanderTimer -= dt;
+  if (pet.wanderTimer <= 0){
+    pet.tx = rand(W*0.18, W*0.82);
+    pet.ty = rand(H*0.66, H*0.82);     // keep her feet on the floor
+    pet.wanderTimer = rand(CONFIG.idleWanderEvery[0], CONFIG.idleWanderEvery[1]);
+  }
+
+  const dx = pet.tx - pet.x, dy = pet.ty - pet.y;
+  const dist = Math.hypot(dx, dy);
+  if (dist > 3){
+    const step = CONFIG.walkSpeed * dt;
+    pet.x += dx/dist * step;
+    pet.y += dy/dist * step;
+    // choose facing row from the dominant movement axis
+    if (Math.abs(dx) > Math.abs(dy)) pet.dir = dx > 0 ? 'right' : 'left';
+    else                             pet.dir = dy > 0 ? 'down'  : 'up';
+    pet.moving = true;
+    advanceFrame(dt, SHEETS.walk.fps, SHEETS.walk.cols);
+  } else {
+    pet.moving = false;                // idle: rest on the standing frame
+    pet.frame = 0; pet.frameTime = 0;
+  }
+}
+
+function advanceFrame(dt, fps, cols){
+  pet.frameTime += dt;
+  const spf = 1 / fps;
+  while (pet.frameTime >= spf){ pet.frameTime -= spf; pet.frame = (pet.frame + 1) % cols; }
+}
+
+/* ==========================  RENDER  ====================================== */
+function resize(){
+  const r = stagewrap.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  cv.width = r.width*dpr; cv.height = r.height*dpr;
+  ctx.setTransform(cv.width/W, 0, 0, cv.height/H, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+}
+window.addEventListener('resize', resize);
+
+function render(){
+  ctx.clearRect(0,0,W,H);
+  drawRoom();
+  drawPet();
+}
+
+function drawRoom(){
+  // wall
+  const wall = ctx.createLinearGradient(0,0,0,H*0.62);
+  wall.addColorStop(0, getVar('--wall')); wall.addColorStop(1, getVar('--wall2'));
+  ctx.fillStyle = wall; ctx.fillRect(0,0,W,H*0.62);
+  // floor
+  const floor = ctx.createLinearGradient(0,H*0.62,0,H);
+  floor.addColorStop(0, getVar('--floor')); floor.addColorStop(1, getVar('--floor2'));
+  ctx.fillStyle = floor; ctx.fillRect(0,H*0.62,W,H*0.38);
+  // baseboard
+  ctx.fillStyle = 'rgba(0,0,0,.06)'; ctx.fillRect(0,H*0.62-4,W,4);
+
+  // a cozy window
+  ctx.fillStyle = '#bfe0ef'; roundRect(W*0.10, H*0.12, W*0.24, H*0.20, 8); ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 6; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.22, H*0.12); ctx.lineTo(W*0.22, H*0.32);
+  ctx.moveTo(W*0.10, H*0.22); ctx.lineTo(W*0.34, H*0.22); ctx.stroke();
+
+  // an easel (she likes drawing 🎨)
+  const ex = W*0.74, ey = H*0.30;
+  ctx.strokeStyle = '#8a5a3a'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex-14, ey+70); ctx.moveTo(ex, ey); ctx.lineTo(ex+14, ey+70); ctx.stroke();
+  ctx.fillStyle = '#fffdf7'; roundRect(ex-22, ey-4, 44, 40, 3); ctx.fill();
+  ctx.fillStyle = getVar('--accent'); ctx.fillRect(ex-14, ey+6, 12, 12);
+  ctx.fillStyle = getVar('--good');   ctx.fillRect(ex+2,  ey+16, 14, 10);
+
+  // a cookie plate near the floor
+  const px = W*0.20, py = H*0.80;
+  ctx.fillStyle='#e9e2d6'; ctx.beginPath(); ctx.ellipse(px,py,26,9,0,0,7); ctx.fill();
+  ctx.fillStyle='#c98a4b'; ctx.beginPath(); ctx.arc(px-6,py-3,7,0,7); ctx.arc(px+7,py-2,7,0,7); ctx.fill();
+  ctx.fillStyle='#5a3b22';
+  ctx.fillRect(px-8,py-4,1.6,1.6); ctx.fillRect(px-3,py-6,1.6,1.6); ctx.fillRect(px+8,py-3,1.6,1.6);
+
+  // little rug
+  ctx.fillStyle = 'rgba(224,122,139,.25)';
+  ctx.beginPath(); ctx.ellipse(W*0.5, H*0.82, W*0.34, H*0.09, 0, 0, 7); ctx.fill();
+}
+
+function drawPet(){
+  const acting = pet.animLock > 0;
+
+  // choose which sheet, row and frame to draw
+  let sh, row, frame;
+  if (acting && (pet.action==='eat' || pet.action==='draw') && sheets[pet.action] && sheets[pet.action].ready){
+    sh = sheets[pet.action];                         // dedicated action animation
+    row = 0;
+    frame = pet.frame % sh.cfg.cols;
+  } else if (sheets.walk && sheets.walk.ready){
+    sh = sheets.walk;
+    row = sh.cfg.rowMap[acting ? 'down' : pet.dir] ?? 0;   // face forward while acting
+    frame = (!acting && pet.moving) ? (pet.frame % sh.cfg.cols) : 0;
+  } else {
+    // art still loading -> placeholder so the game is playable
+    const size = 84;
+    const bob = Math.sin(pet.bob*6) * (pet.moving?2.5:1.2);
+    ctx.fillStyle = 'rgba(0,0,0,.15)';
+    ctx.beginPath(); ctx.ellipse(pet.x, pet.y-6, size*0.30, size*0.10, 0, 0, 7); ctx.fill();
+    drawPlaceholder(pet.x, pet.y - size*0.55 + bob, size);
+    return;
+  }
+
+  const dispH = sh.cfg.displayH || 150;
+  const dispW = dispH * (sh.fw / sh.fh);
+  const bob = (!acting && pet.moving) ? Math.abs(Math.sin(pet.bob*10)) * 3 : 0;
+  const foot = (sh.cfg.footInset || 0) * dispH;    // shift down so feet meet the floor
+  const feetX = pet.x, feetY = pet.y + foot;
+
+  // shadow (pinned to the ground line, doesn't bob or shift with footInset)
+  ctx.fillStyle = 'rgba(0,0,0,.16)';
+  ctx.beginPath(); ctx.ellipse(pet.x, pet.y-4, dispW*0.32, dispH*0.05, 0, 0, 7); ctx.fill();
+
+  ctx.drawImage(
+    sh.canvas,
+    frame*sh.fw, row*sh.fh, sh.fw, sh.fh,
+    feetX - dispW/2, feetY - dispH - bob, dispW, dispH
+  );
+
+  // hugging has no dedicated sheet yet -> float a heart above her head
+  if (acting && pet.action==='hug'){
+    ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('💗', feetX, feetY - dispH + 4 + Math.sin(pet.bob*5)*3);
+  }
+}
+
+/* Placeholder "her": a friendly blob shown only while the walk sheet loads. */
+function drawPlaceholder(gx, gy, size){
+  const mi = moodInfo();
+  ctx.save();
+  ctx.translate(gx, gy);
+
+  const squash = pet.moving ? 1+Math.sin(pet.bob*12)*0.04 : 1;
+  const r = size*0.34;
+
+  // body
+  ctx.fillStyle = getVar('--accent2');
+  ctx.beginPath(); ctx.ellipse(0, 0, r*0.9, r*squash, 0, 0, 7); ctx.fill();
+  // head
+  ctx.fillStyle = '#ffe0c2';
+  ctx.beginPath(); ctx.arc(0, -r*1.05, r*0.66, 0, 7); ctx.fill();
+  // hair
+  ctx.fillStyle = '#6b4a34';
+  ctx.beginPath(); ctx.arc(0, -r*1.25, r*0.68, Math.PI, 0); ctx.fill();
+  ctx.fillRect(-r*0.68, -r*1.25, r*0.22, r*0.9);
+  ctx.fillRect( r*0.46, -r*1.25, r*0.22, r*0.9);
+  // eyes
+  ctx.fillStyle = '#3a2a20';
+  const eo = (mi.key==='sad') ? 0.6 : 1;
+  ctx.beginPath(); ctx.arc(-r*0.22, -r*1.02, 2.6*eo, 0, 7); ctx.arc(r*0.22, -r*1.02, 2.6*eo, 0, 7); ctx.fill();
+  // mouth by mood
+  ctx.strokeStyle = '#b5544f'; ctx.lineWidth = 2.2; ctx.beginPath();
+  if (mi.key==='happy'){ ctx.arc(0, -r*0.82, r*0.24, 0.15*Math.PI, 0.85*Math.PI); }
+  else if (mi.key==='sad'){ ctx.arc(0, -r*0.70, r*0.24, 1.15*Math.PI, 1.85*Math.PI); }
+  else { ctx.moveTo(-r*0.14, -r*0.80); ctx.lineTo(r*0.14, -r*0.80); }
+  ctx.stroke();
+  // cheeks
+  ctx.fillStyle = 'rgba(224,122,139,.5)';
+  ctx.beginPath(); ctx.arc(-r*0.34, -r*0.90, 3, 0, 7); ctx.arc(r*0.34, -r*0.90, 3, 0, 7); ctx.fill();
+
+  // little prop hints per action
+  if (pet.animLock > 0){
+    ctx.font = (r*0.9)+'px serif'; ctx.textAlign='center';
+    const em = pet.action==='eat' ? '🍪' : pet.action==='draw' ? '🎨' : '💗';
+    ctx.fillText(em, r*0.9, -r*0.2);
+  }
+  ctx.restore();
+}
+
+/* utils */
+function roundRect(x,y,w,h,rr){ ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr); ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath(); }
+function getVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+/* ---------- boot ---------- */
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  document.getElementById('banner').classList.add('hide');
+  started = true;
+  say('Hi! 💛');
+  save();
+});
+resize();
+refreshHUD();
+requestAnimationFrame(loop);
+window.addEventListener('beforeunload', save);
+</script>
+</body>
+</html>
