@@ -300,10 +300,11 @@ function doAction(kind){
   cooldown = 0.6;
 
   if (kind === 'feed'){
-    if (state.hunger >= 100) {
+    const wouldOverfeed = state.hunger + CONFIG.gains.feed > 100;
+    state.hunger = clamp(state.hunger + CONFIG.gains.feed);
+    if (wouldOverfeed) {
       state.overfed += CONFIG.gains.feed;
       if (state.overfed >= 70) {
-        // Throw up — all stats halved
         state.hunger = state.hunger * 0.5;
         state.fun = state.fun * 0.5;
         state.love = state.love * 0.5;
@@ -313,20 +314,19 @@ function doAction(kind){
         playAnim('eat', 1.6); say(pick(LINES.feedFull)); burst('🍪');
       }
     } else {
-      state.hunger = clamp(state.hunger + CONFIG.gains.feed);
       state.overfed = 0;
       playAnim('eat', 1.6); say(pick(LINES.feed)); burst('🍪');
     }
   }
   if (kind === 'draw'){
-    if (state.fun >= 100) {
+    const wouldOverdraw = state.fun + CONFIG.gains.draw > 100;
+    state.fun = clamp(state.fun + CONFIG.gains.draw);
+    state.love = clamp(state.love+6);
+    if (wouldOverdraw) {
       state.overdraw += CONFIG.gains.draw;
       state.hunger = clamp(state.hunger - state.overdraw * 0.3);
-      state.love = clamp(state.love+6);
       playAnim('draw',1.8); say(pick(LINES.drawHungry)); burst('🎨');
     } else {
-      state.fun = clamp(state.fun + CONFIG.gains.draw);
-      state.love = clamp(state.love+6);
       state.overdraw = 0;
       playAnim('draw',1.8); say(pick(LINES.draw)); burst('🎨'); burst('🌈');
     }
