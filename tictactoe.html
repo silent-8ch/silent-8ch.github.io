@@ -697,12 +697,13 @@
     }
 
     function startHeartbeat() {
-      // Write heartbeat immediately, then every HEARTBEAT_MS
       const hbKey = 'heartbeat' + myMark;
-      gameRef.child(hbKey).set(firebase.database.ServerValue.TIMESTAMP);
+      // Set interval BEFORE first write — Firebase fires listeners synchronously
+      // on local writes, so heartbeatInterval must be set to prevent re-entry
       heartbeatInterval = setInterval(() => {
         if (gameRef) gameRef.child(hbKey).set(firebase.database.ServerValue.TIMESTAMP);
       }, HEARTBEAT_MS);
+      gameRef.child(hbKey).set(firebase.database.ServerValue.TIMESTAMP);
 
       // Check opponent's heartbeat
       disconnectCheckInterval = setInterval(() => {
