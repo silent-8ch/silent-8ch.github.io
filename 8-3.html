@@ -682,13 +682,15 @@ function drawCloud(cx, cy, scale) {
 
 // Gentle open-ocean swells
 function drawSwell(baseY, t, speed, amp, freq, color) {
+  // Ocean swells heave vertically — surface rises and falls in place
+  const heave = Math.sin(t * speed) * amp;
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(0, baseY + amp);
   for (let x = 0; x <= W; x += 4) {
-    const y = baseY + Math.sin(x * freq + t * speed) * amp
-      + Math.sin(x * freq * 1.7 + t * speed * 0.6 + 2) * amp * 0.3;
-    ctx.lineTo(x, y);
+    const shape = Math.sin(x * freq) * amp * 0.4
+      + Math.sin(x * freq * 2.1 + 1.5) * amp * 0.2;
+    ctx.lineTo(x, baseY + heave + shape);
   }
   ctx.lineTo(W, baseY + amp + 6);
   ctx.lineTo(0, baseY + amp + 6);
