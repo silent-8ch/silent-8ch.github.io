@@ -68,6 +68,16 @@
     20%{opacity:1;transform:translate(-50%,-90%) scale(1.15);}
     100%{opacity:0;transform:translate(-50%,-220%) scale(1);}
   }
+  .vomit{position:absolute;pointer-events:none;font-size:20px;z-index:6;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.2));}
+  .vomit-pool{position:absolute;pointer-events:none;font-size:16px;z-index:5;
+    opacity:0;animation:poolFade 3s ease-out forwards;}
+  @keyframes poolFade{
+    0%{opacity:0;transform:scale(.5);}
+    15%{opacity:1;transform:scale(1);}
+    75%{opacity:1;}
+    100%{opacity:0;transform:scale(.8);}
+  }
   #speech{
     position:absolute;left:0;top:0;transform:translate(-50%,-100%);
     background:#fff;color:var(--ink);padding:8px 14px;border-radius:16px;
@@ -309,7 +319,7 @@ function doAction(kind){
         state.fun = state.fun * 0.5;
         state.love = state.love * 0.5;
         state.overfed = 0;
-        playAnim('eat', 1.6); say(pick(LINES.throwup)); burst('🤢'); burst('🤮');
+        playAnim('eat', 1.6); say(pick(LINES.throwup)); throwUpFx();
       } else {
         playAnim('eat', 1.6); say(pick(LINES.feedFull)); burst('🍪');
       }
@@ -389,6 +399,60 @@ function fxAt(px, py, chars){
 }
 function burst(ch){ for(let i=0;i<3;i++) setTimeout(()=> fxAt(pet.x + rand(-24,24), pet.y-30, ch), i*90); }
 function hearts(){ for(let i=0;i<5;i++) setTimeout(()=> fxAt(pet.x + rand(-30,30), pet.y-30, pick(['💗','💛','💖'])), i*80); }
+
+function throwUpFx(){
+  const r = cv.getBoundingClientRect();
+  const wrapR = stagewrap.getBoundingClientRect();
+  const sh = SHEETS.walk;
+  const dispH = sh ? sh.displayH || 150 : 150;
+
+  // mouth position (roughly mid-face)
+  const mouthY = pet.y - dispH * 0.55;
+  // feet position (where cookies pool)
+  const feetY = pet.y;
+
+  const toScreenX = (px) => (px / W) * r.width + (r.left - wrapR.left);
+  const toScreenY = (py) => (py / H) * r.height + (r.top - wrapR.top);
+
+  const mouthSX = toScreenX(pet.x);
+  const mouthSY = toScreenY(mouthY);
+  const feetSY = toScreenY(feetY);
+  const fallDist = feetSY - mouthSY;
+
+  // Stream of cookies falling from mouth
+  const numCookies = 8;
+  for (let i = 0; i < numCookies; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'vomit';
+      el.textContent = '🍪';
+      const startX = mouthSX + rand(-8, 8);
+      el.style.left = startX + 'px';
+      el.style.top = mouthSY + 'px';
+      stagewrap.appendChild(el);
+
+      const xDrift = rand(-20, 20);
+      const dur = rand(400, 600);
+      el.animate([
+        { top: mouthSY + 'px', left: startX + 'px', opacity: 1, transform: 'rotate(0deg) scale(1)' },
+        { top: feetSY + 'px', left: (startX + xDrift) + 'px', opacity: 1, transform: 'rotate(' + rand(-180, 180) + 'deg) scale(0.7)' }
+      ], { duration: dur, easing: 'ease-in', fill: 'forwards' });
+
+      setTimeout(() => el.remove(), dur);
+
+      // After each cookie lands, add it to the pool
+      setTimeout(() => {
+        const pool = document.createElement('div');
+        pool.className = 'vomit-pool';
+        pool.textContent = '🍪';
+        pool.style.left = (startX + xDrift + rand(-6, 6)) + 'px';
+        pool.style.top = (feetSY + rand(-4, 4)) + 'px';
+        stagewrap.appendChild(pool);
+        setTimeout(() => pool.remove(), 3000);
+      }, dur);
+    }, i * 120);
+  }
+}
 
 /* ---------- HUD ---------- */
 const fills = { hunger:document.getElementById('f-hunger'), fun:document.getElementById('f-fun'), love:document.getElementById('f-love') };
