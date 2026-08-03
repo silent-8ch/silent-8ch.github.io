@@ -842,13 +842,18 @@
 
     function leaveGame() {
       stopHeartbeat();
-      if (gameListener) gameRef.off('value', gameListener);
+      if (gameListener && gameRef) {
+        gameRef.off('value', gameListener);
+        gameListener = null;
+      }
       if (gameRef) {
-        gameRef.child('player' + myMark).remove();
-        gameRef.once('value', snap => {
+        const ref = gameRef;
+        const mark = myMark;
+        ref.child('player' + mark).remove();
+        ref.once('value', snap => {
           const g = snap.val();
           if (g && !g.playerX && !g.playerO) {
-            gameRef.remove();
+            ref.remove();
           }
         });
       }
