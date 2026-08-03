@@ -166,29 +166,24 @@ const CONFIG = {
 };
 
 /* ----------------------------------------------------------------------------
-   SPRITE SHEETS
+   SPRITE SHEETS  (all sheets have transparent backgrounds)
    ----------------------------------------------------------------------------
    Each sheet is a grid of frames laid out cols x rows.
-     cols          frames across (the animation frames)
-     rows          rows down. For `walk` each row is a facing direction.
-     fps           playback speed
-     displayH      on-screen height in canvas px (feet pinned to the floor)
-     rowMap        (walk only) which row holds which facing direction
-     keyBackground true  -> sample the top-left pixel and make that flat colour
-                            transparent (magenta sheets)
-                   false -> draw as-is (sheets that already have transparency;
-                            also lets the page work from a plain file:// open)
+     cols       frames across (the animation frames)
+     rows       rows down. For `walk` each row is a facing direction.
+     fps        playback speed
+     displayH   on-screen height in canvas px (feet pinned to the floor)
+     footInset  fraction of empty space below her feet; she is shifted down by
+                this much so her feet rest on the floor (raise if she floats)
+     rowMap     (walk only) which row holds which facing direction
    To add/replace a sheet later, just edit the entry (src / cols / rows / fps).
    ---------------------------------------------------------------------------- */
 const SHEETS = {
-  // footInset = fraction of empty space below her feet in each frame; she is
-  // shifted down by this much so her feet rest on the floor (raise if floating).
   walk: { src:"k-walking3.png", cols:4, rows:4, fps:8, displayH:150, footInset:0.07,
-          keyBackground:false, rowMap:{ down:0, left:1, right:2, up:3 } },
-  eat:  { src:"k-eating.png",   cols:4, rows:1, fps:7, displayH:158, footInset:0.11, keyBackground:true },
-  draw: { src:"k-drawing.png",  cols:4, rows:1, fps:6, displayH:158, footInset:0.00, keyBackground:true },
+          rowMap:{ down:0, left:1, right:2, up:3 } },
+  eat:  { src:"k-eating.png",   cols:4, rows:1, fps:7, displayH:158, footInset:0.11 },
+  draw: { src:"k-drawing.png",  cols:4, rows:1, fps:6, displayH:158, footInset:0.00 },
 };
-const BG_TOLERANCE = 90;                          // colour-key sensitivity (0-441)
 
 /* Things she "says" — pulled at random per action/mood. Personalize freely. */
 const LINES = {
@@ -222,24 +217,7 @@ function loadSheet(key, cfg){
   img.onload = ()=>{
     const fw = Math.floor(img.width  / cfg.cols);
     const fh = Math.floor(img.height / cfg.rows);
-    const oc = document.createElement('canvas');
-    oc.width = img.width; oc.height = img.height;
-    const octx = oc.getContext('2d');
-    octx.drawImage(img, 0, 0);
-    if (cfg.keyBackground){
-      try{
-        const id = octx.getImageData(0,0,img.width,img.height);
-        const d = id.data;
-        const kr=d[0], kg=d[1], kb=d[2];           // background = top-left pixel
-        const tol = BG_TOLERANCE * BG_TOLERANCE;
-        for (let i=0;i<d.length;i+=4){
-          const dr=d[i]-kr, dg=d[i+1]-kg, db=d[i+2]-kb;
-          if (dr*dr+dg*dg+db*db < tol) d[i+3]=0;   // knock out background
-        }
-        octx.putImageData(id,0,0);
-      }catch(e){ /* browser blocked pixel access (file:// CORS): raw sheet is used */ }
-    }
-    rec.canvas = oc; rec.fw = fw; rec.fh = fh; rec.ready = true;
+    rec.canvas = img; rec.fw = fw; rec.fh = fh; rec.ready = true;
   };
   img.src = cfg.src;
 }
