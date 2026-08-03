@@ -69,10 +69,11 @@
     100%{opacity:0;transform:translate(-50%,-220%) scale(1);}
   }
   #speech{
-    position:absolute;left:50%;top:14px;transform:translateX(-50%);
+    position:absolute;left:0;top:0;transform:translate(-50%,-100%);
     background:#fff;color:var(--ink);padding:8px 14px;border-radius:16px;
     font-size:14px;font-weight:600;box-shadow:0 4px 12px var(--shadow);
     opacity:0;transition:opacity .25s;max-width:80%;text-align:center;z-index:7;
+    white-space:nowrap;pointer-events:none;
   }
   #speech.show{opacity:1;}
   #speech:after{content:"";position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);
@@ -361,8 +362,19 @@ const speech = document.getElementById('speech');
 let speechTimer = null;
 function say(text){
   speech.textContent = text; speech.classList.add('show');
+  positionSpeech();
   clearTimeout(speechTimer);
   speechTimer = setTimeout(()=> speech.classList.remove('show'), 1800);
+}
+function positionSpeech(){
+  const r = cv.getBoundingClientRect();
+  const wrapR = stagewrap.getBoundingClientRect();
+  const sh = SHEETS.walk;
+  const dispH = sh ? sh.displayH || 150 : 150;
+  const sx = (pet.x / W) * r.width + (r.left - wrapR.left);
+  const sy = ((pet.y - dispH - 10) / H) * r.height + (r.top - wrapR.top);
+  speech.style.left = sx + 'px';
+  speech.style.top = sy + 'px';
 }
 function fxAt(px, py, chars){
   const r = cv.getBoundingClientRect();
@@ -425,6 +437,7 @@ function loop(ts){
   }
 
   render();
+  if (speech.classList.contains('show')) positionSpeech();
   requestAnimationFrame(loop);
 }
 let hudAccum = 0, saveAccum = 0;
