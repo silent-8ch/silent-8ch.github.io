@@ -703,14 +703,14 @@ function drawSwell(baseY, t, speed, amp, freq, color) {
    4. recede    — foam thins, pulls back, fades away
 */
 const waves = [];
-const WAVE_COUNT = 3;
-const WAVE_CYCLE = 5; // seconds per full wave lifecycle
+const WAVE_COUNT = 5;
+const WAVE_CYCLE = 9; // seconds per full wave lifecycle (slow animation)
 
-// Stagger the waves so they don't all break at once
+// Stagger waves closely so they emerge often but animate slowly
 for (let i = 0; i < WAVE_COUNT; i++) {
   waves.push({
     phase: (i / WAVE_COUNT) * WAVE_CYCLE,
-    seed: Math.random() * 100, // unique shape per wave
+    seed: Math.random() * 100,
     amplitude: 0.8 + Math.random() * 0.4,
   });
 }
@@ -734,7 +734,7 @@ function drawBreakingWave(wave, oceanTop, oceanBot) {
     const approachP = p / 0.35;
     const waveY = oceanTop + (shoreY - oceanTop) * (0.3 + approachP * 0.65);
     const height = (6 + approachP * 16) * amp;
-    const width = W * 0.9;
+    const width = W * 1.6;
 
     // Wave body (dark water mound)
     const bodyGrad = ctx.createLinearGradient(0, waveY - height, 0, waveY + 4);
