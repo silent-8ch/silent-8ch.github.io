@@ -319,7 +319,7 @@ function doAction(kind){
         state.fun = state.fun * 0.5;
         state.love = state.love * 0.5;
         state.overfed = 0;
-        playAnim('eat', 1.6); say(pick(LINES.throwup)); throwUpFx();
+        playAnim('eat', 2.0, 2); say(pick(LINES.throwup)); throwUpFx();
       } else {
         playAnim('eat', 1.6); say(pick(LINES.feedFull)); burst('🍪');
       }
@@ -362,8 +362,9 @@ stagewrap.addEventListener('pointerdown', (e)=>{
 });
 
 /* ---------- scripted animation ---------- */
-function playAnim(action, dur){
-  pet.action = action; pet.animLock = dur; pet.frame = 0; pet.frameTime = 0;
+function playAnim(action, dur, lockFrame){
+  pet.action = action; pet.animLock = dur; pet.frame = lockFrame ?? 0; pet.frameTime = 0;
+  pet.frameLock = lockFrame ?? null;
   pet.dir = 'down';                    // face the player during an action
 }
 
@@ -517,8 +518,8 @@ function updatePet(dt){
     pet.animLock -= dt;
     pet.moving = false;
     const s = SHEETS[pet.action] || SHEETS.walk;   // eat/draw have their own sheets
-    advanceFrame(dt, s.fps, s.cols);
-    if (pet.animLock <= 0){ pet.action = null; pet.frame = 0; pet.frameTime = 0; }
+    if (pet.frameLock === null) advanceFrame(dt, s.fps, s.cols);
+    if (pet.animLock <= 0){ pet.action = null; pet.frame = 0; pet.frameTime = 0; pet.frameLock = null; }
     return;
   }
 
