@@ -319,9 +319,8 @@
     let authIsEmailLink = false;
     let statsUpdatedForGame = false;
     let heartbeatInterval = null;
-    let disconnectCheckInterval = null;
-    const HEARTBEAT_MS = 3000;
-    const DISCONNECT_THRESHOLD_MS = 10000;
+    const HEARTBEAT_MS = 5000;
+    const DISCONNECT_THRESHOLD_MS = 15000;
 
     const WINS = [
       [0,1,2],[3,4,5],[6,7,8],
@@ -584,20 +583,29 @@
       document.getElementById('play-btn').classList.add('waiting');
 
       const lobbyRef = db.ref('ttt/lobby');
-      const snap = await lobbyRef.orderByChild('created').limitToFirst(1).once('value');
       let found = false;
 
-      snap.forEach(child => {
-        const data = child.val();
-        if (data.playerId !== currentUser.uid) {
+      // Atomically claim a lobby entry using transaction
+      const snap = await lobbyRef.orderByChild('created').limitToFirst(1).once('value');
+      const entries = [];
+      snap.forEach(child => entries.push(child));
+
+      for (const child of entries) {
+        if (child.val().playerId === currentUser.uid) continue;
+        // Try to atomically claim this entry
+        const result = await child.ref.transaction(current => {
+          if (current === null) return; // already claimed by someone else
+          return null; // claim it by deleting
+        });
+        if (result.committed && result.snapshot.val() === null) {
           gameId = child.key;
           myMark = 'O';
           found = true;
-          child.ref.remove();
-          db.ref('ttt/games/' + gameId + '/playerO').set(currentUser.uid);
-          db.ref('ttt/games/' + gameId + '/status').set('playing');
+          await db.ref('ttt/games/' + gameId + '/playerO').set(currentUser.uid);
+          await db.ref('ttt/games/' + gameId + '/status').set('playing');
+          break;
         }
-      });
+      }
 
       if (!found) {
         gameId = db.ref('ttt/games').push().key;
@@ -635,59 +643,7 @@
       stopHeartbeat();
 
       gameListener = gameRef.on('value', snap => {
-        const g = snap.val();
-        if (!g) {
-          setStatus('Opponent left', 'draw');
-          recordResult('draw');
-          document.getElementById('game-over-actions').style.display = '';
-          stopHeartbeat();
-          return;
-        }
-
-        const board = g.board || ['','','','','','','','',''];
-        const turn = g.turn;
-        const winner = g.winner;
-        const winLine = g.winLine;
-
-        renderBoard(board, turn, winner, winLine);
-
-        if (g.status === 'waiting') {
-          setStatus('Waiting for opponent...', 'highlight');
-          document.getElementById('status').classList.add('waiting');
-        } else if (g.status === 'disconnected') {
-          if (g.disconnectedPlayer === myMark) {
-            setStatus('You disconnected - loss', 'lose');
-            recordResult('loss');
-          } else {
-            setStatus('Opponent disconnected - draw', 'draw');
-            recordResult('draw');
-          }
-          document.getElementById('game-over-actions').style.display = '';
-          stopHeartbeat();
-        } else if (winner === 'draw') {
-          setStatus('Draw!', 'draw');
-          document.getElementById('game-over-actions').style.display = '';
-          recordResult('draw');
-          stopHeartbeat();
-        } else if (winner) {
-          if (winner === myMark) {
-            setStatus('You win!', 'win');
-            recordResult('win');
-          } else {
-            setStatus('You lose!', 'lose');
-            recordResult('loss');
-          }
-          document.getElementById('game-over-actions').style.display = '';
-          stopHeartbeat();
-        } else if (turn === myMark) {
-          setStatus('Your turn', 'highlight');
-        } else {
-          setStatus("Opponent's turn");
-        }
-
-        if (g.status === 'playing' && !heartbeatInterval) {
-          startHeartbeat();
-        }
+        handleGameState(snap.val());
       });
 
       gameRef.child('player' + myMark).onDisconnect().remove();
@@ -696,46 +652,94 @@
       }
     }
 
-    function startHeartbeat() {
-      const hbKey = 'heartbeat' + myMark;
-      // Set interval BEFORE first write — Firebase fires listeners synchronously
-      // on local writes, so heartbeatInterval must be set to prevent re-entry
-      heartbeatInterval = setInterval(() => {
-        if (gameRef) gameRef.child(hbKey).set(firebase.database.ServerValue.TIMESTAMP);
-      }, HEARTBEAT_MS);
-      gameRef.child(hbKey).set(firebase.database.ServerValue.TIMESTAMP);
+    function handleGameState(g) {
+      if (!g) {
+        setStatus('Opponent left', 'draw');
+        recordResult('draw');
+        document.getElementById('game-over-actions').style.display = '';
+        stopHeartbeat();
+        return;
+      }
 
-      // Check opponent's heartbeat
-      disconnectCheckInterval = setInterval(() => {
+      renderBoard(
+        g.board || ['','','','','','','','',''],
+        g.turn, g.winner, g.winLine
+      );
+
+      if (g.status === 'waiting') {
+        setStatus('Waiting for opponent...', 'highlight');
+        document.getElementById('status').classList.add('waiting');
+      } else if (g.status === 'disconnected') {
+        if (g.disconnectedPlayer === myMark) {
+          setStatus('You disconnected - loss', 'lose');
+          recordResult('loss');
+        } else {
+          setStatus('Opponent disconnected - draw', 'draw');
+          recordResult('draw');
+        }
+        document.getElementById('game-over-actions').style.display = '';
+        stopHeartbeat();
+      } else if (g.winner === 'draw') {
+        setStatus('Draw!', 'draw');
+        document.getElementById('game-over-actions').style.display = '';
+        recordResult('draw');
+        stopHeartbeat();
+      } else if (g.winner) {
+        if (g.winner === myMark) {
+          setStatus('You win!', 'win');
+          recordResult('win');
+        } else {
+          setStatus('You lose!', 'lose');
+          recordResult('loss');
+        }
+        document.getElementById('game-over-actions').style.display = '';
+        stopHeartbeat();
+      } else if (g.turn === myMark) {
+        setStatus('Your turn', 'highlight');
+      } else {
+        setStatus("Opponent's turn");
+      }
+
+      if (g.status === 'playing' && !heartbeatInterval) {
+        startHeartbeat();
+      }
+    }
+
+    function startHeartbeat() {
+      const hbRef = db.ref('ttt/heartbeats/' + gameId + '/' + myMark);
+      // Set interval BEFORE first write to prevent re-entry from sync listeners
+      heartbeatInterval = setInterval(() => {
         if (!gameRef) return;
+        // Write heartbeat to separate path (won't trigger game listener)
+        hbRef.set(firebase.database.ServerValue.TIMESTAMP);
+        // Poll full game state as redundancy
         gameRef.once('value', snap => {
           const g = snap.val();
-          if (!g || g.winner || g.status !== 'playing') return;
-
+          if (!g) return;
+          handleGameState(g);
+          // Check opponent disconnect
+          if (g.status !== 'playing' || g.winner) return;
           const opponentMark = myMark === 'X' ? 'O' : 'X';
-          const opponentHb = g['heartbeat' + opponentMark];
-          if (!opponentHb) return; // opponent hasn't started heartbeating yet
-
-          const now = Date.now();
-          if (now - opponentHb > DISCONNECT_THRESHOLD_MS) {
-            // Opponent disconnected — record on the game
-            gameRef.update({
-              status: 'disconnected',
-              disconnectedPlayer: opponentMark
-            });
-            // Record loss for the disconnected player
-            const opponentUid = g['player' + opponentMark];
-            if (opponentUid) {
-              db.ref('ttt/players/' + opponentUid).transaction(p => {
-                if (!p) return p;
-                p.losses = (p.losses || 0) + 1;
-                p.streak = 0;
-                return p;
-              });
+          db.ref('ttt/heartbeats/' + gameId + '/' + opponentMark).once('value', hbSnap => {
+            const opponentHb = hbSnap.val();
+            if (!opponentHb) return;
+            if (Date.now() - opponentHb > DISCONNECT_THRESHOLD_MS) {
+              gameRef.update({ status: 'disconnected', disconnectedPlayer: opponentMark });
+              const opponentUid = g['player' + opponentMark];
+              if (opponentUid) {
+                db.ref('ttt/players/' + opponentUid).transaction(p => {
+                  if (!p) return p;
+                  p.losses = (p.losses || 0) + 1;
+                  p.streak = 0;
+                  return p;
+                });
+              }
             }
-          }
+          });
         });
       }, HEARTBEAT_MS);
+      hbRef.set(firebase.database.ServerValue.TIMESTAMP);
+      hbRef.onDisconnect().remove();
     }
 
     async function newGame() {
@@ -776,7 +780,6 @@
 
     function stopHeartbeat() {
       if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
-      if (disconnectCheckInterval) { clearInterval(disconnectCheckInterval); disconnectCheckInterval = null; }
     }
 
     // ── Stats ───────────────────────────────────────────────────────
