@@ -40,7 +40,8 @@ const SCENE_LABELS = {
   millinery:'Millinery', hedgemaze:'Hedge Maze', optician:'Optician', cornmaze:'Corn Maze',
   petshop:'Pet Shop', balloonfest:'Balloon Festival', nursery:'Nursery',
   nightmarket:'Night Market', ramenshop:'Ramen Shop', moonlitjetty:'Moonlit Jetty',
-  orchidroom:'Orchid Conservatory',
+  orchidroom:'Orchid Conservatory', jazzclub:'Jazz Club', ferriswheel:'Ferris Wheel',
+  mushroomglade:'Mushroom Glade', hammam:'Hammam Bathhouse',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

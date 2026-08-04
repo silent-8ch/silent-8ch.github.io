@@ -245,9 +245,27 @@ const SCENE_INTERACT = (()=>{
   g(['perfumery','millinery','balletstudio'], {lines:['So elegant 💃','I feel fancy!','Twirl with me 🩰'], emoji:'💃', love:5});
   g(['desert','saltflats'], {lines:['So wide and warm ☀️','Endless sky!','Careful, it\'s toasty 🌵'], emoji:'🌵', energy:4});
   g(['teahouse'], {lines:['Tea time? 🍵','So peaceful here…','Mmm, warm and cozy 🍵'], emoji:'🍵', energy:5});
+  g(['nightmarket'], {lines:['So many lanterns! 🏮','Look at all the stalls ✨','Smells amazing here 😋'], emoji:'🏮', fun:5});
+  g(['ramenshop'], {lines:['Ramen! 🍜','Slurp slurp 😋','So warm and yummy'], emoji:'🍜', hunger:5});
+  g(['moonlitjetty'], {lines:['So peaceful on the water 🌙','The moonlight… ✨','Sit with me here 🥰'], emoji:'🌙', love:5});
+  g(['orchidroom'], {lines:['Beautiful orchids 🌸','So delicate!','It smells divine 💐'], emoji:'🌸', fun:5});
+  g(['campsite'], {lines:['Cozy campfire 🔥','Marshmallows? 🥰','Under the stars ✨'], emoji:'🔥', energy:5});
+  g(['mountain','cliffs','canyon','sanddunes','riceterraces'], {lines:['What a view! ⛰️','Fresh air 🌿','So peaceful up here'], emoji:'⛰️', energy:5});
+  g(['toyshop','comicshop','trainroom','puppettheater','bowling','magicshop','escaperoom','chesshall'], {lines:['So much fun stuff! 🎁','Can we play?','This is exciting! 🎉'], emoji:'🎉', fun:5});
+  g(['rainystreet'], {lines:['I love the rain 🌧️','Splash! ☔','Cozy and grey 💙'], emoji:'🌧️', love:4});
+  g(['sciencelab','naturalhistory','cartographer','optician','apothecary','clockmaker','antiqueshop'], {lines:['So many curiosities! 🔍','How fascinating 🤓','I want to learn everything'], emoji:'🔍', fun:4});
+  g(['waterfall','geyser','bayou','cranberrybog'], {lines:['Listen to the water 💧','So wild and beautiful 🌿','Nature is amazing!'], emoji:'💧', energy:5});
+  g(['lighthouse','windmill'], {lines:['Look how tall! 🗼','What a landmark ✨','I can see so far'], emoji:'🌅', fun:4});
+  g(['winecellar','barbershop','darkroom'], {lines:['So atmospheric here','Cozy little spot 💛','I like the quiet'], emoji:'💛', love:4});
+  g(['volcano','fireworks','prairiestorm'], {lines:['Wow, so dramatic! 🎆','Look at that! 😮','So powerful ✨'], emoji:'🎆', fun:5});
+  g(['fencing','boxinggym'], {lines:['En garde! 🤺','So energetic!','Let\'s train 💪'], emoji:'💪', energy:5});
+  g(['balloons','balloonfest'], {lines:['Balloons! 🎈','So colorful 🎈','Up up up! ✨'], emoji:'🎈', fun:5});
+  g(['recordingstudio'], {lines:['Let\'s make music 🎶','Sing with me! 🎤','La la la 🎵'], emoji:'🎤', fun:5});
+  g(['terrariumshop','nursery'], {lines:['Tiny green worlds 🌱','So cute and small!','Let\'s grow something 🌿'], emoji:'🌱', love:4});
+  g(['rooftop'], {lines:['What a view up here! 🌆','The city lights ✨','So high up 🥰'], emoji:'🌆', fun:5});
   return map;
 })();
-const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰'];
+const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛'];
 let interactCd = 0;
 function tapScene(px, py){
   if (interactCd > 0 || pet.animLock > 0) return;

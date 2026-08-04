@@ -267,3 +267,225 @@ function drawOrchidRoom(){
   pottedOrchid(W*0.88,'#c98be8');
 }
 registerScene('orchidroom', drawOrchidRoom);
+
+/* ── JAZZ CLUB (indoor · smoky lounge · live music) ── */
+function drawJazzClub(){
+  const t = sceneTime, stageY = H*0.64;
+
+  // deep plum wall
+  const wall=ctx.createLinearGradient(0,0,0,stageY); wall.addColorStop(0,'#1a0e1e'); wall.addColorStop(1,'#33122e');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,stageY);
+  // warm spotlight wash behind the stage
+  const spot=ctx.createRadialGradient(W*0.5,stageY-10,10,W*0.5,stageY-10,150);
+  spot.addColorStop(0,'rgba(255,180,90,.28)'); spot.addColorStop(1,'rgba(255,180,90,0)');
+  ctx.fillStyle=spot; ctx.fillRect(0,0,W,stageY);
+  // drifting smoke haze
+  for (let i=0;i<5;i++){ const hx=(i*90+t*10)%(W+80)-40, hy=H*0.14+i*18+Math.sin(t*0.5+i)*8;
+    ctx.fillStyle=`rgba(200,180,200,${0.05+0.03*Math.sin(t+i)})`; ctx.beginPath(); ctx.ellipse(hx,hy,44,16,0,0,7); ctx.fill(); }
+
+  // brick pattern hint
+  ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1;
+  for (let y=20;y<stageY;y+=16){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    for (let x=((y/16|0)%2)*16; x<W; x+=32){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+16); ctx.stroke(); } }
+
+  // hanging pendant lamps
+  for (const lx of [W*0.24,W*0.76]){ ctx.strokeStyle='#0a0510'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,H*0.12); ctx.stroke();
+    ctx.fillStyle='rgba(255,190,110,.25)'; ctx.beginPath(); ctx.arc(lx,H*0.15,18,0,7); ctx.fill();
+    ctx.fillStyle='#2a1a1a'; ctx.beginPath(); ctx.moveTo(lx-10,H*0.12); ctx.lineTo(lx+10,H*0.12); ctx.lineTo(lx+6,H*0.15); ctx.lineTo(lx-6,H*0.15); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=`rgba(255,210,130,${0.8+0.15*Math.sin(t*2+lx)})`; ctx.beginPath(); ctx.arc(lx,H*0.155,4,0,7); ctx.fill(); }
+
+  // grand piano (left of stage)
+  const pX=W*0.30, pY=stageY-4;
+  ctx.fillStyle='#0d0d10'; ctx.beginPath(); ctx.ellipse(pX,pY-6,44,20,0,0,7); ctx.fill();
+  ctx.fillStyle='#1a1a20'; ctx.fillRect(pX-40,pY-6,80,10);
+  // open lid
+  ctx.fillStyle='#141418'; ctx.beginPath(); ctx.moveTo(pX-40,pY-6); ctx.lineTo(pX-10,pY-40); ctx.lineTo(pX+30,pY-30); ctx.lineTo(pX+40,pY-6); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#3a3a44'; ctx.lineWidth=1; ctx.stroke();
+  // keys
+  ctx.fillStyle='#efe8dc'; ctx.fillRect(pX-30,pY+2,60,5);
+  ctx.fillStyle='#111'; for (let k=0;k<12;k++){ ctx.fillRect(pX-28+k*5,pY+2,2,3); }
+  // legs
+  ctx.fillStyle='#1a1a20'; ctx.fillRect(pX-34,pY+4,4,14); ctx.fillRect(pX+30,pY+4,4,14);
+
+  // upright bass (right)
+  const bX=W*0.72, bY=stageY-2;
+  ctx.strokeStyle='#4a2e18'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(bX,bY-60); ctx.lineTo(bX,bY-6); ctx.stroke();
+  ctx.fillStyle='#7a4a26'; ctx.beginPath(); ctx.ellipse(bX,bY-14,13,22,0,0,7); ctx.fill();
+  ctx.fillStyle='#5a3418'; ctx.beginPath(); ctx.ellipse(bX,bY-14,7,14,0,0,7); ctx.fill();
+  ctx.fillStyle='#2a1a10'; ctx.beginPath(); ctx.arc(bX,bY-60,4,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(240,230,200,.6)'; ctx.lineWidth=0.6; for (let s=-3;s<=3;s+=2){ ctx.beginPath(); ctx.moveTo(bX+s,bY-56); ctx.lineTo(bX+s,bY-8); ctx.stroke(); }
+
+  // floating music notes rising from the stage
+  ctx.fillStyle='rgba(255,220,150,.8)';
+  for (let i=0;i<6;i++){ const nx=W*0.5+Math.sin(t*0.7+i*1.3)*70; const ny=stageY-20-((t*22+i*40)%160);
+    ctx.beginPath(); ctx.ellipse(nx,ny,3,2.2,-0.4,0,7); ctx.fill(); ctx.fillRect(nx+2,ny-10,1.4,10); }
+
+  // wooden stage floor
+  const fl=ctx.createLinearGradient(0,stageY,0,H); fl.addColorStop(0,'#4a2e1c'); fl.addColorStop(1,'#301c10');
+  ctx.fillStyle=fl; ctx.fillRect(0,stageY,W,H-stageY);
+  ctx.fillStyle='rgba(255,190,110,.10)'; ctx.beginPath(); ctx.ellipse(W*0.5,stageY+40,120,26,0,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1; for (let x=0;x<W;x+=26){ ctx.beginPath(); ctx.moveTo(x,stageY); ctx.lineTo(x-6,H); ctx.stroke(); }
+}
+registerScene('jazzclub', drawJazzClub);
+
+/* ── FERRIS WHEEL AT NIGHT (outdoor · fairground) ── */
+function drawFerrisWheel(){
+  const t = sceneTime, groundY = H*0.74;
+
+  // dusk-to-night sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY);
+  sky.addColorStop(0,'#241a44'); sky.addColorStop(0.5,'#4a2a54'); sky.addColorStop(1,'#8a4a5a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  // early stars
+  for (let i=0;i<30;i++){ const sx=(i*83+7)%W, sy=(i*31+3)%(groundY*0.5);
+    ctx.fillStyle=`rgba(255,250,230,${0.2+0.3*Math.abs(Math.sin(t*1.2+i))})`; ctx.fillRect(sx,sy,1.1,1.1); }
+
+  // the wheel
+  const cx=W*0.5, cy=H*0.34, R=W*0.36, spokes=12, rot=t*0.25;
+  // support legs
+  ctx.strokeStyle='#2a2030'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx-40,groundY); ctx.moveTo(cx,cy); ctx.lineTo(cx+40,groundY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx-24,groundY); ctx.moveTo(cx,cy); ctx.lineTo(cx+24,groundY); ctx.stroke();
+  // rim glow
+  ctx.strokeStyle='rgba(255,210,120,.25)'; ctx.lineWidth=8; ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.stroke();
+  ctx.strokeStyle='#e8d0a0'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,R*0.5,0,7); ctx.stroke();
+  // spokes + cabins
+  const cols=['#e05a5a','#5ab0e0','#e0b040','#60c060','#c060c0'];
+  for (let i=0;i<spokes;i++){ const a=rot + i/spokes*Math.PI*2; const rx=cx+Math.cos(a)*R, ry=cy+Math.sin(a)*R;
+    ctx.strokeStyle='#c9b088'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(rx,ry); ctx.stroke();
+    // cabin hangs below the rim point
+    const col=cols[i%cols.length];
+    ctx.fillStyle=col; roundRect(rx-7,ry+2,14,11,3); ctx.fill();
+    ctx.fillStyle='#fff2c0'; ctx.fillRect(rx-4,ry+4,8,4);
+    // twinkling bulb at each rim node
+    ctx.fillStyle=`rgba(255,240,180,${0.6+0.4*Math.sin(t*4+i)})`; ctx.beginPath(); ctx.arc(rx,ry,2,0,7); ctx.fill(); }
+  // hub
+  ctx.fillStyle='#3a2e40'; ctx.beginPath(); ctx.arc(cx,cy,7,0,7); ctx.fill();
+  ctx.fillStyle='#ffe08a'; ctx.beginPath(); ctx.arc(cx,cy,3,0,7); ctx.fill();
+
+  // fairground ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#3a5a3a'); gr.addColorStop(1,'#24401f');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  // glowing ground reflection of the wheel
+  ctx.fillStyle='rgba(255,210,120,.06)'; ctx.beginPath(); ctx.ellipse(cx,groundY+18,90,14,0,0,7); ctx.fill();
+  // little striped booth on the side
+  const boX=W*0.14, boY=groundY;
+  ctx.fillStyle='#efe6d0'; ctx.fillRect(boX-20,boY-24,40,24);
+  for (let i=0;i<5;i++){ ctx.fillStyle= i%2?'#c0392b':'#efe6d0'; ctx.beginPath(); ctx.moveTo(boX-20+i*8,boY-24); ctx.lineTo(boX-16+i*8,boY-30); ctx.lineTo(boX-12+i*8,boY-24); ctx.fill(); }
+  ctx.fillStyle='#6a4a2e'; ctx.fillRect(boX-20,boY-6,40,6);
+  // string lights along the ground line
+  ctx.strokeStyle='rgba(120,90,60,.6)'; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=0;x<=W;x+=10){ const y=groundY-6+Math.sin(x*0.05)*4; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+  for (let x=8;x<W;x+=20){ const y=groundY-6+Math.sin(x*0.05)*4; ctx.fillStyle=`rgba(255,220,140,${0.7+0.3*Math.sin(t*3+x)})`; ctx.beginPath(); ctx.arc(x,y,2,0,7); ctx.fill(); }
+}
+registerScene('ferriswheel', drawFerrisWheel);
+
+/* ── GLOWING MUSHROOM GLADE (outdoor · magical forest at night) ── */
+function drawMushroomGlade(){
+  const t = sceneTime, groundY = H*0.66;
+
+  // dark enchanted sky through the canopy
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#0c1a1e'); sky.addColorStop(1,'#123028');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  // moon shafts of teal light
+  ctx.fillStyle='rgba(120,220,190,.06)';
+  for (let i=0;i<3;i++){ ctx.save(); ctx.translate(W*0.2+i*70,0); ctx.rotate(0.15); ctx.fillRect(0,0,30,groundY); ctx.restore(); }
+
+  // background tree silhouettes
+  ctx.fillStyle='#0a1c16';
+  for (let i=0;i<5;i++){ const tx=i*80+20; ctx.fillRect(tx-6,groundY-120,12,120);
+    ctx.beginPath(); ctx.arc(tx,groundY-120,26,0,7); ctx.fill(); }
+
+  // floating spores / fireflies drifting up
+  for (let i=0;i<26;i++){ const fx=(i*53+ Math.sin(t*0.4+i)*20)%W; const fy=(groundY - ((t*12+i*30)%(groundY)));
+    ctx.fillStyle=`rgba(150,255,210,${0.25+0.4*Math.abs(Math.sin(t*2+i))})`; ctx.beginPath(); ctx.arc(fx,fy,1.6,0,7); ctx.fill(); }
+
+  // mossy ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#1e3a24'); gr.addColorStop(1,'#122414');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  // glow patches on the ground
+  for (const gx of [W*0.2,W*0.5,W*0.8]){ const g=ctx.createRadialGradient(gx,groundY+14,4,gx,groundY+14,54);
+    g.addColorStop(0,'rgba(90,220,180,.22)'); g.addColorStop(1,'rgba(90,220,180,0)'); ctx.fillStyle=g; ctx.fillRect(gx-54,groundY,108,70); }
+
+  // glowing mushrooms of varying size (kept toward the sides)
+  function mushroom(mx,my,sc,cap){
+    ctx.save(); ctx.translate(mx,my); ctx.scale(sc,sc);
+    const glow=0.6+0.3*Math.sin(t*1.5+mx);
+    // under-cap glow
+    ctx.fillStyle=`rgba(150,255,210,${0.25*glow})`; ctx.beginPath(); ctx.arc(0,-2,20,0,7); ctx.fill();
+    // stem
+    ctx.fillStyle='#dfe8d8'; ctx.beginPath(); ctx.moveTo(-4,0); ctx.lineTo(-6,-16); ctx.lineTo(6,-16); ctx.lineTo(4,0); ctx.closePath(); ctx.fill();
+    // cap
+    ctx.fillStyle=cap; ctx.beginPath(); ctx.ellipse(0,-16,15,10,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle='#eaffef'; for (let k=0;k<4;k++){ const dx=-9+k*6; ctx.beginPath(); ctx.arc(dx,-18-Math.abs(dx)*0.15,2,0,7); ctx.fill(); }
+    // rim light
+    ctx.strokeStyle=`rgba(180,255,230,${glow})`; ctx.lineWidth=1.4; ctx.beginPath(); ctx.ellipse(0,-16,15,10,0,Math.PI,0); ctx.stroke();
+    ctx.restore();
+  }
+  mushroom(W*0.12,groundY+30,1.5,'#7a4ac0');
+  mushroom(W*0.24,groundY+16,0.9,'#c04a90');
+  mushroom(W*0.86,groundY+32,1.6,'#4a7ac0');
+  mushroom(W*0.74,groundY+14,0.85,'#c07a3a');
+  mushroom(W*0.5,groundY+8,0.6,'#5ac09a');
+
+  // a couple of glowing pebbles
+  ctx.fillStyle='rgba(140,240,200,.5)';
+  for (const px of [W*0.4,W*0.62]){ ctx.beginPath(); ctx.arc(px,groundY+34,3,0,7); ctx.fill(); }
+}
+registerScene('mushroomglade', drawMushroomGlade);
+
+/* ── HAMMAM (indoor · tiled steam bathhouse) ── */
+function drawHammam(){
+  const t = sceneTime, floorY = H*0.70;
+
+  // warm tiled wall
+  ctx.fillStyle='#d9c9a8'; ctx.fillRect(0,0,W,floorY);
+  // domed ceiling with star cut-outs (top band)
+  const domeH=H*0.20;
+  const dome=ctx.createLinearGradient(0,0,0,domeH); dome.addColorStop(0,'#3a5a6a'); dome.addColorStop(1,'#6a8a94');
+  ctx.fillStyle=dome; ctx.beginPath(); ctx.moveTo(0,domeH); ctx.quadraticCurveTo(W*0.5,-domeH*0.6,W,domeH); ctx.closePath(); ctx.fill();
+  // star-shaped light holes glowing
+  for (let i=0;i<9;i++){ const sx=W*0.12+i*W*0.095, sy=domeH*0.4+Math.sin(i*1.3)*10;
+    ctx.fillStyle=`rgba(255,240,190,${0.6+0.3*Math.sin(t*2+i)})`;
+    ctx.save(); ctx.translate(sx,sy); for (let k=0;k<8;k++){ ctx.rotate(Math.PI/4); ctx.fillRect(-1,0,2,4); } ctx.beginPath(); ctx.arc(0,0,2.4,0,7); ctx.fill(); ctx.restore(); }
+
+  // ornate tile pattern on the wall
+  ctx.strokeStyle='rgba(90,120,130,.4)'; ctx.lineWidth=1;
+  for (let y=domeH;y<floorY;y+=26){ for (let x=0;x<W;x+=26){
+    ctx.strokeRect(x,y,26,26);
+    ctx.fillStyle= ((x/26+y/26)|0)%2 ? 'rgba(70,130,140,.18)':'rgba(200,120,80,.14)';
+    ctx.beginPath(); ctx.moveTo(x+13,y+3); ctx.lineTo(x+23,y+13); ctx.lineTo(x+13,y+23); ctx.lineTo(x+3,y+13); ctx.closePath(); ctx.fill(); } }
+
+  // arched niche/doorway (center back)
+  const aX=W*0.5, aY=domeH+8, aW=54, aH=floorY-aY-6;
+  ctx.fillStyle='#b89878'; ctx.beginPath(); ctx.moveTo(aX-aW/2,floorY-6); ctx.lineTo(aX-aW/2,aY+aW/2); ctx.arc(aX,aY+aW/2,aW/2,Math.PI,0); ctx.lineTo(aX+aW/2,floorY-6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(60,50,40,.5)'; ctx.beginPath(); ctx.moveTo(aX-aW/2+6,floorY-6); ctx.lineTo(aX-aW/2+6,aY+aW/2); ctx.arc(aX,aY+aW/2,aW/2-6,Math.PI,0); ctx.lineTo(aX+aW/2-6,floorY-6); ctx.closePath(); ctx.fill();
+
+  // rising steam veils
+  for (let i=0;i<6;i++){ const hx=(i*70+t*8)%(W+60)-30, hy=floorY-30-((t*10+i*30)%160);
+    ctx.fillStyle=`rgba(255,255,255,${0.06+0.04*Math.sin(t+i)})`; ctx.beginPath(); ctx.ellipse(hx,hy,40,14,0,0,7); ctx.fill(); }
+
+  // marble floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#cdbfa8'); fl.addColorStop(1,'#b0a088');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  // radiating floor tiles
+  ctx.strokeStyle='rgba(120,100,80,.3)'; ctx.lineWidth=1;
+  for (let i=-4;i<=8;i++){ ctx.beginPath(); ctx.moveTo(W*0.5+i*24,floorY); ctx.lineTo(W*0.5+i*60,H); ctx.stroke(); }
+  for (let y=floorY+10;y<H;y+=14){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // central octagonal göbektaşı (heated stone slab)
+  const gx=W*0.5, gy=floorY+40;
+  ctx.fillStyle='#c8b088'; ctx.beginPath();
+  for (let k=0;k<8;k++){ const a=k/8*Math.PI*2+Math.PI/8; const px=gx+Math.cos(a)*44, py=gy+Math.sin(a)*14; k===0?ctx.moveTo(px,py):ctx.lineTo(px,py);} ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='rgba(150,120,90,.6)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle='rgba(180,150,110,.5)'; ctx.beginPath();
+  for (let k=0;k<8;k++){ const a=k/8*Math.PI*2+Math.PI/8; const px=gx+Math.cos(a)*22, py=gy+Math.sin(a)*7; k===0?ctx.moveTo(px,py):ctx.lineTo(px,py);} ctx.closePath(); ctx.fill();
+
+  // brass hammam bowls on the sides
+  function bowl(bx,by){ ctx.fillStyle='#c9a24a'; ctx.beginPath(); ctx.ellipse(bx,by,12,6,0,0,Math.PI); ctx.fill();
+    ctx.fillStyle='#e8c96a'; ctx.beginPath(); ctx.ellipse(bx,by-1,12,3,0,0,7); ctx.fill();
+    ctx.fillStyle='#a8842e'; ctx.beginPath(); ctx.arc(bx,by-1,3,0,7); ctx.fill(); }
+  bowl(W*0.14,floorY+20); bowl(W*0.88,floorY+24);
+}
+registerScene('hammam', drawHammam);
