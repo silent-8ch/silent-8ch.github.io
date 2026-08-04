@@ -2402,6 +2402,45 @@ function drawMusicRoom(){
 }
 registerScene('musicroom', drawMusicRoom);
 
+/* ── AURORA TUNDRA (outdoor · night) ── */
+function drawSnowPine(px,baseY,h){
+  ctx.fillStyle='#16351f'; ctx.beginPath(); ctx.moveTo(px,baseY-h); ctx.lineTo(px-h*0.4,baseY); ctx.lineTo(px+h*0.4,baseY); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.85)'; ctx.beginPath(); ctx.moveTo(px,baseY-h); ctx.lineTo(px-h*0.18,baseY-h*0.5); ctx.lineTo(px+h*0.18,baseY-h*0.5); ctx.closePath(); ctx.fill();
+}
+function drawAurora(){
+  const t = sceneTime, groundY = H*0.66;
+
+  // night sky + stars
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#050a1a'); sky.addColorStop(1,'#0e1830');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  for (let i=0;i<60;i++){ const sx=(i*89+7)%W, sy=(i*53+3)%(groundY*0.7), tw=0.5+0.5*Math.sin(t*2+i); ctx.fillStyle=`rgba(255,255,255,${0.3+0.5*tw})`; ctx.fillRect(sx,sy,1.2,1.2); }
+
+  // aurora ribbons
+  const cols=['rgba(80,230,160,','rgba(120,200,255,','rgba(180,120,230,'];
+  for (let b=0;b<3;b++){
+    const baseY=groundY*0.28 + b*24, col=cols[b];
+    ctx.beginPath();
+    for (let x=0;x<=W;x+=6){ const y=baseY + Math.sin(x*0.02 + t*0.8 + b)*18 + Math.sin(x*0.05 - t*0.5)*8; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
+    for (let x=W;x>=0;x-=6){ const y=baseY+38 + Math.sin(x*0.02 + t*0.8 + b)*18; ctx.lineTo(x,y); }
+    ctx.closePath();
+    const grad=ctx.createLinearGradient(0,baseY-10,0,baseY+44); grad.addColorStop(0,col+'0)'); grad.addColorStop(0.5,col+'0.35)'); grad.addColorStop(1,col+'0)');
+    ctx.fillStyle=grad; ctx.fill();
+  }
+
+  // snowy ground + mounds
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#dfe9f5'); gr.addColorStop(1,'#c2d2e6');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.fillStyle='#eaf2fb'; ctx.beginPath(); ctx.moveTo(0,groundY+10); ctx.quadraticCurveTo(W*0.25,groundY-6,W*0.5,groundY+8); ctx.quadraticCurveTo(W*0.75,groundY-4,W,groundY+10); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+
+  // snowy pines
+  for (let i=0;i<7;i++) drawSnowPine(i*W/6-6, groundY+8, 26+((i*29)%16));
+
+  // falling snow
+  ctx.fillStyle='rgba(255,255,255,.85)';
+  for (let i=0;i<30;i++){ const seed=i*41.7, sx=(((seed*1.6 + Math.sin(t+i)*10)%W)+W)%W, sy=(seed*2.2 + t*14)%H; ctx.beginPath(); ctx.arc(sx,sy,1.2,0,7); ctx.fill(); }
+}
+registerScene('aurora', drawAurora);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
