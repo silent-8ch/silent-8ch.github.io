@@ -3759,6 +3759,39 @@ function drawTulipField(){
 }
 registerScene('tulipfield', drawTulipField);
 
+/* ── RETRO DINER (indoor · 50s diner) ── */
+function drawDiner(){
+  const t = sceneTime, floorY = H*0.62;
+
+  ctx.fillStyle='#3aa0a0'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#f2a6b3'; ctx.fillRect(0,floorY-28,W,8);
+  ctx.fillStyle='#e6e6e6'; ctx.fillRect(0,floorY-20,W,20);
+  const fh=H-floorY; for (let r=0;r<5;r++) for (let c=0;c<10;c++){ ctx.fillStyle=(r+c)%2?'#2a2a2a':'#e8e8e8'; ctx.fillRect(c*W/10,floorY+r/5*fh,W/10,fh/5); }
+
+  // neon sign
+  ctx.font='bold 16px Segoe UI, sans-serif'; ctx.textAlign='center';
+  ctx.strokeStyle='rgba(255,80,140,.4)'; ctx.lineWidth=2; ctx.strokeRect(W*0.5-40,H*0.05,80,H*0.06);
+  ctx.fillStyle=`rgba(255,80,140,${0.7+0.3*Math.sin(t*3)})`; ctx.fillText('DINER', W*0.5, H*0.095); ctx.textAlign='left';
+
+  // back counter with milkshakes
+  const cTop=floorY-40;
+  ctx.fillStyle='#5a4a3a'; ctx.fillRect(0,cTop,W,floorY-cTop);
+  ctx.fillStyle='#d8dce0'; ctx.fillRect(0,cTop,W,6);
+  for (let i=0;i<4;i++){ const mx=W*0.15+i*W*0.2; ctx.fillStyle='#f7d9e3'; ctx.beginPath(); ctx.moveTo(mx-5,cTop-2); ctx.lineTo(mx+5,cTop-2); ctx.lineTo(mx+3,cTop-16); ctx.lineTo(mx-3,cTop-16); ctx.closePath(); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(mx,cTop-16,4,Math.PI,0); ctx.fill(); ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.arc(mx+2,cTop-18,1.5,0,7); ctx.fill(); ctx.strokeStyle='#c0392b'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(mx+4,cTop-16); ctx.lineTo(mx+7,cTop-24); ctx.stroke(); }
+
+  // stools
+  for (let i=0;i<4;i++){ const sx=W*0.15+i*W*0.2; ctx.fillStyle='#888'; ctx.fillRect(sx-2,floorY+2,4,fh*0.5); ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.ellipse(sx,floorY+2,9,4,0,0,7); ctx.fill(); }
+
+  // jukebox
+  const jX=W*0.92, jB=floorY;
+  ctx.fillStyle='#8a3a5a'; roundRect(jX-16,jB-60,32,60,10); ctx.fill();
+  ctx.fillStyle=`rgba(255,200,100,${0.6+0.3*Math.sin(t*2)})`; roundRect(jX-12,jB-56,24,20,8); ctx.fill();
+  ctx.fillStyle='#2a1a2a'; ctx.fillRect(jX-12,jB-32,24,14);
+  ctx.fillStyle='#c0c4c8'; for (let i=0;i<3;i++) ctx.fillRect(jX-8+i*7,jB-30,4,10);
+  for (let i=0;i<4;i++){ ctx.fillStyle=['#e0504a','#f2b03a','#5a9ee0','#7ac05a'][i]; ctx.beginPath(); ctx.arc(jX-9+i*6,jB-14,2,0,7); ctx.fill(); }
+}
+registerScene('diner', drawDiner);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
