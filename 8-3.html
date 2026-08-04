@@ -4089,6 +4089,39 @@ function drawMagicShop(){
 }
 registerScene('magicshop', drawMagicShop);
 
+/* ── FISHING DOCK AT DAWN (outdoor · calm) ── */
+function drawFishingDock(){
+  const t = sceneTime, waterY = H*0.42, dockY = H*0.66;
+
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#5a5a8a'); sky.addColorStop(0.5,'#e08a7a'); sky.addColorStop(1,'#f2c890');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  ctx.fillStyle='rgba(255,230,170,.5)'; ctx.beginPath(); ctx.arc(W*0.7,waterY-8,24,0,7); ctx.fill();
+  ctx.fillStyle='#ffe6a8'; ctx.beginPath(); ctx.arc(W*0.7,waterY-8,16,0,7); ctx.fill();
+  ctx.fillStyle='#5a6a5a'; ctx.beginPath(); ctx.moveTo(0,waterY); ctx.quadraticCurveTo(W*0.3,waterY-20,W*0.6,waterY-4); ctx.quadraticCurveTo(W*0.85,waterY-16,W,waterY-2); ctx.lineTo(W,waterY); ctx.closePath(); ctx.fill();
+
+  const water=ctx.createLinearGradient(0,waterY,0,H); water.addColorStop(0,'#c8a890'); water.addColorStop(0.3,'#8aa0b0'); water.addColorStop(1,'#5a7a8a');
+  ctx.fillStyle=water; ctx.fillRect(0,waterY,W,H-waterY);
+  ctx.fillStyle='rgba(255,230,170,.2)'; ctx.fillRect(W*0.66,waterY,16,H*0.3);
+  ctx.fillStyle='rgba(255,255,255,.15)'; for (let i=0;i<5;i++){ ctx.beginPath(); ctx.ellipse((i*W/4+Math.sin(t*0.2+i)*10),waterY+10+((i%2)*6),40,7,0,0,7); ctx.fill(); }
+  ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=1; for (let i=0;i<6;i++){ const y=waterY+16+i*8; ctx.beginPath(); for (let x=0;x<=W;x+=8){ x===0?ctx.moveTo(x,y):ctx.lineTo(x,y+Math.sin(x*0.1+t+i)*1.2); } ctx.stroke(); }
+
+  // dock
+  ctx.fillStyle='#7a5a3a'; ctx.beginPath(); ctx.moveTo(W*0.3,H); ctx.lineTo(W*0.42,dockY-30); ctx.lineTo(W*0.58,dockY-30); ctx.lineTo(W*0.7,H); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let i=1;i<7;i++){ const p=i/7, y=dockY-30 + p*(H-(dockY-30)), xl=W*0.42 - p*(W*0.12), xr=W*0.58 + p*(W*0.12); ctx.beginPath(); ctx.moveTo(xl,y); ctx.lineTo(xr,y); ctx.stroke(); }
+  ctx.fillStyle='#5a3a1a'; ctx.fillRect(W*0.4,dockY-30,4,20); ctx.fillRect(W*0.6-4,dockY-30,4,20);
+
+  // rowboat
+  const boX=W*0.16, boY=dockY-6;
+  ctx.fillStyle='#8a5a3a'; ctx.beginPath(); ctx.moveTo(boX-22,boY); ctx.quadraticCurveTo(boX,boY+10,boX+22,boY); ctx.lineTo(boX+16,boY-6); ctx.lineTo(boX-16,boY-6); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(boX-16,boY-6); ctx.lineTo(boX+16,boY-6); ctx.stroke();
+  ctx.strokeStyle='#7a5a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(boX+4,boY-4); ctx.lineTo(boX+20,boY-16); ctx.stroke();
+
+  // fishing rod
+  ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.64,dockY+10); ctx.lineTo(W*0.82,dockY-40); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.82,dockY-40); ctx.lineTo(W*0.84,dockY-2); ctx.stroke();
+}
+registerScene('fishingdock', drawFishingDock);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
