@@ -52,11 +52,15 @@ function buildPassport(){
 function buildMapList(){
   buildPassport();
   const list=document.getElementById('mapList'); list.innerHTML='';
-  SCENES.forEach((name,idx)=>{
+  // show alphabetically by name (order no longer matters — every change is random);
+  // keep each scene's real index so jumping to it still works
+  const rows = SCENES.map((name,idx)=>({ name, idx, label: sceneLabel(name) }))
+                     .sort((a,b)=> a.label.localeCompare(b.label));
+  rows.forEach(({name,idx,label})=>{
     const row=document.createElement('div'); row.className='mapRow'+(idx===currentScene?' current':'');
     const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=sceneEnabled(name);
     cb.addEventListener('change',()=>{ if(cb.checked) disabledScenes.delete(name); else disabledScenes.add(name); saveDisabled(); });
-    const nm=document.createElement('span'); nm.className='mn'+(visited.has(name)?' seen':''); nm.textContent=sceneLabel(name);
+    const nm=document.createElement('span'); nm.className='mn'+(visited.has(name)?' seen':''); nm.textContent=label;
     nm.addEventListener('click',()=>{ currentScene=idx; sceneChangeTimer=60; closeMap(); });
     row.appendChild(cb); row.appendChild(nm); list.appendChild(row);
   });
