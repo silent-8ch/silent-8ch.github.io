@@ -5074,6 +5074,60 @@ function drawRiceTerraces(){
 }
 registerScene('riceterraces', drawRiceTerraces);
 
+/* ── BARBERSHOP (indoor · vintage cuts & shaves) ── */
+function drawBarbershop(){
+  const t=sceneTime, floorY=H*0.68;
+  // teal walls + tile floor
+  ctx.fillStyle='#2f6a6a'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#e8e4d8'; ctx.fillRect(0,floorY,W,H-floorY);
+  for(let y=0;y*16<H-floorY;y++) for(let x=0;x<W/22+1;x++){ ctx.fillStyle=((x+y)%2)?'#dcd6c6':'#efece2'; ctx.fillRect(x*22,floorY+y*16,22,16); }
+  ctx.fillStyle='#1e4a4a'; ctx.fillRect(0,floorY-6,W,6);
+  // big wall mirror with gold frame
+  const mx=W*0.5, mw=W*0.4, mtop=H*0.12, mh=H*0.34;
+  ctx.fillStyle='#c8a44a'; ctx.fillRect(mx-mw/2-6,mtop-6,mw+12,mh+12);
+  const mg=ctx.createLinearGradient(mx-mw/2,mtop,mx+mw/2,mtop+mh); mg.addColorStop(0,'#b8ccce'); mg.addColorStop(1,'#8fb0b2');
+  ctx.fillStyle=mg; ctx.fillRect(mx-mw/2,mtop,mw,mh);
+  ctx.fillStyle='rgba(255,255,255,.18)'; ctx.beginPath(); ctx.moveTo(mx-mw/2+6,mtop+6); ctx.lineTo(mx-mw/2+30,mtop+6); ctx.lineTo(mx-mw/2+6,mtop+mh-6); ctx.closePath(); ctx.fill();
+  // shelf under the mirror with tonic bottles
+  ctx.fillStyle='#6a4a30'; ctx.fillRect(mx-mw/2-6,mtop+mh+8,mw+12,5);
+  const bc=['#c0503a','#4a86c0','#5f9a44','#d0a030','#8a4ac0'];
+  for(let i=0;i<6;i++){ ctx.fillStyle=bc[i%bc.length]; ctx.fillRect(mx-mw/2+6+i*(mw/6),mtop+mh-6,7,14); ctx.fillStyle='#ddd'; ctx.fillRect(mx-mw/2+6+i*(mw/6)+1,mtop+mh-9,5,3); }
+  // rotating barber pole on the left wall
+  const px=W*0.1, ptop=H*0.16, ph=H*0.3;
+  ctx.fillStyle='#cfcfd6'; ctx.fillRect(px-8,ptop-6,16,6); ctx.fillRect(px-8,ptop+ph,16,6); // caps
+  // cylinder with animated diagonal stripes (clip to a rounded rect)
+  ctx.save(); ctx.beginPath(); ctx.rect(px-7,ptop,14,ph); ctx.clip();
+  ctx.fillStyle='#f4f4f4'; ctx.fillRect(px-7,ptop,14,ph);
+  for(let s=-4;s<ph/8+2;s++){ const off=(t*20)%16;
+    ctx.fillStyle='#c8202a'; ctx.beginPath(); ctx.moveTo(px-7, ptop+s*16+off); ctx.lineTo(px+7, ptop+s*16-8+off); ctx.lineTo(px+7, ptop+s*16+off); ctx.lineTo(px-7, ptop+s*16+8+off); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#2a4a9a'; ctx.beginPath(); ctx.moveTo(px-7, ptop+s*16+8+off); ctx.lineTo(px+7, ptop+s*16+off); ctx.lineTo(px+7, ptop+s*16+8+off); ctx.lineTo(px-7, ptop+s*16+16+off); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+  ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px-4,ptop); ctx.lineTo(px-4,ptop+ph); ctx.stroke();
+  // the barber chair (center, in front of mirror)
+  const cx=mx, cy=floorY;
+  ctx.fillStyle='#3a3a42'; ctx.fillRect(cx-6,cy-14,12,14+(H-cy)); // pedestal
+  ctx.fillStyle='#b0b0b8'; ctx.beginPath(); ctx.ellipse(cx,H-4,20,5,0,0,7); ctx.fill(); // base
+  ctx.fillStyle='#8a2a2a'; // red leather seat
+  ctx.fillRect(cx-22,cy-24,44,14); // seat
+  ctx.fillRect(cx-22,cy-58,10,36); // backrest post left
+  ctx.fillRect(cx+12,cy-58,10,36);
+  ctx.fillStyle='#9a3535'; ctx.fillRect(cx-20,cy-58,40,34); // backrest
+  ctx.fillStyle='#7a2222'; for(let i=0;i<3;i++) ctx.fillRect(cx-16,cy-52+i*10,32,2); // tufting lines
+  // chrome armrests
+  ctx.strokeStyle='#cfcfd6'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cx-24,cy-16); ctx.lineTo(cx-24,cy-6); ctx.moveTo(cx+24,cy-16); ctx.lineTo(cx+24,cy-6); ctx.stroke();
+  // hot towel steaming on a stand at right
+  const sx=W*0.86, sy=floorY-2;
+  ctx.fillStyle='#888'; ctx.fillRect(sx-1,sy-40,2,40);
+  ctx.fillStyle='#eef2f4'; ctx.fillRect(sx-10,sy-46,20,10);
+  ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=2;
+  for(let i=0;i<2;i++){ ctx.beginPath(); ctx.moveTo(sx-4+i*8,sy-46); for(let k=1;k<=3;k++) ctx.lineTo(sx-4+i*8+Math.sin(t*1.5+i+k)*5, sy-46-k*12); ctx.stroke(); }
+  // hanging pendant light
+  ctx.strokeStyle='#555'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,H*0.08); ctx.stroke();
+  ctx.fillStyle='#333'; ctx.beginPath(); ctx.moveTo(cx-10,H*0.08); ctx.lineTo(cx+10,H*0.08); ctx.lineTo(cx,H*0.13); ctx.closePath(); ctx.fill();
+  ctx.fillStyle=`rgba(255,240,200,${0.6+0.1*Math.sin(t*3)})`; ctx.beginPath(); ctx.arc(cx,H*0.12,3,0,7); ctx.fill();
+}
+registerScene('barbershop', drawBarbershop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
