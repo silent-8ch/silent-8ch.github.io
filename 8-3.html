@@ -2574,6 +2574,52 @@ function drawArcade(){
 }
 registerScene('arcade', drawArcade);
 
+/* ── ROOFTOP GARDEN AT NIGHT (outdoor · urban) ── */
+function drawRooftop(){
+  const t = sceneTime, deckY = H*0.66;
+
+  // night sky + stars + moon
+  const sky=ctx.createLinearGradient(0,0,0,deckY); sky.addColorStop(0,'#1a1a3a'); sky.addColorStop(1,'#3a2a4a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,deckY);
+  for (let i=0;i<40;i++){ const sx=(i*83+5)%W, sy=(i*41+3)%(deckY*0.6); ctx.fillStyle=`rgba(255,255,255,${0.3+0.4*Math.sin(t*2+i)})`; ctx.fillRect(sx,sy,1.2,1.2); }
+  ctx.fillStyle='#f0ecd0'; ctx.beginPath(); ctx.arc(W*0.85,H*0.12,14,0,7); ctx.fill();
+
+  // city skyline with lit windows (deterministic PRNG)
+  let seed=1; const rnd=()=>{ seed=(seed*9301+49297)%233280; return seed/233280; };
+  let bx=0;
+  while (bx<W){
+    const bw=20+Math.floor(rnd()*26), bh=40+Math.floor(rnd()*90), bTop=deckY-bh;
+    ctx.fillStyle='#12101e'; ctx.fillRect(bx,bTop,bw,bh);
+    for (let wy=bTop+6; wy<deckY-6; wy+=8) for (let wx=bx+4; wx<bx+bw-4; wx+=7){ if (rnd()>0.55){ ctx.fillStyle=`rgba(255,210,120,${0.5+0.4*rnd()})`; ctx.fillRect(wx,wy,3,4); } }
+    bx+=bw+2;
+  }
+
+  // deck floor
+  const deck=ctx.createLinearGradient(0,deckY,0,H); deck.addColorStop(0,'#6a4a32'); deck.addColorStop(1,'#513826');
+  ctx.fillStyle=deck; ctx.fillRect(0,deckY,W,H-deckY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1;
+  for (let x=0;x<W;x+=22){ ctx.beginPath(); ctx.moveTo(x,deckY); ctx.lineTo(x,H); ctx.stroke(); }
+
+  // string lights
+  ctx.strokeStyle='rgba(120,100,80,.8)'; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=0;x<=W;x+=10){ const y=20+Math.sin(x*0.03)*10; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y); } ctx.stroke();
+  for (let x=14;x<W;x+=28){ const y=26+Math.sin(x*0.03)*10; ctx.fillStyle='rgba(255,200,100,.15)'; ctx.beginPath(); ctx.arc(x,y,7,0,7); ctx.fill(); ctx.fillStyle=`rgba(255,200,100,${0.7+0.3*Math.sin(t*3+x)})`; ctx.beginPath(); ctx.arc(x,y,3,0,7); ctx.fill(); }
+
+  // potted plants
+  drawPotPlant(W*0.10,deckY,0.9,'bush');
+  drawPotPlant(W*0.90,deckY,0.85,'flower');
+
+  // bistro table + chairs + candle
+  const tX=W*0.5, tY=deckY+16;
+  ctx.fillStyle='#2e2e38';
+  ctx.fillRect(tX-34,tY+2,10,4); ctx.fillRect(tX-34,tY+6,3,16); ctx.fillRect(tX-27,tY+6,3,16); ctx.fillRect(tX-34,tY-8,10,12);
+  ctx.fillRect(tX+24,tY+2,10,4); ctx.fillRect(tX+24,tY+6,3,16); ctx.fillRect(tX+31,tY+6,3,16); ctx.fillRect(tX+24,tY-8,10,12);
+  ctx.fillStyle='#3a3a44'; ctx.fillRect(tX-2,tY,4,26); ctx.beginPath(); ctx.ellipse(tX,tY,20,6,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,210,130,.4)'; ctx.beginPath(); ctx.arc(tX,tY-5,7,0,7); ctx.fill();
+  ctx.fillStyle='#ffd27f'; ctx.beginPath(); ctx.arc(tX,tY-5,2.5,0,7); ctx.fill();
+}
+registerScene('rooftop', drawRooftop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
