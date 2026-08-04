@@ -165,11 +165,6 @@
     <div id="mapList"></div>
   </div>
 
-  <div id="banner">
-    <h1>Happy Birthday! 🎂</h1>
-    <p>I made you a little you. Feed her cookies, draw together, and give her hugs. Take care of her today. 💛</p>
-    <button id="startBtn">Say hi 👋</button>
-  </div>
 </div>
 
 <script>
@@ -575,7 +570,7 @@ function maybeNag(dt){
 }
 
 /* ---------- main loop ---------- */
-let last = 0, started = false;
+let last = 0, started = true;   // no splash — the game runs immediately on load
 function loop(ts){
   if (!last) last = ts;
   let dt = (ts - last)/1000; last = ts;
@@ -7700,12 +7695,7 @@ function roundRect(x,y,w,h,rr){ ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x
 function getVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
 /* ---------- boot ---------- */
-document.getElementById('startBtn').addEventListener('click', ()=>{
-  document.getElementById('banner').classList.add('hide');
-  started = true;
-  say('Hi! 💛');
-  save();
-});
+say('Hi! 💛');
 // on load, drop into a random enabled location (then every change is random too)
 (function(){ const en = enabledIndices(); if (en.length) currentScene = en[Math.floor(Math.random()*en.length)]; })();
 resize();
