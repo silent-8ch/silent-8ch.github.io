@@ -3971,6 +3971,48 @@ function drawSavanna(){
 }
 registerScene('savanna', drawSavanna);
 
+/* ── ANTIQUE SHOP (indoor · antiques) ── */
+function drawAntiqueShop(){
+  const t = sceneTime, floorY = H*0.62;
+
+  ctx.fillStyle='#4a3a2e'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='rgba(0,0,0,.05)'; for (let x=0;x<W;x+=20) ctx.fillRect(x,0,10,floorY);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#6a4a30'); fl.addColorStop(1,'#503826');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='rgba(140,60,74,.3)'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.85,W*0.36,H*0.08,0,0,7); ctx.fill();
+
+  // framed portraits
+  for (const [px,py,pw,ph] of [[W*0.1,H*0.1,30,38],[W*0.24,H*0.12,26,32]]){ ctx.fillStyle='#c9a24a'; ctx.fillRect(px-3,py-3,pw+6,ph+6); ctx.fillStyle='#8a7a6a'; ctx.fillRect(px,py,pw,ph); ctx.fillStyle='#5a4a3a'; ctx.beginPath(); ctx.arc(px+pw/2,py+ph*0.4,pw*0.25,0,7); ctx.fill(); }
+
+  // chandelier
+  ctx.strokeStyle='#c9a24a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.5,0); ctx.lineTo(W*0.5,H*0.1); ctx.stroke(); ctx.beginPath(); ctx.arc(W*0.5,H*0.12,14,Math.PI,0); ctx.stroke();
+  for (let i=-1;i<=1;i++){ ctx.fillStyle=`rgba(255,220,150,${0.6+0.2*Math.sin(t*3+i)})`; ctx.beginPath(); ctx.arc(W*0.5+i*12,H*0.12,3,0,7); ctx.fill(); }
+
+  // counter
+  const cY=floorY-6;
+  ctx.fillStyle='#5a3a24'; ctx.fillRect(W*0.05,cY-8,W*0.9,8+(H-cY)); ctx.fillStyle='#4a2f1c'; ctx.fillRect(W*0.05,cY-8,W*0.9,4);
+
+  // globe
+  const glX=W*0.16, glY=cY-8;
+  ctx.fillStyle='#3a6a8a'; ctx.beginPath(); ctx.arc(glX,glY-12,12,0,7); ctx.fill(); ctx.fillStyle='#4a8a5a'; ctx.beginPath(); ctx.arc(glX-3,glY-14,4,0,7); ctx.arc(glX+4,glY-10,3,0,7); ctx.fill(); ctx.strokeStyle='#c9a24a'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(glX,glY-12,14,Math.PI*1.2,Math.PI*2.2); ctx.stroke(); ctx.fillStyle='#8a5a3a'; ctx.fillRect(glX-2,glY-2,4,4);
+
+  // stacked books
+  const bkX=W*0.32, bkc=['#7a3a3a','#3a5a7a','#5a7a3a'];
+  for (let i=0;i<3;i++){ ctx.fillStyle=bkc[i]; ctx.save(); ctx.translate(bkX,cY-8-i*6); ctx.rotate((i-1)*0.05); ctx.fillRect(-14,-6,28,6); ctx.restore(); }
+
+  // gramophone
+  const grX=W*0.52, grY=cY-8;
+  ctx.fillStyle='#5a3a1a'; ctx.fillRect(grX-10,grY-8,20,8);
+  ctx.fillStyle='#c9a24a'; ctx.beginPath(); ctx.moveTo(grX+8,grY-6); ctx.lineTo(grX+26,grY-22); ctx.lineTo(grX+24,grY-30); ctx.lineTo(grX+6,grY-12); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#a0822a'; ctx.beginPath(); ctx.ellipse(grX+25,grY-26,3,7,0.6,0,7); ctx.fill();
+
+  // oil lamp
+  const lpX=W*0.8, lpY=cY-8;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(lpX-2,lpY-14,4,14); ctx.beginPath(); ctx.ellipse(lpX,lpY,8,3,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,220,150,.5)'; ctx.beginPath(); ctx.ellipse(lpX,lpY-20,7,9,0,0,7); ctx.fill(); ctx.fillStyle='#ffcf5a'; ctx.beginPath(); ctx.ellipse(lpX,lpY-20,2,4+Math.sin(t*8),0,0,7); ctx.fill();
+}
+registerScene('antiqueshop', drawAntiqueShop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
