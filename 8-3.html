@@ -4335,6 +4335,65 @@ function drawOrchard(){
 }
 registerScene('orchard', drawOrchard);
 
+/* ── CANDLE WORKSHOP (indoor · hand-dipped candle making) ── */
+function drawCandleShop(){
+  const t=sceneTime, floorY=H*0.63;
+  // warm amber walls, stone floor
+  ctx.fillStyle='#4a3428'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#6a5240'; ctx.fillRect(0,floorY,W,H-floorY);
+  for(let i=0;i<10;i++){ ctx.fillStyle='rgba(0,0,0,.1)'; ctx.fillRect((i*37)%W, floorY+ (i*13)%(H-floorY),18,1); }
+  // warm glow wash from candles
+  const glow=ctx.createRadialGradient(W*0.5,floorY,10,W*0.5,floorY,W*0.7);
+  glow.addColorStop(0,'rgba(255,190,90,.25)'); glow.addColorStop(1,'rgba(255,190,90,0)');
+  ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
+  // helper: a lit candle
+  function candle(x,y,h,w,flick){
+    ctx.fillStyle='#f0e2c0'; ctx.fillRect(x-w/2,y-h,w,h);
+    ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(x+w/2-2,y-h,2,h);
+    // wick
+    ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x,y-h); ctx.lineTo(x,y-h-3); ctx.stroke();
+    // flame
+    const f=1+0.2*Math.sin(t*8+flick);
+    ctx.fillStyle='rgba(255,150,40,.6)'; ctx.beginPath(); ctx.ellipse(x,y-h-6,4*f,7*f,0,0,7); ctx.fill();
+    ctx.fillStyle='#ffd86a'; ctx.beginPath(); ctx.ellipse(x,y-h-5,2*f,4*f,0,0,7); ctx.fill();
+  }
+  // wall shelf with rows of finished candles
+  for(let s=0;s<2;s++){ const sy=H*0.14+s*H*0.15;
+    ctx.fillStyle='#3a2a1e'; ctx.fillRect(W*0.05,sy+2,W*0.5,4);
+    const cols=['#e8c8a0','#d8a878','#e0b890','#c89868','#eac8b0'];
+    for(let i=0;i<7;i++){ const cx=W*0.09+i*W*0.065, ch=10+((i*3+s)%4)*4;
+      ctx.fillStyle=cols[i%cols.length]; ctx.fillRect(cx-3,sy-ch+2,6,ch); }
+  }
+  // dipping rack — candles hanging by wicks from a horizontal bar, being dipped
+  const rx=W*0.62, ry=H*0.16;
+  ctx.strokeStyle='#5a4028'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(W*0.95,ry); ctx.stroke();
+  const dip=Math.sin(t*0.8)*10; // rack gently rises/lowers
+  for(let i=0;i<5;i++){ const hx=rx+8+i*W*0.06;
+    ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(hx,ry); ctx.lineTo(hx,ry+18+dip); ctx.stroke();
+    ctx.fillStyle='#e0b890'; ctx.fillRect(hx-2.5,ry+18+dip,5,26); }
+  // wax vat below the rack, steaming
+  const vx=rx+W*0.14, vy=floorY-6;
+  ctx.fillStyle='#3a2418'; ctx.fillRect(vx-34,vy-24,68,24+(H-vy));
+  ctx.fillStyle='#c98a3a'; ctx.fillRect(vx-30,vy-20,60,8); // molten wax surface
+  ctx.fillStyle='rgba(230,170,90,.5)'; ctx.fillRect(vx-30,vy-20,60,3);
+  for(let i=0;i<3;i++){ ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=2;
+    const sxx=vx-16+i*16, ph=t*1.5+i; ctx.beginPath();
+    ctx.moveTo(sxx,vy-20); ctx.quadraticCurveTo(sxx+Math.sin(ph)*6, vy-38, sxx+Math.sin(ph)*3, vy-54); ctx.stroke(); }
+  // worktable on the left with molds and a lit sample candle
+  const tx=W*0.08, ty=floorY-4;
+  ctx.fillStyle='#6a4a30'; ctx.fillRect(tx,ty-8,W*0.42,8+(H-ty));
+  ctx.fillStyle='#7a5638'; ctx.fillRect(tx,ty-8,W*0.42,4);
+  // metal molds
+  for(let i=0;i<3;i++){ ctx.fillStyle='#9aa0a8'; ctx.fillRect(tx+10+i*22, ty-26,12,18);
+    ctx.fillStyle='#7a8088'; ctx.fillRect(tx+10+i*22, ty-26,12,3); }
+  candle(tx+W*0.34, ty-8, 22, 8, 0);
+  candle(tx+W*0.28, ty-8, 14, 6, 2.1);
+  // a couple of pillar candles on the floor, lit
+  candle(W*0.5, H-6, 30, 12, 1.0);
+  candle(W*0.5+22, H-6, 20, 9, 3.3);
+}
+registerScene('candleshop', drawCandleShop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
