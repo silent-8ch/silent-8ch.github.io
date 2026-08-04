@@ -4603,6 +4603,61 @@ function drawCinema(){
 }
 registerScene('cinema', drawCinema);
 
+/* ── MARINA (outdoor · sailboats at sunset) ── */
+function drawMarina(){
+  const t=sceneTime, waterY=H*0.52;
+  // sunset sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY);
+  sky.addColorStop(0,'#f4a24a'); sky.addColorStop(0.5,'#f2c37a'); sky.addColorStop(1,'#f6e0b0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  // low sun
+  const sunX=W*0.5, sunY=waterY-10;
+  ctx.fillStyle='#ffd97a'; ctx.beginPath(); ctx.arc(sunX,sunY,30,0,7); ctx.fill();
+  ctx.globalAlpha=0.3; ctx.beginPath(); ctx.arc(sunX,sunY,44,0,7); ctx.fill(); ctx.globalAlpha=1;
+  // hazy far shoreline
+  ctx.fillStyle='#c9946a'; ctx.fillRect(0,waterY-8,W,8);
+  ctx.fillStyle='rgba(120,90,110,.4)'; for(let i=0;i<6;i++){ ctx.fillRect(W*0.1*i, waterY-8-((i*13)%10), 40, (i*13)%10+2); }
+  // harbor water
+  const water=ctx.createLinearGradient(0,waterY,0,H); water.addColorStop(0,'#c98a5a'); water.addColorStop(1,'#4a6a8a');
+  ctx.fillStyle=water; ctx.fillRect(0,waterY,W,H-waterY);
+  // sun glitter path
+  for(let i=0;i<12;i++){ const gy=waterY+6+i*((H-waterY)/12); const wob=Math.sin(t*2+i)*8;
+    ctx.fillStyle='rgba(255,220,150,.5)'; ctx.fillRect(sunX-10+wob, gy, 20-i, 2); }
+  // ripple lines
+  for(let i=0;i<7;i++){ const ry=waterY+16+i*((H-waterY)/7); ctx.strokeStyle='rgba(255,255,255,.1)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); for(let x=0;x<=W;x+=8){ const yy=ry+Math.sin(x*0.05+t*1.4+i)*2; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // a sailboat (hull + mast + sails), bobbing + reflection
+  function boat(x,y,s,sailA,sailB,bob){
+    const by=y+Math.sin(t*1.3+bob)*3, tilt=Math.sin(t*1.3+bob)*0.04;
+    ctx.save(); ctx.translate(x,by); ctx.rotate(tilt);
+    // reflection
+    ctx.save(); ctx.globalAlpha=0.22; ctx.scale(1,-1); ctx.translate(0,-4);
+    ctx.fillStyle=sailA; ctx.beginPath(); ctx.moveTo(0,-4); ctx.lineTo(-14*s,-4); ctx.lineTo(-2*s,-40*s); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // hull
+    ctx.fillStyle='#7a4a2a'; ctx.beginPath(); ctx.moveTo(-20*s,0); ctx.lineTo(20*s,0); ctx.lineTo(13*s,10*s); ctx.lineTo(-13*s,10*s); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#8a5a34'; ctx.fillRect(-20*s,-2,40*s,3);
+    // mast
+    ctx.strokeStyle='#5a4028'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-44*s); ctx.stroke();
+    // sails
+    ctx.fillStyle=sailA; ctx.beginPath(); ctx.moveTo(-1,-2); ctx.lineTo(-16*s,-2); ctx.lineTo(-2,-40*s); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=sailB; ctx.beginPath(); ctx.moveTo(1,-4); ctx.lineTo(13*s,-2); ctx.lineTo(2,-42*s); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  boat(W*0.2, waterY+28, 1.0, '#f2f0e8','#e8dcc4', 0);
+  boat(W*0.78, waterY+22, 0.85, '#e8eef4','#cfe0e8', 1.4);
+  boat(W*0.5, waterY+52, 1.15, '#f6ece0','#e0c8a8', 2.6);
+  // wooden dock jutting from foreground-left with pilings
+  ctx.fillStyle='#6a4a2e'; ctx.fillRect(0,H*0.82,W*0.34,10);
+  ctx.fillStyle='#7a5636'; ctx.fillRect(0,H*0.82,W*0.34,3);
+  for(let i=0;i<4;i++){ ctx.fillStyle='#4a3320'; ctx.fillRect(W*0.06+i*W*0.08, H*0.82+10, 4, H*0.18-10); }
+  // a couple of gulls
+  for(let i=0;i<3;i++){ const gx=W*0.2+i*W*0.28+Math.sin(t*0.7+i)*10, gy=H*0.14+i*8;
+    ctx.strokeStyle='#5a4a4a'; ctx.lineWidth=1.5; ctx.beginPath();
+    ctx.moveTo(gx-5,gy); ctx.quadraticCurveTo(gx,gy-4,gx+5,gy); ctx.stroke(); }
+}
+registerScene('marina', drawMarina);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
