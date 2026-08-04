@@ -126,7 +126,7 @@ function fxNowSec(){ try{ return (performance && performance.now ? performance.n
     }
     const CFG = {
       spring: { count:9,  kind:'emoji', chars:['🌸','🌸','🌼'], size:[10,15], fall:[8,16],  sway:[10,20], alpha:0.55 },
-      summer: { count:8,  kind:'glow',  color:'255,236,140',   size:[1.6,3.0], drift:[6,14], alpha:0.7 },
+      summer: { count:4,  kind:'glow',  color:'255,236,140',   size:[1.6,3.0], drift:[6,14], alpha:0.26 },
       autumn: { count:8,  kind:'emoji', chars:['🍂','🍁','🍂'], size:[11,16], fall:[10,20], sway:[14,26], alpha:0.6 },
       winter: { count:12, kind:'snow',  color:'255,255,255',   size:[1.2,2.6], fall:[8,18],  sway:[8,16],  alpha:0.75 },
     };
@@ -196,8 +196,9 @@ function fxNowSec(){ try{ return (performance && performance.now ? performance.n
           ctx.globalAlpha = cfg.alpha;
           ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill();
         }
-      } else { // glow (fireflies)
+      } else { // glow (fireflies) — only after dark, so they never wash over daytime scenes
         const night = (typeof isNight === 'function') && isNight();
+        if (!night){ ctx.restore(); return; }
         for (const p of parts){
           const tw = 0.45 + 0.55 * (0.5 + 0.5*Math.sin(p.phase * p.tw * 3));
           const a = cfg.alpha * tw * (night ? 1.0 : 0.55);
@@ -539,7 +540,8 @@ function fxNowSec(){ try{ return (performance && performance.now ? performance.n
     let alpha = 0;
     EXTRA_UPDATERS.push(function(dt){
       let target = 0;
-      try{ target = (state && state.fun >= 96) ? 1 : 0; }catch(e){}
+      // only when fun is truly brimming, and only in daylight (a rainbow is a sky thing)
+      try{ const day = !((typeof isNight === 'function') && isNight()); target = (day && state && state.fun >= 99) ? 1 : 0; }catch(e){}
       // ease toward target so it drifts in/out gently
       alpha += (target - alpha) * Math.min(1, dt * 0.7);
     });
@@ -549,7 +551,7 @@ function fxNowSec(){ try{ return (performance && performance.now ? performance.n
       ctx.save();
       ctx.lineWidth = 5; ctx.lineCap = 'round';
       for (let i=0;i<BANDS.length;i++){
-        ctx.strokeStyle = 'rgba(' + BANDS[i] + ',' + (0.16 * alpha).toFixed(3) + ')';
+        ctx.strokeStyle = 'rgba(' + BANDS[i] + ',' + (0.08 * alpha).toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(cx, cy, r0 - i*5, Math.PI*1.02, Math.PI*1.98); ctx.stroke();
       }
       ctx.restore();

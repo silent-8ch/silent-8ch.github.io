@@ -16,9 +16,9 @@ ever both touch it, I rebase on your version first so your text always wins.
 
 ## Inbox
 <!-- add your requests below this line -->
-- ! **Bug: fireflies show on every scene** — The seasonal motes system in `js/extras.js` (section 2, `fxSeasonMotes`) draws summer fireflies as an `EXTRA_DRAWERS` overlay on ALL scenes. Since it's August, the glow particles appear everywhere. Fix: either remove the summer fireflies entirely, make them only appear on outdoor night scenes, or reduce count/alpha drastically so they're barely visible.
-- ! **Bug: rainbow shows on every scene** — The joy rainbow in `js/extras.js` (section 8, `fxRainbow`) draws a rainbow arc across the top of every scene whenever `state.fun >= 96`. This triggers after using the draw action. Fix: lower the threshold, reduce opacity further, or make it only appear on outdoor scenes.
 
 
 ## Done
 <!-- I'll move handled items here, newest first, with a note + commit short-sha -->
+- ✅ **Bug: rainbow shows on every scene** — *Fixed:* now daytime-only (gated on `!isNight()`), threshold raised `fun>=96` → `fun>=99` so a single draw rarely triggers it, and opacity cut roughly in half (`0.16` → `0.08` per band). It no longer appears at night/indoor-evening scenes and is barely-there when it does.
+- ✅ **Bug: fireflies show on every scene** — *Fixed:* summer fireflies are now night-only (they don't draw at all in daylight — so they're gone during the day in August) and drastically reduced (count `8`→`4`, alpha `0.7`→`0.26`). At night a few faint ones remain. Say the word if you'd rather remove them entirely.
