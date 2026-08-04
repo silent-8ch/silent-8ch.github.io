@@ -3637,6 +3637,36 @@ function drawCarnival(){
 }
 registerScene('carnival', drawCarnival);
 
+/* ── CHOCOLATE SHOP (indoor · chocolatier) ── */
+function drawChocolateShop(){
+  const t = sceneTime, floorY = H*0.62;
+
+  ctx.fillStyle='#5a3a2a'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#6a4634'; ctx.fillRect(0,floorY-26,W,26);
+  ctx.fillStyle='#e0d0b8'; ctx.fillRect(0,floorY,W,H-floorY);
+  for (let r=0;r<5;r++) for (let c=0;c<10;c++){ if ((r+c)%2){ ctx.fillStyle='#5a3a2a'; ctx.globalAlpha=0.2; ctx.fillRect(c*W/10,floorY+r/5*(H-floorY),W/10,(H-floorY)/5); } }
+  ctx.globalAlpha=1;
+
+  ctx.fillStyle='#f2d9a0'; ctx.font='bold 13px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('CHOCOLATERIE', W*0.5, H*0.09); ctx.textAlign='left';
+
+  // shelves of chocolate boxes
+  ctx.fillStyle='#7a5238'; ctx.fillRect(W*0.06,H*0.16,W*0.34,4); ctx.fillRect(W*0.06,H*0.30,W*0.34,4);
+  const boxc=['#c0392b','#8e44ad','#d4a017','#2980b9']; for (let r=0;r<2;r++) for (let i=0;i<5;i++){ const bx=W*0.09+i*W*0.06, by=(r===0?H*0.16:H*0.30)-14; ctx.fillStyle=boxc[(i+r)%4]; ctx.fillRect(bx-6,by,12,14); ctx.fillStyle='#f2d9a0'; ctx.fillRect(bx-6,by+5,12,2); }
+
+  // display case with truffles
+  const dcX=W*0.46, dcTop=floorY-50, dcW=W*0.5;
+  ctx.fillStyle='rgba(210,225,235,.3)'; ctx.fillRect(dcX-dcW/2,dcTop,dcW,34); ctx.strokeStyle='#cfe0e8'; ctx.lineWidth=2; ctx.strokeRect(dcX-dcW/2,dcTop,dcW,34);
+  ctx.fillStyle='#5a3a2a'; ctx.fillRect(dcX-dcW/2,dcTop+34,dcW,floorY-(dcTop+34));
+  const trc=['#6a4028','#8a5a3a','#c0392b','#f2d9a0','#8e44ad']; for (let r=0;r<2;r++) for (let i=0;i<8;i++){ const tx=dcX-dcW/2+10+i*((dcW-20)/8), ty=dcTop+10+r*14; ctx.fillStyle=trc[(i+r)%5]; ctx.beginPath(); ctx.arc(tx,ty,4,0,7); ctx.fill(); ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(tx,ty,4,3.6,4.7); ctx.stroke(); }
+
+  // chocolate fountain
+  const fX=W*0.86, fB=floorY;
+  ctx.fillStyle='#c0c4c8'; ctx.fillRect(fX-4,fB-56,8,56);
+  for (let i=0;i<3;i++){ const ty=fB-56+8+i*16, tw=8+i*8; ctx.fillStyle='#d0d4d8'; ctx.beginPath(); ctx.ellipse(fX,ty,tw,4,0,0,7); ctx.fill(); ctx.fillStyle='#5a3218'; ctx.beginPath(); ctx.ellipse(fX,ty-1,tw,3,0,0,7); ctx.fill(); ctx.strokeStyle='#5a3218'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(fX-tw,ty); ctx.lineTo(fX-tw+Math.sin(t*5)*1,ty+8); ctx.moveTo(fX+tw,ty); ctx.lineTo(fX+tw+Math.sin(t*5+1)*1,ty+8); ctx.stroke(); }
+  ctx.fillStyle='#5a3218'; ctx.beginPath(); ctx.ellipse(fX,fB,20,5,0,0,7); ctx.fill();
+}
+registerScene('chocolateshop', drawChocolateShop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
