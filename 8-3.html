@@ -7377,6 +7377,60 @@ function drawCornMaze(){
 }
 registerScene('cornmaze', drawCornMaze);
 
+/* ── PET SHOP (indoor · puppies, fish tanks & birds) ── */
+function drawPetShop(){
+  const t=sceneTime, floorY=H*0.7;
+  // cheerful shop
+  ctx.fillStyle='#eae0cc'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#b58a5a'; ctx.fillRect(0,floorY,W,H-floorY);
+  for(let i=0;i<7;i++){ ctx.fillStyle='rgba(0,0,0,.05)'; ctx.fillRect(0,floorY+i*((H-floorY)/7),W,1); }
+  ctx.fillStyle='#5aa06a'; ctx.fillRect(0,H*0.1,W,3);
+  // "PETS" sign with a pawprint
+  ctx.fillStyle='#3a7a4a'; ctx.font='bold 13px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('PETS', W*0.5, H*0.08);
+  ctx.beginPath(); ctx.arc(W*0.58,H*0.055,3,0,7); ctx.fill(); for(let i=0;i<3;i++){ ctx.beginPath(); ctx.arc(W*0.565+i*0.015*W,H*0.04,1.4,0,7); ctx.fill(); } ctx.textAlign='left';
+  // stacked fish tanks on the left, bubbling with colorful fish
+  for(let s=0;s<2;s++){ const tx=W*0.05, ty=H*0.16+s*H*0.2, tw=W*0.28, th=H*0.16;
+    ctx.fillStyle='#2a6a8a'; ctx.fillRect(tx,ty,tw,th); ctx.strokeStyle='#4a4e56'; ctx.lineWidth=3; ctx.strokeRect(tx,ty,tw,th);
+    ctx.fillStyle='#d8c88a'; ctx.fillRect(tx+2,ty+th-6,tw-4,4); // gravel
+    // plants
+    ctx.strokeStyle='#3f8a4a'; ctx.lineWidth=2; for(let i=0;i<4;i++){ const px=tx+8+i*(tw/4); ctx.beginPath(); ctx.moveTo(px,ty+th-4); ctx.quadraticCurveTo(px+Math.sin(t*1.5+i)*4,ty+th*0.4,px,ty+th*0.2); ctx.stroke(); }
+    // fish
+    for(let i=0;i<3;i++){ const fx=tx+8 + ((t*20+i*40+s*20)%(tw-16)); const fy=ty+6+ (i*th/3)%th*0.6;
+      ctx.fillStyle=['#e0692a','#f2c14a','#4a86c0'][i%3]; ctx.beginPath(); ctx.ellipse(fx,fy,5,3,0,0,7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(fx-4,fy); ctx.lineTo(fx-8,fy-2); ctx.lineTo(fx-8,fy+2); ctx.closePath(); ctx.fill(); }
+    // bubbles
+    for(let i=0;i<5;i++){ const bx=tx+tw-10; const by=ty+th - ((t*20+i*18)%th); ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(bx+Math.sin(by)*2,by,1.5,0,7); ctx.stroke(); }
+  }
+  // a puppy pen in the center foreground with two wagging pups
+  const px=W*0.5, py=floorY;
+  ctx.fillStyle='#c9a86a'; ctx.fillRect(px-50,py-4,100,6+(H-py)); // pen wall front
+  ctx.strokeStyle='#b09050'; ctx.lineWidth=2; for(let i=-4;i<=4;i++){ ctx.beginPath(); ctx.moveTo(px+i*11,py-4); ctx.lineTo(px+i*11,H); ctx.stroke(); }
+  ctx.fillStyle='#e8dcc0'; ctx.fillRect(px-48,py-2,96,H-py); // bedding behind bars (drawn first)
+  function pup(x,col){ const wag=Math.sin(t*6+x)*3; const hop=Math.abs(Math.sin(t*2+x))*2;
+    ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(x,py+8-hop,10,7,0,0,7); ctx.fill(); // body
+    ctx.beginPath(); ctx.arc(x+8,py+2-hop,6,0,7); ctx.fill(); // head
+    ctx.fillStyle='#3a2a1a'; ctx.beginPath(); ctx.arc(x+11,py+1-hop,1,0,7); ctx.fill(); // eye
+    ctx.fillStyle='#2a1a12'; ctx.beginPath(); ctx.arc(x+13,py+3-hop,1.4,0,7); ctx.fill(); // nose
+    ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(x+4,py-4-hop); ctx.lineTo(x+2,py-10-hop); ctx.lineTo(x+8,py-5-hop); ctx.closePath(); ctx.fill(); // ear
+    // wagging tail
+    ctx.strokeStyle=col; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x-9,py+4-hop); ctx.lineTo(x-14,py-2-hop+wag); ctx.stroke(); }
+  pup(px-16,'#c98a4a'); pup(px+18,'#e8dcc0');
+  // a bird cage hanging on the right with a swinging bird on a perch
+  const cgx=W*0.82, cgy=H*0.16;
+  ctx.strokeStyle='#888'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(cgx,H*0.06); ctx.lineTo(cgx,cgy); ctx.stroke();
+  ctx.strokeStyle='#c9a24a'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cgx,cgy,4,Math.PI,0); ctx.stroke();
+  ctx.strokeStyle='#b0b0b8'; ctx.beginPath(); ctx.arc(cgx,cgy+30,26,Math.PI,0); ctx.stroke(); ctx.fillStyle='#c9a24a'; ctx.fillRect(cgx-26,cgy+30,52,4);
+  for(let i=-2;i<=2;i++){ ctx.strokeStyle='#b0b0b8'; ctx.beginPath(); ctx.moveTo(cgx+i*11,cgy+4); ctx.lineTo(cgx+i*13,cgy+30); ctx.stroke(); }
+  // perch + bird swinging
+  const sw=Math.sin(t*2)*6; ctx.strokeStyle='#8a6a44'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cgx-8,cgy+18); ctx.lineTo(cgx+8,cgy+18); ctx.stroke();
+  ctx.fillStyle='#4aa0d0'; ctx.beginPath(); ctx.ellipse(cgx+sw,cgy+14,4,5,0,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(cgx+sw+2,cgy+9,2.5,0,7); ctx.fill();
+  ctx.fillStyle='#f0a020'; ctx.beginPath(); ctx.moveTo(cgx+sw+4,cgy+9); ctx.lineTo(cgx+sw+7,cgy+9); ctx.lineTo(cgx+sw+4,cgy+11); ctx.fill();
+  // shelf of pet supplies (bags/toys) low on the right
+  ctx.fillStyle='#8a6a44'; ctx.fillRect(W*0.72,floorY-4,W*0.24,4);
+  for(let i=0;i<4;i++){ ctx.fillStyle=['#e0692a','#4a86c0','#3a8a5a','#d0a030'][i]; ctx.fillRect(W*0.74+i*W*0.05,floorY-16,10,12); }
+}
+registerScene('petshop', drawPetShop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
