@@ -151,7 +151,16 @@
   .outfitRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:14px;cursor:pointer;}
   .outfitRow .oi{font-size:18px;}
   .outfitRow.sel{background:rgba(224,122,139,.45);font-weight:700;}
-  #daysChip{font-size:12px;font-weight:700;color:var(--accent);background:#fff;padding:3px 8px;border-radius:20px;box-shadow:0 1px 3px var(--shadow);user-select:none;cursor:default;}
+  #daysChip{font-size:12px;font-weight:700;color:var(--accent);background:#fff;padding:3px 8px;border-radius:20px;box-shadow:0 1px 3px var(--shadow);user-select:none;cursor:pointer;}
+  #notePanel{position:absolute;inset:0;background:rgba(42,33,28,.88);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
+  #notePanel.hide{display:none;}
+  #noteHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  #noteClose{cursor:pointer;font-size:18px;padding:0 4px;}
+  #noteHint{color:rgba(255,255,255,.6);font-size:11px;font-weight:500;margin-bottom:10px;}
+  #noteList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+  .noteCard{background:#fdf6ee;border-radius:12px;padding:12px 14px;color:#4a3a34;font-size:13px;line-height:1.5;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+  .noteCard .nd{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px;}
+  .noteLocked{background:rgba(255,255,255,.08);color:rgba(255,255,255,.55);border-radius:12px;padding:12px 14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;}
   #collectPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
   #collectPanel.hide{display:none;}
   #collectHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -242,6 +251,12 @@
   <div id="setPanel" class="hide">
     <div id="setHead"><span>⚙️ Settings</span><span id="setClose">✕</span></div>
     <div id="setList"></div>
+  </div>
+
+  <div id="notePanel" class="hide">
+    <div id="noteHead"><span>💌 Notes from Paul</span><span id="noteClose">✕</span></div>
+    <div id="noteHint">Little letters that unlock as your days together add up 💛</div>
+    <div id="noteList"></div>
   </div>
 
 </div>
@@ -1079,6 +1094,33 @@ function drawAccessory(kind, cx, topY, s){
   ctx.restore();
 }
 
+/* ---- love notes from Paul, unlocking as the days together add up ---- */
+const LOVE_NOTES = [
+  {day:1,  text:'Happy birthday, my love. I made this whole little world just for you — every place, every hug. 💛 —Paul'},
+  {day:2,  text:'Every day with you is my favorite day. Even the quiet ones. 💗'},
+  {day:3,  text:'Thank you for your drawings, your laugh, and for always sharing your cookies (mostly). 🍪'},
+  {day:5,  text:'You make ordinary moments feel like magic. I don’t know how you do it. ✨'},
+  {day:7,  text:'A whole week of us in here — and a lifetime of us out there. 🥰'},
+  {day:10, text:'I’d wander all 123 of these places just to hold your hand in one of them. 🗺️'},
+  {day:14, text:'Two weeks, and I still get butterflies when you smile at me. 🦋'},
+  {day:21, text:'Wherever we are, you’re home to me. 🏡'},
+  {day:30, text:'A month in, and I love you more than the day we started. Always will. 💍'},
+];
+function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
+function buildNotes(){
+  const list=document.getElementById('noteList'); if(!list) return; list.innerHTML='';
+  const d=(meta&&meta.totalDays)||0;
+  document.getElementById('noteHead').firstElementChild.textContent=`💌 Notes from Paul ${notesUnlocked()}/${LOVE_NOTES.length}`;
+  LOVE_NOTES.forEach(n=>{
+    if (d>=n.day){ const c=document.createElement('div'); c.className='noteCard';
+      c.innerHTML=`<div class="nd">Day ${n.day}</div>${n.text}`; list.appendChild(c); }
+    else { const c=document.createElement('div'); c.className='noteLocked';
+      c.innerHTML=`<span>🔒</span><span>Unlocks on day ${n.day} together</span>`; list.appendChild(c); }
+  });
+}
+function openNotes(){ buildNotes(); document.getElementById('notePanel').classList.remove('hide'); }
+function closeNotes(){ document.getElementById('notePanel').classList.add('hide'); }
+
 /* ---- "days together": distinct days visited + consecutive-day streak ---- */
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function daysBetween(a,b){ return Math.round((new Date(b+'T00:00') - new Date(a+'T00:00'))/86400000); }
@@ -1103,6 +1145,7 @@ function initDaysTogether(){
         hearts(); sfx('day');
         state.hunger=clamp(state.hunger+10); state.fun=clamp(state.fun+10); state.love=clamp(state.love+10); state.energy=clamp(state.energy+10);
         refreshHUD();
+        if (LOVE_NOTES.some(n=> n.day === meta.totalDays)) showToast('💌','A new note from Paul','Tap 💛 to read it');
       }, 1400);
     } else {
       setTimeout(()=>{ say('Hi! 💛'); }, 1200);
@@ -1221,6 +1264,8 @@ document.getElementById('outfitBtn').addEventListener('click', openOutfit);
 document.getElementById('outfitClose').addEventListener('click', closeOutfit);
 document.getElementById('setBtn').addEventListener('click', openSettings);
 document.getElementById('setClose').addEventListener('click', closeSettings);
+document.getElementById('daysChip').addEventListener('click', openNotes);
+document.getElementById('noteClose').addEventListener('click', closeNotes);
 document.getElementById('mapAll').addEventListener('click', ()=>{ disabledScenes.clear(); saveDisabled(); buildMapList(); });
 document.getElementById('mapNone').addEventListener('click', ()=>{ disabledScenes = new Set(SCENES); saveDisabled(); buildMapList(); });
 
