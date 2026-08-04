@@ -3606,6 +3606,37 @@ function drawClockmaker(){
 }
 registerScene('clockmaker', drawClockmaker);
 
+/* ── CARNIVAL AT NIGHT (outdoor · festive) ── */
+function drawCarnival(){
+  const t = sceneTime, groundY = H*0.66;
+
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#1a1a3a'); sky.addColorStop(1,'#4a2a5a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  for (let i=0;i<30;i++){ const sx=(i*71+5)%W, sy=(i*37+3)%(groundY*0.7); ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(sx,sy,1,1); }
+
+  // ferris wheel
+  const wX=W*0.34, wY=H*0.32, wR=W*0.20, rot=t*0.3;
+  ctx.strokeStyle='#5a5e70'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(wX,wY); ctx.lineTo(wX-16,groundY); ctx.moveTo(wX,wY); ctx.lineTo(wX+16,groundY); ctx.stroke();
+  ctx.strokeStyle='#8a8ea0'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(wX,wY,wR,0,7); ctx.stroke();
+  for (let i=0;i<12;i++){ const a=rot+i/12*6.28, ex=wX+Math.cos(a)*wR, ey=wY+Math.sin(a)*wR; ctx.strokeStyle='#6a6e80'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(wX,wY); ctx.lineTo(ex,ey); ctx.stroke(); ctx.fillStyle=['#e0504a','#f2b03a','#5a9ee0','#7ac05a'][i%4]; ctx.fillRect(ex-5,ey-2,10,8); }
+  ctx.fillStyle='#c9a24a'; ctx.beginPath(); ctx.arc(wX,wY,5,0,7); ctx.fill();
+  for (let i=0;i<16;i++){ const a=i/16*6.28; ctx.fillStyle=`rgba(255,240,150,${0.5+0.5*Math.sin(t*4+i)})`; ctx.beginPath(); ctx.arc(wX+Math.cos(a)*wR,wY+Math.sin(a)*wR,2,0,7); ctx.fill(); }
+
+  // striped tent
+  const tX=W*0.8, tB=groundY, tW=W*0.3, tPeak=groundY-70;
+  for (let i=0;i<8;i++){ ctx.fillStyle=i%2?'#d0402e':'#e8e0d4'; ctx.beginPath(); ctx.moveTo(tX,tPeak); ctx.lineTo(tX-tW/2+i*tW/8, tB); ctx.lineTo(tX-tW/2+(i+1)*tW/8, tB); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle='#f2c14e'; ctx.beginPath(); ctx.moveTo(tX,tPeak); ctx.lineTo(tX,tPeak-12); ctx.lineTo(tX+10,tPeak-8); ctx.closePath(); ctx.fill();
+
+  // ground
+  const g=ctx.createLinearGradient(0,groundY,0,H); g.addColorStop(0,'#3a2e2a'); g.addColorStop(1,'#2a201c');
+  ctx.fillStyle=g; ctx.fillRect(0,groundY,W,H-groundY);
+
+  // string lights
+  ctx.strokeStyle='rgba(150,130,110,.6)'; ctx.lineWidth=1; ctx.beginPath(); for (let x=0;x<=W;x+=10){ const y=16+Math.sin(x*0.04)*8; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y); } ctx.stroke();
+  for (let x=12;x<W;x+=24){ const y=16+Math.sin(x*0.04)*8+5; ctx.fillStyle=`rgba(255,${140+Math.floor(Math.abs(Math.sin(x))*80)},90,${0.7+0.3*Math.sin(t*3+x)})`; ctx.beginPath(); ctx.arc(x,y,3,0,7); ctx.fill(); }
+}
+registerScene('carnival', drawCarnival);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
