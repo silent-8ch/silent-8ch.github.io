@@ -6306,6 +6306,64 @@ function drawVolcano(){
 }
 registerScene('volcano', drawVolcano);
 
+/* ── FIREWORKS (outdoor · festive night show over the water) ── */
+function drawFireworks(){
+  const t=sceneTime, waterY=H*0.72;
+  // night sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#0a0e24'); sky.addColorStop(1,'#1e2a48');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  // stars
+  for(let i=0;i<40;i++){ const sx=(i*47+9)%W, sy=(i*71)%(waterY*0.7); ctx.fillStyle=`rgba(255,255,255,${0.3+0.3*Math.sin(t*2+i)})`; ctx.fillRect(sx,sy,1.2,1.2); }
+  // a distant city skyline silhouette with lit windows
+  ctx.fillStyle='#0c1020';
+  const bh=[0.5,0.62,0.44,0.7,0.55,0.66,0.48,0.6];
+  for(let i=0;i<8;i++){ const bx=i*W/8, bw=W/8; const by=waterY - (waterY*0.28)*bh[i];
+    ctx.fillRect(bx,by,bw+1,waterY-by);
+    ctx.fillStyle=`rgba(255,220,140,.6)`; for(let w=0;w<6;w++){ if((i*7+w)%3) ctx.fillRect(bx+4+ (w%3)*(bw/3), by+6+Math.floor(w/3)*10, 3,4); }
+    ctx.fillStyle='#0c1020'; }
+  // firework bursts — several at staggered phases
+  const palette=[['#ff5a7a'],['#5ad0ff'],['#ffd45a'],['#8affa0'],['#c98aff'],['#ff9a4a']];
+  function burst(cx, topY, phase, colIdx){
+    const period=2.4; const ph=(t*0.8 + phase)%period;
+    if(ph<0.35){ // rising rocket
+      const rp=ph/0.35; ctx.fillStyle='#ffd98a'; ctx.beginPath(); ctx.arc(cx, waterY - (waterY-topY)*rp, 2,0,7); ctx.fill();
+      ctx.strokeStyle='rgba(255,200,120,.4)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(cx,waterY - (waterY-topY)*rp); ctx.lineTo(cx, waterY - (waterY-topY)*rp + 14); ctx.stroke();
+    } else { // explosion
+      const ep=(ph-0.35)/(period-0.35); const R=6+ep*46; const alpha=Math.max(0,1-ep);
+      const col=palette[colIdx%palette.length][0];
+      for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; const r=R*(0.85+ (i%3)*0.08);
+        ctx.strokeStyle=col; ctx.globalAlpha=alpha; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*r*0.5, topY+Math.sin(a)*r*0.5 + ep*ep*30);
+        ctx.lineTo(cx+Math.cos(a)*r, topY+Math.sin(a)*r + ep*ep*30); ctx.stroke();
+        // sparkle tip
+        ctx.fillStyle='#fff'; ctx.globalAlpha=alpha*(0.5+0.5*Math.sin(t*20+i)); ctx.beginPath(); ctx.arc(cx+Math.cos(a)*r, topY+Math.sin(a)*r + ep*ep*30, 1.4,0,7); ctx.fill();
+      }
+      ctx.globalAlpha=1;
+      // flash core
+      ctx.fillStyle=`rgba(255,255,255,${alpha*0.5})`; ctx.beginPath(); ctx.arc(cx,topY,4,0,7); ctx.fill();
+    }
+  }
+  burst(W*0.26, H*0.24, 0.0, 0);
+  burst(W*0.54, H*0.16, 0.9, 1);
+  burst(W*0.76, H*0.3, 1.7, 2);
+  burst(W*0.4, H*0.34, 2.3, 3);
+  burst(W*0.88, H*0.2, 3.1, 4);
+  burst(W*0.12, H*0.32, 1.3, 5);
+  // harbor water with shimmering reflections of the bursts + city
+  const water=ctx.createLinearGradient(0,waterY,0,H); water.addColorStop(0,'#16223e'); water.addColorStop(1,'#0a1226');
+  ctx.fillStyle=water; ctx.fillRect(0,waterY,W,H-waterY);
+  // reflected colored streaks (wavering)
+  for(let i=0;i<6;i++){ const rx=W*(0.15+i*0.15); ctx.fillStyle=palette[i%palette.length][0]; ctx.globalAlpha=0.12;
+    for(let y=0;y<H-waterY;y+=6){ ctx.fillRect(rx-8+Math.sin(y*0.2+t*3+i)*4, waterY+y, 16, 3); } ctx.globalAlpha=1; }
+  // ripple lines
+  for(let i=0;i<4;i++){ const ry=waterY+10+i*((H-waterY)/5); ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=ry+Math.sin(x*0.05+t*1.5+i)*2; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // two tiny silhouettes on a foreground dock watching
+  ctx.fillStyle='#05070f'; ctx.fillRect(0,H*0.94,W,H*0.06);
+  for(let i=0;i<2;i++){ const px=W*0.44+i*W*0.08; ctx.fillRect(px-2,H*0.9,4,H*0.04); ctx.beginPath(); ctx.arc(px,H*0.89,3,0,7); ctx.fill(); }
+}
+registerScene('fireworks', drawFireworks);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
