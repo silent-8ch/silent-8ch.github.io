@@ -511,6 +511,102 @@ const SCENE_SPOTS = {
     {nx:0.25, ny:0.55, r:45, e:'🎈', lines:['Balloons! 🎈','Can I have one?','So colorful 🌈']},
     {nx:0.60, ny:0.75, r:46, e:'🍿', lines:['Popcorn! 🍿','Smells buttery 😋','Share a bag? 🥰']},
   ],
+  aurora: [
+    {nx:0.50, ny:0.25, r:68, e:'🌌', lines:['The northern lights! 🌌','So many colors ✨','It\'s dancing 💚']},
+    {nx:0.25, ny:0.20, r:45, e:'⭐', lines:['A bright star ⭐','Make a wish 🥰','So clear tonight']},
+    {nx:0.60, ny:0.80, r:55, e:'❄️', lines:['Fresh snow ❄️','So sparkly','Crunch crunch ⛄']},
+    {nx:0.80, ny:0.55, r:46, e:'🌲', lines:['Snowy pines 🌲','So still','Frosted tips ❄️']},
+  ],
+  tidepools: [
+    {nx:0.45, ny:0.60, r:55, e:'🌊', lines:['A little tidepool 🌊','So much life!','Peek inside 👀']},
+    {nx:0.70, ny:0.72, r:46, e:'🦀', lines:['A crab! 🦀','Snip snip','Sideways scuttle 😄']},
+    {nx:0.28, ny:0.70, r:44, e:'⭐', lines:['A starfish ⭐','So squishy','Right on the rock']},
+    {nx:0.60, ny:0.40, r:46, e:'🪸', lines:['Wavy seaweed 🌿','So colorful 🪸','Careful, slippery']},
+  ],
+  balletstudio: [
+    {nx:0.30, ny:0.55, r:50, e:'🩰', lines:['The barre 🩰','Stretch with me','Plié! 💃']},
+    {nx:0.60, ny:0.40, r:52, e:'🪞', lines:['So many mirrors 🪞','I see us dancing','Twirl! ✨']},
+    {nx:0.75, ny:0.68, r:45, e:'👗', lines:['A pretty tutu 👗','So frilly 🥰','Can I wear it?']},
+    {nx:0.22, ny:0.40, r:44, e:'🎹', lines:['A little tune 🎹','Time to dance 🎶','So graceful']},
+  ],
+  vineyard: [
+    {nx:0.35, ny:0.50, r:52, e:'🍇', lines:['Ripe grapes! 🍇','So plump and purple','Taste one? 😋']},
+    {nx:0.65, ny:0.60, r:52, e:'🌿', lines:['Rows of vines 🌿','So neat and green','Endless rows']},
+    {nx:0.75, ny:0.72, r:45, e:'🛢️', lines:['Wine barrels 🍷','Aged just right','So rustic 💛']},
+    {nx:0.50, ny:0.20, r:55, e:'☀️', lines:['Rolling hills 🌄','What a view!','So golden ✨']},
+  ],
+  recordshop: [
+    {nx:0.30, ny:0.55, r:52, e:'💿', lines:['Crates of records 💿','So many albums','Find a gem? 🎶']},
+    {nx:0.60, ny:0.50, r:48, e:'🎧', lines:['Drop the needle 🎧','Crackle crackle','Our song? 🥰']},
+    {nx:0.75, ny:0.30, r:45, e:'🎸', lines:['Cool posters 🎸','So retro','I love this band']},
+    {nx:0.25, ny:0.35, r:44, e:'🔊', lines:['Big speakers 🔊','Turn it up! 🎶','Feel the bass']},
+  ],
+  snowycabin: [
+    {nx:0.35, ny:0.55, r:52, e:'🔥', lines:['The crackling fire 🔥','So warm and cozy','Snuggle up 🥰']},
+    {nx:0.70, ny:0.35, r:50, e:'❄️', lines:['Snow outside ❄️','So pretty','Glad we\'re inside 💛']},
+    {nx:0.55, ny:0.70, r:44, e:'☕', lines:['Hot cocoa? ☕','Warms my hands','Marshmallows! 🥰']},
+    {nx:0.25, ny:0.75, r:46, e:'🧸', lines:['A soft rug 🧸','Let\'s lie down','So comfy 😌']},
+  ],
+  spa: [
+    {nx:0.30, ny:0.45, r:48, e:'🕯️', lines:['Soft candlelight 🕯️','So calming','Breathe out 😌']},
+    {nx:0.55, ny:0.60, r:48, e:'💧', lines:['Warm water 💧','So soothing','Ahhh 💆']},
+    {nx:0.75, ny:0.70, r:44, e:'🧖', lines:['Fluffy towels 🧖','So fresh','Pampered 🥰']},
+    {nx:0.70, ny:0.35, r:42, e:'🪴', lines:['A little plant 🪴','So serene 🌿','Zen vibes']},
+  ],
+  desert: [
+    {nx:0.30, ny:0.55, r:50, e:'🌵', lines:['A tall cactus 🌵','Careful, prickly!','So hardy']},
+    {nx:0.75, ny:0.20, r:50, e:'☀️', lines:['Blazing sun ☀️','So hot!','Need some shade 🥵']},
+    {nx:0.55, ny:0.75, r:58, e:'🏜️', lines:['Rolling sand 🏜️','So soft and warm','Endless dunes']},
+    {nx:0.70, ny:0.68, r:42, e:'🦎', lines:['A little lizard! 🦎','So quick','Sunbathing too']},
+  ],
+  fireflies: [
+    {nx:0.50, ny:0.40, r:60, e:'✨', lines:['Fireflies! ✨','Catch one? 🥰','Like tiny stars 🌟']},
+    {nx:0.60, ny:0.78, r:52, e:'🌿', lines:['In the tall grass 🌿','They love it here','So magical']},
+    {nx:0.28, ny:0.65, r:46, e:'💧', lines:['A quiet pond 💧','Reflecting the lights','So still']},
+    {nx:0.80, ny:0.35, r:45, e:'🌳', lines:['Dark trees 🌳','Twinkling all around','So dreamy 🌙']},
+  ],
+  lighthouse: [
+    {nx:0.50, ny:0.25, r:55, e:'🔦', lines:['The lighthouse beam 🔦','Round and round','Guiding ships home ⛵']},
+    {nx:0.60, ny:0.70, r:55, e:'🌊', lines:['The crashing sea 🌊','So wild!','Salty breeze']},
+    {nx:0.25, ny:0.72, r:46, e:'🪨', lines:['Craggy rocks 🪨','Careful up here','Watch the waves']},
+    {nx:0.75, ny:0.35, r:45, e:'🕊️', lines:['Seagulls! 🕊️','Squawk squawk','So free up there']},
+  ],
+  chocolateshop: [
+    {nx:0.35, ny:0.50, r:50, e:'🍫', lines:['A chocolate fountain! 🍫','So dreamy 😋','Dip something?']},
+    {nx:0.60, ny:0.60, r:46, e:'🍬', lines:['Fancy truffles 🍬','Which flavor?','One for you 🥰']},
+    {nx:0.75, ny:0.70, r:44, e:'🧁', lines:['So many sweets 🧁','My mouth\'s watering','Hard to choose!']},
+    {nx:0.25, ny:0.35, r:44, e:'☕', lines:['Warm cocoa ☕','So rich','Mmm 💛']},
+  ],
+  tulipfield: [
+    {nx:0.50, ny:0.60, r:62, e:'🌷', lines:['So many tulips! 🌷','Every color 🌈','Which is prettiest?']},
+    {nx:0.75, ny:0.35, r:50, e:'🌬️', lines:['A windmill 🌬️','Round and round','So Dutch and cute 🥰']},
+    {nx:0.28, ny:0.72, r:44, e:'🧺', lines:['Pick a few? 🧺','For our table 💐','So fresh']},
+    {nx:0.40, ny:0.18, r:48, e:'☁️', lines:['Big open sky ☁️','So bright','What a day ✨']},
+  ],
+  savanna: [
+    {nx:0.30, ny:0.40, r:55, e:'🌳', lines:['A lone acacia 🌳','So iconic','Shade at last']},
+    {nx:0.60, ny:0.62, r:48, e:'🦁', lines:['A lion! 🦁','So majestic','Rawr 😮']},
+    {nx:0.78, ny:0.35, r:48, e:'🦒', lines:['A giraffe! 🦒','So tall!','Munching leaves 🌿']},
+    {nx:0.40, ny:0.80, r:55, e:'🌾', lines:['Golden grass 🌾','Swaying softly','So wide and wild']},
+  ],
+  butterflydome: [
+    {nx:0.50, ny:0.40, r:58, e:'🦋', lines:['Butterflies! 🦋','So many colors 🌈','One landed on me! 🥰']},
+    {nx:0.65, ny:0.68, r:50, e:'🌸', lines:['Nectar flowers 🌸','They love these','So fragrant']},
+    {nx:0.25, ny:0.55, r:46, e:'🌿', lines:['Big green leaves 🌿','A chrysalis? 🐛','So lush']},
+    {nx:0.55, ny:0.16, r:48, e:'☀️', lines:['Warm and humid ☀️','Perfect for them','So bright 🦋']},
+  ],
+  marina: [
+    {nx:0.40, ny:0.50, r:55, e:'⛵', lines:['So many boats ⛵','Which is ours?','Set sail? 🥰']},
+    {nx:0.55, ny:0.72, r:52, e:'🌊', lines:['Gentle waves 🌊','So blue','Sparkling water ✨']},
+    {nx:0.75, ny:0.65, r:45, e:'🪝', lines:['The wooden dock','Careful at the edge','Dangle our feet 🦶']},
+    {nx:0.70, ny:0.30, r:44, e:'🕊️', lines:['Seagulls! 🕊️','After our snacks 😆','So noisy']},
+  ],
+  sunflowers: [
+    {nx:0.40, ny:0.50, r:60, e:'🌻', lines:['So tall! 🌻','Taller than me!','Facing the sun ☀️']},
+    {nx:0.65, ny:0.55, r:45, e:'🐝', lines:['A busy bee 🐝','Buzz buzz','Gathering pollen']},
+    {nx:0.60, ny:0.18, r:50, e:'☀️', lines:['Bright blue sky ☀️','So cheerful','What a day 🥰']},
+    {nx:0.50, ny:0.80, r:52, e:'🌾', lines:['A little path 🌾','Wander with me','Where does it go?']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){

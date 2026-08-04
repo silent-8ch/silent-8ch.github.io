@@ -3039,3 +3039,135 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 20). Two scene-gated micro-interactions. No always-on
+   overlays; each lives only in its scene, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   44) GRIND THE HERBS  —  in the herb shed a mortar and pestle sits ready. Tap to
+   grind: the pestle circles, the herbs turn a deeper green, and a little cloud of
+   fragrance rises. Restores a touch of calm. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxMortar(){
+  try{
+    const SHEDS = new Set(['herbshed','apothecary','potionkitchen','herbalist']);
+    let mp = null;                       // {x,y,grind,fine,cd,ang}
+    function inShed(){ try{ return (typeof SCENES!=='undefined') && SHEDS.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inShed()){ mp = null; return; }
+      if (!mp){ mp = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.74)), y: rand(H*0.66,H*0.74), grind:0, fine:0, cd:0, ang:0 }; }
+      if (mp.cd > 0) mp.cd -= dt;
+      if (mp.grind > 0){ mp.grind -= dt; mp.ang += dt*10; mp.fine = Math.min(1, mp.fine + dt*0.4); }
+      else if (mp.fine > 0){ mp.fine = Math.max(0, mp.fine - dt*0.06); }   // slowly settles back
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!mp || !inShed()) return;
+      const x = mp.x, y = mp.y, grinding = mp.grind > 0;
+      const off = grinding ? Math.cos(mp.ang)*2.5 : 0, offy = grinding ? Math.sin(mp.ang)*1.5 : 0;
+      ctx.save();
+      // bowl (mortar)
+      ctx.fillStyle = '#9a8a7a';
+      ctx.beginPath(); ctx.moveTo(x-13, y-4); ctx.quadraticCurveTo(x, y+12, x+13, y-4); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#7a6a5a'; ctx.beginPath(); ctx.ellipse(x, y-4, 13, 4, 0, 0, 7); ctx.fill();
+      // ground herbs inside — greener/finer as fine rises
+      const green = Math.round(90 + mp.fine*60);
+      ctx.fillStyle = 'rgba(' + (60-mp.fine*20) + ',' + green + ',' + (50) + ',0.9)';
+      ctx.beginPath(); ctx.ellipse(x+off*0.4, y-3, 7, 2.2, 0, 0, 7); ctx.fill();
+      // little leaf flecks
+      ctx.fillStyle = 'rgba(80,140,60,0.8)';
+      for (let i=0;i<3;i++){ const fx = x - 4 + i*4 + off*0.3; ctx.beginPath(); ctx.arc(fx, y-3, 1 - mp.fine*0.5, 0, 7); ctx.fill(); }
+      // pestle
+      ctx.save(); ctx.translate(x+off, y-9+offy); ctx.rotate(0.5 + (grinding?Math.sin(mp.ang)*0.15:0));
+      ctx.strokeStyle = '#8a7a6a'; ctx.lineWidth = 4; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(7,-12); ctx.stroke();
+      ctx.fillStyle = '#9a8a7a'; ctx.beginPath(); ctx.arc(0,0,2.6,0,7); ctx.fill();
+      ctx.restore();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!mp || !inShed()) return false;
+        if (Math.hypot(px - mp.x, py - (mp.y - 4)) > 20) return false;
+        if (mp.cd > 0){ mp.grind = Math.min(1.5, mp.grind + 0.4); return true; }
+        mp.cd = 0.6; mp.grind = Math.min(1.6, mp.grind + 0.9);
+        if (typeof sfx === 'function') sfx('draw');
+        if (typeof fxAt === 'function') fxAt(mp.x, mp.y - 14, pick(['🌿','✨','🍃']));
+        if (typeof say === 'function') say(pick(['Smells so fresh 🌿','Grind, grind… 😌','Herbal magic 🍃','Lovely and fragrant 💛']));
+        try{ state.energy = clamp(state.energy + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   45) TIDAL-CAVE CRAB  —  in the tidal cave a little crab sidles across the wet
+   rocks. Tap it and it scuttles off with a startled claw-wave and a puff of
+   bubbles, then peeks back out. Only in the tidal cave. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxCrab(){
+  try{
+    let crab = null;                     // {x,y,dir,t,scuttle,cd,vx}
+    function inCave(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'tidalcave'; }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inCave()){ crab = null; return; }
+      if (!crab){ crab = { x: rand(W*0.3,W*0.7), y: rand(H*0.76,H*0.82), dir:(Math.random()<0.5?-1:1), t:rand(0,10), scuttle:0, cd:0, vx: rand(10,16) }; }
+      crab.t += dt; if (crab.cd > 0) crab.cd -= dt;
+      const speed = crab.scuttle > 0 ? crab.vx*3 : crab.vx*0.5;
+      if (crab.scuttle > 0) crab.scuttle -= dt;
+      crab.x += crab.dir * speed * dt;
+      if (crab.x < W*0.2){ crab.x = W*0.2; crab.dir = 1; } if (crab.x > W*0.8){ crab.x = W*0.8; crab.dir = -1; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!crab || !inCave()) return;
+      const bob = Math.sin(crab.t*10) * (crab.scuttle>0?1.5:0.6);
+      const x = crab.x, y = crab.y + bob;
+      const clawUp = crab.scuttle > 0 ? Math.sin(crab.scuttle*24)*0.5 - 0.3 : 0;
+      ctx.save();
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.14)'; ctx.beginPath(); ctx.ellipse(x, y+5, 10, 2.6, 0, 0, 7); ctx.fill();
+      // legs (3 per side)
+      ctx.strokeStyle = '#b8442a'; ctx.lineWidth = 1.2; ctx.lineCap='round';
+      for (let i=-1;i<=1;i++){
+        const lp = Math.sin(crab.t*14 + i)* (crab.scuttle>0?2:0.6);
+        ctx.beginPath(); ctx.moveTo(x-6, y+1+i*2); ctx.lineTo(x-11, y+4+i*2+lp); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x+6, y+1+i*2); ctx.lineTo(x+11, y+4+i*2-lp); ctx.stroke();
+      }
+      // body
+      ctx.fillStyle = '#d9542f'; ctx.beginPath(); ctx.ellipse(x, y, 8, 5.5, 0, 0, 7); ctx.fill();
+      // eyes on stalks
+      ctx.strokeStyle = '#d9542f'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(x-3, y-4); ctx.lineTo(x-3, y-8); ctx.moveTo(x+3, y-4); ctx.lineTo(x+3, y-8); ctx.stroke();
+      ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(x-3, y-9, 1.3, 0, 7); ctx.arc(x+3, y-9, 1.3, 0, 7); ctx.fill();
+      // claws (raise when startled)
+      ctx.fillStyle = '#c9482a';
+      ctx.save(); ctx.translate(x-8, y-1); ctx.rotate(-0.4 + clawUp); ctx.beginPath(); ctx.ellipse(-3,0,3.4,2.4,0,0,7); ctx.fill(); ctx.restore();
+      ctx.save(); ctx.translate(x+8, y-1); ctx.rotate(0.4 - clawUp); ctx.beginPath(); ctx.ellipse(3,0,3.4,2.4,0,0,7); ctx.fill(); ctx.restore();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!crab || !inCave()) return false;
+        if (px < crab.x - 13 || px > crab.x + 13 || py < crab.y - 12 || py > crab.y + 8) return false;
+        crab.dir = (px < crab.x) ? 1 : -1;                     // scuttle away from the tap
+        crab.scuttle = 1;
+        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(crab.x+rand(-8,8), crab.y-rand(2,12), pick(['🫧','🦀','💧'])), i*80);
+        if (crab.cd <= 0){
+          crab.cd = 1.2;
+          if (typeof sfx === 'function') sfx('tap');
+          if (typeof say === 'function') say(pick(['A crab! 🦀','Off it scuttles! 😄','Snippy little thing 🥰','Bubbles! 🫧']));
+          try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

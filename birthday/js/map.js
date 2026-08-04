@@ -74,6 +74,8 @@ const SCENE_LABELS = {
   herbshed:'Herb Drying Shed',
   cranberryharvest:'Cranberry Harvest', tidalcave:'Tidal Cave', bambootearoom:'Bamboo Tearoom',
   reindeerbarn:'Reindeer Barn',
+  mapleforest:'Maple Forest', skygondola:'Sky Gondola', cidermill:'Cider Mill',
+  driftwoodbeach:'Driftwood Beach',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){
