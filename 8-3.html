@@ -5018,6 +5018,62 @@ function drawTrainRoom(){
 }
 registerScene('trainroom', drawTrainRoom);
 
+/* ── RICE TERRACES (outdoor · flooded paddies at dawn) ── */
+function drawRiceTerraces(){
+  const t=sceneTime, skyY=H*0.34;
+  // soft dawn sky
+  const sky=ctx.createLinearGradient(0,0,0,skyY); sky.addColorStop(0,'#b9d0e6'); sky.addColorStop(1,'#f3d8b0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,skyY);
+  // soft sun low behind hills
+  ctx.fillStyle='rgba(255,235,190,.85)'; ctx.beginPath(); ctx.arc(W*0.66,skyY-6,20,0,7); ctx.fill();
+  // layered misty hills
+  ctx.fillStyle='#9fb0a0'; ctx.beginPath(); ctx.moveTo(0,skyY); ctx.quadraticCurveTo(W*0.3,skyY-24,W*0.6,skyY-4); ctx.quadraticCurveTo(W*0.85,skyY-18,W,skyY-2); ctx.lineTo(W,skyY); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fillRect(0,skyY-8,W,8); // mist band
+  // the stepped terraces descending — each an irrigated paddy that mirrors the sky
+  const steps=7;
+  for(let i=0;i<steps;i++){
+    const y0=skyY + (H-skyY)*i/steps;
+    const y1=skyY + (H-skyY)*(i+1)/steps;
+    // curved terrace edge (follows the contour of the hill)
+    const bend=10+i*3;
+    // water surface with a dawn-tinted reflection, lighter near front
+    const shade=0.5 - i*0.03;
+    const wg=ctx.createLinearGradient(0,y0,0,y1);
+    wg.addColorStop(0,`rgba(${180+i*6},${190+i*4},${170+i*2},0.9)`);
+    wg.addColorStop(1,`rgba(${150+i*6},${175+i*4},${185+i*2},0.9)`);
+    ctx.fillStyle=wg;
+    ctx.beginPath(); ctx.moveTo(0,y0);
+    for(let x=0;x<=W;x+=12){ ctx.lineTo(x, y0 + Math.sin(x*0.02 + i)*bend*0.4); }
+    ctx.lineTo(W,y1);
+    for(let x=W;x>=0;x-=12){ ctx.lineTo(x, y1 + Math.sin(x*0.02 + i+0.5)*bend*0.4); }
+    ctx.closePath(); ctx.fill();
+    // shimmer highlights on the water
+    ctx.strokeStyle='rgba(255,240,210,.35)'; ctx.lineWidth=1;
+    ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=(y0+y1)/2 + Math.sin(x*0.06+t*1.5+i)*2; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke();
+    // grassy mud ridge separating this terrace from the next
+    ctx.fillStyle='#6a5a34'; ctx.beginPath(); ctx.moveTo(0,y1);
+    for(let x=0;x<=W;x+=12){ ctx.lineTo(x, y1 + Math.sin(x*0.02 + i+0.5)*bend*0.4); }
+    ctx.lineTo(W,y1+4);
+    for(let x=W;x>=0;x-=12){ ctx.lineTo(x, y1+4 + Math.sin(x*0.02 + i+0.5)*bend*0.4); }
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#5f7a3a'; ctx.beginPath(); ctx.moveTo(0,y1);
+    for(let x=0;x<=W;x+=8){ ctx.lineTo(x, y1 + Math.sin(x*0.02+i+0.5)*bend*0.4 - 1.5); }
+    ctx.stroke?.();
+    // little rice sprout tufts poking up along the near ridge
+    if(i>=3){ for(let x=6;x<W;x+=18){ const ry=y1 + Math.sin(x*0.02+i+0.5)*bend*0.4; ctx.strokeStyle='#4f7a30'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,ry); ctx.lineTo(x-2,ry-5); ctx.moveTo(x,ry); ctx.lineTo(x+2,ry-5); ctx.moveTo(x,ry); ctx.lineTo(x,ry-6); ctx.stroke(); } }
+  }
+  // a lone farmer's hut on an upper ridge
+  const hx=W*0.16, hy=skyY + (H-skyY)*1/steps - 4;
+  ctx.fillStyle='#7a5636'; ctx.fillRect(hx-6,hy-8,12,8);
+  ctx.fillStyle='#4a3320'; ctx.beginPath(); ctx.moveTo(hx-9,hy-8); ctx.lineTo(hx+9,hy-8); ctx.lineTo(hx,hy-16); ctx.closePath(); ctx.fill();
+  // a couple of white egrets gliding low
+  for(let i=0;i<2;i++){ const gx=(t*24+i*160)%(W+40)-20, gy=skyY*0.7+i*16;
+    ctx.strokeStyle='#f4f4f0'; ctx.lineWidth=2; ctx.beginPath();
+    ctx.moveTo(gx-6,gy); ctx.quadraticCurveTo(gx,gy-3+Math.sin(t*6+i),gx+6,gy); ctx.stroke(); }
+}
+registerScene('riceterraces', drawRiceTerraces);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
