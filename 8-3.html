@@ -6466,6 +6466,60 @@ function drawCoralReef(){
 }
 registerScene('coralreef', drawCoralReef);
 
+/* ── BOXING GYM (indoor · ring & swinging bags) ── */
+function drawBoxingGym(){
+  const t=sceneTime, floorY=H*0.7;
+  // industrial gym
+  ctx.fillStyle='#4a4640'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#6a5a44'; ctx.fillRect(0,floorY,W,H-floorY); // wood floor
+  for(let i=0;i<8;i++){ ctx.fillStyle='rgba(0,0,0,.08)'; ctx.fillRect(0,floorY+i*((H-floorY)/8),W,1); }
+  ctx.fillStyle='#3a3630'; ctx.fillRect(0,H*0.08,W,W*0.004); // brick line
+  // brick wall texture
+  ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.lineWidth=1; for(let r=0;r<5;r++) for(let c=0;c<W/40+1;c++){ ctx.strokeRect(c*40 - (r%2)*20, H*0.1+r*16, 40,16); }
+  // championship banners hung high
+  const bc=['#c0392b','#2960a0','#c9a227'];
+  for(let i=0;i<3;i++){ const bx=W*0.12+i*W*0.3; ctx.fillStyle=bc[i]; ctx.beginPath(); ctx.moveTo(bx,H*0.12); ctx.lineTo(bx+40,H*0.12); ctx.lineTo(bx+40,H*0.24); ctx.lineTo(bx+20,H*0.3); ctx.lineTo(bx,H*0.24); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 8px Arial'; ctx.textAlign='center'; ctx.fillText('★', bx+20, H*0.2); ctx.textAlign='left'; }
+  // the boxing ring (perspective) on the right
+  const rx=W*0.66, rTop=floorY-30, rBot=H-6, rw=W*0.3;
+  // canvas
+  ctx.fillStyle='#c9c2b4'; ctx.beginPath(); ctx.moveTo(rx-rw*0.4,rTop); ctx.lineTo(rx+rw*0.5,rTop); ctx.lineTo(rx+rw*0.6,rBot); ctx.lineTo(rx-rw*0.5,rBot); ctx.closePath(); ctx.fill();
+  // corner posts
+  ctx.fillStyle='#c0392b'; ctx.fillRect(rx-rw*0.4-3,rTop-40,6,40); ctx.fillRect(rx+rw*0.5-3,rTop-40,6,40); ctx.fillRect(rx-rw*0.5-3,rBot-46,6,46); ctx.fillRect(rx+rw*0.6-3,rBot-46,6,46);
+  // ropes
+  ctx.strokeStyle='#e8e0d0'; ctx.lineWidth=2; for(let k=0;k<3;k++){ const off=12+k*12;
+    ctx.beginPath(); ctx.moveTo(rx-rw*0.4,rTop-off); ctx.lineTo(rx+rw*0.5,rTop-off); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rx-rw*0.4,rTop-off); ctx.lineTo(rx-rw*0.5,rBot-off-6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rx+rw*0.5,rTop-off); ctx.lineTo(rx+rw*0.6,rBot-off-6); ctx.stroke(); }
+  // heavy bag hanging from the ceiling on the left, swinging
+  const hx=W*0.2, hTop=H*0.1; const swing=Math.sin(t*1.4)*0.12;
+  ctx.strokeStyle='#333'; ctx.lineWidth=2; ctx.save(); ctx.translate(hx,hTop); ctx.rotate(swing);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,H*0.22); ctx.stroke();
+  ctx.fillStyle='#7a1e1e'; ctx.beginPath(); ctx.moveTo(-14,H*0.22); ctx.lineTo(14,H*0.22); ctx.lineTo(12,H*0.46); ctx.lineTo(-12,H*0.46); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#5a1414'; ctx.fillRect(-14,H*0.22,28,4); ctx.fillRect(-12,H*0.34,24,3);
+  ctx.fillStyle='rgba(255,255,255,.12)'; ctx.fillRect(-14,H*0.22,5,H*0.24);
+  ctx.restore();
+  // a trainer silhouette steadying the bag
+  const tbx=hx+Math.sin(t*1.4)*20;
+  ctx.fillStyle='#1c1c22'; ctx.fillRect(tbx+16,floorY-30,10,30+(H-floorY)); ctx.beginPath(); ctx.arc(tbx+21,floorY-34,6,0,7); ctx.fill();
+  ctx.strokeStyle='#1c1c22'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(tbx+18,floorY-22); ctx.lineTo(tbx+6,floorY-30); ctx.stroke(); // arm to bag
+  // speed bag platform on the wall being hit (blurred fast motion)
+  const sbx=W*0.44, sby=H*0.4;
+  ctx.fillStyle='#3a2e22'; ctx.fillRect(sbx-18,sby-8,36,5); // platform
+  const hit=Math.sin(t*14); ctx.fillStyle='#5a1414'; ctx.globalAlpha=0.5;
+  ctx.beginPath(); ctx.ellipse(sbx+hit*4,sby+6,7,9,0,0,7); ctx.fill(); ctx.globalAlpha=1;
+  ctx.beginPath(); ctx.ellipse(sbx,sby+6,7,9,0,0,7); ctx.fillStyle='#7a1e1e'; ctx.fill();
+  // a row of jump ropes + gloves hanging on the left wall
+  ctx.fillStyle='#8a6a44'; ctx.fillRect(W*0.03,H*0.42,3,3);
+  for(let i=0;i<3;i++){ ctx.strokeStyle='#c0392b'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(W*0.05+i*W*0.02,H*0.42); ctx.quadraticCurveTo(W*0.05+i*W*0.02+6,H*0.5,W*0.05+i*W*0.02,H*0.56); ctx.stroke(); }
+  // pair of red gloves on a peg
+  ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.arc(W*0.12,H*0.44,7,0,7); ctx.fill(); ctx.fillRect(W*0.115,H*0.44,10,8);
+  ctx.beginPath(); ctx.arc(W*0.16,H*0.46,7,0,7); ctx.fill(); ctx.fillRect(W*0.155,H*0.46,10,8);
+  // a stool with a water bottle in the ring corner
+  ctx.fillStyle='#222'; ctx.fillRect(rx-rw*0.44,rBot-18,10,12); ctx.fillStyle='#3aa0d0'; ctx.fillRect(rx-rw*0.42,rBot-28,4,10);
+}
+registerScene('boxinggym', drawBoxingGym);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
