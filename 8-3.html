@@ -3048,6 +3048,46 @@ function drawWaterfall(){
 }
 registerScene('waterfall', drawWaterfall);
 
+/* ── SEWING STUDIO (indoor · quilting) ── */
+function drawSewingStudio(){
+  const floorY = H*0.62;
+
+  ctx.fillStyle='#e4d8c8'; ctx.fillRect(0,0,W,floorY);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#b98a5a'); fl.addColorStop(1,'#a9784a');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(90,60,30,.2)'; ctx.lineWidth=1; for (let i=1;i<5;i++){ const y=floorY+i/5*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // patchwork quilt on the wall
+  const qX=W*0.06, qY=H*0.10, qC=8, qR=6, qs=9, qc=['#e0504a','#f2b03a','#5a9ee0','#7ac05a','#c05fd0','#e8628c','#f2c14e'];
+  ctx.fillStyle='#8a5a3a'; ctx.fillRect(qX-4,qY-6,qC*qs+8,4);
+  for (let r=0;r<qR;r++) for (let c=0;c<qC;c++){ ctx.fillStyle=qc[(r*qC+c*3)%qc.length]; ctx.globalAlpha=0.9; ctx.fillRect(qX+c*qs,qY+r*qs,qs-1,qs-1); }
+  ctx.globalAlpha=1; ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.strokeRect(qX,qY,qC*qs,qR*qs);
+
+  // thread spool rack
+  const rX=W*0.62, rY=H*0.14, tc=['#e0504a','#5a9ee0','#7ac05a','#f2b03a','#c05fd0','#e8628c'];
+  ctx.fillStyle='#8a5a3a'; ctx.fillRect(rX,rY,W*0.32,4); ctx.fillRect(rX,rY+22,W*0.32,4);
+  for (let i=0;i<6;i++){ const sx=rX+8+i*((W*0.32-16)/6); ctx.fillStyle=tc[i]; ctx.fillRect(sx-3,rY-12,6,12); ctx.fillStyle=tc[(i+2)%6]; ctx.fillRect(sx-3,rY+10,6,12); }
+
+  // fabric bolts leaning
+  for (let i=0;i<3;i++){ const bx=W*0.10+i*10; ctx.save(); ctx.translate(bx,floorY); ctx.rotate(-0.2); ctx.fillStyle=['#c05fd0','#5a9ee0','#e8628c'][i]; ctx.fillRect(-6,-70,12,70); ctx.fillStyle='rgba(255,255,255,.2)'; ctx.fillRect(-6,-70,4,70); ctx.restore(); }
+
+  // sewing table + machine
+  const tX=W*0.44, tTop=floorY-30;
+  ctx.fillStyle='#9a6b3f'; ctx.fillRect(tX-40,tTop,80,8); ctx.fillRect(tX-36,tTop+8,5,floorY-(tTop+8)); ctx.fillRect(tX+31,tTop+8,5,floorY-(tTop+8));
+  ctx.fillStyle='#efe6d8'; ctx.beginPath(); ctx.moveTo(tX-22,tTop-2); ctx.lineTo(tX+22,tTop-2); ctx.lineTo(tX+22,tTop-18); ctx.lineTo(tX+8,tTop-18); ctx.lineTo(tX+2,tTop-30); ctx.lineTo(tX-22,tTop-30); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#c04a2a'; ctx.fillRect(tX-18,tTop-26,10,3);
+  ctx.fillStyle='#888'; ctx.beginPath(); ctx.arc(tX+16,tTop-24,4,0,7); ctx.fill();
+  ctx.strokeStyle='#555'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(tX+4,tTop-18); ctx.lineTo(tX+4,tTop-4); ctx.stroke();
+  ctx.fillStyle='#7ac05a'; ctx.fillRect(tX-14,tTop-4,26,4);
+
+  // dress form
+  const dX=W*0.87, dB=floorY+6;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(dX-2,dB,4,H-dB);
+  ctx.fillStyle='#d8b8a0'; ctx.beginPath(); ctx.moveTo(dX-14,dB-6); ctx.quadraticCurveTo(dX-16,dB-40,dX-6,dB-52); ctx.lineTo(dX+6,dB-52); ctx.quadraticCurveTo(dX+16,dB-40,dX+14,dB-6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#c8a890'; ctx.fillRect(dX-3,dB-60,6,8);
+}
+registerScene('sewingstudio', drawSewingStudio);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
