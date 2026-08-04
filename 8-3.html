@@ -5547,6 +5547,51 @@ function drawLetterpress(){
 }
 registerScene('letterpress', drawLetterpress);
 
+/* ── GLOWWORM CAVE (nature · bioluminescent grotto over dark water) ── */
+function drawGlowwormCave(){
+  const t=sceneTime, waterY=H*0.62;
+  // near-black cavern
+  ctx.fillStyle='#04060c'; ctx.fillRect(0,0,W,H);
+  // faint cave-mouth glow far back on the right
+  const mg=ctx.createRadialGradient(W*0.9,waterY*0.6,4,W*0.9,waterY*0.6,W*0.5);
+  mg.addColorStop(0,'rgba(40,70,90,.35)'); mg.addColorStop(1,'rgba(40,70,90,0)');
+  ctx.fillStyle=mg; ctx.fillRect(0,0,W,H);
+  // jagged ceiling silhouette with hanging stalactites
+  ctx.fillStyle='#0a0e16'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W,0);
+  ctx.lineTo(W,H*0.12);
+  for(let x=W;x>=0;x-=W/12){ const drop=H*0.1+ (Math.sin(x*0.7)+1)*H*0.05; ctx.lineTo(x-W/24, H*0.12+drop); ctx.lineTo(x-W/12, H*0.1); }
+  ctx.lineTo(0,H*0.12); ctx.closePath(); ctx.fill();
+  // long thin stalactites
+  ctx.fillStyle='#0c1018'; for(let i=0;i<9;i++){ const sx=W*0.05+i*W*0.11; const len=H*0.06+ (i%3)*H*0.04;
+    ctx.beginPath(); ctx.moveTo(sx-4,H*0.14); ctx.lineTo(sx+4,H*0.14); ctx.lineTo(sx,H*0.14+len); ctx.closePath(); ctx.fill(); }
+  // constellation of glowworms on the ceiling (blue-green points, gently pulsing)
+  const worms=[];
+  for(let i=0;i<70;i++){ const wx=(i*53+17)%W; const wy=H*0.06+ ((i*37)% (Math.floor(waterY*0.6)));
+    const pulse=0.4+0.6*Math.abs(Math.sin(t*1.5 + i*0.7));
+    worms.push([wx,wy,pulse]);
+    ctx.fillStyle=`rgba(120,230,210,${pulse})`; const r=(i%9===0)?1.8:1.1; ctx.fillRect(wx,wy,r,r);
+    if(i%9===0){ ctx.globalAlpha=pulse*0.4; ctx.beginPath(); ctx.arc(wx+0.5,wy+0.5,4,0,7); ctx.fill(); ctx.globalAlpha=1; }
+    // faint silk thread hanging down
+    if(i%6===0){ ctx.strokeStyle=`rgba(120,230,210,${pulse*0.15})`; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(wx,wy); ctx.lineTo(wx,wy+14); ctx.stroke(); }
+  }
+  // still black underground river
+  const water=ctx.createLinearGradient(0,waterY,0,H); water.addColorStop(0,'#061218'); water.addColorStop(1,'#020508');
+  ctx.fillStyle=water; ctx.fillRect(0,waterY,W,H-waterY);
+  // reflection of the glowworms in the water (wavering, dimmer)
+  for(const [wx,wy,pulse] of worms){ if(wy<waterY*0.9){ const ry=waterY + (waterY - wy)*0.5 + Math.sin(t*1.2+wx*0.1)*1.5;
+    if(ry<H){ ctx.fillStyle=`rgba(90,200,190,${pulse*0.3})`; ctx.fillRect(wx+Math.sin(t+wx)*1, ry, 1.2,1.2); } } }
+  // gentle water surface ripple lines
+  for(let i=0;i<5;i++){ const ry=waterY+8+i*((H-waterY)/6); ctx.strokeStyle='rgba(120,230,210,.05)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=ry+Math.sin(x*0.05+t*1+i)*1.5; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // a small silhouetted boat drifting with a lantern-less rower
+  const bx=(t*10)%(W+80)-40, by=waterY+18;
+  ctx.fillStyle='#010304'; ctx.beginPath(); ctx.moveTo(bx-16,by); ctx.lineTo(bx+16,by); ctx.lineTo(bx+11,by+6); ctx.lineTo(bx-11,by+6); ctx.closePath(); ctx.fill();
+  ctx.fillRect(bx-2,by-10,4,10); ctx.beginPath(); ctx.arc(bx,by-12,2.4,0,7); ctx.fill(); // rower
+  // its reflection
+  ctx.globalAlpha=0.3; ctx.beginPath(); ctx.moveTo(bx-16,by+8); ctx.lineTo(bx+16,by+8); ctx.lineTo(bx+11,by+2); ctx.lineTo(bx-11,by+2); ctx.closePath(); ctx.fill(); ctx.globalAlpha=1;
+}
+registerScene('glowwormcave', drawGlowwormCave);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
