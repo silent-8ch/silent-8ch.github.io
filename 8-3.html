@@ -2899,6 +2899,51 @@ function drawVineyard(){
 }
 registerScene('vineyard', drawVineyard);
 
+/* ── FLORIST SHOP (indoor · flowers) ── */
+function drawFlorist(){
+  const floorY = H*0.62;
+
+  // wall + wainscot
+  ctx.fillStyle='#eae0d0'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#dcae88'; ctx.fillRect(0,floorY-30,W,30);
+  ctx.fillStyle='rgba(0,0,0,.05)'; ctx.fillRect(0,floorY-30,W,2);
+  // tiled floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#c8b89a'); fl.addColorStop(1,'#b4a486');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  for (let r=0;r<5;r++) for (let c=0;c<10;c++){ if ((r+c)%2){ ctx.fillStyle='rgba(120,90,60,.10)'; ctx.fillRect(c*W/10,floorY+r/5*(H-floorY),W/10,(H-floorY)/5); } }
+
+  // hanging dried flowers
+  for (const hx of [W*0.2,W*0.5,W*0.8]){
+    ctx.strokeStyle='#7a8a5a'; ctx.lineWidth=2;
+    for (let k=0;k<5;k++){ const a=-1.2+k*0.5; ctx.beginPath(); ctx.moveTo(hx,0); ctx.quadraticCurveTo(hx+Math.cos(a)*10,20,hx+Math.cos(a)*14,34); ctx.stroke(); }
+    ctx.fillStyle='#b088c0'; for (let k=0;k<3;k++){ ctx.beginPath(); ctx.arc(hx-6+k*6,30,2,0,7); ctx.fill(); }
+  }
+
+  // shop sign
+  ctx.fillStyle='#7a5a3a'; ctx.font='bold 14px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('✿ Fleurs ✿', W*0.5, H*0.10); ctx.textAlign='left';
+
+  // flower buckets
+  function bucket(x,cols){
+    const by=floorY+8;
+    ctx.fillStyle='#8aa0b0'; ctx.beginPath(); ctx.moveTo(x-12,by-2); ctx.lineTo(x+12,by-2); ctx.lineTo(x+9,by+22); ctx.lineTo(x-9,by+22); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#3a7a3a'; ctx.lineWidth=1.5; for (let i=-2;i<=2;i++){ ctx.beginPath(); ctx.moveTo(x+i*4,by-2); ctx.lineTo(x+i*5,by-30); ctx.stroke(); }
+    for (let i=-2;i<=2;i++){ ctx.fillStyle=cols[(i+2)%cols.length]; ctx.beginPath(); ctx.arc(x+i*5,by-32,5,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x+i*5,by-32,1.8,0,7); ctx.fill(); }
+  }
+  bucket(W*0.14,['#e8628c','#f2c14e','#e84a6a']);
+  bucket(W*0.30,['#c05fd0','#f2a6b3','#9a5fd0']);
+  bucket(W*0.86,['#ff8a5a','#f2c14e','#e8628c']);
+
+  // counter with wrapped bouquet + ribbon spools
+  const cX=W*0.58, cTop=floorY+6;
+  ctx.fillStyle='#9a6b3f'; ctx.fillRect(cX-30,cTop,70,H-cTop);
+  ctx.fillStyle='#8a5a34'; ctx.fillRect(cX-30,cTop,70,6);
+  ctx.fillStyle='#f0e8d8'; ctx.beginPath(); ctx.moveTo(cX-6,cTop-2); ctx.lineTo(cX+18,cTop-2); ctx.lineTo(cX+8,cTop-30); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#e8628c'; ctx.beginPath(); ctx.arc(cX+4,cTop-28,4,0,7); ctx.arc(cX+11,cTop-26,4,0,7); ctx.arc(cX+7,cTop-33,4,0,7); ctx.fill();
+  ctx.fillStyle='#e84a6a'; ctx.beginPath(); ctx.arc(cX-18,cTop-6,5,0,7); ctx.fill();
+  ctx.fillStyle='#4a90d9'; ctx.beginPath(); ctx.arc(cX-8,cTop-6,5,0,7); ctx.fill();
+}
+registerScene('florist', drawFlorist);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
