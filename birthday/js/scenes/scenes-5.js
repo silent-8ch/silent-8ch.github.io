@@ -1370,3 +1370,216 @@ function drawGiftWrapShop(){
   ctx.strokeStyle='#e0b040'; ctx.lineWidth=2; ctx.beginPath(); for (let k=0;k<=8;k++){ const cx=W*0.7+k*3; ctx.lineTo(cx, floorY+30+Math.sin(k*1.2)*3);} ctx.stroke();
 }
 registerScene('giftwrapshop', drawGiftWrapShop);
+
+/* ── GINGERBREAD KITCHEN (indoor · holiday baking) ── */
+function drawGingerbreadKitchen(){
+  const t = sceneTime, counterY = H*0.66;
+
+  // warm spiced wall
+  const wall=ctx.createLinearGradient(0,0,0,counterY); wall.addColorStop(0,'#b5723e'); wall.addColorStop(1,'#8a5228');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,counterY);
+  ctx.strokeStyle='rgba(0,0,0,.14)'; ctx.lineWidth=1; for (let y=18;y<counterY;y+=20){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // checkered wall trim near ceiling
+  for (let x=0;x<W;x+=14){ ctx.fillStyle=(x/14|0)%2?'#e8c9a0':'#a05a2e'; ctx.fillRect(x,10,14,10); }
+
+  // window (left) showing a snowy night
+  const wx=W*0.10, wy=H*0.16, ww=W*0.28, wh=H*0.30;
+  ctx.fillStyle='#1e2a42'; ctx.fillRect(wx,wy,ww,wh);
+  for (let i=0;i<16;i++){ const sx=wx+((i*31+t*6)%ww), sy=wy+((i*23+t*9)%wh); ctx.fillStyle='rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(sx,sy,1.3,0,7); ctx.fill(); }
+  ctx.fillStyle='#e8eef6'; ctx.fillRect(wx,wy+wh-8,ww,8);
+  ctx.strokeStyle='#efe0c8'; ctx.lineWidth=4; ctx.strokeRect(wx,wy,ww,wh); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.moveTo(wx,wy+wh/2); ctx.lineTo(wx+ww,wy+wh/2); ctx.stroke();
+
+  // hanging utensils + garland (center-right)
+  ctx.strokeStyle='#5a3a20'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.5,H*0.10); ctx.quadraticCurveTo(W*0.72,H*0.16,W*0.94,H*0.10); ctx.stroke();
+  ctx.fillStyle='#3a6a3a'; for (let k=0;k<8;k++){ const p=k/7; const gx=W*0.5+p*(W*0.44); const gy=H*0.10+Math.sin(p*Math.PI)*6*1.0+ (0.16-0.10)*H*Math.sin(p*Math.PI); ctx.beginPath(); ctx.arc(gx,gy,4,0,7); ctx.fill(); ctx.fillStyle=k%2?'#c0392b':'#3a6a3a'; }
+  ctx.fillStyle='#c9c9d0'; for (const [ux,uy] of [[W*0.58,H*0.18],[W*0.68,H*0.20],[W*0.80,H*0.19]]){ ctx.fillRect(ux-1,uy,2,16); ctx.beginPath(); ctx.arc(ux,uy+18,4,0,Math.PI); ctx.fill(); }
+
+  // wood counter
+  const cnt=ctx.createLinearGradient(0,counterY,0,H); cnt.addColorStop(0,'#d8b483'); cnt.addColorStop(1,'#b8945f');
+  ctx.fillStyle=cnt; ctx.fillRect(0,counterY,W,H-counterY);
+  ctx.fillStyle='rgba(255,250,230,.18)'; ctx.fillRect(0,counterY,W,4);
+  // flour dusting
+  ctx.fillStyle='rgba(255,255,255,.3)'; for (let i=0;i<30;i++){ const fx=(i*67+11)%W, fy=counterY+8+((i*41+7)%(H-counterY-8)); ctx.fillRect(fx,fy,2,2); }
+
+  // gingerbread house centerpiece (center-back, high so pet floor clear)
+  const hx=W*0.5, hy=counterY+8;
+  ctx.fillStyle='#a86a34'; ctx.fillRect(hx-20,hy-24,40,24);
+  ctx.beginPath(); ctx.moveTo(hx-24,hy-24); ctx.lineTo(hx,hy-42); ctx.lineTo(hx+24,hy-24); ctx.closePath(); ctx.fill();
+  // icing trim
+  ctx.strokeStyle='#fff6ee'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(hx-24,hy-24); ctx.lineTo(hx,hy-42); ctx.lineTo(hx+24,hy-24); ctx.stroke();
+  for (let k=-4;k<=4;k++){ ctx.beginPath(); ctx.arc(hx+k*5,hy-24,1.4,0,7); ctx.fill(); }
+  ctx.fillStyle='#fff6ee'; ctx.beginPath(); ctx.moveTo(hx-20,hy); for (let k=0;k<=8;k++){ ctx.lineTo(hx-20+k*5,hy-2-(k%2)*2);} ctx.lineTo(hx+20,hy); ctx.fill();
+  // door + gumdrops
+  ctx.fillStyle='#6a3a1a'; ctx.fillRect(hx-4,hy-12,8,12);
+  ctx.fillStyle='#e2607a'; ctx.beginPath(); ctx.arc(hx-12,hy-8,2.4,0,7); ctx.fill(); ctx.fillStyle='#5ad08a'; ctx.beginPath(); ctx.arc(hx+12,hy-8,2.4,0,7); ctx.fill();
+
+  // cooling rack of gingerbread people (left, low)
+  ctx.fillStyle='#c9c9d0'; ctx.fillRect(W*0.14-22,counterY+30,44,4); for (let g=0;g<3;g++){ const gx=W*0.14-14+g*14, gy=counterY+26;
+    ctx.fillStyle='#a86a34'; ctx.beginPath(); ctx.arc(gx,gy-6,3.5,0,7); ctx.fill(); roundRect(gx-3,gy-3,6,8,2); ctx.fill();
+    ctx.fillRect(gx-6,gy-2,12,2.4); ctx.fillRect(gx-2.5,gy+5,2.4,4); ctx.fillRect(gx,gy+5,2.4,4);
+    ctx.fillStyle='#fff6ee'; ctx.fillRect(gx-2,gy-1,4,1); }
+
+  // icing piping bag + mixing bowl (right, low)
+  const bx=W*0.84, by=counterY+30;
+  ctx.fillStyle='#e8e2d4'; ctx.beginPath(); ctx.arc(bx,by,12,0,Math.PI); ctx.fill(); ctx.fillStyle='#efe6d8'; ctx.beginPath(); ctx.ellipse(bx,by,12,4,0,0,7); ctx.fill();
+  ctx.fillStyle='#c9a24a'; ctx.beginPath(); ctx.ellipse(bx,by,8,2.6,0,0,7); ctx.fill();
+  ctx.fillStyle='#f2c04a'; ctx.beginPath(); ctx.moveTo(bx-16,by-16); ctx.lineTo(bx-8,by-6); ctx.lineTo(bx-20,by-8); ctx.closePath(); ctx.fill();
+}
+registerScene('gingerbreadkitchen', drawGingerbreadKitchen);
+
+/* ── SUNFLOWER MAZE (outdoor · sunny towering blooms) ── */
+function drawSunflowerMaze(){
+  const t = sceneTime, pathY = H*0.62;
+
+  // bright summer sky
+  const sky=ctx.createLinearGradient(0,0,0,pathY); sky.addColorStop(0,'#5fb0ea'); sky.addColorStop(1,'#cbe9c0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,pathY);
+  ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.5,H*0.12,22,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,246,176,.3)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.12,34,0,7); ctx.fill();
+  drawCloud(W*0.18+Math.sin(t*0.1)*8,H*0.10,0.6); drawCloud(W*0.82+Math.sin(t*0.08+2)*6,H*0.16,0.5);
+
+  // distant sunflower tops on the horizon (a green-gold band)
+  ctx.fillStyle='#6a8a2e'; ctx.fillRect(0,pathY-30,W,34);
+  for (let x=6;x<W;x+=16){ ctx.fillStyle='#e0b020'; ctx.beginPath(); ctx.arc(x,pathY-30,4,0,7); ctx.fill(); ctx.fillStyle='#8a5a1a'; ctx.beginPath(); ctx.arc(x,pathY-30,1.6,0,7); ctx.fill(); }
+
+  // dirt path receding up the middle (kept for pet)
+  const path=ctx.createLinearGradient(0,pathY,0,H); path.addColorStop(0,'#c2a06a'); path.addColorStop(1,'#9a7844');
+  ctx.fillStyle=path; ctx.beginPath(); ctx.moveTo(W*0.5-16,pathY); ctx.lineTo(W*0.5+16,pathY); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(120,95,60,.25)'; for (let i=0;i<30;i++){ const px=(i*67+11)%W, py=pathY+10+((i*43+7)%(H-pathY-10)); ctx.fillRect(px,py,2,2); }
+
+  // tall sunflower walls on both sides (foreground, big)
+  function sunflower(sx,sy,sc,sway){ const a=Math.sin(t*1.2+sway)*0.08;
+    ctx.save(); ctx.translate(sx,sy); ctx.rotate(a); ctx.scale(sc,sc);
+    // stem + leaves
+    ctx.strokeStyle='#3a7a2a'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(0,60); ctx.lineTo(0,0); ctx.stroke();
+    ctx.fillStyle='#4a8a2e'; ctx.beginPath(); ctx.ellipse(-8,34,9,4,-0.5,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(8,44,9,4,0.5,0,7); ctx.fill();
+    // petals
+    ctx.fillStyle='#f2b81e'; for (let k=0;k<14;k++){ const pa=k/14*6.28; ctx.save(); ctx.rotate(pa); ctx.beginPath(); ctx.ellipse(0,-14,4,9,0,0,7); ctx.fill(); ctx.restore(); }
+    // center
+    ctx.fillStyle='#7a4a1a'; ctx.beginPath(); ctx.arc(0,0,9,0,7); ctx.fill();
+    ctx.fillStyle='#5a3410'; for (let k=0;k<12;k++){ const pa=k/12*6.28; ctx.beginPath(); ctx.arc(Math.cos(pa)*5,Math.sin(pa)*5,1.2,0,7); ctx.fill(); }
+    ctx.restore();
+  }
+  // left wall (three, varying)
+  sunflower(W*0.10,pathY+40,1.5,0); sunflower(W*0.24,pathY+20,1.1,1); sunflower(W*0.02,pathY+70,1.7,2);
+  // right wall
+  sunflower(W*0.90,pathY+40,1.5,3); sunflower(W*0.76,pathY+22,1.1,4); sunflower(W*0.98,pathY+72,1.7,5);
+
+  // busy bees near the blooms
+  for (let i=0;i<4;i++){ const bx=W*0.2+i*W*0.18+Math.sin(t*3+i)*14; const by=pathY-6+Math.sin(t*4+i*2)*10;
+    ctx.fillStyle='#e0a020'; ctx.beginPath(); ctx.ellipse(bx,by,2.6,1.8,0,0,7); ctx.fill(); ctx.fillStyle='#333'; ctx.fillRect(bx-1,by-1.4,1,2.8);
+    ctx.fillStyle='rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(bx,by-2,2,1,0,0,7); ctx.fill(); }
+  // a wooden signpost at the path mouth (left, low)
+  ctx.fillStyle='#6a4a2e'; ctx.fillRect(W*0.14-2,H*0.80,4,H*0.14); ctx.fillStyle='#8a6038'; roundRect(W*0.14-16,H*0.80,20,10,2); ctx.fill();
+  ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.14-12,H*0.80+5); ctx.lineTo(W*0.14+0,H*0.80+5); ctx.stroke();
+}
+registerScene('sunflowermaze', drawSunflowerMaze);
+
+/* ── JELLYFISH TANK (indoor · dark glowing exhibit) ── */
+function drawJellyfishTank(){
+  const t = sceneTime, floorY = H*0.82;
+
+  // dark exhibit room
+  ctx.fillStyle='#080a14'; ctx.fillRect(0,0,W,H);
+
+  // big cylindrical tank glowing (fills most of the canvas)
+  const tankX=W*0.5, tankTop=H*0.06, tankBot=floorY-4, tankW=W*0.86;
+  const tg=ctx.createLinearGradient(0,tankTop,0,tankBot); tg.addColorStop(0,'#123a6a'); tg.addColorStop(0.5,'#1a5a8a'); tg.addColorStop(1,'#0e2a4a');
+  ctx.fillStyle=tg; roundRect(tankX-tankW/2,tankTop,tankW,tankBot-tankTop,14); ctx.fill();
+  // colored ambient light shift (blue↔violet)
+  const hue=200+40*Math.sin(t*0.4);
+  ctx.fillStyle=`hsla(${hue},70%,50%,0.18)`; roundRect(tankX-tankW/2,tankTop,tankW,tankBot-tankTop,14); ctx.fill();
+
+  // clip drawings to inside the tank
+  ctx.save(); roundRect(tankX-tankW/2+3,tankTop+3,tankW-6,tankBot-tankTop-6,12); ctx.clip();
+  // shafts of light from the top
+  ctx.fillStyle='rgba(180,230,255,.06)'; for (let i=0;i<4;i++){ ctx.save(); ctx.translate(tankX-tankW*0.3+i*tankW*0.2,tankTop); ctx.rotate(0.12); ctx.fillRect(0,0,20,tankBot-tankTop); ctx.restore(); }
+  // rising bubbles
+  for (let i=0;i<22;i++){ const bx=tankX-tankW/2+ ((i*53+9)%tankW); const by=tankBot-((t*16+i*33)%(tankBot-tankTop)); ctx.fillStyle='rgba(200,240,255,.2)'; ctx.beginPath(); ctx.arc(bx,by,1+ (i%3),0,7); ctx.fill(); }
+  // drifting jellyfish (pulsing bells + tentacles)
+  function jelly(jx,jy,sc,hue2){ const pulse=1+0.18*Math.sin(t*2+jx); ctx.save(); ctx.translate(jx,jy); ctx.scale(sc*pulse,sc/pulse);
+    // glow
+    ctx.fillStyle=`hsla(${hue2},80%,70%,0.16)`; ctx.beginPath(); ctx.arc(0,0,22,0,7); ctx.fill();
+    // bell
+    const bg=ctx.createLinearGradient(0,-16,0,6); bg.addColorStop(0,`hsla(${hue2},80%,78%,0.85)`); bg.addColorStop(1,`hsla(${hue2},70%,55%,0.55)`);
+    ctx.fillStyle=bg; ctx.beginPath(); ctx.ellipse(0,0,15,13,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle=`hsla(${hue2},80%,85%,0.5)`; ctx.beginPath(); ctx.ellipse(0,-2,15,13,0,Math.PI,0.1*Math.PI); ctx.fill();
+    // frilly rim
+    ctx.fillStyle=`hsla(${hue2},80%,80%,0.7)`; for (let k=-3;k<=3;k++){ ctx.beginPath(); ctx.arc(k*4.5,0,2,0,Math.PI); ctx.fill(); }
+    // tentacles
+    ctx.strokeStyle=`hsla(${hue2},70%,75%,0.6)`; ctx.lineWidth=1.4;
+    for (let k=-4;k<=4;k++){ ctx.beginPath(); ctx.moveTo(k*2.6,2); ctx.quadraticCurveTo(k*2.6+Math.sin(t*2+k)*4,20,k*2.6+Math.sin(t+k)*3,36); ctx.stroke(); }
+    // oral arms (thicker)
+    ctx.strokeStyle=`hsla(${hue2},75%,82%,0.7)`; ctx.lineWidth=2.4;
+    for (let k=-1;k<=1;k++){ ctx.beginPath(); ctx.moveTo(k*4,2); ctx.quadraticCurveTo(k*4+Math.sin(t*1.5+k)*5,18,k*3,30); ctx.stroke(); }
+    ctx.restore();
+  }
+  jelly(W*0.30, H*0.34+Math.sin(t*0.6)*14, 1.3, 300);
+  jelly(W*0.66, H*0.50+Math.sin(t*0.5+2)*16, 1.6, 200);
+  jelly(W*0.50, H*0.24+Math.sin(t*0.7+1)*10, 0.9, 260);
+  jelly(W*0.20, H*0.60+Math.sin(t*0.55+3)*12, 1.0, 330);
+  jelly(W*0.80, H*0.30+Math.sin(t*0.65+4)*12, 0.8, 180);
+  ctx.restore();
+
+  // tank glass frame + reflections
+  ctx.strokeStyle='rgba(180,220,255,.25)'; ctx.lineWidth=3; roundRect(tankX-tankW/2,tankTop,tankW,tankBot-tankTop,14); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.06)'; roundRect(tankX-tankW/2+6,tankTop+6,10,tankBot-tankTop-12,5); ctx.fill();
+
+  // dark reflective exhibit floor with tank glow spill
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#10141e'); fl.addColorStop(1,'#080a12');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle=`hsla(${hue},70%,50%,0.10)`; ctx.beginPath(); ctx.ellipse(W*0.5,floorY+8,tankW*0.5,10,0,0,7); ctx.fill();
+}
+registerScene('jellyfishtank', drawJellyfishTank);
+
+/* ── CAVE HOT SPRING (indoor/underground · steaming rock pool) ── */
+function drawCaveHotSpring(){
+  const t = sceneTime, poolY = H*0.50;
+
+  // dim warm cavern
+  const bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#241820'); bg.addColorStop(0.5,'#332028'); bg.addColorStop(1,'#1a1016');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // rock ceiling with stalactites + a light shaft opening
+  ctx.fillStyle='#1c1218'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,44);
+  for (let x=W; x>=0; x-=26){ ctx.lineTo(x-13, 44+26*Math.abs(Math.sin(x*0.31))); ctx.lineTo(x-26,44); }
+  ctx.closePath(); ctx.fill();
+  // opening in the ceiling letting moonlight in
+  ctx.fillStyle='rgba(180,210,255,.10)'; ctx.beginPath(); ctx.moveTo(W*0.44,0); ctx.lineTo(W*0.56,0); ctx.lineTo(W*0.66,poolY); ctx.lineTo(W*0.34,poolY); ctx.closePath(); ctx.fill();
+  // a few stars visible through the gap
+  for (let i=0;i<5;i++){ ctx.fillStyle='rgba(230,240,255,.8)'; ctx.fillRect(W*0.46+i*6, 4+(i%3)*4, 1.4,1.4); }
+
+  // cave back walls (side masses)
+  ctx.fillStyle='#2a1c22'; ctx.beginPath(); ctx.moveTo(0,poolY); ctx.lineTo(0,44); ctx.quadraticCurveTo(W*0.16,poolY-40,W*0.30,poolY); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W,poolY); ctx.lineTo(W,44); ctx.quadraticCurveTo(W*0.84,poolY-40,W*0.70,poolY); ctx.closePath(); ctx.fill();
+
+  // steaming hot spring pool (turquoise, glowing)
+  const pool=ctx.createLinearGradient(0,poolY,0,H); pool.addColorStop(0,'#2a8a8a'); pool.addColorStop(0.5,'#1e6a6e'); pool.addColorStop(1,'#124a50');
+  ctx.fillStyle=pool; ctx.fillRect(0,poolY,W,H-poolY);
+  // warm underglow
+  ctx.fillStyle='rgba(120,240,220,.10)'; ctx.beginPath(); ctx.ellipse(W*0.5,poolY+30,W*0.5,26,0,0,7); ctx.fill();
+  // rippling water lines
+  ctx.strokeStyle='rgba(180,255,240,.18)'; ctx.lineWidth=1;
+  for (let y=poolY+8;y<H;y+=9){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.06+t*1.4+y)*1.8; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+  // moonlight reflection on the pool
+  for (let y=poolY; y<H; y+=3){ const p=(y-poolY)/(H-poolY); const wob=Math.sin(y*0.4+t*2)*(3+p*8); ctx.fillStyle=`rgba(200,225,255,${0.12*(1-p)})`; ctx.fillRect(W*0.5-8+wob,y,16+p*10,2); }
+
+  // rocky rim around the pool
+  ctx.fillStyle='#3a2620'; ctx.beginPath(); ctx.moveTo(0,poolY+6); for (let x=0;x<=W;x+=14){ ctx.lineTo(x,poolY-2+Math.sin(x*0.3)*4); } ctx.lineTo(W,poolY+6); ctx.closePath(); ctx.fill();
+  // scattered boulders (sides)
+  ctx.fillStyle='#4a342c'; ctx.beginPath(); ctx.arc(W*0.10,poolY+2,14,0,7); ctx.arc(W*0.90,poolY+4,16,0,7); ctx.fill();
+  ctx.fillStyle='#3a2620'; ctx.beginPath(); ctx.arc(W*0.20,poolY+4,9,0,7); ctx.arc(W*0.80,poolY+2,8,0,7); ctx.fill();
+
+  // rising steam veils
+  for (let i=0;i<7;i++){ const hx=(i*58+t*6)%(W+60)-30; const hy=poolY-((t*8+i*26)%150); ctx.fillStyle=`rgba(230,255,250,${0.07+0.04*Math.sin(t+i)})`; ctx.beginPath(); ctx.ellipse(hx,hy,38,14,0,0,7); ctx.fill(); }
+
+  // a small stone lantern on the rim (left) + folded towels (right)
+  const lx=W*0.12, ly=poolY-2;
+  ctx.fillStyle='#5a4a44'; ctx.fillRect(lx-6,ly-16,12,14); ctx.fillRect(lx-8,ly-20,16,5);
+  ctx.fillStyle=`rgba(255,200,120,${0.8+0.15*Math.sin(t*2.5)})`; ctx.fillRect(lx-3,ly-13,6,7);
+  ctx.fillStyle='#3a2620'; ctx.fillRect(lx-8,ly-2,16,4);
+  // towels
+  ctx.fillStyle='#e8e2d4'; roundRect(W*0.84,poolY-10,22,8,2); ctx.fill(); ctx.fillStyle='#d8c8b8'; roundRect(W*0.85,poolY-16,20,7,2); ctx.fill();
+}
+registerScene('cavehotspring', drawCaveHotSpring);

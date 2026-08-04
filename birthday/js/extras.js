@@ -1242,3 +1242,110 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 7). Two small, polished touches. No always-on
+   overlays; the tap feature is scene-gated and returns false on misses.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   18) WAVE HELLO  —  when you take her somewhere new, she looks over and gives a
+   happy little wave with a greeting suited to the place. Brief and one-shot per
+   scene change; skipped if she's busy so it never interrupts anything.
+   -------------------------------------------------------------------------- */
+(function fxWaveHello(){
+  try{
+    let lastScene = -1, warmup = 1.2;    // small delay so the first load doesn't wave
+    function greetFor(scene){
+      const S = (n)=>scene===n;
+      if (['snowycabin','icepond','frozenfalls','icebergbay'].includes(scene)) return 'Brr — cozy though! ❄️';
+      if (['beach','marina','fishingdock','tidepools','coralreef'].includes(scene)) return 'The sea! 🌊';
+      if (['musicroom','recordshop','ballroom','jazzclub','concerthall'].includes(scene)) return 'I hear music! 🎶';
+      if (['catcafe','petshop','butterflydome','aviary','backyard'].includes(scene)) return 'Little friends! 🐾';
+      return pick(['Ooh, somewhere new! 👋','I love it here 💛','What a lovely spot ✨','Take my hand 🥰']);
+    }
+    EXTRA_UPDATERS.push(function(dt){
+      if (warmup > 0){ warmup -= dt; if (warmup <= 0) lastScene = currentScene; return; }
+      if (currentScene === lastScene) return;
+      lastScene = currentScene;
+      try{
+        if (!pet || pet.resting || pet.animLock>0 || (typeof isCrying==='function' && isCrying())) return;
+        if (typeof birthday !== 'undefined' && birthday) return;   // don't wave over the birthday scene
+        const h = (typeof SHEETS!=='undefined' && SHEETS.walk && SHEETS.walk.displayH) || 150;
+        if (typeof fxAt === 'function') fxAt(pet.x + 14, pet.y - h*0.72, '👋');
+        try{ pet.blush = Math.min(2.0, (pet.blush||0) + 0.8); }catch(e){}
+        const scene = (typeof SCENES!=='undefined') ? SCENES[currentScene] : null;
+        setTimeout(()=>{ try{ if (typeof say==='function') say(greetFor(scene)); }catch(e){} }, 260);
+        if (typeof sfx === 'function') sfx('tap');
+      }catch(e){}
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   19) KITE ON THE HILL  —  only on Kite Hill, a little kite dances in the sky on
+   its string. Give it a tap to send it into a swooping loop-the-loop. Purely for
+   the joy of it; it lives only in that scene and drifts on the breeze.
+   -------------------------------------------------------------------------- */
+(function fxKite(){
+  try{
+    let kite = null;                     // {t,loop,loopT,hue,cd}
+    function onHill(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'kitehill'; }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!onHill()){ kite = null; return; }
+      if (!kite) kite = { t: rand(0,Math.PI*2), loop: 0, loopT: 0, hue: pick(['#ff8fab','#8ad3ff','#ffd166','#c8a2ff']), cd: 0 };
+      kite.t += dt; if (kite.cd > 0) kite.cd -= dt;
+      if (kite.loop > 0){ kite.loopT += dt * 6; if (kite.loopT >= Math.PI*2){ kite.loop = 0; kite.loopT = 0; } }
+    });
+
+    function kitePos(){
+      // anchor near her hand; kite sways on a breeze up and to the side
+      const ax = pet.x + 10, ay = pet.y - 30;
+      let kx = W*0.30 + Math.sin(kite.t*0.5) * 46;
+      let ky = H*0.16 + Math.cos(kite.t*0.7) * 18;
+      if (kite.loop > 0){ kx += Math.cos(kite.loopT) * 20; ky += Math.sin(kite.loopT) * 20 - 6; }
+      return { kx, ky, ax, ay };
+    }
+
+    EXTRA_DRAWERS.push(function(){
+      if (!kite || !onHill()) return;
+      const { kx, ky, ax, ay } = kitePos();
+      ctx.save();
+      // string (gentle catenary sag)
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(ax, ay);
+      ctx.quadraticCurveTo((ax+kx)/2, Math.max(ay, ky) + 24, kx, ky); ctx.stroke();
+      // kite diamond
+      const s = 11;
+      const ang = Math.atan2(ky - ay, kx - ax) + Math.PI/2;
+      ctx.translate(kx, ky); ctx.rotate(ang * 0.25);
+      ctx.fillStyle = kite.hue;
+      ctx.beginPath(); ctx.moveTo(0,-s); ctx.lineTo(s*0.8,0); ctx.lineTo(0,s); ctx.lineTo(-s*0.8,0); ctx.closePath(); ctx.fill();
+      // cross spars
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(0,-s); ctx.lineTo(0,s); ctx.moveTo(-s*0.8,0); ctx.lineTo(s*0.8,0); ctx.stroke();
+      // little tail bows
+      ctx.rotate(-ang*0.25);
+      ctx.fillStyle = kite.hue;
+      for (let i=1;i<=3;i++){ const ty = s + i*6 + Math.sin(kite.t*3 + i)*2; ctx.beginPath(); ctx.arc(Math.sin(kite.t*3+i)*3, ty, 2, 0, 7); ctx.fill(); }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!kite || !onHill()) return false;
+        const { kx, ky } = kitePos();
+        if (Math.hypot(px - kx, py - ky) > 20) return false;
+        if (kite.cd <= 0){
+          kite.cd = 1.2; kite.loop = 1; kite.loopT = 0;
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof fxAt === 'function') fxAt(kx, ky - 6, pick(['🪁','✨','💨']));
+          if (typeof say === 'function') say(pick(['Wheee, look at it go! 🪁','Loop-the-loop! 🥰','Higher! 💨','Such a lovely breeze ✨']));
+          try{ state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

@@ -57,6 +57,10 @@ const TRINKET_POOL = (()=>{
   g(['snowglobeshop'], ['🌨️','⛄','🏔️']);
   g(['nightgarden'], ['🌌','🦉','🌼']);
   g(['mochishop'], ['🍡','🍮','🧋']);
+  g(['aquariumtunnel'], ['🐠','🦈','🫧']);
+  g(['starrymeadow'], ['🌟','🌾','🦗']);
+  g(['harbornight'], ['⚓','🌃','🛟']);
+  g(['giftwrapshop'], ['🎁','🎀','✂️']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -136,6 +140,9 @@ const ACHIEVEMENTS = [
   {id:'feed_500',    icon:'🍩', name:'Snack Legend',      desc:'500 cookies',              test:()=> (state.feeds||0) >= 500},
   {id:'rest_100',    icon:'😴', name:'Hundred Naps',      desc:'Rest 100 times',           test:()=> (state.rests||0) >= 100},
   {id:'days_120',    icon:'📅', name:'Four Months of Us', desc:'120 days together',        test:()=> (meta.totalDays||0) >= 120},
+  {id:'draw_500',    icon:'🏛️', name:'Gallery Legend',    desc:'Draw together 500 times',  test:()=> (state.draws||0) >= 500},
+  {id:'hug_1000',    icon:'💘', name:'Infinite Hugs',     desc:'1000 hugs',                test:()=> (state.hugs||0) >= 1000},
+  {id:'days_270',    icon:'🍂', name:'Three Seasons',     desc:'270 days together',        test:()=> (meta.totalDays||0) >= 270},
 ];
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
@@ -629,6 +636,9 @@ const LOVE_NOTES = [
   {day:8,  text:'Eight days, and you\'ve already made this little place feel like ours. 💛'},
   {day:13, text:'Unlucky number? Not with you here — you make every day feel like a good omen. 🍀'},
   {day:70, text:'Ten weeks of tiny hellos, and you are still worth every single one. 🥰'},
+  {day:11, text:'Eleven days already — you have a way of making time feel gentle and generous. 💛'},
+  {day:65, text:'A couple of months in, and loving you has become as easy and natural as breathing. 🌿'},
+  {day:140, text:'However many days it\'s been, my answer is always the same: I\'d do them all again with you. 💗'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){

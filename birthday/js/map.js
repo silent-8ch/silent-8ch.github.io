@@ -48,6 +48,8 @@ const SCENE_LABELS = {
   flowermarket:'Flower Market', snowglobeshop:'Snow Globe Shop', nightgarden:'Night Garden',
   mochishop:'Mochi Shop', aquariumtunnel:'Aquarium Tunnel', starrymeadow:'Starry Meadow',
   harbornight:'Harbor at Night', giftwrapshop:'Gift Wrap Shop',
+  gingerbreadkitchen:'Gingerbread Kitchen', sunflowermaze:'Sunflower Maze',
+  jellyfishtank:'Jellyfish Tank', cavehotspring:'Cave Hot Spring',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){
