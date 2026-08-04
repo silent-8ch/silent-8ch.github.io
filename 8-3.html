@@ -3506,6 +3506,39 @@ function drawLighthouse(){
 }
 registerScene('lighthouse', drawLighthouse);
 
+/* ── WINE CELLAR (indoor · wine) ── */
+function drawWineCellar(){
+  const t = sceneTime, floorY = H*0.66;
+
+  ctx.fillStyle='#2e2620'; ctx.fillRect(0,0,W,floorY);
+  ctx.strokeStyle='rgba(0,0,0,.3)'; ctx.lineWidth=2; for (let i=0;i<3;i++){ ctx.beginPath(); ctx.arc(W*(0.25+i*0.25),H*0.14,W*0.13,Math.PI,0); ctx.stroke(); }
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1; for (let y=H*0.14;y<floorY;y+=14){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  const glow=ctx.createRadialGradient(W*0.5,floorY-30,10,W*0.5,floorY-30,W*0.55); glow.addColorStop(0,'rgba(255,170,80,.12)'); glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=glow; ctx.fillRect(0,0,W,floorY);
+
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#4a4038'); fl.addColorStop(1,'#3a322a');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let i=1;i<4;i++){ const y=floorY+i/4*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // wine rack
+  const rX=W*0.05, rY=H*0.2, rW=W*0.4, rH=floorY-rY-8, rows=5, cols=8, cw=rW/cols, ch=rH/rows;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(rX-3,rY-3,rW+6,rH+6);
+  for (let r=0;r<rows;r++) for (let c=0;c<cols;c++){ const x=rX+c*cw, y=rY+r*ch; ctx.fillStyle='#1a1410'; ctx.fillRect(x,y,cw-1,ch-1); ctx.fillStyle=(r+c)%3===0?'#5a2a2a':(r+c)%3===1?'#2a4a2a':'#3a3020'; ctx.beginPath(); ctx.arc(x+cw/2,y+ch/2,Math.min(cw,ch)*0.3,0,7); ctx.fill(); ctx.fillStyle='rgba(255,200,120,.2)'; ctx.beginPath(); ctx.arc(x+cw/2-1,y+ch/2-1,1.5,0,7); ctx.fill(); }
+
+  // barrels
+  function barrel(x,y,s){ ctx.fillStyle='#7a4a24'; ctx.beginPath(); ctx.ellipse(x,y,18*s,13*s,0,0,7); ctx.fill(); ctx.fillStyle='#5a3418'; ctx.beginPath(); ctx.ellipse(x,y,7*s,13*s,0,0,7); ctx.fill(); ctx.strokeStyle='#3a2410'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(x,y,18*s,13*s,0,0,7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x-18*s,y); ctx.lineTo(x+18*s,y); ctx.stroke(); }
+  barrel(W*0.76,floorY+8,1); barrel(W*0.9,floorY+8,1); barrel(W*0.83,floorY-20,1);
+
+  // tasting table + bottle + glass + candle
+  const tX=W*0.5, tY=floorY+24;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(tX-24,tY,48,6); ctx.fillRect(tX-20,tY+6,4,H-tY); ctx.fillRect(tX+16,tY+6,4,H-tY);
+  ctx.fillStyle='#2a4a2a'; ctx.fillRect(tX-10,tY-22,7,22); ctx.fillRect(tX-8,tY-30,3,8);
+  ctx.fillStyle='rgba(230,230,240,.4)'; ctx.beginPath(); ctx.moveTo(tX+6,tY-2); ctx.lineTo(tX+18,tY-2); ctx.lineTo(tX+15,tY-14); ctx.lineTo(tX+9,tY-14); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#7a1a2a'; ctx.beginPath(); ctx.moveTo(tX+8,tY-4); ctx.lineTo(tX+16,tY-4); ctx.lineTo(tX+14,tY-10); ctx.lineTo(tX+10,tY-10); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#e8dcc0'; ctx.fillRect(tX-2,tY-14,4,12); const cf=1+Math.sin(t*8)*0.3; ctx.fillStyle='rgba(255,180,90,.3)'; ctx.beginPath(); ctx.arc(tX,tY-16,8,0,7); ctx.fill(); ctx.fillStyle='#ffcf5a'; ctx.beginPath(); ctx.ellipse(tX,tY-16,2,4*cf,0,0,7); ctx.fill();
+}
+registerScene('winecellar', drawWineCellar);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
