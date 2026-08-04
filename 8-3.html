@@ -448,6 +448,7 @@ const DEFAULT_STATE = {
   hunger: 70, fun: 70, love: 70, energy: 80,
   overfed: 0, overdraw: 0,
   feeds: 0, draws: 0, hugs: 0, rests: 0,
+  favTreat: null,
   x: W/2, y: H*0.68,
   lastSeen: null,
 };
@@ -548,7 +549,12 @@ function doAction(kind){
       }
     } else {
       state.overfed = 0;
-      playAnim('eat', 1.6); say(pick(tr.l)); burst(tr.e);
+      if (tr.e === state.favTreat){
+        playAnim('eat', 1.6); say('My favorite! ' + tr.e + ' 💖');
+        state.love = clamp(state.love + 8); burst(tr.e); hearts();
+      } else {
+        playAnim('eat', 1.6); say(pick(tr.l)); burst(tr.e);
+      }
     }
     offerTreat = pick(TREATS); updateFeedBtn();   // offer a new treat next time
   }
@@ -858,6 +864,7 @@ function idleThoughts(dt){
   else if (state.energy < 40) e = '😴';
   else if (state.love < 40) e = '💗';
   else if (state.fun  < 40) e = '🎨';
+  else if (state.favTreat && Math.random() < 0.22) e = state.favTreat;   // daydream of her favorite treat
   else { const list = THOUGHT_SCENE[SCENES[currentScene]] || ['💭','🙂','💛','✨','🎶']; e = pick(list); }
   fxAt(pet.x + rand(-6,6), pet.y - SHEETS.walk.displayH*0.9, '💭'+e);
 }
@@ -8436,6 +8443,7 @@ function getVar(n){ return getComputedStyle(document.documentElement).getPropert
 resize();
 refreshHUD();
 offerTreat = pick(TREATS); updateFeedBtn();   // start with a random treat on offer
+if (!state.favTreat){ state.favTreat = pick(TREATS).e; save(); }   // she secretly has a favorite
 initDaysTogether();   // greets her, counts the day, updates the 💛 chip
 requestAnimationFrame(loop);
 window.addEventListener('beforeunload', save);
