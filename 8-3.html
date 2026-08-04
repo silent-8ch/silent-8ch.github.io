@@ -7328,6 +7328,55 @@ function drawOptician(){
 }
 registerScene('optician', drawOptician);
 
+/* ── CORN MAZE (outdoor · autumn cornfield labyrinth) ── */
+function drawCornMaze(){
+  const t=sceneTime, horizon=H*0.3;
+  // golden autumn sky
+  const sky=ctx.createLinearGradient(0,0,0,horizon); sky.addColorStop(0,'#8fc0dc'); sky.addColorStop(1,'#f2dca8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizon);
+  // hazy sun
+  ctx.fillStyle='rgba(255,240,190,.8)'; ctx.beginPath(); ctx.arc(W*0.78,H*0.14,20,0,7); ctx.fill();
+  // distant autumn trees + a barn
+  const fol=['#d0602a','#e0a02a','#c04a2a'];
+  for(let i=0;i<10;i++){ ctx.fillStyle=fol[i%3]; ctx.beginPath(); ctx.arc(i*W/10+6,horizon-2,10+(i%3)*4,0,7); ctx.fill(); }
+  ctx.fillStyle='#a03a2a'; ctx.fillRect(W*0.14,horizon-18,26,18); ctx.fillStyle='#7a2a1e'; ctx.beginPath(); ctx.moveTo(W*0.13,horizon-18); ctx.lineTo(W*0.235,horizon-18); ctx.lineTo(W*0.19,horizon-28); ctx.closePath(); ctx.fill();
+  // the corn field / maze — tall golden-green corn walls in perspective with winding cut paths
+  ctx.fillStyle='#8a9a3a'; ctx.fillRect(0,horizon,W,H-horizon);
+  const rows=7;
+  for(let r=0;r<rows;r++){
+    const y=horizon + (H-horizon)*Math.pow(r/rows,1.3);
+    const cornH=(H-horizon)/rows * (0.6+r*0.12) + 6;
+    const shade=120 - r*6;
+    for(let x=0;x<W;x+=(26+r*5)){
+      if((x + r*18) % (84+r*10) < (56+r*5)){ // corn wall vs cut path
+        // corn wall segment: vertical stalks
+        for(let sxp=x; sxp<x+(26+r*5)*0.85; sxp+=3+r*0.6){ const sway=Math.sin(t*2+sxp*0.1+r)*2;
+          ctx.strokeStyle=`rgb(${shade+30},${shade+40},${40+r*4})`; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(sxp,y); ctx.lineTo(sxp+sway,y-cornH); ctx.stroke();
+          // tassel top
+          ctx.fillStyle=`rgb(${200-r*8},${180-r*8},${90-r*4})`; ctx.fillRect(sxp+sway-1,y-cornH-3,2,4);
+        }
+      }
+    }
+    // dirt path strip in front
+    ctx.fillStyle=`rgb(${170-r*8},${140-r*6},${95-r*4})`; ctx.fillRect(0,y,W,(H-horizon)/rows*0.3);
+  }
+  // a scarecrow standing in a cut clearing mid-maze
+  const scx=W*0.5, scy=H*0.56;
+  ctx.strokeStyle='#6a4a2a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(scx,scy); ctx.lineTo(scx,scy+26); ctx.moveTo(scx-14,scy+6); ctx.lineTo(scx+14,scy+6); ctx.stroke();
+  ctx.fillStyle='#7a3a2a'; ctx.fillRect(scx-8,scy-2,16,16); ctx.fillStyle='#e0c060'; ctx.beginPath(); ctx.arc(scx,scy-8,6,0,7); ctx.fill();
+  ctx.fillStyle='#6a4a20'; ctx.beginPath(); ctx.moveTo(scx-9,scy-11); ctx.lineTo(scx+9,scy-11); ctx.lineTo(scx,scy-20); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#d8b850'; ctx.lineWidth=1; for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.moveTo(scx-14,scy+6); ctx.lineTo(scx-16+i,scy+12); ctx.moveTo(scx+14,scy+6); ctx.lineTo(scx+16+i,scy+12); ctx.stroke(); }
+  // pumpkins + hay bales flanking the entrance in the foreground
+  for(let i=0;i<4;i++){ const px=W*0.12+i*W*0.24; ctx.fillStyle='#e0802a'; ctx.beginPath(); ctx.ellipse(px,H*0.94,12,10,0,0,7); ctx.fill();
+    ctx.strokeStyle='#c06820'; ctx.lineWidth=1; for(let k=-1;k<=1;k++){ ctx.beginPath(); ctx.moveTo(px+k*5,H*0.94-9); ctx.lineTo(px+k*5,H*0.94+9); ctx.stroke(); }
+    ctx.fillStyle='#4f7a30'; ctx.fillRect(px-1,H*0.94-11,2,4); }
+  ctx.fillStyle='#d8c060'; ctx.fillRect(W*0.02,H*0.9,W*0.1,H*0.08); ctx.fillRect(W*0.88,H*0.9,W*0.1,H*0.08);
+  ctx.strokeStyle='#b8a040'; ctx.lineWidth=1; for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(W*0.02,H*0.92+i*H*0.02); ctx.lineTo(W*0.12,H*0.92+i*H*0.02); ctx.stroke(); }
+  // crows over the field
+  for(let i=0;i<3;i++){ const cx=W*0.4+i*W*0.15+Math.sin(t*0.7+i)*12, cy=H*0.18+i*6; ctx.strokeStyle='#2a2018'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(cx-5,cy); ctx.quadraticCurveTo(cx,cy-4+Math.sin(t*6+i)*1.5,cx+5,cy); ctx.stroke(); }
+}
+registerScene('cornmaze', drawCornMaze);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
