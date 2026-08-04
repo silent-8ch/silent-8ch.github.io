@@ -3473,6 +3473,39 @@ function drawDarkroom(){
 }
 registerScene('darkroom', drawDarkroom);
 
+/* ── LIGHTHOUSE COAST (outdoor · evening) ── */
+function drawLighthouse(){
+  const t = sceneTime, seaY = H*0.40, shoreY = H*0.66;
+
+  const sky=ctx.createLinearGradient(0,0,0,seaY); sky.addColorStop(0,'#2a2a55'); sky.addColorStop(1,'#e08a6a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,seaY);
+  for (let i=0;i<15;i++){ const sx=(i*83+5)%W, sy=(i*31+3)%(seaY*0.5); ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(sx,sy,1,1); }
+  const sea=ctx.createLinearGradient(0,seaY,0,shoreY); sea.addColorStop(0,'#2a4a6a'); sea.addColorStop(1,'#1a3a54');
+  ctx.fillStyle=sea; ctx.fillRect(0,seaY,W,shoreY-seaY);
+  ctx.strokeStyle='rgba(255,180,140,.15)'; ctx.lineWidth=1; for (let i=0;i<8;i++){ const y=seaY+4+i*4; ctx.beginPath(); for (let x=0;x<=W;x+=8){ x===0?ctx.moveTo(x,y):ctx.lineTo(x,y+Math.sin(x*0.1+t+i)*1.2); } ctx.stroke(); }
+
+  // lighthouse on a rock
+  const lX=W*0.76, lBase=seaY+6, towerH=70, topW=14, botW=22;
+  ctx.fillStyle='#3a3630'; ctx.beginPath(); ctx.moveTo(lX-30,lBase+10); ctx.lineTo(lX-16,lBase-6); ctx.lineTo(lX+18,lBase-4); ctx.lineTo(lX+32,lBase+10); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(lX-botW/2,lBase); ctx.lineTo(lX-topW/2,lBase-towerH); ctx.lineTo(lX+topW/2,lBase-towerH); ctx.lineTo(lX+botW/2,lBase); ctx.closePath();
+  ctx.save(); ctx.clip();
+  ctx.fillStyle='#f0ece4'; ctx.fillRect(lX-botW,lBase-towerH,botW*2,towerH);
+  ctx.fillStyle='#c0392b'; for (let i=0;i<4;i++){ ctx.fillRect(lX-botW,lBase-towerH+i*20+8,botW*2,10); }
+  ctx.restore();
+  ctx.fillStyle='#3a4048'; ctx.fillRect(lX-9,lBase-towerH-12,18,12);
+  ctx.fillStyle=`rgba(255,240,180,${0.7+0.3*Math.sin(t*4)})`; ctx.fillRect(lX-6,lBase-towerH-10,12,8);
+  ctx.fillStyle='#2a2e34'; ctx.beginPath(); ctx.moveTo(lX-11,lBase-towerH-12); ctx.lineTo(lX,lBase-towerH-22); ctx.lineTo(lX+11,lBase-towerH-12); ctx.closePath(); ctx.fill();
+  const lightY=lBase-towerH-6, ang=Math.sin(t*0.8)*0.5 - 1.2;
+  ctx.fillStyle='rgba(255,245,190,.12)'; ctx.beginPath(); ctx.moveTo(lX,lightY); ctx.lineTo(lX+Math.cos(ang-0.12)*260, lightY+Math.sin(ang-0.12)*260); ctx.lineTo(lX+Math.cos(ang+0.12)*260, lightY+Math.sin(ang+0.12)*260); ctx.closePath(); ctx.fill();
+
+  // rocky shore
+  const rock=ctx.createLinearGradient(0,shoreY,0,H); rock.addColorStop(0,'#4a463e'); rock.addColorStop(1,'#3a362e');
+  ctx.fillStyle=rock; ctx.fillRect(0,shoreY,W,H-shoreY);
+  ctx.fillStyle='rgba(255,255,255,.4)'; for (let x=0;x<W;x+=10){ ctx.beginPath(); ctx.arc(x,shoreY+Math.sin(x*0.2+t*3)*2,2,0,7); ctx.fill(); }
+  ctx.strokeStyle='#eee'; ctx.lineWidth=1.5; const gx=W*0.3+Math.sin(t*0.4)*30; ctx.beginPath(); ctx.moveTo(gx-5,seaY-30); ctx.quadraticCurveTo(gx,seaY-33,gx,seaY-30); ctx.quadraticCurveTo(gx,seaY-33,gx+5,seaY-30); ctx.stroke();
+}
+registerScene('lighthouse', drawLighthouse);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
