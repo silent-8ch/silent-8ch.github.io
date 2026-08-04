@@ -6418,6 +6418,54 @@ function drawChessHall(){
 }
 registerScene('chesshall', drawChessHall);
 
+/* ── CORAL REEF (underwater · sunlit reef teeming with fish) ── */
+function drawCoralReef(){
+  const t=sceneTime, sandY=H*0.82;
+  // sunlit water column
+  const water=ctx.createLinearGradient(0,0,0,H); water.addColorStop(0,'#2aa6d8'); water.addColorStop(0.6,'#1f7fb0'); water.addColorStop(1,'#12556e');
+  ctx.fillStyle=water; ctx.fillRect(0,0,W,H);
+  // god-ray light shafts from the surface
+  ctx.save(); for(let i=0;i<5;i++){ const x0=W*0.1+i*W*0.2 + Math.sin(t*0.5+i)*10; ctx.globalAlpha=0.06;
+    ctx.fillStyle='#dff4ff'; ctx.beginPath(); ctx.moveTo(x0,0); ctx.lineTo(x0+22,0); ctx.lineTo(x0+60,H); ctx.lineTo(x0+10,H); ctx.closePath(); ctx.fill(); } ctx.restore();
+  // sandy seabed
+  ctx.fillStyle='#e6d8a8'; ctx.beginPath(); ctx.moveTo(0,sandY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,sandY+Math.sin(x*0.05)*6); } ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.fill();
+  // coral clusters along the bottom
+  function brainCoral(x,y,r,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y,r,Math.PI,0); ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.12)'; ctx.lineWidth=1; for(let i=0;i<4;i++){ ctx.beginPath(); ctx.arc(x,y,r-3-i*3,Math.PI,0); ctx.stroke(); } }
+  function branchCoral(x,base,c){ ctx.strokeStyle=c; ctx.lineWidth=4; ctx.lineCap='round';
+    for(let b=-2;b<=2;b++){ ctx.beginPath(); ctx.moveTo(x,base); ctx.quadraticCurveTo(x+b*6,base-16,x+b*10,base-30); ctx.stroke(); } ctx.lineCap='butt'; }
+  function fanCoral(x,base,c){ ctx.fillStyle=c; ctx.beginPath(); ctx.moveTo(x,base); for(let a=0;a<=Math.PI;a+=0.3){ ctx.lineTo(x+Math.cos(a)*18, base-Math.sin(a)*26); } ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=0.6; for(let a=0.2;a<Math.PI;a+=0.3){ ctx.beginPath(); ctx.moveTo(x,base); ctx.lineTo(x+Math.cos(a)*18, base-Math.sin(a)*26); ctx.stroke(); } }
+  brainCoral(W*0.15,sandY,20,'#e07a9a'); brainCoral(W*0.85,sandY+4,24,'#e0a04a');
+  branchCoral(W*0.35,sandY+2,'#e0906a'); branchCoral(W*0.62,sandY,'#c86a9a');
+  fanCoral(W*0.5,sandY,'#d04a6a'); fanCoral(W*0.28,sandY+2,'#6a5ac0');
+  // swaying anemones with tentacles
+  for(let i=0;i<3;i++){ const ax=W*0.2+i*W*0.3, ay=sandY-4; ctx.fillStyle='#9a5ac0';
+    for(let k=0;k<9;k++){ const a=-Math.PI*0.1 - k*0.28; const sw=Math.sin(t*2+k+i)*4;
+      ctx.strokeStyle=k%2?'#c07ad8':'#9a5ac0'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.quadraticCurveTo(ax+Math.cos(a)*10+sw, ay+Math.sin(a)*14, ax+Math.cos(a)*14+sw*1.5, ay+Math.sin(a)*22); ctx.stroke(); }
+    ctx.fillStyle='#7a3aa0'; ctx.beginPath(); ctx.ellipse(ax,ay,8,4,0,0,7); ctx.fill(); }
+  // schooling fish drifting across
+  function fish(x,y,s,col,dir){ ctx.save(); ctx.translate(x,y); ctx.scale(dir,1);
+    ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(0,0,7*s,4*s,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-6*s,0); ctx.lineTo(-12*s,-4*s); ctx.lineTo(-12*s,4*s); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(4*s,-1*s,1.2*s,0,7); ctx.fill();
+    ctx.fillStyle='#222'; ctx.beginPath(); ctx.arc(4.4*s,-1*s,0.6*s,0,7); ctx.fill(); ctx.restore(); }
+  // a school moving together
+  for(let i=0;i<10;i++){ const fx=((t*40 + i*26)%(W+60))-30; const fy=H*0.4 + Math.sin(i*0.8 + t*1.5)*16; fish(fx,fy,1,'#f2c14a',1); }
+  // a couple of clownfish near an anemone
+  fish(W*0.2+Math.sin(t*2)*6, sandY-16, 1.1, '#e0692a', -1);
+  fish(W*0.24+Math.sin(t*2+1)*6, sandY-10, 0.9, '#e0692a', -1);
+  // an angelfish gliding slowly the other way
+  const agx=(W+40)-((t*18)%(W+80)); fish(agx, H*0.28, 1.6, '#5ad0e0', -1);
+  // rising bubbles
+  for(let i=0;i<14;i++){ const bx=(i*53+7)%W; const by=(H - (t*30 + i*40)%H); ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(bx+Math.sin(by*0.1+i)*4, by, 1.5+(i%3),0,7); ctx.stroke(); }
+  // green sea-grass tufts
+  ctx.strokeStyle='#3f8a5a'; ctx.lineWidth=2; for(let i=0;i<14;i++){ const gx=i*W/14+6; const sw=Math.sin(t*1.5+i)*6;
+    ctx.beginPath(); ctx.moveTo(gx,sandY+4); ctx.quadraticCurveTo(gx+sw,sandY-12,gx+sw*1.5,sandY-24); ctx.stroke(); }
+}
+registerScene('coralreef', drawCoralReef);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
