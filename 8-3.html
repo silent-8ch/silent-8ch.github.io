@@ -4922,6 +4922,54 @@ function drawBowling(){
 }
 registerScene('bowling', drawBowling);
 
+/* ── REDWOOD FOREST (outdoor · towering trunks, god-rays) ── */
+function drawRedwoods(){
+  const t=sceneTime, groundY=H*0.78;
+  // deep green canopy light
+  const air=ctx.createLinearGradient(0,0,0,groundY); air.addColorStop(0,'#2f4a2e'); air.addColorStop(1,'#516b3e');
+  ctx.fillStyle=air; ctx.fillRect(0,0,W,groundY);
+  // misty forest floor
+  ctx.fillStyle='#3a4a2c'; ctx.fillRect(0,groundY,W,H-groundY);
+  // slanting god-ray light shafts from upper-left
+  ctx.save();
+  for(let i=0;i<5;i++){ const x0=W*0.05+i*W*0.16; ctx.globalAlpha=0.06+0.03*Math.sin(t*0.8+i);
+    ctx.fillStyle='#f0f4c0'; ctx.beginPath();
+    ctx.moveTo(x0,0); ctx.lineTo(x0+30,0); ctx.lineTo(x0+90,groundY); ctx.lineTo(x0+40,groundY); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+  // towering trunks — a few big foreground, several thin back ones (parallax by size)
+  function trunk(x,w,shade){ const g=ctx.createLinearGradient(x-w,0,x+w,0);
+    g.addColorStop(0,shade[0]); g.addColorStop(0.5,shade[1]); g.addColorStop(1,shade[0]);
+    ctx.fillStyle=g; ctx.fillRect(x-w,0,w*2,groundY+8);
+    // bark furrows
+    ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1;
+    for(let k=-2;k<=2;k++){ ctx.beginPath(); ctx.moveTo(x+k*w*0.4, 0); ctx.lineTo(x+k*w*0.4+ Math.sin(k)*3, groundY); ctx.stroke(); }
+    // root flare
+    ctx.fillStyle=shade[0]; ctx.beginPath(); ctx.moveTo(x-w,groundY-8); ctx.lineTo(x-w*1.7,groundY+10); ctx.lineTo(x+w*1.7,groundY+10); ctx.lineTo(x+w,groundY-8); ctx.closePath(); ctx.fill();
+  }
+  // far trunks
+  trunk(W*0.3, 8, ['#4a3020','#6a4a30']);
+  trunk(W*0.62, 7, ['#4a3020','#6a4a30']);
+  trunk(W*0.82, 6, ['#452e1e','#63452c']);
+  // near trunks (big, reddish bark)
+  trunk(W*0.12, 26, ['#6a2f1e','#9a4a2e']);
+  trunk(W*0.9, 30, ['#66301f','#98492d']);
+  // hanging light dust motes in the beams
+  for(let i=0;i<22;i++){ const mx=(i*53+ t*4)%W, my=(i*71)% groundY;
+    ctx.fillStyle='rgba(240,244,190,.35)'; ctx.fillRect(mx,my,2,2); }
+  // ferns and undergrowth on the floor
+  function fern(x,base,s,col){ ctx.strokeStyle=col; ctx.lineWidth=1.5;
+    for(let f=-2;f<=2;f++){ ctx.beginPath(); ctx.moveTo(x,base); ctx.quadraticCurveTo(x+f*10,base-16*s, x+f*16,base-30*s); ctx.stroke(); } }
+  fern(W*0.22,H*0.9,1.0,'#3f6a2e'); fern(W*0.5,H*0.96,1.2,'#457a34'); fern(W*0.74,H*0.9,1.0,'#3f6a2e');
+  // a fallen mossy log across the foreground
+  ctx.fillStyle='#5a4a30'; ctx.beginPath(); ctx.ellipse(W*0.4,H*0.99,W*0.5,10,0.03,0,7); ctx.fill();
+  ctx.fillStyle='#4f7a3a'; for(let i=0;i<12;i++){ ctx.beginPath(); ctx.arc(W*0.1+i*W*0.07, H*0.96+Math.sin(i)*2, 5,Math.PI,0); ctx.fill(); }
+  // a couple of mushrooms on the log
+  for(let i=0;i<3;i++){ const mx=W*0.24+i*W*0.22; ctx.fillStyle='#e8e0d0'; ctx.fillRect(mx-1,H*0.955,2,6);
+    ctx.fillStyle='#c0503a'; ctx.beginPath(); ctx.ellipse(mx,H*0.955,5,3,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(mx-1,H*0.95,0.8,0,7); ctx.fill(); }
+}
+registerScene('redwoods', drawRedwoods);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
