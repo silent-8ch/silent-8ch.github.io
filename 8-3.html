@@ -5448,6 +5448,51 @@ function drawBookbindery(){
 }
 registerScene('bookbindery', drawBookbindery);
 
+/* ── METEOR SHOWER (outdoor · night hills, streaking meteors) ── */
+function drawMeteorShower(){
+  const t=sceneTime, hillY=H*0.72;
+  // deep night sky gradient
+  const sky=ctx.createLinearGradient(0,0,0,hillY); sky.addColorStop(0,'#0a1430'); sky.addColorStop(1,'#243a5a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,hillY);
+  // milky-way band
+  ctx.save(); ctx.globalAlpha=0.12; ctx.fillStyle='#cfd8f0';
+  ctx.beginPath(); ctx.moveTo(0,H*0.1); ctx.quadraticCurveTo(W*0.5,H*0.32,W,H*0.06); ctx.lineTo(W,H*0.2); ctx.quadraticCurveTo(W*0.5,H*0.46,0,H*0.24); ctx.closePath(); ctx.fill(); ctx.restore();
+  // star field (twinkle)
+  for(let i=0;i<90;i++){ const sx=(i*47+13)%W, sy=(i*89+7)%hillY; const tw=0.4+0.6*Math.abs(Math.sin(t*2+i));
+    ctx.fillStyle=`rgba(255,255,255,${tw*0.9})`; const r=(i%11===0)?1.6:0.9; ctx.fillRect(sx,sy,r,r); }
+  // meteors — several streaks at staggered times, top-right to lower-left
+  for(let m=0;m<5;m++){ const period=2.2, phase=(t*0.9 + m*0.44) % period; const p=phase/period; // 0..1
+    if(p<0.55){ const prog=p/0.55; // active portion
+      const x0=W*0.7+m*W*0.12, y0=-10 - m*8;
+      const dx=-W*0.5, dy=hillY*0.7;
+      const hx=x0+dx*prog, hy=y0+dy*prog;
+      const len=40;
+      const tx=hx - dx/Math.hypot(dx,dy)*len, ty=hy - dy/Math.hypot(dx,dy)*len;
+      const grad=ctx.createLinearGradient(tx,ty,hx,hy); grad.addColorStop(0,'rgba(255,255,255,0)'); grad.addColorStop(1,`rgba(255,250,220,${1-prog*0.4})`);
+      ctx.strokeStyle=grad; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(hx,hy); ctx.stroke();
+      ctx.fillStyle='rgba(255,255,240,.9)'; ctx.beginPath(); ctx.arc(hx,hy,2,0,7); ctx.fill();
+    } }
+  // a bright slow "fireball" occasionally crossing
+  { const fp=(t*0.25)%1; if(fp<0.5){ const prog=fp/0.5; const fx=W*1.0 - W*1.1*prog, fy=H*0.1+H*0.14*prog;
+    const grad=ctx.createLinearGradient(fx+70,fy-30,fx,fy); grad.addColorStop(0,'rgba(120,180,255,0)'); grad.addColorStop(1,'rgba(180,220,255,.8)');
+    ctx.strokeStyle=grad; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(fx+70,fy-30); ctx.lineTo(fx,fy); ctx.stroke();
+    ctx.fillStyle='rgba(220,235,255,.95)'; ctx.beginPath(); ctx.arc(fx,fy,3,0,7); ctx.fill(); } }
+  // silhouetted rolling hills
+  ctx.fillStyle='#0d1a24'; ctx.beginPath(); ctx.moveTo(0,hillY);
+  for(let x=0;x<=W;x+=12){ ctx.lineTo(x, hillY + Math.sin(x*0.02)*10 - 6); } ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#060f16'; ctx.beginPath(); ctx.moveTo(0,H*0.86);
+  for(let x=0;x<=W;x+=12){ ctx.lineTo(x, H*0.86 + Math.sin(x*0.03+2)*8); } ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  // a lone tree on a hill
+  ctx.fillStyle='#040a10'; ctx.fillRect(W*0.8-2,hillY-18,4,18); ctx.beginPath(); ctx.arc(W*0.8,hillY-22,10,0,7); ctx.fill();
+  // two tiny silhouettes lying on a blanket, stargazing
+  const bx=W*0.3;
+  ctx.fillStyle='#0a0f14'; ctx.fillRect(bx-16,H*0.9,40,4); // blanket
+  ctx.beginPath(); ctx.ellipse(bx-6,H*0.9-2,8,3,-0.2,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(bx+10,H*0.9-2,8,3,0.2,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(bx-13,H*0.9-4,2.4,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(bx+17,H*0.9-4,2.4,0,7); ctx.fill();
+}
+registerScene('meteorshower', drawMeteorShower);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
