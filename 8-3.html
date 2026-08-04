@@ -5128,6 +5128,64 @@ function drawBarbershop(){
 }
 registerScene('barbershop', drawBarbershop);
 
+/* ── KOI POND (outdoor · garden pond with an arched bridge) ── */
+function drawKoiPond(){
+  const t=sceneTime, bankY=H*0.26;
+  // green garden band at top
+  ctx.fillStyle='#6a9a4a'; ctx.fillRect(0,0,W,bankY);
+  ctx.fillStyle='#5a8a3e'; for(let i=0;i<W;i+=14){ ctx.beginPath(); ctx.arc(i+7,bankY,7,Math.PI,0); ctx.fill(); }
+  // a couple of shrubs + a stone lantern on the far bank
+  for(let i=0;i<3;i++){ ctx.fillStyle='#4f7a34'; ctx.beginPath(); ctx.arc(W*0.2+i*W*0.3,bankY-10,12,0,7); ctx.fill(); }
+  ctx.fillStyle='#8a8a82'; ctx.fillRect(W*0.86,bankY-22,10,10); ctx.beginPath(); ctx.moveTo(W*0.85,bankY-22); ctx.lineTo(W*0.92,bankY-22); ctx.lineTo(W*0.885,bankY-30); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#ffd98a'; ctx.fillRect(W*0.868,bankY-20,6,6);
+  // the pond water
+  const water=ctx.createLinearGradient(0,bankY,0,H); water.addColorStop(0,'#3f7a86'); water.addColorStop(1,'#245a68');
+  ctx.fillStyle=water; ctx.fillRect(0,bankY,W,H-bankY);
+  // soft caustic ripple bands
+  for(let i=0;i<8;i++){ const ry=bankY+10+i*((H-bankY)/8); ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=2;
+    ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=ry+Math.sin(x*0.04+t*1.2+i)*3; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // koi swimming beneath the surface (colored bodies with wavy tails)
+  function koi(cx,cy,s,col,spd,phase){
+    const x=(cx + t*spd*20) % (W+80) - 40;
+    const wig=Math.sin(t*4+phase);
+    ctx.save(); ctx.translate(x,cy+Math.sin(t*1.1+phase)*6);
+    ctx.globalAlpha=0.9;
+    // body
+    ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(0,0,14*s,6*s,0,0,7); ctx.fill();
+    // tail (sweeping)
+    ctx.beginPath(); ctx.moveTo(-12*s,0); ctx.quadraticCurveTo(-20*s,wig*5*s,-24*s,wig*8*s); ctx.quadraticCurveTo(-20*s,0,-12*s,0); ctx.fill();
+    // fins
+    ctx.beginPath(); ctx.ellipse(2*s,5*s,5*s,2*s,wig*0.4,0,7); ctx.fill();
+    // white/red patches
+    ctx.fillStyle= col==='#e86a2a'?'#f4f0e8':'#e86a2a';
+    ctx.beginPath(); ctx.arc(2*s,-1*s,3*s,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(-4*s,1*s,2*s,0,7); ctx.fill();
+    ctx.restore(); ctx.globalAlpha=1;
+  }
+  koi(20, H*0.5, 1.0, '#e86a2a', 0.9, 0);
+  koi(160, H*0.66, 1.2, '#f4f0e8', 0.6, 1.7);
+  koi(90, H*0.82, 1.1, '#e0b030', 1.1, 3.0);
+  koi(250, H*0.58, 0.9, '#e86a2a', 0.8, 4.2);
+  // lily pads with occasional flowers
+  function pad(x,y,r){ ctx.fillStyle='#3f7a4a'; ctx.beginPath(); ctx.ellipse(x,y,r,r*0.5,0,0.5,Math.PI*2+0.2); ctx.fill(); }
+  pad(W*0.2,H*0.44,12); pad(W*0.7,H*0.5,14); pad(W*0.5,H*0.74,11); pad(W*0.85,H*0.8,12);
+  ctx.fillStyle='#f2b8d0'; for(const[fx,fy] of [[W*0.7,H*0.5],[W*0.85,H*0.8]]){ for(let p=0;p<6;p++){ const a=p/6*Math.PI*2; ctx.beginPath(); ctx.ellipse(fx+Math.cos(a)*4,fy-4+Math.sin(a)*3,3,1.6,a,0,7); ctx.fill(); } ctx.fillStyle='#f6d84a'; ctx.beginPath(); ctx.arc(fx,fy-4,2,0,7); ctx.fill(); ctx.fillStyle='#f2b8d0'; }
+  // the red arched bridge crossing the pond
+  const bx0=W*0.05, bx1=W*0.95, bTop=bankY+22, bRise=30;
+  ctx.strokeStyle='#c0392b'; ctx.lineWidth=8; ctx.beginPath();
+  ctx.moveTo(bx0,bTop+bRise); ctx.quadraticCurveTo(W*0.5,bTop-bRise, bx1,bTop+bRise); ctx.stroke();
+  // railing posts + rail
+  ctx.strokeStyle='#a52f22'; ctx.lineWidth=3; ctx.beginPath();
+  ctx.moveTo(bx0,bTop+bRise-14); ctx.quadraticCurveTo(W*0.5,bTop-bRise-14, bx1,bTop+bRise-14); ctx.stroke();
+  for(let i=0;i<=8;i++){ const u=i/8; const x=bx0+(bx1-bx0)*u; const y=bTop+bRise + (Math.pow(2*u-1,2)-1)*bRise*2 - 0;
+    // point on the quadratic
+    const qy=(1-u)*(1-u)*(bTop+bRise)+2*(1-u)*u*(bTop-bRise)+u*u*(bTop+bRise);
+    ctx.strokeStyle='#a52f22'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,qy); ctx.lineTo(x,qy-14); ctx.stroke(); }
+  // bridge reflection shimmer
+  ctx.strokeStyle='rgba(192,57,43,.2)'; ctx.lineWidth=6; ctx.beginPath();
+  ctx.moveTo(bx0,bTop+bRise+18); ctx.quadraticCurveTo(W*0.5,bTop-bRise+40, bx1,bTop+bRise+18); ctx.stroke();
+}
+registerScene('koipond', drawKoiPond);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
