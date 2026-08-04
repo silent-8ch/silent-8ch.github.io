@@ -141,6 +141,10 @@
   #wishBar .wt{font-size:12.5px;color:#4a3a34;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   #wishBar button{border:none;background:var(--accent);color:#fff;font-weight:700;font-size:12px;padding:6px 12px;border-radius:16px;cursor:pointer;white-space:nowrap;flex:none;}
   #wishBar .wx{cursor:pointer;color:#b0a0a0;font-weight:700;padding:0 4px;flex:none;}
+  @keyframes placeIn{ from{opacity:0;transform:translateX(-50%) translateY(-8px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
+  #placeLabel{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:17;background:rgba(42,33,28,.72);color:#fff;font-size:12px;font-weight:700;letter-spacing:.2px;padding:5px 12px;border-radius:16px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+  #placeLabel.hide{display:none;}
+  #placeLabel.show{animation:placeIn .3s ease;}
   #setSection{color:#fff;font-weight:700;font-size:13px;margin:14px 2px 6px;}
   .achRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:13px;}
   .achRow .ai{font-size:18px;}
@@ -225,6 +229,7 @@
     <div id="speech"></div>
     <div id="toast" class="hide"></div>
     <div id="wishBar" class="hide"></div>
+    <div id="placeLabel" class="hide"></div>
   </div>
 
   <div id="actions">
@@ -1656,11 +1661,18 @@ function applyDayNight(scene){
   if (c[3] > 0.001){ ctx.fillStyle=`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${c[3]})`; ctx.fillRect(0,0,W,H); }
 }
 
+let placeTimer = null, lastLabeledScene = -1;
+function showPlace(name){
+  const el = document.getElementById('placeLabel'); if (!el) return;
+  el.textContent = '📍 ' + name; el.className = ''; void el.offsetWidth; el.classList.add('show');
+  clearTimeout(placeTimer); placeTimer = setTimeout(()=> el.classList.add('hide'), 2500);
+}
 function render(){
   ctx.clearRect(0,0,W,H);
   if (birthday){ drawBirthdayScene(); return; }
   const scene = SCENES[currentScene];
   if (started) markVisited(scene);
+  if (started && currentScene !== lastLabeledScene){ lastLabeledScene = currentScene; showPlace(sceneLabel(scene)); }
   const draw = SCENE_RENDERERS[scene];
   if (draw){
     draw();
