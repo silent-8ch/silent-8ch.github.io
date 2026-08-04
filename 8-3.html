@@ -6623,6 +6623,55 @@ function drawNaturalHistory(){
 }
 registerScene('naturalhistory', drawNaturalHistory);
 
+/* ── SAND DUNES (outdoor · desert dune sea at sunset, camel caravan) ── */
+function drawSandDunes(){
+  const t=sceneTime, skyY=H*0.42;
+  // warm dusk sky
+  const sky=ctx.createLinearGradient(0,0,0,skyY); sky.addColorStop(0,'#e08a4a'); sky.addColorStop(0.5,'#f2b86a'); sky.addColorStop(1,'#f8dc9a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,skyY);
+  // large hazy sun low on the horizon
+  const sunX=W*0.28, sunY=skyY-14;
+  ctx.fillStyle='#fff0c8'; ctx.beginPath(); ctx.arc(sunX,sunY,30,0,7); ctx.fill();
+  ctx.globalAlpha=0.25; ctx.beginPath(); ctx.arc(sunX,sunY,50,0,7); ctx.fill(); ctx.globalAlpha=1;
+  // faint heat haze band
+  ctx.fillStyle='rgba(255,220,170,.3)'; ctx.fillRect(0,skyY-6,W,10);
+  // overlapping dune ridges, back (light) to front (shadowed), each a smooth crest
+  const duneCols=['#f0c884','#e8b86e','#dca85a','#cf9848','#c08838'];
+  const bases=[0.46,0.56,0.68,0.82,1.0];
+  for(let d=0;d<5;d++){ const by=H*bases[d]; ctx.fillStyle=duneCols[d];
+    ctx.beginPath(); ctx.moveTo(0,by);
+    for(let x=0;x<=W;x+=8){ const y=by - Math.sin(x*0.012 + d*1.3)*22 - Math.sin(x*0.03+d)*8; ctx.lineTo(x,y); }
+    ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+    // shadowed lee side (thin darker band under each crest)
+    ctx.strokeStyle='rgba(120,70,30,.22)'; ctx.lineWidth=2;
+    ctx.beginPath(); for(let x=0;x<=W;x+=8){ const y=by - Math.sin(x*0.012 + d*1.3)*22 - Math.sin(x*0.03+d)*8; if(x===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);} ctx.stroke();
+  }
+  // wind-blown sand ripples on the nearest dune
+  ctx.strokeStyle='rgba(150,100,50,.18)'; ctx.lineWidth=1;
+  for(let i=0;i<8;i++){ const ry=H*0.86+i*((H-H*0.86)/8); ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=ry+Math.sin(x*0.08+i)*2; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // wisps of sand blowing off the top crest
+  for(let i=0;i<4;i++){ ctx.strokeStyle=`rgba(255,235,200,${0.12+0.06*Math.sin(t*2+i)})`; ctx.lineWidth=2;
+    const cx=W*0.2+i*W*0.2; ctx.beginPath(); ctx.moveTo(cx,H*0.46 - Math.sin(cx*0.012)*22);
+    for(let k=1;k<=4;k++) ctx.lineTo(cx+k*14, H*0.46 - Math.sin(cx*0.012)*22 - k*4 + Math.sin(t*3+i+k)*3); ctx.stroke(); }
+  // a camel caravan crossing a mid dune ridge (silhouettes)
+  function camel(x,y,s){ ctx.fillStyle='#4a2f1a';
+    ctx.beginPath(); ctx.ellipse(x,y,10*s,5*s,0,0,7); ctx.fill(); // body
+    ctx.beginPath(); ctx.arc(x-3*s,y-4*s,3*s,0,7); ctx.arc(x+3*s,y-4*s,3*s,0,7); ctx.fill(); // two humps
+    // neck + head
+    ctx.fillRect(x+8*s,y-14*s,2.5*s,12*s); ctx.beginPath(); ctx.ellipse(x+9*s,y-15*s,3*s,2*s,0.4,0,7); ctx.fill();
+    // legs
+    ctx.strokeStyle='#4a2f1a'; ctx.lineWidth=1.6*s; for(const lx of [-6,-2,2,6]){ ctx.beginPath(); ctx.moveTo(x+lx*s,y+3*s); ctx.lineTo(x+lx*s+ Math.sin(t*3+lx)*1, y+13*s); ctx.stroke(); }
+    // rider on the lead camel
+  }
+  const march=(t*10)%(W*0.5);
+  const ridgeY = x => H*0.66 - Math.sin(x*0.012 + 2*1.3)*22 - Math.sin(x*0.03+2)*8;
+  for(let i=0;i<4;i++){ const cx=W*0.1 + march + i*36; camel(cx, ridgeY(cx)-6, 0.9 - i*0.05);
+    if(i===0){ ctx.fillStyle='#3a2414'; ctx.fillRect(cx-1,ridgeY(cx)-24,3,10); ctx.beginPath(); ctx.arc(cx,ridgeY(cx)-25,2.5,0,7); ctx.fill(); } }
+  // long soft shadows the caravan casts down-sun
+  ctx.globalAlpha=0.15; ctx.fillStyle='#8a5a2a'; for(let i=0;i<4;i++){ const cx=W*0.1+march+i*36; ctx.beginPath(); ctx.ellipse(cx-14,ridgeY(cx)+2,16,3,0,0,7); ctx.fill(); } ctx.globalAlpha=1;
+}
+registerScene('sanddunes', drawSandDunes);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
