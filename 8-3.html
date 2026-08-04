@@ -3888,6 +3888,59 @@ function drawIcePond(){
 }
 registerScene('icepond', drawIcePond);
 
+/* ── CAT CAFÉ (indoor · cats) ── */
+function drawCatCafe(){
+  const t = sceneTime, floorY = H*0.62;
+
+  ctx.fillStyle='#f0e0cc'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#d8b48c'; ctx.fillRect(0,floorY-24,W,24);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#c99a6a'); fl.addColorStop(1,'#b5884f');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(90,60,20,.15)'; ctx.lineWidth=1; for (let i=1;i<5;i++){ const y=floorY+i/5*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  ctx.fillStyle='#a0522d'; ctx.font='bold 12px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('🐾 Cat Cafe 🐾', W*0.5, H*0.09); ctx.textAlign='left';
+  ctx.fillStyle='#bfe0ef'; ctx.fillRect(W*0.06,H*0.14,W*0.24,H*0.2); ctx.strokeStyle='#fff'; ctx.lineWidth=5; ctx.strokeRect(W*0.06,H*0.14,W*0.24,H*0.2);
+  ctx.fillStyle='#9a6b3f'; ctx.fillRect(W*0.5,H*0.2,W*0.4,4); ctx.fillRect(W*0.42,H*0.34,W*0.3,4);
+
+  function cat(x,y,col,pose){
+    ctx.fillStyle=col;
+    if (pose==='loaf'){
+      ctx.beginPath(); ctx.ellipse(x,y,14,8,0,0,7); ctx.fill();
+      ctx.beginPath(); ctx.arc(x-10,y-4,6,0,7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x-14,y-8); ctx.lineTo(x-13,y-13); ctx.lineTo(x-9,y-9); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x-9,y-9); ctx.lineTo(x-7,y-14); ctx.lineTo(x-4,y-9); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(x-12,y-4,1,0,7); ctx.arc(x-8,y-4,1,0,7); ctx.fill();
+      ctx.strokeStyle=col; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(x+13,y); ctx.quadraticCurveTo(x+22,y-2,x+20+Math.sin(t*3)*3,y-10); ctx.stroke();
+    } else if (pose==='sit'){
+      ctx.beginPath(); ctx.ellipse(x,y,8,12,0,0,7); ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y-12,7,0,7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x-6,y-16); ctx.lineTo(x-5,y-22); ctx.lineTo(x-1,y-16); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x+1,y-16); ctx.lineTo(x+5,y-22); ctx.lineTo(x+6,y-16); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(x-3,y-12,1,0,7); ctx.arc(x+3,y-12,1,0,7); ctx.fill();
+      ctx.strokeStyle=col; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(x+6,y+8); ctx.quadraticCurveTo(x+16,y+8,x+16,y-2); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.ellipse(x,y,14,7,0,0,7); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+12,y-1,5,0,7); ctx.fill();
+      ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+10,y-2); ctx.lineTo(x+14,y-2); ctx.stroke();
+      ctx.strokeStyle=col; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x-13,y); ctx.quadraticCurveTo(x-20,y-6,x-14,y-8); ctx.stroke();
+    }
+  }
+  cat(W*0.6,H*0.2-2,'#e0a050','loaf');
+  cat(W*0.78,H*0.2-2,'#5a5a5a','sit');
+  cat(W*0.52,H*0.34-2,'#3a3a3a','loaf');
+
+  // cat tree
+  const ctX=W*0.88, ctB=floorY;
+  ctx.fillStyle='#a08868'; ctx.fillRect(ctX-4,ctB-70,8,70);
+  ctx.fillStyle='#c8b090'; ctx.beginPath(); ctx.ellipse(ctX,ctB-70,16,5,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(ctX-10,ctB-40,14,5,0,0,7); ctx.fill();
+  cat(ctX,ctB-74,'#d8d0c0','loaf');
+
+  // floor cushion with sleeping cat
+  ctx.fillStyle='#c05fd0'; ctx.beginPath(); ctx.ellipse(W*0.24,floorY+30,26,10,0,0,7); ctx.fill();
+  cat(W*0.24,floorY+26,'#8a5a3a','sleep');
+}
+registerScene('catcafe', drawCatCafe);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
