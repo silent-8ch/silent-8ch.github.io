@@ -4816,6 +4816,56 @@ function drawIceCreamParlor(){
 }
 registerScene('icecreamparlor', drawIceCreamParlor);
 
+/* ── TOPIARY GARDEN (outdoor · sculpted hedges + fountain) ── */
+function drawTopiary(){
+  const t=sceneTime, groundY=H*0.66;
+  // bright sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#9fd0ee'); sky.addColorStop(1,'#dcefdd');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  for(let i=0;i<3;i++){ const cx=((t*6+i*130)%(W+120))-60; ctx.fillStyle='rgba(255,255,255,.8)';
+    ctx.beginPath(); ctx.arc(cx,H*0.12+i*24,12,0,7); ctx.arc(cx+14,cy2(i),9,0,7); ctx.arc(cx-12,H*0.12+i*24+4,8,0,7); ctx.fill(); }
+  function cy2(i){ return H*0.12+i*24+3; }
+  // manicured lawn with gravel path
+  ctx.fillStyle='#5fa048'; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.fillStyle='#548c3e'; for(let i=0;i<W;i+=16){ ctx.fillRect(i, groundY, 8, H-groundY); } // mowing stripes
+  ctx.fillStyle='#d8cfae'; ctx.beginPath(); ctx.moveTo(W*0.36,H); ctx.lineTo(W*0.64,H); ctx.lineTo(W*0.56,groundY+4); ctx.lineTo(W*0.44,groundY+4); ctx.closePath(); ctx.fill();
+  // low boxwood parterre hedges (back)
+  ctx.fillStyle='#3f7a34'; ctx.fillRect(0,groundY-14,W,16);
+  ctx.fillStyle='#4f8c40'; for(let i=0;i<W;i+=10){ ctx.beginPath(); ctx.arc(i+5,groundY-14,6,Math.PI,0); ctx.fill(); }
+  // topiary helpers
+  function ball(x,base,r,col){ ctx.fillStyle=col||'#3f8034'; ctx.beginPath(); ctx.arc(x,base-r,r,0,7); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.08)'; ctx.beginPath(); ctx.arc(x-r*0.3,base-r*1.3,r*0.4,0,7); ctx.fill(); }
+  function pot(x,base,w){ ctx.fillStyle='#b5885a'; ctx.beginPath(); ctx.moveTo(x-w,base); ctx.lineTo(x+w,base); ctx.lineTo(x+w*0.7,base+14); ctx.lineTo(x-w*0.7,base+14); ctx.closePath(); ctx.fill(); }
+  // spiral cone topiary (stacked balls) left
+  const lx=W*0.14, lb=groundY+34;
+  pot(lx,lb,12); ball(lx,lb,13); ball(lx,lb-18,10); ball(lx,lb-32,7); ball(lx,lb-44,4);
+  // topiary "peacock/bird" shape right — body + tail fan + head
+  const rx=W*0.84, rb=groundY+34;
+  pot(rx,rb,12);
+  ctx.fillStyle='#3f8034'; ctx.beginPath(); ctx.ellipse(rx,rb-16,16,13,0,0,7); ctx.fill(); // body
+  ctx.beginPath(); ctx.arc(rx-14,rb-30,5,0,7); ctx.fill(); // head
+  ctx.strokeStyle='#3f8034'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(rx-14,rb-34); ctx.lineTo(rx-16,rb-40); ctx.stroke();
+  // tail fan
+  for(let i=0;i<5;i++){ const a=-0.5+i*0.35; ctx.fillStyle=i%2?'#357029':'#4f8c40';
+    ctx.save(); ctx.translate(rx+8,rb-18); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,-16,4,16,0,0,7); ctx.fill(); ctx.restore(); }
+  // central tiered stone fountain with animated water
+  const fx=W*0.5, fb=groundY+40;
+  ctx.fillStyle='#c8c2b4'; ctx.beginPath(); ctx.ellipse(fx,fb,44,12,0,0,7); ctx.fill(); // basin
+  ctx.fillStyle='#9fd8e0'; ctx.beginPath(); ctx.ellipse(fx,fb-2,38,8,0,0,7); ctx.fill(); // water
+  ctx.fillStyle='#b0aa9c'; ctx.fillRect(fx-6,fb-26,12,24); // pillar
+  ctx.fillStyle='#c8c2b4'; ctx.beginPath(); ctx.ellipse(fx,fb-26,20,6,0,0,7); ctx.fill(); // upper bowl
+  ctx.fillStyle='#9fd8e0'; ctx.beginPath(); ctx.ellipse(fx,fb-27,15,4,0,0,7); ctx.fill();
+  // spouting water arcs
+  ctx.strokeStyle='rgba(180,225,235,.7)'; ctx.lineWidth=2;
+  for(let i=0;i<8;i++){ const a=i/8*Math.PI*2, ph=Math.sin(t*3+i)*2;
+    ctx.beginPath(); ctx.moveTo(fx,fb-32); ctx.quadraticCurveTo(fx+Math.cos(a)*14, fb-40-ph, fx+Math.cos(a)*22, fb-24); ctx.stroke(); }
+  // droplet sparkles in the basin
+  for(let i=0;i<6;i++){ ctx.fillStyle=`rgba(255,255,255,${0.3+0.3*Math.sin(t*4+i)})`; ctx.fillRect(fx-20+i*8, fb-3+Math.sin(t*3+i)*1.5, 2,2); }
+  // little clipped shrubs lining the path front
+  for(let i=0;i<4;i++){ ball(W*0.32+i*W*0.12, H*0.98, 9); }
+}
+registerScene('topiary', drawTopiary);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
