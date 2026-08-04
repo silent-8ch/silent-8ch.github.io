@@ -127,6 +127,10 @@
   .mapLink{color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;user-select:none;}
   .mapLink:hover{text-decoration:underline;}
   .mapSep{color:rgba(255,255,255,.35);font-size:12px;}
+  #mapPassport{color:#fff;font-size:12px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  #mapPassport .pbar{flex:1;min-width:80px;height:6px;border-radius:4px;background:rgba(255,255,255,.15);overflow:hidden;}
+  #mapPassport .pbar>i{display:block;height:100%;background:var(--accent);}
+  .mapRow .mn.seen::after{content:' ✓';color:#7ac07a;font-size:12px;}
   #mapList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding-right:4px;}
   .mapRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:8px 10px;}
   .mapRow input{width:16px;height:16px;flex:none;accent-color:var(--accent);}
@@ -169,6 +173,7 @@
     <div id="mapHead"><span>🗺️ Locations</span><span id="mapClose">✕</span></div>
     <div id="mapHint">Tap a name to go there · check the box to keep it in the rotation</div>
     <div id="mapTools"><span id="mapAll" class="mapLink">Select all</span><span class="mapSep">·</span><span id="mapNone" class="mapLink">Select none</span></div>
+    <div id="mapPassport"></div>
     <div id="mapList"></div>
   </div>
 
@@ -716,6 +721,24 @@ let sceneChangeTimer = 60; // seconds
 // added later default to on.
 let disabledScenes = (function(){ try{ const r=localStorage.getItem('bpet_disabled'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveDisabled(){ try{ localStorage.setItem('bpet_disabled', JSON.stringify([...disabledScenes])); }catch(e){} }
+
+/* ---- passport: places she's visited (persisted) + milestone badges ---- */
+let visited = (function(){ try{ const r=localStorage.getItem('bpet_visited'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
+function saveVisited(){ try{ localStorage.setItem('bpet_visited', JSON.stringify([...visited])); }catch(e){} }
+const PASSPORT_BADGES = [
+  {n:10, icon:'🌱', name:'Wanderer'}, {n:25, icon:'🧭', name:'Explorer'},
+  {n:50, icon:'⭐', name:'Adventurer'}, {n:100, icon:'🏆', name:'Voyager'},
+];
+function earnedBadges(){ return PASSPORT_BADGES.filter(b=>visited.size>=b.n); }
+function markVisited(name){
+  if (visited.has(name)) return;
+  const before = visited.size;
+  visited.add(name); saveVisited();
+  // celebrate crossing a badge threshold (or collecting them all)
+  const crossed = PASSPORT_BADGES.find(b=>before<b.n && visited.size>=b.n);
+  if (crossed){ say(`${crossed.icon} ${crossed.name}! (${crossed.n} places)`); burst(crossed.icon); }
+  else if (visited.size === SCENES.length){ say('🗺️ Every place, together! 💛'); hearts(); }
+}
 function sceneEnabled(n){ return !disabledScenes.has(n); }
 // advance currentScene to the next/prev enabled scene, skipping hidden ones
 function stepScene(dir){
@@ -787,13 +810,22 @@ const SCENE_LABELS = {
   carnival:'Carnival', chocolateshop:'Chocolate Shop', tulipfield:'Tulip Field',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
+function buildPassport(){
+  const el=document.getElementById('mapPassport'); if(!el) return;
+  const pct = Math.round(visited.size/SCENES.length*100);
+  const badges = earnedBadges().map(b=>`${b.icon}`).join(' ');
+  el.innerHTML = `<span>🗺️ Visited ${visited.size}/${SCENES.length}</span>`
+    + `<span class="pbar"><i style="width:${pct}%"></i></span>`
+    + (badges ? `<span title="badges earned">${badges}</span>` : '');
+}
 function buildMapList(){
+  buildPassport();
   const list=document.getElementById('mapList'); list.innerHTML='';
   SCENES.forEach((name,idx)=>{
     const row=document.createElement('div'); row.className='mapRow'+(idx===currentScene?' current':'');
     const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=sceneEnabled(name);
     cb.addEventListener('change',()=>{ if(cb.checked) disabledScenes.delete(name); else disabledScenes.add(name); saveDisabled(); });
-    const nm=document.createElement('span'); nm.className='mn'; nm.textContent=sceneLabel(name);
+    const nm=document.createElement('span'); nm.className='mn'+(visited.has(name)?' seen':''); nm.textContent=sceneLabel(name);
     nm.addEventListener('click',()=>{ currentScene=idx; sceneChangeTimer=60; closeMap(); });
     row.appendChild(cb); row.appendChild(nm); list.appendChild(row);
   });
@@ -1097,6 +1129,7 @@ function render(){
   ctx.clearRect(0,0,W,H);
   if (birthday){ drawBirthdayScene(); return; }
   const scene = SCENES[currentScene];
+  if (started) markVisited(scene);
   const draw = SCENE_RENDERERS[scene];
   if (draw){
     draw();
