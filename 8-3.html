@@ -7024,6 +7024,63 @@ function drawAviary(){
 }
 registerScene('aviary', drawAviary);
 
+/* ── ICEBERG BAY (outdoor · polar sea with icebergs & penguins) ── */
+function drawIcebergBay(){
+  const t=sceneTime, seaY=H*0.5;
+  // cold pale polar sky
+  const sky=ctx.createLinearGradient(0,0,0,seaY); sky.addColorStop(0,'#a8c4e0'); sky.addColorStop(1,'#e0eef4');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,seaY);
+  // pale low sun
+  ctx.fillStyle='rgba(255,250,235,.8)'; ctx.beginPath(); ctx.arc(W*0.76,H*0.16,18,0,7); ctx.fill();
+  ctx.globalAlpha=0.2; ctx.beginPath(); ctx.arc(W*0.76,H*0.16,30,0,7); ctx.fill(); ctx.globalAlpha=1;
+  // distant glacier wall on the horizon
+  ctx.fillStyle='#cfe0ea'; ctx.fillRect(0,seaY-24,W,24);
+  ctx.fillStyle='#bcd2e0'; for(let i=0;i<W;i+=22){ ctx.fillRect(i,seaY-24-(i%3)*6,20,(i%3)*6+2); }
+  ctx.fillStyle='rgba(140,190,220,.5)'; ctx.fillRect(0,seaY-6,W,6); // shadowed base
+  // cold sea
+  const sea=ctx.createLinearGradient(0,seaY,0,H); sea.addColorStop(0,'#3f7a9a'); sea.addColorStop(1,'#22506a');
+  ctx.fillStyle=sea; ctx.fillRect(0,seaY,W,H-seaY);
+  // gentle swell lines
+  for(let i=0;i<7;i++){ const ry=seaY+10+i*((H-seaY)/8); ctx.strokeStyle='rgba(255,255,255,.1)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=ry+Math.sin(x*0.05+t*1.2+i)*2; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // icebergs with underwater blue glow + reflection, gently bobbing
+  function berg(x,y,s,bob){
+    const by=y+Math.sin(t*0.8+bob)*2;
+    // reflection
+    ctx.save(); ctx.globalAlpha=0.2; ctx.fillStyle='#dff0f8'; ctx.beginPath(); ctx.moveTo(x-30*s,by+2); ctx.lineTo(x+30*s,by+2); ctx.lineTo(x+10*s,by+30*s); ctx.lineTo(x-14*s,by+30*s); ctx.closePath(); ctx.fill(); ctx.restore();
+    // submerged blue base
+    ctx.fillStyle='rgba(120,200,225,.35)'; ctx.beginPath(); ctx.ellipse(x,by+4,34*s,8*s,0,0,7); ctx.fill();
+    // the berg above water
+    ctx.fillStyle='#eef6fa'; ctx.beginPath(); ctx.moveTo(x-30*s,by); ctx.lineTo(x-18*s,by-24*s); ctx.lineTo(x-4*s,by-14*s); ctx.lineTo(x+10*s,by-32*s); ctx.lineTo(x+24*s,by-16*s); ctx.lineTo(x+32*s,by); ctx.closePath(); ctx.fill();
+    // shadow facets
+    ctx.fillStyle='#cfe4ee'; ctx.beginPath(); ctx.moveTo(x+10*s,by-32*s); ctx.lineTo(x+24*s,by-16*s); ctx.lineTo(x+16*s,by); ctx.lineTo(x+6*s,by); ctx.closePath(); ctx.fill();
+  }
+  berg(W*0.22, seaY+30, 1.1, 0); berg(W*0.7, seaY+50, 1.4, 1.6); berg(W*0.9, seaY+22, 0.7, 3);
+  // a foreground ice floe with a huddle of penguins
+  const flY=H*0.86;
+  ctx.fillStyle='#eef6fa'; ctx.beginPath(); ctx.moveTo(0,flY); ctx.lineTo(W*0.5,flY-8); ctx.lineTo(W*0.62,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#cfe4ee'; ctx.beginPath(); ctx.moveTo(0,flY+4); ctx.lineTo(W*0.5,flY-4); ctx.lineTo(W*0.5,flY-8); ctx.lineTo(0,flY); ctx.closePath(); ctx.fill();
+  function penguin(x,y,s,face){ ctx.save(); ctx.translate(x,y); ctx.scale(face,1);
+    ctx.fillStyle='#1a1a22'; ctx.beginPath(); ctx.ellipse(0,0,7*s,11*s,0,0,7); ctx.fill(); // back
+    ctx.fillStyle='#f4f4f0'; ctx.beginPath(); ctx.ellipse(1*s,1*s,4.5*s,9*s,0,0,7); ctx.fill(); // belly
+    ctx.fillStyle='#1a1a22'; ctx.beginPath(); ctx.arc(0,-9*s,4*s,0,7); ctx.fill(); // head
+    ctx.fillStyle='#f0a020'; ctx.beginPath(); ctx.moveTo(3*s,-9*s); ctx.lineTo(7*s,-8*s); ctx.lineTo(3*s,-7*s); ctx.closePath(); ctx.fill(); // beak
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(1.5*s,-10*s,1*s,0,7); ctx.fill();
+    // little flipper wave
+    const w=Math.sin(t*3+x)*0.3; ctx.strokeStyle='#1a1a22'; ctx.lineWidth=2*s; ctx.beginPath(); ctx.moveTo(-6*s,-2*s); ctx.lineTo(-9*s,4*s+w*4*s); ctx.stroke();
+    // feet
+    ctx.fillStyle='#f0a020'; ctx.fillRect(-3*s,10*s,3*s,2*s); ctx.fillRect(1*s,10*s,3*s,2*s);
+    ctx.restore(); }
+  penguin(W*0.14,flY+6,1.0,1); penguin(W*0.26,flY+10,1.1,-1); penguin(W*0.38,flY+4,0.9,1);
+  // one penguin diving/sliding toward the water
+  penguin(W*0.5,flY+18,1.0,1);
+  // a couple of snowflakes
+  for(let i=0;i<16;i++){ const sx=(i*47+t*10)%W, sy=(i*31+t*16)%seaY; ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(sx,sy,2,2); }
+  // a seabird gliding
+  const gx=(t*24)%(W+40)-20; ctx.strokeStyle='#5a5a52'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(gx-6,H*0.24); ctx.quadraticCurveTo(gx,H*0.24-4,gx+6,H*0.24); ctx.stroke();
+}
+registerScene('icebergbay', drawIcebergBay);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
