@@ -1800,3 +1800,214 @@ function drawPapercraftStudio(){
   ctx.strokeStyle='#8a8a92'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.72,deskY+24); ctx.lineTo(W*0.78,deskY+30); ctx.moveTo(W*0.72,deskY+30); ctx.lineTo(W*0.78,deskY+24); ctx.stroke();
 }
 registerScene('papercraftstudio', drawPapercraftStudio);
+
+/* ── POPPY FIELD (outdoor · breezy red poppies) ── */
+function drawPoppyField(){
+  const t = sceneTime, fieldY = H*0.50;
+
+  // bright open sky
+  const sky=ctx.createLinearGradient(0,0,0,fieldY); sky.addColorStop(0,'#5fb0ea'); sky.addColorStop(1,'#d8eecf');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,fieldY);
+  ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.80,H*0.13,20,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,246,176,.3)'; ctx.beginPath(); ctx.arc(W*0.80,H*0.13,32,0,7); ctx.fill();
+  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.10,0.7); drawCloud(W*0.5+Math.sin(t*0.08+2)*6,H*0.18,0.5); drawCloud(W*0.9+Math.sin(t*0.12+4)*5,H*0.08,0.4);
+
+  // distant rolling hills
+  ctx.fillStyle='#7aa84a'; ctx.beginPath(); ctx.moveTo(0,fieldY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,fieldY-24-16*Math.sin(x*0.016+1)); } ctx.lineTo(W,fieldY); ctx.fill();
+  ctx.fillStyle='#6a9a3e'; ctx.beginPath(); ctx.moveTo(0,fieldY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,fieldY-8-10*Math.sin(x*0.03+3)); } ctx.lineTo(W,fieldY); ctx.fill();
+  // a lone tree on a hill (left)
+  ctx.fillStyle='#5a3a20'; ctx.fillRect(W*0.18-2,fieldY-30,4,18); ctx.fillStyle='#3a8a3a'; ctx.beginPath(); ctx.arc(W*0.18,fieldY-34,12,0,7); ctx.fill();
+
+  // green field base
+  const grr=ctx.createLinearGradient(0,fieldY,0,H); grr.addColorStop(0,'#5a9e3a'); grr.addColorStop(1,'#3f7a26');
+  ctx.fillStyle=grr; ctx.fillRect(0,fieldY,W,H-fieldY);
+
+  // layers of poppies — smaller/paler far, bigger/brighter near, swaying in wind
+  function poppy(px,py,sc,shade){ const sway=Math.sin(t*1.6+px*0.05)*3*sc;
+    ctx.strokeStyle='#3a7a2a'; ctx.lineWidth=1.4*sc; ctx.beginPath(); ctx.moveTo(px,py+14*sc); ctx.quadraticCurveTo(px+sway*0.5,py+4*sc,px+sway,py); ctx.stroke();
+    ctx.save(); ctx.translate(px+sway,py); ctx.scale(sc,sc);
+    ctx.fillStyle=shade; for (let k=0;k<5;k++){ const a=k/5*6.28; ctx.beginPath(); ctx.ellipse(Math.cos(a)*4,Math.sin(a)*4,5,4,a,0,7); ctx.fill(); }
+    ctx.fillStyle='#2a1a10'; ctx.beginPath(); ctx.arc(0,0,2.4,0,7); ctx.fill();
+    ctx.fillStyle='#1a1008'; for (let k=0;k<6;k++){ const a=k/6*6.28; ctx.beginPath(); ctx.arc(Math.cos(a)*2.4,Math.sin(a)*2.4,0.7,0,7); ctx.fill(); }
+    ctx.restore();
+  }
+  // far layer
+  for (let i=0;i<16;i++){ const px=(i*47+10)%W; const py=fieldY+10+ (i%3)*6; poppy(px,py,0.5,'#d84a3a'); }
+  // mid layer
+  for (let i=0;i<14;i++){ const px=(i*61+24)%W; const py=fieldY+34+ (i%4)*8; poppy(px,py,0.8,'#e2482e'); }
+  // near layer (bottom, big) — kept along the sides so center floor reads
+  for (let i=0;i<10;i++){ const px=(i*79+8)%W; if (px>W*0.34 && px<W*0.66) continue; const py=H*0.82+ (i%3)*10; poppy(px,py,1.3,'#e2402a'); }
+  // a few white daisies mixed in (sides)
+  for (const [dx,dy] of [[W*0.10,H*0.88],[W*0.90,H*0.86],[W*0.22,H*0.80]]){ ctx.fillStyle='#fff'; for (let k=0;k<7;k++){ const a=k/7*6.28; ctx.beginPath(); ctx.ellipse(dx+Math.cos(a)*4,dy+Math.sin(a)*4,2.4,1.4,a,0,7); ctx.fill(); } ctx.fillStyle='#e0b040'; ctx.beginPath(); ctx.arc(dx,dy,2,0,7); ctx.fill(); }
+
+  // butterflies fluttering
+  for (let i=0;i<3;i++){ const bx=W*0.3+i*W*0.22+Math.sin(t*1.5+i)*20; const by=fieldY-10+Math.sin(t*2+i*2)*14; const flap=Math.abs(Math.sin(t*8+i))*0.6+0.2;
+    ctx.fillStyle=['#e0902a','#c05a90','#5a90d0'][i]; ctx.save(); ctx.translate(bx,by);
+    ctx.beginPath(); ctx.ellipse(-2,0,3,flap*4,0.4,0,7); ctx.ellipse(2,0,3,flap*4,-0.4,0,7); ctx.fill();
+    ctx.fillStyle='#333'; ctx.fillRect(-0.5,-3,1,6); ctx.restore(); }
+}
+registerScene('poppyfield', drawPoppyField);
+
+/* ── TREEHOUSE (outdoor · cozy platform in the canopy) ── */
+function drawTreehouse(){
+  const t = sceneTime, deckY = H*0.70;
+
+  // warm afternoon sky through leaves
+  const sky=ctx.createLinearGradient(0,0,0,deckY); sky.addColorStop(0,'#8fc9ee'); sky.addColorStop(1,'#f0e6c8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,deckY);
+  ctx.fillStyle='#fff6c0'; ctx.beginPath(); ctx.arc(W*0.5,H*0.16,60,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,246,192,.25)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.16,90,0,7); ctx.fill();
+
+  // dense canopy framing the top & corners (dark green leaf masses)
+  function leafMass(cx,cy,r,col){ ctx.fillStyle=col; for (let k=0;k<7;k++){ const a=k/7*6.28; ctx.beginPath(); ctx.arc(cx+Math.cos(a)*r*0.6,cy+Math.sin(a)*r*0.6,r*0.5,0,7); ctx.fill(); } ctx.beginPath(); ctx.arc(cx,cy,r*0.6,0,7); ctx.fill(); }
+  leafMass(W*0.12,H*0.06,54,'#2f7a34'); leafMass(W*0.5,-10,70,'#379038'); leafMass(W*0.9,H*0.05,58,'#2a7030');
+  leafMass(W*0.04,H*0.34,40,'#347f36'); leafMass(W*0.97,H*0.30,44,'#2f7a34');
+  // sun dapples flickering in the leaves
+  for (let i=0;i<14;i++){ const dx=(i*53+9)%W; const dy=(i*37+5)%(H*0.30); ctx.fillStyle=`rgba(255,246,180,${0.1+0.12*Math.sin(t*2+i)})`; ctx.beginPath(); ctx.arc(dx,dy,4,0,7); ctx.fill(); }
+
+  // big tree trunk on the right supporting the house
+  ctx.fillStyle='#6a4626'; ctx.fillRect(W*0.78,H*0.10,W*0.16,H-H*0.10);
+  ctx.strokeStyle='#4a2e16'; ctx.lineWidth=1.5; for (let i=0;i<8;i++){ const ly=H*0.14+i*36; ctx.beginPath(); ctx.moveTo(W*0.79,ly); ctx.quadraticCurveTo(W*0.86,ly+8,W*0.93,ly+2); ctx.stroke(); }
+  // a thick branch under the deck
+  ctx.fillStyle='#5a3a1e'; ctx.fillRect(W*0.10,deckY+6,W*0.72,10);
+
+  // the little wooden cabin behind the deck
+  const hx=W*0.2, hy=H*0.30, hw=W*0.5, hh=deckY-hy;
+  ctx.fillStyle='#a5764a'; ctx.fillRect(hx,hy,hw,hh);
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1; for (let y=hy+8;y<deckY;y+=10){ ctx.beginPath(); ctx.moveTo(hx,y); ctx.lineTo(hx+hw,y); ctx.stroke(); }
+  // pitched roof
+  ctx.fillStyle='#7a4a2a'; ctx.beginPath(); ctx.moveTo(hx-10,hy); ctx.lineTo(hx+hw*0.5,hy-34); ctx.lineTo(hx+hw+10,hy); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#8a5a34'; for (let x=hx-6;x<hx+hw;x+=8){ ctx.fillRect(x,hy-4,3,4); }
+  // round window with warm glow
+  ctx.fillStyle='#ffe6a0'; ctx.beginPath(); ctx.arc(hx+hw*0.5,hy+hh*0.4,14,0,7); ctx.fill();
+  ctx.strokeStyle='#5a3a1e'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(hx+hw*0.5,hy+hh*0.4,14,0,7); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(hx+hw*0.5-14,hy+hh*0.4); ctx.lineTo(hx+hw*0.5+14,hy+hh*0.4); ctx.moveTo(hx+hw*0.5,hy+hh*0.4-14); ctx.lineTo(hx+hw*0.5,hy+hh*0.4+14); ctx.stroke();
+  // bunting flags along the roof edge
+  for (let x=hx-4;x<hx+hw;x+=16){ ctx.fillStyle=['#e05a5a','#e0b040','#5ab0e0'][((x/16)|0)%3]; ctx.beginPath(); ctx.moveTo(x,hy); ctx.lineTo(x+10,hy); ctx.lineTo(x+5,hy+8); ctx.closePath(); ctx.fill(); }
+
+  // rope ladder hanging down (left)
+  ctx.strokeStyle='#8a6a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.16,deckY); ctx.lineTo(W*0.16,H); ctx.moveTo(W*0.24,deckY); ctx.lineTo(W*0.24,H); ctx.stroke();
+  ctx.lineWidth=3; for (let y=deckY+10;y<H;y+=16){ ctx.beginPath(); ctx.moveTo(W*0.16,y); ctx.lineTo(W*0.24,y); ctx.stroke(); }
+
+  // wooden deck platform
+  const deck=ctx.createLinearGradient(0,deckY,0,H); deck.addColorStop(0,'#c19a62'); deck.addColorStop(1,'#a2794c');
+  ctx.fillStyle=deck; ctx.fillRect(0,deckY,W,H-deckY);
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1; for (let x=0;x<W;x+=22){ ctx.beginPath(); ctx.moveTo(x,deckY); ctx.lineTo(x,H); ctx.stroke(); }
+  // simple railing along the front
+  ctx.fillStyle='#8a6038'; ctx.fillRect(0,deckY+2,W,4); for (let x=10;x<W;x+=34){ ctx.fillRect(x,deckY+2,4,14); }
+  // a paper lantern hanging from the branch (left) + a potted plant (right, low)
+  const lx=W*0.30;
+  ctx.strokeStyle='#5a3a1e'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lx,deckY+8); ctx.lineTo(lx,deckY+18); ctx.stroke();
+  ctx.fillStyle=`rgba(240,150,80,${0.82+0.12*Math.sin(t*2)})`; roundRect(lx-7,deckY+18,14,18,7); ctx.fill();
+  ctx.fillStyle='#b56a44'; ctx.beginPath(); ctx.moveTo(W*0.7,H-4); ctx.lineTo(W*0.78,H-4); ctx.lineTo(W*0.76,H-20); ctx.lineTo(W*0.72,H-20); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#3a8a3a'; for (const a of [-0.5,0,0.5]){ ctx.save(); ctx.translate(W*0.74,H-20); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,-8,4,10,0,0,7); ctx.fill(); ctx.restore(); }
+}
+registerScene('treehouse', drawTreehouse);
+
+/* ── DESERT OASIS (outdoor · palms & pool at golden hour) ── */
+function drawDesertOasis(){
+  const t = sceneTime, duneY = H*0.52, poolY = H*0.66;
+
+  // warm golden-hour sky
+  const sky=ctx.createLinearGradient(0,0,0,duneY); sky.addColorStop(0,'#f5b96a'); sky.addColorStop(0.5,'#f0d09a'); sky.addColorStop(1,'#f6e6c0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,duneY);
+  // low sun with glow
+  const sunX=W*0.72, sunY=H*0.24;
+  ctx.fillStyle='rgba(255,220,150,.35)'; ctx.beginPath(); ctx.arc(sunX,sunY,40,0,7); ctx.fill();
+  ctx.fillStyle='#fff0c0'; ctx.beginPath(); ctx.arc(sunX,sunY,24,0,7); ctx.fill();
+  // heat shimmer birds
+  ctx.strokeStyle='rgba(120,90,60,.4)'; ctx.lineWidth=1; for (let i=0;i<3;i++){ const bx=(W*0.2+i*30+t*6)%W, by=H*0.10+i*6; ctx.beginPath(); ctx.moveTo(bx-4,by); ctx.quadraticCurveTo(bx,by-3,bx+4,by); ctx.stroke(); }
+
+  // far dunes (layered)
+  ctx.fillStyle='#e0b070'; ctx.beginPath(); ctx.moveTo(0,duneY); for(let x=0;x<=W;x+=18){ ctx.lineTo(x,duneY-20-14*Math.sin(x*0.014+1)); } ctx.lineTo(W,duneY); ctx.fill();
+  ctx.fillStyle='#d49a54'; ctx.beginPath(); ctx.moveTo(0,duneY); for(let x=0;x<=W;x+=18){ ctx.lineTo(x,duneY-6-10*Math.sin(x*0.025+3)); } ctx.lineTo(W,duneY); ctx.fill();
+
+  // sand foreground
+  const sand=ctx.createLinearGradient(0,duneY,0,H); sand.addColorStop(0,'#e8c184'); sand.addColorStop(1,'#c9a060');
+  ctx.fillStyle=sand; ctx.fillRect(0,duneY,W,H-duneY);
+  ctx.fillStyle='rgba(180,140,90,.2)'; for (let i=0;i<30;i++){ const sx=(i*67+11)%W, sy=duneY+8+((i*41+7)%(H-duneY-8)); ctx.fillRect(sx,sy,2,2); }
+
+  // the oasis pool (center, glassy blue reflecting sky)
+  const pool=ctx.createLinearGradient(0,poolY,0,H*0.82); pool.addColorStop(0,'#3aa0c0'); pool.addColorStop(1,'#2a7a9a');
+  ctx.fillStyle=pool; ctx.beginPath(); ctx.ellipse(W*0.5,poolY+14,W*0.42,26,0,0,7); ctx.fill();
+  // ripples + sun reflection
+  ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1; for (let i=0;i<3;i++){ ctx.beginPath(); ctx.ellipse(W*0.5,poolY+14,W*0.3-i*30+Math.sin(t*2+i)*3,18-i*4,0,0,7); ctx.stroke(); }
+  ctx.fillStyle='rgba(255,235,180,.3)'; ctx.beginPath(); ctx.ellipse(sunX-W*0.1,poolY+10,26,5,0,0,7); ctx.fill();
+  // sandy rim
+  ctx.strokeStyle='#b88a50'; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(W*0.5,poolY+14,W*0.42,26,0,0,7); ctx.stroke();
+
+  // palm trees (sides, arching over) — drawn after pool so they frame it
+  function palm(px,baseY,h,lean){ ctx.save(); ctx.translate(px,baseY);
+    ctx.strokeStyle='#7a5a34'; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(lean*0.5,-h*0.6,lean,-h); ctx.stroke();
+    // frond crown
+    ctx.strokeStyle='#3a8a4a'; ctx.lineWidth=3;
+    for (let k=0;k<7;k++){ const a=Math.PI + k/6*Math.PI; const sway=Math.sin(t*1.2+k+px)*4;
+      ctx.beginPath(); ctx.moveTo(lean,-h); ctx.quadraticCurveTo(lean+Math.cos(a)*20, -h+Math.sin(a)*16, lean+Math.cos(a)*36+sway, -h+Math.sin(a)*24+8); ctx.stroke(); }
+    // coconuts
+    ctx.fillStyle='#5a3a1a'; ctx.beginPath(); ctx.arc(lean-3,-h+4,3,0,7); ctx.arc(lean+4,-h+5,3,0,7); ctx.fill();
+    ctx.restore(); }
+  palm(W*0.14, duneY+18, 120, 18);
+  palm(W*0.88, duneY+22, 140, -22);
+  palm(W*0.30, duneY+10, 90, 10);
+
+  // a couple of desert shrubs + a small striped cushion by the pool (low, sides)
+  ctx.fillStyle='#5a7a3a'; for (const gx of [W*0.10,W*0.90]){ for (let k=-2;k<=2;k++){ ctx.beginPath(); ctx.moveTo(gx,H*0.92); ctx.lineTo(gx+k*3,H*0.92-8); ctx.stroke(); } ctx.beginPath(); ctx.arc(gx,H*0.90,5,0,7); ctx.fill(); }
+  ctx.save(); ctx.translate(W*0.20,H*0.90); ctx.rotate(-0.1); ctx.fillStyle='#c04a6a'; roundRect(-16,-6,32,12,3); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.3)'; for (let x=-16;x<16;x+=8){ ctx.fillRect(x,-6,2,12);} ctx.restore();
+}
+registerScene('desertoasis', drawDesertOasis);
+
+/* ── DUMPLING HOUSE (indoor · steamy bamboo-steamer kitchen) ── */
+function drawDumplingHouse(){
+  const t = sceneTime, counterY = H*0.66;
+
+  // warm red-lacquer wall
+  const wall=ctx.createLinearGradient(0,0,0,counterY); wall.addColorStop(0,'#7a2a2a'); wall.addColorStop(1,'#a03a34');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,counterY);
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1; for (let y=18;y<counterY;y+=20){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // gold trim band
+  ctx.fillStyle='#e0b84a'; ctx.fillRect(0,H*0.30,W,4);
+
+  // round window with lattice (left)
+  const wx=W*0.16, wy=H*0.16;
+  ctx.fillStyle='#e8d8b0'; ctx.beginPath(); ctx.arc(wx,wy,26,0,7); ctx.fill();
+  ctx.strokeStyle='#8a2a2a'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(wx,wy,26,0,7); ctx.stroke();
+  for (let k=-2;k<=2;k++){ ctx.beginPath(); ctx.moveTo(wx+k*10,wy-24); ctx.lineTo(wx+k*10,wy+24); ctx.moveTo(wx-24,wy+k*10); ctx.lineTo(wx+24,wy+k*10); ctx.stroke(); }
+
+  // hanging red lanterns with tassels
+  for (const lx of [W*0.52,W*0.74,W*0.90]){ ctx.strokeStyle='#3a1a1a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,H*0.08); ctx.stroke();
+    ctx.fillStyle='rgba(255,120,90,.3)'; ctx.beginPath(); ctx.arc(lx,H*0.12,18,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(220,60,50,${0.85+0.1*Math.sin(t*2+lx)})`; roundRect(lx-11,H*0.08,22,24,10); ctx.fill();
+    ctx.fillStyle='#e0b84a'; ctx.fillRect(lx-11,H*0.08,22,3); ctx.fillRect(lx-11,H*0.08+24,22,3);
+    ctx.strokeStyle='#e0b84a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lx,H*0.08+27); ctx.lineTo(lx,H*0.08+38); ctx.stroke(); }
+
+  // menu board on the wall (center-right, high)
+  ctx.fillStyle='#2a1a14'; ctx.fillRect(W*0.40,H*0.14,W*0.16,H*0.14);
+  ctx.strokeStyle='rgba(240,220,180,.8)'; ctx.lineWidth=1; for (let k=0;k<4;k++){ ctx.beginPath(); ctx.moveTo(W*0.42,H*0.17+k*10); ctx.lineTo(W*0.53,H*0.17+k*10); ctx.stroke(); }
+
+  // wood counter with a bamboo steamer stack (center) and dumpling plates
+  const cnt=ctx.createLinearGradient(0,counterY,0,H); cnt.addColorStop(0,'#c49a68'); cnt.addColorStop(1,'#a2794c');
+  ctx.fillStyle=cnt; ctx.fillRect(0,counterY,W,H-counterY);
+  ctx.fillStyle='rgba(255,245,220,.15)'; ctx.fillRect(0,counterY,W,4);
+
+  // bamboo steamer stack (center-back, high, with rising steam)
+  const sx=W*0.5, sTopY=counterY+2;
+  for (let tier=2;tier>=0;tier--){ const ty=sTopY+tier*10; ctx.fillStyle= tier===0?'#d8b878':'#c8a868'; ctx.beginPath(); ctx.ellipse(sx,ty,30,9,0,0,7); ctx.fill();
+    ctx.fillStyle='#b89858'; ctx.fillRect(sx-30,ty,60,10);
+    ctx.strokeStyle='rgba(120,90,50,.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.ellipse(sx,ty,30,9,0,0,7); ctx.stroke(); }
+  // domed lid
+  ctx.fillStyle='#cdae70'; ctx.beginPath(); ctx.ellipse(sx,sTopY-4,30,12,0,Math.PI,0); ctx.fill();
+  ctx.fillStyle='#8a6a3a'; ctx.beginPath(); ctx.arc(sx,sTopY-14,3,0,7); ctx.fill();
+  // steam plumes
+  ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=2;
+  for (const ox of [-10,0,10]){ ctx.beginPath(); for (let k=0;k<=9;k++){ const yy=sTopY-16-k*5, xx=sx+ox+Math.sin(t*3+k*0.6+ox)*4; k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy);} ctx.stroke(); }
+
+  // plates of dumplings on the counter (sides, low)
+  function dumplings(px,py){ ctx.fillStyle='#e9e2d6'; ctx.beginPath(); ctx.ellipse(px,py,24,8,0,0,7); ctx.fill();
+    for (let k=0;k<4;k++){ const dx=px-15+k*10; ctx.fillStyle='#f0e6cf'; ctx.beginPath(); ctx.ellipse(dx,py-3,6,4,0,Math.PI,0); ctx.fill();
+      ctx.strokeStyle='rgba(180,160,120,.7)'; ctx.lineWidth=0.7; for (let p=-2;p<=2;p++){ ctx.beginPath(); ctx.moveTo(dx+p*1.5,py-3); ctx.lineTo(dx+p*1.5,py-6); ctx.stroke(); } } }
+  dumplings(W*0.18,counterY+26); dumplings(W*0.82,counterY+28);
+  // a little dipping-sauce dish + chopsticks (center-low)
+  ctx.fillStyle='#3a2a24'; ctx.beginPath(); ctx.ellipse(W*0.5,counterY+34,9,3.4,0,0,7); ctx.fill();
+  ctx.strokeStyle='#6a4326'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(W*0.5+12,counterY+24); ctx.lineTo(W*0.5+28,counterY+18); ctx.moveTo(W*0.5+12,counterY+27); ctx.lineTo(W*0.5+28,counterY+22); ctx.stroke();
+}
+registerScene('dumplinghouse', drawDumplingHouse);

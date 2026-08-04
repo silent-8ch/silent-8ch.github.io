@@ -52,6 +52,8 @@ const SCENE_LABELS = {
   jellyfishtank:'Jellyfish Tank', cavehotspring:'Cave Hot Spring',
   iceskatingrink:'Ice Skating Rink', candyfactory:'Candy Factory', moonbeach:'Moonlit Beach',
   papercraftstudio:'Papercraft Studio',
+  poppyfield:'Poppy Field', treehouse:'Treehouse', desertoasis:'Desert Oasis',
+  dumplinghouse:'Dumpling House',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

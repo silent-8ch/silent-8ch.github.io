@@ -1517,3 +1517,142 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 9). Two scene-gated, contained little moments. No
+   always-on overlays; each lives only in its scenes and taps return false on miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   22) PAPER BOAT  —  by the water, a little folded paper boat bobs on the surface.
+   Give it a tap and it sets sail across the ripples while she watches it go. Lives
+   only in watery scenes and gently resets when it reaches the far side.
+   -------------------------------------------------------------------------- */
+(function fxPaperBoat(){
+  try{
+    const WATER = new Set(['river','koipond','moonlitjetty','marina','fishingdock']);
+    let boat = null;                     // {x,y,vx,bob,hue,cd,wake}
+    function onWater(){ try{ return (typeof SCENES!=='undefined') && WATER.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!onWater()){ boat = null; return; }
+      if (!boat){ boat = { x: rand(W*0.2, W*0.35), y: rand(H*0.5, H*0.6), vx: 6, bob: rand(0,Math.PI*2), hue: pick(['#ffffff','#ffe0a8','#cfe8ff']), cd: 0, wake: 0 }; }
+      const b = boat;
+      b.bob += dt; if (b.cd > 0) b.cd -= dt; if (b.wake > 0) b.wake -= dt;
+      b.x += b.vx * dt; b.vx *= 0.995;
+      if (b.x > W*0.9){ boat = { x: rand(W*0.14, W*0.28), y: rand(H*0.48, H*0.6), vx: 6, bob: rand(0,Math.PI*2), hue: b.hue, cd:0, wake:0 }; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!boat || !onWater()) return;
+      const b = boat, y = b.y + Math.sin(b.bob*2) * 1.6;
+      ctx.save();
+      // wake ripple behind the boat
+      if (b.wake > 0){
+        ctx.globalAlpha = Math.max(0, b.wake / 0.8) * 0.5;
+        ctx.strokeStyle = 'rgba(230,245,255,0.9)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(b.x - 10, y + 5, 12, 3.5, 0, 0, 7); ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      // reflection
+      ctx.globalAlpha = 0.18; ctx.fillStyle = b.hue;
+      ctx.beginPath(); ctx.moveTo(b.x-9, y+6); ctx.lineTo(b.x+9, y+6); ctx.lineTo(b.x, y+13); ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1;
+      // hull
+      ctx.fillStyle = b.hue;
+      ctx.beginPath(); ctx.moveTo(b.x-10, y+2); ctx.lineTo(b.x+10, y+2); ctx.lineTo(b.x+6, y+7); ctx.lineTo(b.x-6, y+7); ctx.closePath(); ctx.fill();
+      // sail (folded paper triangle)
+      ctx.beginPath(); ctx.moveTo(b.x, y-9); ctx.lineTo(b.x+8, y+2); ctx.lineTo(b.x, y+2); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(b.x, y-9); ctx.lineTo(b.x-8, y+2); ctx.lineTo(b.x, y+2); ctx.closePath();
+      ctx.fillStyle = 'rgba(0,0,0,0.06)'; ctx.fill();
+      // crease line
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 0.7;
+      ctx.beginPath(); ctx.moveTo(b.x, y-9); ctx.lineTo(b.x, y+2); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!boat || !onWater()) return false;
+        if (Math.hypot(px - boat.x, py - boat.y) > 16) return false;
+        if (boat.cd > 0) return true;
+        boat.cd = 0.9; boat.vx = rand(26, 40); boat.wake = 0.8;
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof fxAt === 'function') fxAt(boat.x, boat.y - 10, pick(['⛵','💨','✨']));
+        if (typeof say === 'function') say(pick(['Set sail! ⛵','Off it goes 🥰','Bon voyage, little boat 💛','Sail away ✨']));
+        try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   23) SHARED MILKSHAKE  —  in the diner, café or ice-cream parlor, a tall shake
+   with two straws waits to be shared. Tap to take a sip together — hearts, a
+   little sweetness, and rising bubbles. Only appears in those cozy spots.
+   -------------------------------------------------------------------------- */
+(function fxMilkshake(){
+  try{
+    const SPOTS = new Set(['diner','cafe','icecreamparlor']);
+    let shake = null;                    // {x,y,ttl,cd,sips,bob}
+    let timer = rand(8, 16);
+    function inSpot(){ try{ return (typeof SCENES!=='undefined') && SPOTS.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inSpot()){ shake = null; timer = rand(8,16); return; }
+      if (!shake){
+        timer -= dt;
+        if (timer <= 0){ timer = rand(30, 55); shake = { x: Math.max(W*0.2, Math.min(W*0.8, pet.x + (pet.x<W*0.5?44:-44))), y: rand(H*0.72, H*0.80), ttl: rand(30, 45), cd: 0, sips: 0, bob: 0 }; }
+        return;
+      }
+      shake.bob += dt; shake.ttl -= dt; if (shake.cd > 0) shake.cd -= dt;
+      if (shake.ttl <= 0) shake = null;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!shake || !inSpot()) return;
+      const x = shake.x, base = shake.y;
+      ctx.save();
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.14)';
+      ctx.beginPath(); ctx.ellipse(x, base + 2, 12, 3.5, 0, 0, 7); ctx.fill();
+      // glass (tapered tumbler)
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath(); ctx.moveTo(x-8, base-26); ctx.lineTo(x+8, base-26); ctx.lineTo(x+6, base); ctx.lineTo(x-6, base); ctx.closePath(); ctx.fill();
+      // shake fill
+      ctx.fillStyle = '#f7c7d6';
+      ctx.beginPath(); ctx.moveTo(x-7.4, base-22); ctx.lineTo(x+7.4, base-22); ctx.lineTo(x+6, base-1); ctx.lineTo(x-6, base-1); ctx.closePath(); ctx.fill();
+      // whipped top + cherry
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x-3, base-27, 4, 0, 7); ctx.arc(x+3, base-27, 4.5, 0, 7); ctx.arc(x, base-30, 4, 0, 7); ctx.fill();
+      ctx.fillStyle = '#e0405a'; ctx.beginPath(); ctx.arc(x, base-33, 2, 0, 7); ctx.fill();
+      // two straws
+      ctx.strokeStyle = '#ff6b8a'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(x-2, base-24); ctx.lineTo(x-7, base-40); ctx.stroke();
+      ctx.strokeStyle = '#6bb6ff';
+      ctx.beginPath(); ctx.moveTo(x+2, base-24); ctx.lineTo(x+7, base-40); ctx.stroke();
+      // a rising bubble now and then
+      const bp = (shake.bob*1.3) % 1;
+      ctx.globalAlpha = 0.5 * (1 - bp);
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x + Math.sin(shake.bob*3)*3, base - 4 - bp*16, 1.4, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!shake || !inSpot()) return false;
+        if (px < shake.x - 12 || px > shake.x + 12 || py < shake.y - 42 || py > shake.y + 6) return false;
+        if (shake.cd > 0) return true;
+        shake.cd = 1; shake.sips++; shake.ttl = Math.max(shake.ttl, 8);
+        if (typeof sfx === 'function') sfx('feed');
+        if (typeof fxAt === 'function') fxAt(shake.x, shake.y - 34, pick(['💗','🥤','✨']));
+        if (typeof hearts === 'function' && shake.sips % 2 === 0) hearts();
+        if (typeof say === 'function') say(pick(['Sip with me 🥤','Mmm, so sweet 🥰','Two straws, just us 💛','Share the last sip? 💗']));
+        try{ state.hunger = clamp(state.hunger + 3); state.love = clamp(state.love + 3); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

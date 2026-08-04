@@ -65,6 +65,10 @@ const TRINKET_POOL = (()=>{
   g(['sunflowermaze'], ['🌻','🐝','🌾']);
   g(['jellyfishtank'], ['🎐','🪼','🫧']);
   g(['cavehotspring'], ['♨️','🪨','💦']);
+  g(['iceskatingrink'], ['⛸️','❄️','🧣']);
+  g(['candyfactory'], ['🍭','🍬','🍫']);
+  g(['moonbeach'], ['🌝','🐚','🌊']);
+  g(['papercraftstudio'], ['📄','✂️','🎨']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -149,6 +153,8 @@ const ACHIEVEMENTS = [
   {id:'days_270',    icon:'🍂', name:'Three Seasons',     desc:'270 days together',        test:()=> (meta.totalDays||0) >= 270},
   {id:'feed_1000',   icon:'🍰', name:'Cookie Royalty',    desc:'1000 cookies',             test:()=> (state.feeds||0) >= 1000},
   {id:'days_500',    icon:'💫', name:'Five Hundred Days',  desc:'500 days together',        test:()=> (meta.totalDays||0) >= 500},
+  {id:'draw_1000',   icon:'🌌', name:'Living Masterpiece', desc:'Draw together 1000 times', test:()=> (state.draws||0) >= 1000},
+  {id:'rest_200',    icon:'🌜', name:'Sweetest Dreams',    desc:'Rest 200 times',           test:()=> (state.rests||0) >= 200},
 ];
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
@@ -648,6 +654,9 @@ const LOVE_NOTES = [
   {day:16, text:'Sixteen days, and I already can\'t imagine my mornings without checking in on you. ☀️'},
   {day:100, text:'A hundred days together. You made triple digits feel like a milestone worth celebrating. 🎉💛'},
   {day:170, text:'The longer I love you, the more I understand how rare and good this really is. 🍀'},
+  {day:17, text:'Seventeen days in, and you\'re still the first thing I want to smile about each morning. 😊'},
+  {day:85, text:'Nearly three months of us. You make the counting feel less like math and more like a love song. 🎶'},
+  {day:210, text:'Whatever the number climbs to, it only ever means one thing: more time lucky enough to love you. 💛'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){
