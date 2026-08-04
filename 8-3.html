@@ -410,7 +410,7 @@ stagewrap.addEventListener('pointerdown', (e)=>{
   // during the birthday scene, taps blow out candles (or return when finished)
   if (birthday){
     if (birthday.done) endBirthday();
-    else blowOutOne((px - (W/2 - W*0.34/2)) / (W*0.34));   // map tap x to a candle fraction
+    else blowOutOne(px, py);                                // blow out the nearest candle to the tap
     return;
   }
   // sprite occupies roughly a box above the feet point (pet.x, pet.y)
@@ -689,9 +689,11 @@ function updateScene(dt) {
    candles out. Mic needs https or localhost — if it's blocked, tap the candles.
    ============================================================================ */
 const BIRTHDAY = {
-  candleCount: 5,
-  blowThreshold: 0.14,     // mic loudness (0..1) that counts as "blowing"
-  candleCost: 0.6,         // blow-energy needed to put out one candle
+  candleCount: 43,         // candles on the cake, laid out in an isometric grid
+  cols: 8,                 // candles per grid row
+  tileW: 13, tileH: 6.5,   // isometric tile half-size (px)
+  blowThreshold: 0.07,     // mic loudness (0..1) that counts as "blowing" (lower = easier)
+  candleCost: 0.05,        // blow-energy needed to put out one candle (lower = easier)
 };
 let birthday = null;                                   // active scene, or null
 let audioCtx = null, micAnalyser = null, micData = null, micStream = null;
@@ -708,7 +710,10 @@ function startBirthday(){
   if (birthday) return;
   ensureAudio();                                       // must happen on the click gesture
   const n = BIRTHDAY.candleCount, candles = [];
-  for (let i=0;i<n;i++) candles.push({ x:(i+0.5)/n, lit:true, flick:rand(0,6.28), smoke:0 });
+  for (let k=0;k<n;k++){
+    candles.push({ col:k%BIRTHDAY.cols, row:Math.floor(k/BIRTHDAY.cols),
+                   lit:true, flick:rand(0,6.28), smoke:0, sx:0, sy:0 });
+  }
   birthday = { t:0, candles, energy:0, blow:0, done:false, doneT:0, confetti:[] };
   hugGroup = [...HUG_POOL];                             // everyone gathers around Krystal
   playHappyBirthday();
@@ -769,13 +774,13 @@ function micLevel(){
 }
 
 /* ---- extinguish a candle (mic energy or a tap) ---- */
-function blowOutOne(preferX){
+function blowOutOne(px, py){
   const b = birthday; if (!b) return;
   const lit = b.candles.filter(c=>c.lit); if (!lit.length) return;
   let target = lit[0];
-  if (preferX != null){                                // nearest lit candle to a tap
+  if (px != null){                                     // nearest lit candle to a tap
     let best = 1e9;
-    for (const c of lit){ const d = Math.abs(c.x - preferX); if (d < best){ best = d; target = c; } }
+    for (const c of lit){ const d = (c.sx-px)**2 + (c.sy-py)**2; if (d < best){ best = d; target = c; } }
   }
   target.lit = false; target.smoke = 1;
   if (b.candles.every(c=>!c.lit) && !b.done){ b.done = true; b.doneT = 0; spawnConfetti(); }
@@ -785,7 +790,7 @@ function updateBirthday(dt){
   const b = birthday; b.t += dt; pet.bob += dt;        // reuse bob for the group's gentle sway
   b.blow = micLevel();
   if (!b.done){
-    if (b.blow > BIRTHDAY.blowThreshold) b.energy += (b.blow - BIRTHDAY.blowThreshold) * dt * 5;
+    if (b.blow > BIRTHDAY.blowThreshold) b.energy += (b.blow - BIRTHDAY.blowThreshold) * dt * 8;
     const targetOut = Math.floor(b.energy / BIRTHDAY.candleCost);
     while (b.candles.filter(c=>!c.lit).length < targetOut && b.candles.some(c=>c.lit)) blowOutOne();
   } else {
@@ -842,33 +847,54 @@ function drawBunting(){
 }
 
 function drawCake(b){
-  const cx = W/2, cw = W*0.34, ch = H*0.09, x0 = cx-cw/2, y0 = H*0.66;
+  const cx = W/2, cyTop = H*0.62;                         // centre of the cake's top surface
+  const COLS = BIRTHDAY.cols, ROWS = Math.ceil(b.candles.length / COLS);
+  const tw = BIRTHDAY.tileW, th = BIRTHDAY.tileH;
+  // footprint of the isometric grid (diamond) + margin
+  const rx = ((COLS-1)/2 + (ROWS-1)/2) * tw + 20;
+  const ry = ((COLS-1)/2 + (ROWS-1)/2) * th + 14;
+  const bh = H*0.13;                                      // cake body height
+
   // plate
-  ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(cx, y0+ch+7, cw*0.66, 8, 0,0,7); ctx.fill();
-  ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(cx, y0+ch+5, cw*0.62, 7, 0,0,7); ctx.fill();
-  // body + frosting
-  ctx.fillStyle = '#b06a44'; roundRect(x0, y0, cw, ch, 6); ctx.fill();
-  ctx.fillStyle = '#f7d9e3'; roundRect(x0, y0-7, cw, 16, 7); ctx.fill();
-  for (let i=0;i<6;i++){ const dx=x0+ (i+0.5)/6*cw; ctx.beginPath(); ctx.arc(dx, y0+6, 4,0,Math.PI); ctx.fill(); }
-  // candles
+  ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(cx, cyTop+bh+ry*0.5+8, rx*1.15, ry*0.7, 0,0,7); ctx.fill();
+  ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(cx, cyTop+bh+ry*0.5+5, rx*1.1, ry*0.62, 0,0,7); ctx.fill();
+  // cake body (a cylinder: side wall + rounded bottom)
+  ctx.fillStyle = '#a4623d';
+  ctx.fillRect(cx-rx, cyTop, rx*2, bh);
+  ctx.beginPath(); ctx.ellipse(cx, cyTop+bh, rx, ry, 0, 0, Math.PI*2); ctx.fill();
+  // frosting rim + top surface
+  ctx.fillStyle = '#e6b8c8';
+  for (let i=0;i<Math.round(rx/9);i++){ const dx=cx-rx + (i+0.5)/Math.round(rx/9)*rx*2; ctx.beginPath(); ctx.arc(dx, cyTop+6, 6,0,Math.PI); ctx.fill(); }
+  ctx.fillStyle = '#f7d9e3'; ctx.beginPath(); ctx.ellipse(cx, cyTop, rx, ry, 0,0,7); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth=1; ctx.stroke();
+
+  // place candles on the top surface, then draw back-to-front for depth
   for (const c of b.candles){
-    const px = x0 + c.x*cw, top = y0-7, stickH = 22, wickY = top-stickH;
-    ctx.fillStyle = '#7ec8e3'; ctx.fillRect(px-1.6, wickY, 3.2, stickH);
-    ctx.fillStyle = '#5a3b22'; ctx.fillRect(px-0.6, wickY-2, 1.2, 3);
-    if (c.lit){
-      const shrink = 1 - Math.min(0.75, b.blow*2.2);          // flame shrinks as you blow
-      const lean = b.blow*45 + Math.sin(b.t*10 + c.flick)*1.4; // and leans away
-      const fx = px + lean, fy = wickY-2;
-      ctx.fillStyle = 'rgba(255,200,80,.35)';                 // glow
-      ctx.beginPath(); ctx.arc(fx, fy-4*shrink, 9*shrink, 0,7); ctx.fill();
-      ctx.fillStyle = '#ffcf33';
-      ctx.beginPath(); ctx.ellipse(fx, fy-6*shrink, 4*shrink, 8*shrink, 0,0,7); ctx.fill();
-      ctx.fillStyle = '#ff8a2a';
-      ctx.beginPath(); ctx.ellipse(fx, fy-4*shrink, 2.3*shrink, 5*shrink, 0,0,7); ctx.fill();
-    } else if (c.smoke>0){
-      ctx.fillStyle = `rgba(210,210,210,${c.smoke*0.5})`;
-      ctx.beginPath(); ctx.arc(px, wickY-6-(1-c.smoke)*12, 2+(1-c.smoke)*3, 0,7); ctx.fill();
-    }
+    const gi = c.col - (COLS-1)/2, gj = c.row - (ROWS-1)/2;
+    c.sx = cx + (gi - gj) * tw;
+    c.sy = cyTop + (gi + gj) * th;
+  }
+  const ordered = b.candles.slice().sort((p,q)=> p.sy - q.sy);
+  for (const c of ordered) drawCandle(c, b);
+}
+
+function drawCandle(c, b){
+  const stickH = 13, bx = c.sx, baseY = c.sy, topY = baseY - stickH;
+  ctx.fillStyle = (c.col % 2) ? '#e37b8e' : '#7ec8e3';    // alternating stripes
+  ctx.fillRect(bx-1.4, topY, 2.8, stickH);
+  if (c.lit){
+    const shrink = 1 - Math.min(0.8, b.blow*2.2);         // flame shrinks as you blow
+    const lean = b.blow*34 + Math.sin(b.t*10 + c.flick)*1.2;
+    const fx = bx + lean, fy = topY - 1;
+    ctx.fillStyle = 'rgba(255,200,80,.28)';
+    ctx.beginPath(); ctx.arc(fx, fy-3*shrink, 6*shrink, 0,7); ctx.fill();
+    ctx.fillStyle = '#ffcf33';
+    ctx.beginPath(); ctx.ellipse(fx, fy-4*shrink, 2.6*shrink, 5.5*shrink, 0,0,7); ctx.fill();
+    ctx.fillStyle = '#ff8a2a';
+    ctx.beginPath(); ctx.ellipse(fx, fy-3*shrink, 1.5*shrink, 3.3*shrink, 0,0,7); ctx.fill();
+  } else if (c.smoke>0){
+    ctx.fillStyle = `rgba(210,210,210,${c.smoke*0.5})`;
+    ctx.beginPath(); ctx.arc(bx, topY-4-(1-c.smoke)*10, 1.6+(1-c.smoke)*2.5, 0,7); ctx.fill();
   }
 }
 
