@@ -4765,6 +4765,57 @@ function drawSunflowers(){
 }
 registerScene('sunflowers', drawSunflowers);
 
+/* ── ICE CREAM PARLOR (indoor · retro sundae shop) ── */
+function drawIceCreamParlor(){
+  const t=sceneTime, floorY=H*0.66;
+  // mint walls + pink wainscot
+  ctx.fillStyle='#c8ecdc'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#f4c4d4'; ctx.fillRect(0,floorY-22,W,22);
+  // checker floor (pink/white diamonds)
+  for(let y=0;y*14<H-floorY+14;y++) for(let x=0;x<W/22+1;x++){
+    ctx.fillStyle=((x+y)%2)?'#f6d9e2':'#ffffff'; ctx.fillRect(x*22 - (y%2)*11, floorY+y*14, 22,14); }
+  // striped awning valance along the top
+  for(let i=0;i<W/20+1;i++){ ctx.fillStyle=(i%2)?'#e0556a':'#fbeff2'; ctx.beginPath();
+    ctx.moveTo(i*20,0); ctx.lineTo(i*20+20,0); ctx.lineTo(i*20+10,16); ctx.closePath(); ctx.fill(); }
+  // menu board
+  ctx.fillStyle='#3a2a2e'; ctx.fillRect(W*0.06,H*0.1,W*0.24,H*0.2);
+  ctx.fillStyle='#f6d9e2'; ctx.font='bold 8px Segoe UI, sans-serif'; ctx.textAlign='center';
+  ctx.fillText('SCOOPS', W*0.18, H*0.14);
+  ctx.fillStyle='#c8ecdc'; ctx.font='7px Segoe UI, sans-serif';
+  ['Vanilla','Strawberry','Mint','Choc'].forEach((s,i)=>ctx.fillText(s, W*0.18, H*0.17+i*10));
+  ctx.textAlign='left';
+  // the counter / display case
+  const cy=floorY-4;
+  ctx.fillStyle='#e0556a'; ctx.fillRect(W*0.34,cy-30,W*0.6,30+(H-cy));
+  ctx.fillStyle='#f6eff2'; ctx.fillRect(W*0.34,cy-30,W*0.6,6);
+  // glass display with tubs of ice cream (colored mounds)
+  ctx.fillStyle='rgba(210,240,250,.35)'; ctx.fillRect(W*0.36,cy-28,W*0.56,22);
+  const flav=['#f6e7b0','#f2a0b8','#a8e0c0','#b98a5a','#d0a8e0','#f2b070'];
+  for(let i=0;i<6;i++){ const tx=W*0.4+i*W*0.085;
+    ctx.fillStyle='#eaf2f6'; ctx.fillRect(tx-11,cy-12,22,8); // tub
+    ctx.fillStyle=flav[i]; ctx.beginPath(); ctx.ellipse(tx,cy-12,11,6,0,Math.PI,0); ctx.fill();
+    // a scoop ball sitting on top
+    ctx.beginPath(); ctx.arc(tx,cy-16,5,0,7); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(tx-2,cy-18,1.6,0,7); ctx.fill(); }
+  // a tall sundae glass on the counter with a bobbing cherry
+  const sx=W*0.5, sy=cy-30;
+  ctx.fillStyle='rgba(230,245,250,.6)'; ctx.beginPath(); ctx.moveTo(sx-8,sy); ctx.lineTo(sx+8,sy); ctx.lineTo(sx+5,sy-16); ctx.lineTo(sx-5,sy-16); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#f6e7b0'; ctx.beginPath(); ctx.arc(sx-3,sy-16,5,0,7); ctx.fill();
+  ctx.fillStyle='#f2a0b8'; ctx.beginPath(); ctx.arc(sx+3,sy-18,5,0,7); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(sx,sy-24,4,0,7); ctx.fill(); // whipped
+  const cherY=sy-30+Math.sin(t*3)*1.5; ctx.fillStyle='#d0303a'; ctx.beginPath(); ctx.arc(sx,cherY,2.5,0,7); ctx.fill();
+  ctx.strokeStyle='#3f7a2e'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(sx,cherY-2); ctx.lineTo(sx+2,cherY-6); ctx.stroke();
+  // hanging cone lights
+  for(let i=0;i<4;i++){ const lx=W*0.4+i*W*0.15; ctx.strokeStyle='#aaa'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,H*0.08); ctx.stroke();
+    ctx.fillStyle='#e8b878'; ctx.beginPath(); ctx.moveTo(lx-5,H*0.08); ctx.lineTo(lx+5,H*0.08); ctx.lineTo(lx,H*0.08+10); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=`rgba(255,240,200,${0.6+0.2*Math.sin(t*3+i)})`; ctx.beginPath(); ctx.arc(lx,H*0.08+2,3,0,7); ctx.fill(); }
+  // a round soda-fountain stool in the foreground
+  ctx.fillStyle='#e0556a'; ctx.beginPath(); ctx.ellipse(W*0.16,H*0.86,16,6,0,0,7); ctx.fill();
+  ctx.fillStyle='#c8c8d0'; ctx.fillRect(W*0.155,H*0.86,4,H*0.12);
+  ctx.fillStyle='#b0b0b8'; ctx.beginPath(); ctx.ellipse(W*0.16,H*0.98,10,3,0,0,7); ctx.fill();
+}
+registerScene('icecreamparlor', drawIceCreamParlor);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
