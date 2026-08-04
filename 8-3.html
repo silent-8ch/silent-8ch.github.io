@@ -5950,6 +5950,52 @@ function drawCobbler(){
 }
 registerScene('cobbler', drawCobbler);
 
+/* ── WHEAT FIELD (outdoor · golden wheat rippling at sunset) ── */
+function drawWheatField(){
+  const t=sceneTime, groundY=H*0.5;
+  // amber sunset sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY);
+  sky.addColorStop(0,'#e0904a'); sky.addColorStop(0.5,'#f4b85a'); sky.addColorStop(1,'#f8dc90');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  // big low sun
+  const sunX=W*0.72, sunY=groundY-16;
+  ctx.fillStyle='#fff0c0'; ctx.beginPath(); ctx.arc(sunX,sunY,32,0,7); ctx.fill();
+  ctx.globalAlpha=0.25; ctx.beginPath(); ctx.arc(sunX,sunY,52,0,7); ctx.fill(); ctx.globalAlpha=1;
+  // wispy clouds
+  for(let i=0;i<3;i++){ const cx=((t*3+i*130)%(W+120))-60; ctx.fillStyle=`rgba(255,230,200,${0.5-i*0.1})`; ctx.beginPath(); ctx.ellipse(cx,H*0.14+i*12,30,5,0,0,7); ctx.fill(); }
+  // distant hill line
+  ctx.fillStyle='#c98a4a'; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.quadraticCurveTo(W*0.5,groundY-16,W,groundY); ctx.lineTo(W,groundY+4); ctx.lineTo(0,groundY+4); ctx.fill();
+  // the wheat field base
+  const field=ctx.createLinearGradient(0,groundY,0,H); field.addColorStop(0,'#d8a83a'); field.addColorStop(1,'#a5761f');
+  ctx.fillStyle=field; ctx.fillRect(0,groundY,W,H-groundY);
+  // wind ripple bands sweeping across the field (lighter arcs moving)
+  for(let i=0;i<8;i++){ const ry=groundY+8+i*((H-groundY)/8); ctx.strokeStyle='rgba(255,240,190,.15)'; ctx.lineWidth=3;
+    ctx.beginPath(); for(let x=0;x<=W;x+=8){ const yy=ry+Math.sin(x*0.03 + t*1.5 + i*0.5)*4; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // individual wheat stalks (denser & taller toward foreground), swaying with the wind
+  for(let row=0;row<5;row++){ const ry=groundY+16+row*((H-groundY)/5); const s=0.6+row*0.2;
+    for(let i=0;i<28;i++){ const x=(i*W/28 + row*7)%W; const wind=Math.sin(t*1.5 + x*0.05 + row)*4*s;
+      ctx.strokeStyle='#b5852a'; ctx.lineWidth=1*s; ctx.beginPath(); ctx.moveTo(x,ry+14*s); ctx.quadraticCurveTo(x+wind*0.5,ry, x+wind,ry-14*s); ctx.stroke();
+      // grain head
+      ctx.fillStyle='#e0c060'; ctx.beginPath(); ctx.ellipse(x+wind,ry-16*s,2*s,5*s,wind*0.05,0,7); ctx.fill();
+      // awns
+      ctx.strokeStyle='rgba(230,200,110,.7)'; ctx.lineWidth=0.5; for(let a=-1;a<=1;a+=2){ ctx.beginPath(); ctx.moveTo(x+wind,ry-20*s); ctx.lineTo(x+wind+a*3*s,ry-26*s); ctx.stroke(); }
+    }
+  }
+  // a weathered scarecrow standing among the wheat
+  const scx=W*0.24, scy=H*0.7;
+  ctx.strokeStyle='#6a4a2a'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(scx,scy); ctx.lineTo(scx,scy+40); ctx.stroke(); // post
+  ctx.beginPath(); ctx.moveTo(scx-20,scy+8); ctx.lineTo(scx+20,scy+8); ctx.stroke(); // arms
+  ctx.fillStyle='#8a5a30'; ctx.fillRect(scx-10,scy-2,20,20); // shirt
+  ctx.fillStyle='#e0c060'; ctx.beginPath(); ctx.arc(scx,scy-8,7,0,7); ctx.fill(); // straw head
+  ctx.fillStyle='#7a4a20'; ctx.beginPath(); ctx.moveTo(scx-10,scy-12); ctx.lineTo(scx+10,scy-12); ctx.lineTo(scx,scy-22); ctx.closePath(); ctx.fill(); // hat
+  // straw dangling from sleeves
+  ctx.strokeStyle='#d8b850'; ctx.lineWidth=1; for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.moveTo(scx-20,scy+8); ctx.lineTo(scx-22+i,scy+14); ctx.moveTo(scx+20,scy+8); ctx.lineTo(scx+22+i,scy+14); ctx.stroke(); }
+  // crows flying near the sun
+  for(let i=0;i<3;i++){ const cx=sunX-40+Math.sin(t*0.7+i*2)*30, cy=H*0.2+i*10;
+    ctx.strokeStyle='#2a2018'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(cx-5,cy); ctx.quadraticCurveTo(cx,cy-4+Math.sin(t*6+i)*1.5,cx+5,cy); ctx.stroke(); }
+}
+registerScene('wheatfield', drawWheatField);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
