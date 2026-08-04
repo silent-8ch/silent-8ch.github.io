@@ -361,6 +361,21 @@ const LINES = {
   sleepyNight:["It's late… 🌙", "Sleepy time 😴", "The stars are out ✨"],
 };
 
+/* A rotating variety of treats for the Cookie button — the icon previews the next one. */
+const TREATS = [
+  {e:'🍪', n:'Cookie',     l:['Cookies! 🍪','My favorite 😋','One more?']},
+  {e:'🧁', n:'Cupcake',    l:['A cupcake! 🧁','So sweet!','Frosting first 😄']},
+  {e:'🍰', n:'Cake',       l:['Cake?! 🍰','Yes please!','Best day ever']},
+  {e:'🍦', n:'Ice cream',  l:['Ice cream! 🍦','Brain freeze… worth it 🥶','Sprinkles?']},
+  {e:'🍫', n:'Chocolate',  l:['Chocolate 🍫','Mmm 😍','You know me well']},
+  {e:'🍩', n:'Donut',      l:['A donut! 🍩','Sprinkles! 🎉','Nom nom']},
+  {e:'🍓', n:'Berries',    l:['Berry sweet 🍓','So juicy!','Yum']},
+  {e:'🥐', n:'Croissant',  l:['Ooh, flaky 🥐','Buttery! 😌','Très bon']},
+  {e:'🍑', n:'Peach',      l:['Juicy peach 🍑','Sweet!','Mmm']},
+  {e:'🥧', n:'Pie',        l:['Pie! 🥧','Warm and cozy','A little slice?']},
+];
+let offerTreat = TREATS[0];
+
 /* ==========================  ENGINE  (edit below with care)  ============== */
 
 const cv = document.getElementById('cv');
@@ -475,6 +490,7 @@ function doAction(kind){
   if (ck){ state[ck] = (state[ck]||0) + 1; if (typeof checkAchievements==='function') checkAchievements(); }
 
   if (kind === 'feed'){
+    const tr = offerTreat;
     const wouldOverfeed = state.hunger + CONFIG.gains.feed > 100;
     state.hunger = clamp(state.hunger + CONFIG.gains.feed);
     if (wouldOverfeed) {
@@ -486,12 +502,13 @@ function doAction(kind){
         state.overfed = 0;
         playAnim('eat', 2.0, 2); say(pick(LINES.throwup)); throwUpFx();
       } else {
-        playAnim('eat', 1.6); say(pick(LINES.feedFull)); burst('🍪');
+        playAnim('eat', 1.6); say(pick(LINES.feedFull)); burst(tr.e);
       }
     } else {
       state.overfed = 0;
-      playAnim('eat', 1.6); say(pick(LINES.feed)); burst('🍪');
+      playAnim('eat', 1.6); say(pick(tr.l)); burst(tr.e);
     }
+    offerTreat = pick(TREATS); updateFeedBtn();   // offer a new treat next time
   }
   if (kind === 'draw'){
     const wouldOverdraw = state.fun + CONFIG.gains.draw > 100;
@@ -686,6 +703,7 @@ function throwUpFx(){
 
 /* ---------- HUD ---------- */
 const fills = { hunger:document.getElementById('f-hunger'), fun:document.getElementById('f-fun'), love:document.getElementById('f-love'), energy:document.getElementById('f-energy') };
+function updateFeedBtn(){ const b=document.querySelector('.btn[data-action="feed"]'); if(!b) return; const ic=b.querySelector('.ic'); if(ic) ic.textContent=offerTreat.e; if(b.lastChild) b.lastChild.textContent=offerTreat.n; }
 function barColor(v){ return v>55 ? 'var(--good)' : v>28 ? 'var(--warn)' : 'var(--bad)'; }
 function refreshHUD(){
   for (const k of ['hunger','fun','love','energy']){
@@ -8233,6 +8251,7 @@ function getVar(n){ return getComputedStyle(document.documentElement).getPropert
 (function(){ const en = enabledIndices(); if (en.length) currentScene = en[Math.floor(Math.random()*en.length)]; })();
 resize();
 refreshHUD();
+offerTreat = pick(TREATS); updateFeedBtn();   // start with a random treat on offer
 initDaysTogether();   // greets her, counts the day, updates the 💛 chip
 requestAnimationFrame(loop);
 window.addEventListener('beforeunload', save);
