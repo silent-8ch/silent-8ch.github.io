@@ -3539,6 +3539,35 @@ function drawWineCellar(){
 }
 registerScene('winecellar', drawWineCellar);
 
+/* ── BAMBOO FOREST (outdoor · serene) ── */
+function drawBamboo(){
+  const t = sceneTime;
+
+  const bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#cfe6c8'); bg.addColorStop(0.55,'#9cc48c'); bg.addColorStop(0.75,'#7aa060'); bg.addColorStop(1,'#5a6a3a');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(255,255,220,.08)'; for (let i=0;i<4;i++){ const x=W*0.2+i*W*0.2; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x+30,0); ctx.lineTo(x-40,H); ctx.lineTo(x-70,H); ctx.closePath(); ctx.fill(); }
+
+  function stalk(x,w,col,sway){
+    const bend=Math.sin(t*0.5+x)*sway;
+    ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(x,H); ctx.quadraticCurveTo(x+bend*0.5,H*0.4,x+bend,-10); ctx.stroke();
+    ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1; for (let y=H*0.9;y>0;y-=28){ const sx=x+bend*(1-y/H); ctx.beginPath(); ctx.moveTo(sx-w/2,y); ctx.lineTo(sx+w/2,y); ctx.stroke(); }
+    ctx.strokeStyle=col; ctx.lineWidth=1.5; for (let k=0;k<4;k++){ const ly=40+k*20, lx=x+bend*(1-ly/H); ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+(k%2?14:-14), ly-8); ctx.stroke(); }
+  }
+  for (let i=0;i<7;i++) stalk(W*0.06+i*W*0.14+8, 4, '#8ab87a', 6);
+  for (let i=0;i<5;i++) stalk(W*0.1+i*W*0.2, 8, '#5a9a4a', 10);
+
+  // stepping stones
+  ctx.fillStyle='#9a9488'; for (const s of [[W*0.5,H*0.82,16],[W*0.44,H*0.9,18],[W*0.58,H*0.96,20]]){ ctx.beginPath(); ctx.ellipse(s[0],s[1],s[2],s[2]*0.4,0,0,7); ctx.fill(); }
+
+  // stone lantern
+  const laX=W*0.85, laB=H*0.80;
+  ctx.fillStyle='#8a8478'; ctx.fillRect(laX-3,laB-6,6,6); ctx.fillRect(laX-2,laB-22,4,16);
+  ctx.fillStyle='#9a9488'; ctx.fillRect(laX-8,laB-32,16,10);
+  ctx.fillStyle='rgba(255,200,120,.7)'; ctx.fillRect(laX-4,laB-30,8,6);
+  ctx.fillStyle='#8a8478'; ctx.beginPath(); ctx.moveTo(laX-10,laB-32); ctx.lineTo(laX,laB-40); ctx.lineTo(laX+10,laB-32); ctx.closePath(); ctx.fill();
+}
+registerScene('bamboo', drawBamboo);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
