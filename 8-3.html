@@ -932,10 +932,10 @@ function drawConfetti(){
 function render(){
   ctx.clearRect(0,0,W,H);
   if (birthday){ drawBirthdayScene(); return; }
-  if (SCENES[currentScene] === 'beach') drawBeach();
-  else if (SCENES[currentScene] === 'backyard') drawBackyard();
-  else if (SCENES[currentScene] === 'river') drawRiver();
-  drawPet();
+  const scene = SCENES[currentScene];
+  if (scene === 'beach'){ drawBeach(); drawPet(); }
+  else if (scene === 'backyard'){ drawBackyard(); }   // draws Krystal at her sorted depth
+  else if (scene === 'river'){ drawRiver(); drawPet(); }
 }
 
 function drawBeach(){
@@ -1506,13 +1506,24 @@ function drawBackyard() {
     ctx.fillStyle = '#d4b06a';
     ctx.beginPath(); ctx.ellipse(fx, fy - 1, 12, 3, 0, 0, 7); ctx.fill();
   }
-  drawFeeder(W * 0.28, H * 0.55);
-  drawFeeder(W * 0.72, H * 0.52);
-
-  // Cookie plate on the grass
-  const px = W * 0.50, py = H * 0.85;
-  ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(px, py, 26, 9, 0, 0, 7); ctx.fill();
-  ctx.fillStyle = '#c98a4b'; ctx.beginPath(); ctx.arc(px - 6, py - 3, 7, 0, 7); ctx.arc(px + 7, py - 2, 7, 0, 7); ctx.fill();
+  // --- depth-sorted ground objects (painter's algorithm) ---
+  // An object's depth is its ground-contact point: the further DOWN the screen
+  // its base sits (the larger its y), the closer it is to the viewer, so it is
+  // drawn later (in front). Krystal is sorted in by her feet (pet.y), so she
+  // walks BEHIND a feeder whenever her feet are further up the yard than that
+  // feeder's base — and in front of it only when she comes right up to it.
+  function drawCookiePlate(px, py){
+    ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(px, py, 26, 9, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#c98a4b'; ctx.beginPath(); ctx.arc(px - 6, py - 3, 7, 0, 7); ctx.arc(px + 7, py - 2, 7, 0, 7); ctx.fill();
+  }
+  const groundItems = [
+    { y: H*0.55 + H*0.3, draw: () => drawFeeder(W*0.28, H*0.55) },  // left feeder (pole base)
+    { y: H*0.52 + H*0.3, draw: () => drawFeeder(W*0.72, H*0.52) },  // right feeder (pole base)
+    { y: H*0.85,         draw: () => drawCookiePlate(W*0.50, H*0.85) },
+    { y: pet.y,          draw: () => drawPet() },                   // Krystal, by her feet
+  ];
+  groundItems.sort((a, b) => a.y - b.y);        // farther back (smaller y) drawn first
+  for (const it of groundItems) it.draw();
 
   // Draw critters
   updateCritters(1/60);
