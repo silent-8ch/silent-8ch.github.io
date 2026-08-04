@@ -3890,3 +3890,194 @@ function drawHerbShed(){
   ctx.fillStyle='#b0a89c'; ctx.beginPath(); ctx.ellipse(W*0.30,H*0.44,6,2,0,0,7); ctx.ellipse(W*0.42,H*0.44,6,2,0,0,7); ctx.fill();
 }
 registerScene('herbshed', drawHerbShed);
+
+/* ── CRANBERRY HARVEST (outdoor · flooded bog of floating berries) ── */
+function drawCranberryHarvest(){
+  const t = sceneTime, bogY = H*0.44;
+
+  // crisp autumn sky
+  const sky=ctx.createLinearGradient(0,0,0,bogY); sky.addColorStop(0,'#7ab8e6'); sky.addColorStop(1,'#e6dcc0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,bogY);
+  ctx.fillStyle='rgba(255,244,200,.6)'; ctx.beginPath(); ctx.arc(W*0.78,H*0.13,18,0,7); ctx.fill();
+  drawCloud(W*0.22+Math.sin(t*0.1)*8,H*0.10,0.55); drawCloud(W*0.5+Math.sin(t*0.08+2)*6,H*0.16,0.4);
+
+  // autumn tree line + low hills on the far bank
+  ctx.fillStyle='#c06a2a'; ctx.fillRect(0,bogY-20,W,24);
+  for (let x=0;x<W;x+=18){ ctx.fillStyle=['#d0842a','#c0402a','#e0a83a','#b85a2a'][(x/18|0)%4]; ctx.beginPath(); ctx.arc(x,bogY-20,9,Math.PI,0); ctx.fill(); }
+  // a small red harvest barn on the bank (left)
+  ctx.fillStyle='#a03828'; ctx.fillRect(W*0.08,bogY-38,34,22); ctx.fillStyle='#6a241a'; ctx.beginPath(); ctx.moveTo(W*0.08-4,bogY-38); ctx.lineTo(W*0.08+17,bogY-50); ctx.lineTo(W*0.08+38,bogY-38); ctx.fill(); ctx.fillStyle='#3a1a12'; ctx.fillRect(W*0.08+13,bogY-30,8,14);
+
+  // the flooded bog water (fills lower canvas) — deep with reflections
+  const wat=ctx.createLinearGradient(0,bogY,0,H); wat.addColorStop(0,'#4a6a5a'); wat.addColorStop(1,'#2e4a44'); ctx.fillStyle=wat; ctx.fillRect(0,bogY,W,H-bogY);
+  ctx.strokeStyle='rgba(210,230,225,.10)'; ctx.lineWidth=1; for (let y=bogY+8;y<H;y+=10){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.05+t*1.2+y)*1.4; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+
+  // vast rafts of floating red cranberries drifting on the surface (the theme)
+  for (let i=0;i<240;i++){ const bx=(i*37 + t*4 + Math.sin(i)*10)%W; const by=bogY+8 + (i*53 % (H-bogY-8)); const shade=['#c0261e','#d83a2a','#a01e18','#e0503a'][i%4]; ctx.fillStyle=shade; ctx.beginPath(); ctx.arc(bx,by,2.4,0,7); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(bx-0.7,by-0.7,0.8,0,7); ctx.fill(); }
+  // corralled clusters — denser berry patches gathered by floating booms
+  ctx.strokeStyle='#5a4028'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.3,bogY+40); ctx.quadraticCurveTo(W*0.5,bogY+30,W*0.72,bogY+46); ctx.stroke();
+  ctx.fillStyle='rgba(180,30,24,.35)'; ctx.beginPath(); ctx.ellipse(W*0.5,bogY+70,W*0.42,40,0,0,7); ctx.fill();
+
+  // a wader/harvester silhouette pushing berries (right, mid) — simple, off to side
+  const hx=W*0.82, hy=bogY+40; ctx.fillStyle='#3a4a5a'; ctx.fillRect(hx-4,hy-24,8,20); ctx.beginPath(); ctx.arc(hx,hy-28,5,0,7); ctx.fill();
+  ctx.fillStyle='#e0b040'; ctx.beginPath(); ctx.arc(hx,hy-28,5,Math.PI,0); ctx.fill(); // hat brim
+  ctx.strokeStyle='#8a6038'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(hx+3,hy-20); ctx.lineTo(hx+18,hy-2); ctx.stroke();
+  ctx.fillStyle='#b0483a'; ctx.beginPath(); ctx.ellipse(hx+20,hy+2,10,3,0,0,7); ctx.fill();
+
+  // wooden crates of collected berries on a dock (left, low)
+  const dx=W*0.14; ctx.fillStyle='#6a4a2e'; ctx.fillRect(0,H*0.88,W*0.28,6);
+  for (let c=0;c<2;c++){ const cxx=dx-6+c*22; ctx.fillStyle='#8a6038'; ctx.fillRect(cxx-12,H*0.88-14,22,14); ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=1; ctx.strokeRect(cxx-12,H*0.88-14,22,14);
+    for (let k=0;k<5;k++){ ctx.fillStyle='#c0261e'; ctx.beginPath(); ctx.arc(cxx-8+k*4,H*0.88-16,2.4,0,7); ctx.fill(); } }
+}
+registerScene('cranberryharvest', drawCranberryHarvest);
+
+/* ── TIDAL CAVE (outdoor · sea cave with a glowing mouth) ── */
+function drawTidalCave(){
+  const t = sceneTime, waterY = H*0.60;
+
+  // dark rock all around (fills canvas)
+  const rock=ctx.createLinearGradient(0,0,0,H); rock.addColorStop(0,'#1a1620'); rock.addColorStop(0.5,'#2a2430'); rock.addColorStop(1,'#14101a');
+  ctx.fillStyle=rock; ctx.fillRect(0,0,W,H);
+
+  // bright cave mouth opening to a turquoise sea + sky (center)
+  const mx=W*0.5, mTop=H*0.16, mBot=H*0.66, mw=W*0.44;
+  ctx.save(); ctx.beginPath(); ctx.moveTo(mx-mw/2,mBot); ctx.lineTo(mx-mw/2,mTop+40); ctx.quadraticCurveTo(mx-mw*0.3,mTop,mx,mTop); ctx.quadraticCurveTo(mx+mw*0.3,mTop,mx+mw/2,mTop+40); ctx.lineTo(mx+mw/2,mBot); ctx.closePath(); ctx.clip();
+  // sky through the mouth
+  const osky=ctx.createLinearGradient(0,mTop,0,waterY); osky.addColorStop(0,'#8fd0ea'); osky.addColorStop(1,'#d8f0ec'); ctx.fillStyle=osky; ctx.fillRect(mx-mw/2,mTop,mw,waterY-mTop);
+  ctx.fillStyle='rgba(255,250,220,.6)'; ctx.beginPath(); ctx.arc(mx+mw*0.2,mTop+30,14,0,7); ctx.fill();
+  // bright sea through the mouth
+  const osea=ctx.createLinearGradient(0,waterY,0,mBot); osea.addColorStop(0,'#3ac0c8'); osea.addColorStop(1,'#2a9aa8'); ctx.fillStyle=osea; ctx.fillRect(mx-mw/2,waterY,mw,mBot-waterY);
+  ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1; for (let y=waterY+4;y<mBot;y+=6){ ctx.beginPath(); for (let x=mx-mw/2;x<=mx+mw/2;x+=6){ const yy=y+Math.sin(x*0.08+t*1.6+y)*1.6; x===mx-mw/2?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+  // a sailboat far out through the opening
+  ctx.fillStyle='#5a6a7a'; ctx.beginPath(); ctx.moveTo(mx+8,waterY-2); ctx.lineTo(mx+18,waterY-2); ctx.lineTo(mx+13,waterY+3); ctx.fill(); ctx.fillStyle='#efe6d0'; ctx.beginPath(); ctx.moveTo(mx+13,waterY-2); ctx.lineTo(mx+13,waterY-12); ctx.lineTo(mx+20,waterY-3); ctx.fill();
+  ctx.restore();
+
+  // cave mouth rim highlight (backlit rock edge)
+  ctx.strokeStyle='rgba(150,220,230,.4)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(mx-mw/2,mBot); ctx.lineTo(mx-mw/2,mTop+40); ctx.quadraticCurveTo(mx-mw*0.3,mTop,mx,mTop); ctx.quadraticCurveTo(mx+mw*0.3,mTop,mx+mw/2,mTop+40); ctx.lineTo(mx+mw/2,mBot); ctx.stroke();
+
+  // stalactites hanging from the cave ceiling (framing)
+  ctx.fillStyle='#0e0a14'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,40);
+  for (let x=W; x>=0; x-=24){ ctx.lineTo(x-12, 40+26*Math.abs(Math.sin(x*0.3))); ctx.lineTo(x-24,40); } ctx.closePath(); ctx.fill();
+
+  // the water inside the cave (dark reflective, fills bottom) with the mouth-glow spilling in
+  const inWat=ctx.createLinearGradient(0,waterY,0,H); inWat.addColorStop(0,'#1a3a40'); inWat.addColorStop(1,'#0c1e22'); ctx.fillStyle=inWat; ctx.fillRect(0,waterY,W,H-waterY);
+  // turquoise glow reflection under the mouth
+  const gg=ctx.createRadialGradient(mx,waterY,10,mx,waterY,120); gg.addColorStop(0,'rgba(80,220,220,.22)'); gg.addColorStop(1,'rgba(80,220,220,0)'); ctx.fillStyle=gg; ctx.fillRect(0,waterY,W,H-waterY);
+  // rippling reflection column
+  for (let y=waterY; y<H; y+=3){ const p=(y-waterY)/(H-waterY); const wob=Math.sin(y*0.4+t*2)*(3+p*10); ctx.fillStyle=`rgba(150,235,235,${0.14*(1-p)})`; ctx.fillRect(mx-14+wob,y,28+p*10,2); }
+  ctx.strokeStyle='rgba(120,200,210,.14)'; ctx.lineWidth=1; for (let y=waterY+8;y<H;y+=9){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.05+t*1.3+y)*1.6; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+
+  // wet rocky ledges in the foreground (sides) with a starfish + glisten
+  ctx.fillStyle='#241f2a'; ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(0,waterY+10); ctx.quadraticCurveTo(W*0.14,waterY+30,W*0.2,H); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W,H); ctx.lineTo(W,waterY+6); ctx.quadraticCurveTo(W*0.86,waterY+34,W*0.80,H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(150,220,230,.15)'; ctx.beginPath(); ctx.ellipse(W*0.08,H*0.86,10,4,0.3,0,7); ctx.fill();
+  // starfish on the left ledge
+  ctx.fillStyle='#d86a4a'; ctx.save(); ctx.translate(W*0.12,H*0.90); for (let k=0;k<5;k++){ ctx.rotate(6.28/5); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-8); ctx.lineTo(2.4,-3); ctx.closePath(); ctx.fill(); } ctx.restore();
+  // drips from a stalactite
+  const drip=(t*40)%40; ctx.fillStyle='rgba(150,220,230,.6)'; ctx.beginPath(); ctx.arc(W*0.3, 30+drip, 1.4,0,7); ctx.fill();
+}
+registerScene('tidalcave', drawTidalCave);
+
+/* ── BAMBOO TEAROOM (indoor · minimalist bamboo tea space) ── */
+function drawBambooTearoom(){
+  const t = sceneTime, floorY = H*0.62;
+
+  // pale warm wall
+  ctx.fillStyle='#efe6d0'; ctx.fillRect(0,0,W,floorY);
+  // a glowing paper screen behind (green garden light beyond)
+  const shX=W*0.06, shW=W*0.88, shY=H*0.06, shH=floorY-shY-4;
+  const shg=ctx.createLinearGradient(0,shY,0,shY+shH); shg.addColorStop(0,'#eef2dc'); shg.addColorStop(1,'#dce8c8'); ctx.fillStyle=shg; ctx.fillRect(shX,shY,shW,shH);
+  // silhouettes of bamboo stalks behind the screen (soft)
+  ctx.strokeStyle='rgba(90,130,70,.35)'; ctx.lineWidth=4; for (let i=0;i<7;i++){ const bx=shX+16+i*(shW/7); ctx.beginPath(); ctx.moveTo(bx+Math.sin(t*0.6+i)*2,shY); ctx.lineTo(bx,shY+shH); ctx.stroke(); ctx.strokeStyle='rgba(70,110,55,.3)'; ctx.lineWidth=1; for (let k=1;k<6;k++){ ctx.beginPath(); ctx.moveTo(bx-4,shY+k*shH/6); ctx.lineTo(bx+4,shY+k*shH/6); ctx.stroke(); } ctx.strokeStyle='rgba(90,130,70,.35)'; ctx.lineWidth=4; }
+  // soft leaf shadows
+  ctx.fillStyle='rgba(70,110,55,.2)'; for (let i=0;i<10;i++){ const lx=shX+ (i*67%shW); const ly=shY+ (i*41% (shH*0.7)); ctx.save(); ctx.translate(lx,ly); ctx.rotate(i); ctx.beginPath(); ctx.ellipse(0,0,10,2.6,0,0,7); ctx.fill(); ctx.restore(); }
+  // shoji lattice frame over the screen
+  ctx.strokeStyle='#7a5a3a'; ctx.lineWidth=3; ctx.strokeRect(shX,shY,shW,shH); ctx.lineWidth=1.4; for (let x=shX;x<=shX+shW+1;x+=shW/5){ ctx.beginPath(); ctx.moveTo(x,shY); ctx.lineTo(x,shY+shH); ctx.stroke(); } for (let y=shY;y<=shY+shH+1;y+=shH/4){ ctx.beginPath(); ctx.moveTo(shX,y); ctx.lineTo(shX+shW,y); ctx.stroke(); }
+
+  // a hanging bamboo wind chime (left)
+  ctx.strokeStyle='#5a4a30'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.14,0); ctx.lineTo(W*0.14,H*0.10); ctx.stroke();
+  for (let i=0;i<3;i++){ const cx=W*0.14-6+i*6; const sw=Math.sin(t*2+i)*2; ctx.fillStyle='#9aae6a'; roundRect(cx-1.5+sw,H*0.10,3,12,1); ctx.fill(); }
+
+  // tatami floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#c2b47a'); fl.addColorStop(1,'#a89a66'); ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(120,110,70,.25)'; ctx.lineWidth=1; for (let y=floorY+4;y<H;y+=4){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.strokeStyle='#3a4a2a'; ctx.lineWidth=2; for (let x=0;x<=W;x+=W/3){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x,H); ctx.stroke(); } ctx.beginPath(); ctx.moveTo(0,floorY+(H-floorY)/2); ctx.lineTo(W,floorY+(H-floorY)/2); ctx.stroke();
+
+  // low bamboo tea table with a cast-iron pot + cups + steam (center-back, high)
+  const tx=W*0.5, ty=floorY+22;
+  ctx.fillStyle='#7a5a34'; roundRect(tx-42,ty,84,9,2); ctx.fill(); ctx.fillStyle='#5a3f22'; ctx.fillRect(tx-36,ty+9,5,12); ctx.fillRect(tx+31,ty+9,5,12);
+  // iron teapot
+  ctx.fillStyle='#2a2a30'; ctx.beginPath(); ctx.ellipse(tx-10,ty-8,13,10,0,0,7); ctx.fill(); ctx.beginPath(); ctx.moveTo(tx-22,ty-10); ctx.lineTo(tx-30,ty-16); ctx.lineTo(tx-26,ty-6); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#2a2a30'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(tx-10,ty-20,6,Math.PI,0); ctx.stroke();
+  // cups
+  ctx.fillStyle='#d8c8a8'; ctx.beginPath(); ctx.arc(tx+12,ty-3,4,0,7); ctx.arc(tx+24,ty-3,4,0,7); ctx.fill(); ctx.fillStyle='#7a8a4a'; ctx.beginPath(); ctx.arc(tx+12,ty-4,2.4,0,7); ctx.arc(tx+24,ty-4,2.4,0,7); ctx.fill();
+  // steam
+  ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=2; ctx.beginPath(); for (let k=0;k<=8;k++){ const yy=ty-18-k*4, xx=tx-10+Math.sin(t*3+k*0.6)*3; k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy);} ctx.stroke();
+
+  // a bamboo vase with a single branch (right, low) + a floor cushion (left, low)
+  ctx.fillStyle='#9aae6a'; roundRect(W*0.84,H*0.86,10,H*0.14-6,2); ctx.fill(); ctx.strokeStyle='#5a3a22'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.845,H*0.86); ctx.quadraticCurveTo(W*0.82,H*0.74,W*0.87,H*0.68); ctx.stroke(); ctx.fillStyle='#e589b0'; for (let k=0;k<4;k++){ ctx.beginPath(); ctx.arc(W*0.86+ (k%2?4:-2),H*0.70+k*3,2.4,0,7); ctx.fill(); }
+  ctx.fillStyle='#b0483a'; ctx.beginPath(); ctx.ellipse(W*0.16,H*0.92,20,7,0,0,7); ctx.fill(); ctx.fillStyle='#c0584a'; ctx.beginPath(); ctx.ellipse(W*0.16,H*0.90,18,5,0,0,7); ctx.fill();
+}
+registerScene('bambootearoom', drawBambooTearoom);
+
+/* ── REINDEER BARN (indoor · rustic winter stable) ── */
+function drawReindeerBarn(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // dark timber barn wall
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#5a4632'); wall.addColorStop(1,'#43331f');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  ctx.strokeStyle='rgba(0,0,0,.24)'; ctx.lineWidth=1; for (let x=0;x<W;x+=22){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,floorY); ctx.stroke(); }
+  // A-frame rafters + hayloft
+  ctx.fillStyle='#2e2216'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W*0.5,H*0.02); ctx.lineTo(W,0); ctx.lineTo(W,H*0.12); ctx.lineTo(0,H*0.12); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#1e140c'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(W*0.1,H*0.12); ctx.lineTo(W*0.5,H*0.02); ctx.lineTo(W*0.9,H*0.12); ctx.moveTo(W*0.5,H*0.02); ctx.lineTo(W*0.5,H*0.12); ctx.stroke();
+
+  // snowy window (left) — night outside with stars
+  const wx=W*0.08, wy=H*0.16, ww=W*0.24, wh=H*0.24;
+  ctx.fillStyle='#16223e'; ctx.fillRect(wx,wy,ww,wh);
+  for (let i=0;i<10;i++){ ctx.fillStyle='rgba(230,240,255,.8)'; ctx.fillRect(wx+ (i*23)%ww, wy+ (i*17)%wh, 1.2,1.2); }
+  ctx.fillStyle='#e8eef6'; ctx.fillRect(wx,wy+wh-8,ww,8);
+  ctx.strokeStyle='#2a1c10'; ctx.lineWidth=4; ctx.strokeRect(wx,wy,ww,wh); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.moveTo(wx,wy+wh/2); ctx.lineTo(wx+ww,wy+wh/2); ctx.stroke();
+
+  // hanging lantern (center) + a garland of pine + a horseshoe
+  ctx.strokeStyle='#1e140c'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.5,H*0.12); ctx.lineTo(W*0.5,H*0.18); ctx.stroke();
+  ctx.fillStyle='rgba(255,200,110,.25)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.22,16,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(255,205,120,${0.85+0.1*Math.sin(t*2)})`; roundRect(W*0.5-6,H*0.18,12,14,2); ctx.fill();
+  ctx.strokeStyle='#3a6a3a'; ctx.lineWidth=3; ctx.beginPath(); for (let x=W*0.6;x<W*0.94;x+=6){ const y=H*0.14+Math.sin(x*0.05)*4; x===W*0.6?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+  ctx.strokeStyle='#9a9088'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(W*0.86,H*0.20,7,0.4,Math.PI-0.4); ctx.stroke();
+
+  // wooden stall dividers
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(W*0.34,H*0.40,6,floorY-H*0.40); ctx.fillRect(W*0.66,H*0.40,6,floorY-H*0.40);
+  ctx.fillStyle='#4a3420'; ctx.fillRect(W*0.34,H*0.40,W*0.32,5);
+  // hay in a manger (center-back)
+  ctx.fillStyle='#d8b85a'; ctx.beginPath(); ctx.moveTo(W*0.44,floorY-6); ctx.lineTo(W*0.56,floorY-6); ctx.lineTo(W*0.53,floorY-18); ctx.lineTo(W*0.47,floorY-18); ctx.closePath(); ctx.fill();
+  for (let k=0;k<6;k++){ ctx.strokeStyle='#c8a840'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.46+k*2.5,floorY-16); ctx.lineTo(W*0.46+k*2.5+2,floorY-22); ctx.stroke(); }
+
+  // the reindeer standing in its stall (center-right)
+  const rx=W*0.62, ry=floorY-4;
+  // legs
+  ctx.strokeStyle='#6a4a30'; ctx.lineWidth=4; for (const lx of [-14,-6,6,14]){ ctx.beginPath(); ctx.moveTo(rx+lx,ry-22); ctx.lineTo(rx+lx,ry); ctx.stroke(); }
+  // body
+  ctx.fillStyle='#7a5636'; ctx.beginPath(); ctx.ellipse(rx,ry-30,22,13,0,0,7); ctx.fill();
+  // neck + head
+  ctx.fillStyle='#6a4a2e'; ctx.beginPath(); ctx.moveTo(rx+16,ry-38); ctx.lineTo(rx+30,ry-54); ctx.lineTo(rx+36,ry-50); ctx.lineTo(rx+22,ry-32); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(rx+34,ry-54,8,6,0.4,0,7); ctx.fill();
+  // nose + eye
+  ctx.fillStyle='#3a2a1a'; ctx.beginPath(); ctx.arc(rx+41,ry-52,2.4,0,7); ctx.fill();
+  ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(rx+34,ry-56,1.4,0,7); ctx.fill();
+  // antlers
+  ctx.strokeStyle='#c9b89a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(rx+30,ry-58); ctx.lineTo(rx+26,ry-72); ctx.moveTo(rx+27,ry-66); ctx.lineTo(rx+20,ry-70); ctx.moveTo(rx+27,ry-64); ctx.lineTo(rx+33,ry-72);
+  ctx.moveTo(rx+36,ry-58); ctx.lineTo(rx+40,ry-72); ctx.moveTo(rx+38,ry-66); ctx.lineTo(rx+45,ry-70); ctx.moveTo(rx+38,ry-64); ctx.lineTo(rx+33,ry-70); ctx.stroke();
+  // ear
+  ctx.fillStyle='#5a3f26'; ctx.beginPath(); ctx.ellipse(rx+28,ry-54,3,5,-0.6,0,7); ctx.fill();
+  // a red harness bell (blinking)
+  ctx.fillStyle=`rgba(230,200,90,${0.7+0.3*Math.sin(t*3)})`; ctx.beginPath(); ctx.arc(rx+26,ry-40,2.4,0,7); ctx.fill();
+
+  // straw-strewn plank floor + a feed bucket & a small sack (sides, low)
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#8a6a44'); fl.addColorStop(1,'#6a4e30'); ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let y=floorY+10;y<H;y+=12){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.strokeStyle='rgba(210,180,90,.5)'; for (let i=0;i<20;i++){ const sx=(i*61+9)%W, sy=floorY+8+((i*29)%(H-floorY-8)); ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+rand(-4,4),sy-rand(2,4)); ctx.stroke(); }
+  // metal feed bucket (left, low)
+  const bxx=W*0.14, byy=H*0.90; ctx.fillStyle='#8a8e96'; ctx.beginPath(); ctx.moveTo(bxx-10,byy); ctx.lineTo(bxx+10,byy); ctx.lineTo(bxx+8,byy+16); ctx.lineTo(bxx-8,byy+16); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#6a6e76'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(bxx,byy,10,Math.PI,0); ctx.stroke(); ctx.fillStyle='#d8b85a'; ctx.beginPath(); ctx.ellipse(bxx,byy,8,2.6,0,0,7); ctx.fill();
+  // burlap sack (right, low)
+  ctx.fillStyle='#b8a074'; ctx.beginPath(); ctx.moveTo(W*0.84,H); ctx.lineTo(W*0.84,H*0.90); ctx.quadraticCurveTo(W*0.87,H*0.87,W*0.90,H*0.90); ctx.lineTo(W*0.90,H); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#8a7454'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.845,H*0.90); ctx.lineTo(W*0.895,H*0.90); ctx.stroke();
+}
+registerScene('reindeerbarn', drawReindeerBarn);

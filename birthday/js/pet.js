@@ -415,6 +415,102 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.78, r:46, e:'💧', lines:['Time to water 💧','Drip drip','Helping them grow 🌱']},
     {nx:0.50, ny:0.16, r:54, e:'☀️', lines:['Sun through the glass ☀️','So warm and bright','Like a little jungle 🌴']},
   ],
+  artstudio: [
+    {nx:0.30, ny:0.50, r:55, e:'🎨', lines:['Your masterpiece! 🎨','Paint me something? 🖌️','So much color 🌈']},
+    {nx:0.60, ny:0.70, r:48, e:'🖌️', lines:['So many colors 🖌️','Messy but fun!','Which shade? 🎨']},
+    {nx:0.75, ny:0.35, r:55, e:'🖼️', lines:['Look at these! 🖼️','So talented 😍','I love that one 💛']},
+    {nx:0.50, ny:0.15, r:48, e:'☀️', lines:['Nice light in here ☀️','Perfect for painting','So bright and airy']},
+  ],
+  musicroom: [
+    {nx:0.35, ny:0.60, r:55, e:'🎹', lines:['Play me a tune? 🎹','Plink plonk 🎶','So pretty 🎵']},
+    {nx:0.70, ny:0.55, r:48, e:'🎸', lines:['A guitar! 🎸','Strum strum','Sing along? 🎤']},
+    {nx:0.50, ny:0.25, r:55, e:'🎵', lines:['Music everywhere 🎵','La la la 🎶','I feel like dancing 💃']},
+    {nx:0.20, ny:0.40, r:45, e:'🎻', lines:['So many instruments','A violin! 🎻','Which one next?']},
+  ],
+  teahouse: [
+    {nx:0.40, ny:0.60, r:50, e:'🍵', lines:['Tea\'s ready! 🍵','Careful, it\'s hot ♨️','Pour me a cup? 🥰']},
+    {nx:0.70, ny:0.72, r:48, e:'🧧', lines:['Comfy cushions','Sit with me 🥰','So cozy down here']},
+    {nx:0.75, ny:0.35, r:52, e:'🎋', lines:['The little garden 🎋','So serene 🍃','Look outside 🌿']},
+    {nx:0.25, ny:0.30, r:45, e:'🏮', lines:['A paper lantern 🏮','Soft glow ✨','So peaceful']},
+  ],
+  zengarden: [
+    {nx:0.40, ny:0.55, r:50, e:'🪨', lines:['A quiet stone 🪨','So balanced','Breathe with me 😌']},
+    {nx:0.60, ny:0.75, r:55, e:'🌊', lines:['Perfect ripples 🌊','So neat and calm','Don\'t step on it! 😄']},
+    {nx:0.75, ny:0.40, r:45, e:'🌳', lines:['Tiny tree 🌳','So carefully grown','So peaceful 🍃']},
+    {nx:0.22, ny:0.35, r:42, e:'🏮', lines:['A stone lantern 🏮','So still','Serenity ✨']},
+  ],
+  arcade: [
+    {nx:0.25, ny:0.45, r:52, e:'🕹️', lines:['The claw machine! 🎮','Win me a prize? 🧸','So close!']},
+    {nx:0.55, ny:0.40, r:50, e:'👾', lines:['High score! 👾','Beep boop 🎮','Let\'s play! 🕹️']},
+    {nx:0.75, ny:0.65, r:48, e:'🔴', lines:['Pinball! 🔴','Ding ding ding','Tilt! 😆']},
+    {nx:0.50, ny:0.78, r:45, e:'🎟️', lines:['So many tickets! 🎟️','What can we get?','Jackpot! 🎉']},
+  ],
+  planetarium: [
+    {nx:0.50, ny:0.20, r:70, e:'🌟', lines:['The whole galaxy! 🌌','So many stars ⭐','Make a wish ✨']},
+    {nx:0.30, ny:0.35, r:48, e:'🪐', lines:['Look, Saturn! 🪐','So far away','Space is huge 😮']},
+    {nx:0.50, ny:0.65, r:45, e:'🔭', lines:['The star projector 🔭','How does it work?','So clever!']},
+    {nx:0.75, ny:0.30, r:45, e:'🌙', lines:['The moon 🌙','So bright tonight','Hello, moon 🥰']},
+  ],
+  autumnforest: [
+    {nx:0.30, ny:0.40, r:58, e:'🍁', lines:['Golden leaves 🍁','So many colors 🍂','Autumn is magic ✨']},
+    {nx:0.60, ny:0.78, r:55, e:'🍂', lines:['Jump in the leaves! 🍂','Crunch crunch','So cozy 🧣']},
+    {nx:0.22, ny:0.75, r:42, e:'🍄', lines:['A little mushroom 🍄','So cute!','Don\'t eat it! 😄']},
+    {nx:0.78, ny:0.50, r:45, e:'🐿️', lines:['A squirrel! 🐿️','Gathering nuts 🌰','So busy 🥰']},
+  ],
+  lavender: [
+    {nx:0.50, ny:0.60, r:65, e:'💜', lines:['So much lavender 💜','Smells heavenly','Purple everywhere 🌸']},
+    {nx:0.30, ny:0.45, r:45, e:'🐝', lines:['A busy bee 🐝','Buzz buzz','It loves the flowers 💜']},
+    {nx:0.72, ny:0.75, r:46, e:'🧺', lines:['Let\'s gather some 🧺','For a bouquet 💐','So fragrant 🥰']},
+    {nx:0.50, ny:0.20, r:55, e:'☀️', lines:['Rolling purple hills 💜','So dreamy','What a view ✨']},
+  ],
+  rooftop: [
+    {nx:0.50, ny:0.30, r:65, e:'🌆', lines:['The city lights 🌆','So sparkly at night ✨','Look how big it is 😮']},
+    {nx:0.25, ny:0.20, r:48, e:'✨', lines:['Twinkly lights ✨','So romantic 🥰','Cozy up here']},
+    {nx:0.75, ny:0.68, r:45, e:'🪴', lines:['A rooftop garden 🪴','So green up here','Growing strong 🌿']},
+    {nx:0.50, ny:0.78, r:48, e:'🪑', lines:['Sit with me 🪑','Best seat in the city','Just us up here 💛']},
+  ],
+  waterfall: [
+    {nx:0.50, ny:0.35, r:60, e:'💧', lines:['The waterfall! 💧','So loud and grand','Sparkling mist ✨']},
+    {nx:0.50, ny:0.72, r:55, e:'🌊', lines:['The pool below 🌊','So clear!','Dip our toes? 🦶']},
+    {nx:0.25, ny:0.60, r:46, e:'🪨', lines:['Mossy rocks 🪨','Careful, slippery','Watch your step!']},
+    {nx:0.72, ny:0.25, r:48, e:'🌈', lines:['A rainbow! 🌈','In the mist ✨','So lucky 🍀']},
+  ],
+  pottery: [
+    {nx:0.35, ny:0.60, r:52, e:'🏺', lines:['The potter\'s wheel 🏺','Round and round','Let\'s make a bowl! 🥰']},
+    {nx:0.72, ny:0.40, r:52, e:'🍶', lines:['So many pots 🍶','Which is prettiest?','Handmade with love 💛']},
+    {nx:0.20, ny:0.45, r:46, e:'🔥', lines:['The warm kiln 🔥','Baking the clay','So toasty']},
+    {nx:0.55, ny:0.78, r:44, e:'🎨', lines:['Squishy clay!','So messy 😄','Look what I made! 🏺']},
+  ],
+  florist: [
+    {nx:0.40, ny:0.50, r:55, e:'💐', lines:['So many bouquets 💐','Which for you? 🌹','Smells amazing 🥰']},
+    {nx:0.70, ny:0.68, r:48, e:'🌷', lines:['Fresh cut flowers 🌷','So colorful 🌈','Pick your favorite']},
+    {nx:0.72, ny:0.35, r:42, e:'🎀', lines:['Pretty ribbons 🎀','Wrap it up 🎁','A little bow']},
+    {nx:0.25, ny:0.30, r:45, e:'☀️', lines:['Sunny window ☀️','Flowers love it','So cheerful']},
+  ],
+  cafe: [
+    {nx:0.35, ny:0.55, r:52, e:'☕', lines:['Coffee! ☕','Smells so good','What\'ll you have? 😊']},
+    {nx:0.60, ny:0.65, r:46, e:'🥐', lines:['A croissant! 🥐','Flaky and warm 😋','Share one? 🥰']},
+    {nx:0.75, ny:0.72, r:48, e:'🪟', lines:['Our little table 🪟','People-watching','Cozy corner 💛']},
+    {nx:0.50, ny:0.25, r:45, e:'📋', lines:['So many choices','Hmm, decisions','I\'ll have what you have 🥰']},
+  ],
+  catcafe: [
+    {nx:0.40, ny:0.60, r:50, e:'🐱', lines:['Kitty! 🐱','So soft…','Purrr 🐈']},
+    {nx:0.70, ny:0.45, r:48, e:'🐈', lines:['A cat tower 🐈','One\'s napping up top','So cozy for them 😴']},
+    {nx:0.25, ny:0.40, r:45, e:'🐾', lines:['Sunbathing kitty ☀️','So sleepy 😴','Sweet little paws 🐾']},
+    {nx:0.60, ny:0.78, r:44, e:'🧶', lines:['A ball of yarn 🧶','Chase it! 🐱','So playful 🥰']},
+  ],
+  koipond: [
+    {nx:0.50, ny:0.60, r:58, e:'🐟', lines:['Orange koi! 🐟','So graceful','They\'re coming over 🥰']},
+    {nx:0.30, ny:0.70, r:48, e:'🪷', lines:['Lily pads 🪷','A frog? 🐸','So serene']},
+    {nx:0.70, ny:0.40, r:50, e:'⛩️', lines:['The little bridge','Cross with me 🥰','Best view from here']},
+    {nx:0.25, ny:0.35, r:42, e:'🏮', lines:['A stone lantern 🏮','So peaceful ✨','Soft glow']},
+  ],
+  carnival: [
+    {nx:0.30, ny:0.30, r:58, e:'🎡', lines:['The ferris wheel! 🎡','Ride with me? 🥰','So high up!']},
+    {nx:0.70, ny:0.45, r:50, e:'🎪', lines:['The big top! 🎪','What\'s the show?','So exciting 🎉']},
+    {nx:0.25, ny:0.55, r:45, e:'🎈', lines:['Balloons! 🎈','Can I have one?','So colorful 🌈']},
+    {nx:0.60, ny:0.75, r:46, e:'🍿', lines:['Popcorn! 🍿','Smells buttery 😋','Share a bag? 🥰']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){

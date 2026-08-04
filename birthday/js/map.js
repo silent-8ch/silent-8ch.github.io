@@ -72,6 +72,8 @@ const SCENE_LABELS = {
   mossgarden:'Moss Garden',
   winterchalet:'Winter Chalet', penguincove:'Penguin Cove', fireflypier:'Firefly Pier',
   herbshed:'Herb Drying Shed',
+  cranberryharvest:'Cranberry Harvest', tidalcave:'Tidal Cave', bambootearoom:'Bamboo Tearoom',
+  reindeerbarn:'Reindeer Barn',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

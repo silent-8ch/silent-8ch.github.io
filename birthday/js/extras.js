@@ -2901,3 +2901,141 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 19). Two scene-gated micro-interactions. No always-on
+   overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   42) MUSIC BOX  —  in the orchid room or bonsai garden a little music box waits.
+   Tap its crank to wind it: the lid opens, a tiny dancer turns, and a soft trickle
+   of notes drifts out while the winding slowly unwinds. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxMusicBox(){
+  try{
+    const ROOMS = new Set(['orchidroom','bonsaigarden','teahouse','conservatory','parlor']);
+    let mb = null;                       // {x,y,wind,spin,cd,noteT}
+    function inRoom(){ try{ return (typeof SCENES!=='undefined') && ROOMS.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inRoom()){ mb = null; return; }
+      if (!mb){ mb = { x: Math.max(W*0.18, Math.min(W*0.86, W*0.80)), y: rand(H*0.64,H*0.72), wind:0, spin:0, cd:0, noteT:0 }; }
+      if (mb.cd > 0) mb.cd -= dt;
+      if (mb.wind > 0){
+        mb.wind = Math.max(0, mb.wind - dt*0.5);              // slowly unwinds
+        mb.spin += dt * (2 + mb.wind*3);
+        mb.noteT -= dt;
+        if (mb.noteT <= 0){ mb.noteT = 0.6; if (typeof fxAt==='function') fxAt(mb.x + rand(-6,6), mb.y - rand(18,28), pick(['♪','♫','🎵'])); }
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!mb || !inRoom()) return;
+      const x = mb.x, y = mb.y, open = mb.wind > 0;
+      ctx.save();
+      // box body
+      ctx.fillStyle = '#8a4a5a';
+      if (typeof roundRect === 'function'){ roundRect(x-13, y-6, 26, 16, 3); ctx.fill(); } else ctx.fillRect(x-13, y-6, 26, 16);
+      ctx.fillStyle = '#c9a24a'; ctx.fillRect(x-13, y+8, 26, 2);       // gold trim
+      // lid (open when playing)
+      ctx.save(); ctx.translate(x-13, y-6); ctx.rotate(open ? -1.0 : -0.1);
+      ctx.fillStyle = '#9a5a6a'; ctx.fillRect(0, -3, 26, 3);
+      ctx.restore();
+      // dancer rising from the box when open
+      if (open){
+        ctx.save(); ctx.translate(x, y-8); ctx.rotate(Math.sin(mb.spin)*0.4);
+        ctx.fillStyle = '#f7c7d6';                                    // tutu
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(5,4); ctx.lineTo(-5,4); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#ffe0c2'; ctx.beginPath(); ctx.arc(0,-4,2.4,0,7); ctx.fill();   // head
+        ctx.strokeStyle = '#e0a0b0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0,-1); ctx.lineTo(0,3); ctx.stroke();
+        ctx.restore();
+      }
+      // winding crank on the side
+      ctx.save(); ctx.translate(x+14, y+2); ctx.rotate(mb.spin*0.6);
+      ctx.strokeStyle = '#c9a24a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(4,0); ctx.stroke();
+      ctx.fillStyle = '#c9a24a'; ctx.beginPath(); ctx.arc(4,0,1.6,0,7); ctx.fill();
+      ctx.restore();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!mb || !inRoom()) return false;
+        if (px < mb.x - 16 || px > mb.x + 20 || py < mb.y - 20 || py > mb.y + 12) return false;
+        if (mb.cd > 0){ mb.wind = Math.min(1, mb.wind + 0.2); return true; }
+        mb.cd = 0.8; mb.wind = Math.min(1, mb.wind + 0.7);
+        if (typeof sfx === 'function') sfx('draw');
+        if (typeof fxAt === 'function') fxAt(mb.x, mb.y - 22, pick(['🎶','✨','💛']));
+        if (typeof say === 'function') say(pick(['Our little tune 🎶','Wind it again? 🥰','So delicate ✨','She’s dancing! 💃']));
+        try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); state.energy = clamp(state.energy + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   43) FEED THE PENGUIN  —  at the penguin cove a little penguin waddles on the ice.
+   Tap it to toss a fish; it tips its head back, gulps it down, and flaps happily.
+   Only at the cove. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxPenguin(){
+  try{
+    let pg = null;                       // {x,y,dir,t,flap,gulp,cd,vx}
+    function atCove(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'penguincove'; }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!atCove()){ pg = null; return; }
+      if (!pg){ pg = { x: rand(W*0.3,W*0.7), y: rand(H*0.74,H*0.80), dir:(Math.random()<0.5?-1:1), t:rand(0,10), flap:0, gulp:0, cd:0, vx: rand(8,14) }; }
+      pg.t += dt; if (pg.flap > 0) pg.flap -= dt; if (pg.gulp > 0) pg.gulp -= dt; if (pg.cd > 0) pg.cd -= dt;
+      if (pg.gulp <= 0){                                        // waddle side to side, pausing to gulp
+        pg.x += pg.dir * pg.vx * dt;
+        if (pg.x < W*0.24){ pg.x = W*0.24; pg.dir = 1; } if (pg.x > W*0.76){ pg.x = W*0.76; pg.dir = -1; }
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pg || !atCove()) return;
+      const waddle = Math.sin(pg.t*6) * 1.5;
+      const x = pg.x, y = pg.y;
+      const tip = pg.gulp > 0 ? -0.5 : 0;                       // head tips back to swallow
+      ctx.save();
+      // shadow on ice
+      ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.beginPath(); ctx.ellipse(x, y+2, 10, 3, 0, 0, 7); ctx.fill();
+      ctx.translate(x + waddle, y);
+      // body
+      ctx.fillStyle = '#2a2a33'; ctx.beginPath(); ctx.ellipse(0, -9, 8, 11, 0, 0, 7); ctx.fill();
+      // white belly
+      ctx.fillStyle = '#f2f2f2'; ctx.beginPath(); ctx.ellipse(0, -8, 5, 8.5, 0, 0, 7); ctx.fill();
+      // flippers (flap when fed)
+      const fl = pg.flap > 0 ? Math.sin(pg.flap*30)*0.6 : 0;
+      ctx.fillStyle = '#22222a'; ctx.save(); ctx.translate(-7,-9); ctx.rotate(-0.3 - fl); ctx.fillRect(-1,0,2.5,9); ctx.restore();
+      ctx.save(); ctx.translate(7,-9); ctx.rotate(0.3 + fl); ctx.fillRect(-1.5,0,2.5,9); ctx.restore();
+      // head
+      ctx.save(); ctx.rotate(tip);
+      ctx.fillStyle = '#2a2a33'; ctx.beginPath(); ctx.arc(0,-20,5.5,0,7); ctx.fill();
+      ctx.fillStyle = '#ffb03a'; ctx.beginPath(); ctx.moveTo(0,-20); ctx.lineTo(6,-19); ctx.lineTo(0,-17.5); ctx.closePath(); ctx.fill();  // beak
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-1.6,-21,1,0,7); ctx.arc(1.6,-21,1,0,7); ctx.fill();
+      ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(-1.6,-21,0.5,0,7); ctx.arc(1.6,-21,0.5,0,7); ctx.fill();
+      ctx.restore();
+      // feet
+      ctx.fillStyle = '#ffb03a'; ctx.beginPath(); ctx.ellipse(-3,1,2.4,1.2,0,0,7); ctx.ellipse(3,1,2.4,1.2,0,0,7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pg || !atCove()) return false;
+        if (px < pg.x - 14 || px > pg.x + 14 || py < pg.y - 30 || py > pg.y + 6) return false;
+        if (pg.cd > 0) return true;
+        pg.cd = 1.1; pg.flap = 0.7; pg.gulp = 0.6;
+        if (typeof sfx === 'function') sfx('feed');
+        if (typeof fxAt === 'function') fxAt(pg.x, pg.y - 30, pick(['🐟','🐧','💗']));
+        if (typeof say === 'function') say(pick(['Here you go, little one! 🐟','So hungry 🐧','Flippers up! 🥰','He gobbled it! 😄']));
+        try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
