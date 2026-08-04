@@ -660,11 +660,28 @@ const SCENES = ['beach', 'backyard', 'river'];
 let currentScene = 0;
 let sceneChangeTimer = 60; // seconds
 
+/* Scene registry — to add a scene, write a draw function and call
+   registerScene('name', drawFn[, selfPet]). It's appended to the rotation and
+   rendered automatically. Scenes in SCENE_SELF_PET draw Krystal themselves
+   (depth-sorted); every other scene gets drawPet() drawn on top for free. */
+const SCENE_RENDERERS = {};
+const SCENE_SELF_PET = new Set();
+function registerScene(name, drawFn, selfPet){
+  if (!SCENES.includes(name)) SCENES.push(name);
+  SCENE_RENDERERS[name] = drawFn;
+  if (selfPet) SCENE_SELF_PET.add(name);
+}
+registerScene('beach', drawBeach);
+registerScene('backyard', drawBackyard, true);   // depth-sorts Krystal itself
+registerScene('river', drawRiver);
+
 // Debug: press 1/2/3 to switch scenes, c to toggle crying
 document.addEventListener('keydown', e => {
   if (e.key === '1') { currentScene = 0; sceneChangeTimer = 60; }
   if (e.key === '2') { currentScene = 1; sceneChangeTimer = 60; }
   if (e.key === '3') { currentScene = 2; sceneChangeTimer = 60; }
+  if (e.key === 'n' || e.key === 'N') { currentScene = (currentScene + 1) % SCENES.length; sceneChangeTimer = 60; }
+  if (e.key === 'p' || e.key === 'P') { currentScene = (currentScene - 1 + SCENES.length) % SCENES.length; sceneChangeTimer = 60; }
   if (e.key === 'c' || e.key === 'C') {
     debugCry = !debugCry;
     say(debugCry ? '(debug: crying on)' : '(debug: crying off)');
@@ -946,9 +963,11 @@ function render(){
   ctx.clearRect(0,0,W,H);
   if (birthday){ drawBirthdayScene(); return; }
   const scene = SCENES[currentScene];
-  if (scene === 'beach'){ drawBeach(); drawPet(); }
-  else if (scene === 'backyard'){ drawBackyard(); }   // draws Krystal at her sorted depth
-  else if (scene === 'river'){ drawRiver(); drawPet(); }
+  const draw = SCENE_RENDERERS[scene];
+  if (draw){
+    draw();
+    if (!SCENE_SELF_PET.has(scene)) drawPet();   // scenes that don't place her themselves
+  }
 }
 
 function drawBeach(){
@@ -1797,6 +1816,92 @@ function drawRiver() {
     ctx.fillStyle = '#3a7a22'; ctx.fillRect(fx - 0.5, fy, 1, 5);
   }
 }
+
+/* ══════════════════════ ADDITIONAL SCENES ══════════════════════
+   Each scene is a self-contained draw function animated off `sceneTime`,
+   registered with registerScene(). Indoor scenes get a theme/purpose. */
+
+/* ── ART STUDIO (indoor · painting) ── */
+function drawArtStudio(){
+  const t = sceneTime, floorY = H*0.62;
+
+  // warm wall + wood floor
+  const wall = ctx.createLinearGradient(0,0,0,floorY);
+  wall.addColorStop(0,'#efe4d6'); wall.addColorStop(1,'#e3d3bf');
+  ctx.fillStyle = wall; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle = 'rgba(0,0,0,.06)'; ctx.fillRect(0,floorY-3,W,3);
+  const floor = ctx.createLinearGradient(0,floorY,0,H);
+  floor.addColorStop(0,'#b98a5a'); floor.addColorStop(1,'#a9784a');
+  ctx.fillStyle = floor; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle = 'rgba(90,60,30,.22)'; ctx.lineWidth = 1;
+  for (let i=1;i<7;i++){ const y=floorY+(i/7)*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // big window with daylight
+  const wx=W*0.06, wy=H*0.10, ww=W*0.30, wh=H*0.34;
+  ctx.save(); roundRect(wx,wy,ww,wh,6); ctx.clip();
+  const sky = ctx.createLinearGradient(0,wy,0,wy+wh);
+  sky.addColorStop(0,'#9ed0f0'); sky.addColorStop(1,'#dff0fb');
+  ctx.fillStyle = sky; ctx.fillRect(wx,wy,ww,wh);
+  ctx.fillStyle = 'rgba(255,255,255,.9)';
+  ctx.beginPath(); ctx.arc(wx+ww*0.62,wy+wh*0.32,10,0,7); ctx.arc(wx+ww*0.74,wy+wh*0.34,8,0,7); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=6; roundRect(wx,wy,ww,wh,6); ctx.stroke();
+  ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.moveTo(wx,wy+wh/2); ctx.lineTo(wx+ww,wy+wh/2); ctx.stroke();
+
+  // sunbeam + dust motes
+  ctx.fillStyle='rgba(255,245,200,.13)';
+  ctx.beginPath(); ctx.moveTo(wx+6,wy+wh); ctx.lineTo(wx+ww,wy+wh); ctx.lineTo(wx+ww+70,H); ctx.lineTo(wx-20,H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#fff8dc';
+  for (let i=0;i<16;i++){
+    const bx = wx + 10 + ((i*61.7) % (ww+70)) + Math.sin(t*0.6+i)*4;
+    const by = (wy+wh) + (((i*53.3) + t*12) % (H-(wy+wh)));
+    ctx.globalAlpha = 0.35 + 0.35*Math.sin(t+i);
+    ctx.beginPath(); ctx.arc(bx,by,1,0,7); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // framed paintings on the wall
+  function painting(px,py,pw,ph,fn){
+    ctx.fillStyle='#8a5a3a'; roundRect(px-3,py-3,pw+6,ph+6,2); ctx.fill();
+    ctx.save(); ctx.beginPath(); ctx.rect(px,py,pw,ph); ctx.clip(); fn(px,py,pw,ph); ctx.restore();
+  }
+  painting(W*0.55,H*0.12,44,34,(x,y,w,h)=>{ const g=ctx.createLinearGradient(0,y,0,y+h); g.addColorStop(0,'#ffd27f'); g.addColorStop(1,'#ff8a5a'); ctx.fillStyle=g; ctx.fillRect(x,y,w,h); ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.arc(x+w*0.5,y+h*0.55,7,0,7); ctx.fill(); });
+  painting(W*0.73,H*0.10,40,30,(x,y,w,h)=>{ ctx.fillStyle='#2e7d32'; ctx.fillRect(x,y,w,h); ctx.fillStyle='#8bc34a'; for(let i=0;i<5;i++) ctx.fillRect(x+i*8,y+h-8-i*2,6,8+i*2); });
+  painting(W*0.89,H*0.16,28,40,(x,y,w,h)=>{ ctx.fillStyle='#e0f0ff'; ctx.fillRect(x,y,w,h); ctx.strokeStyle='#4a90d9'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x+4,y+h-6); ctx.lineTo(x+w*0.5,y+8); ctx.lineTo(x+w-4,y+h-6); ctx.stroke(); });
+
+  // easel with a canvas (painting in progress)
+  const ex=W*0.70, ey=H*0.42, legH=H*0.32;
+  ctx.strokeStyle='#7a5230'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(ex-24,ey+legH); ctx.moveTo(ex,ey); ctx.lineTo(ex+24,ey+legH); ctx.moveTo(ex,ey+12); ctx.lineTo(ex,ey+legH*0.9); ctx.stroke();
+  const cw=64, ch=52, cxp=ex-cw/2, cyp=ey+6;
+  ctx.fillStyle='#7a5230'; ctx.fillRect(cxp-4,cyp-4,cw+8,ch+8);
+  ctx.fillStyle='#fffdf5'; ctx.fillRect(cxp,cyp,cw,ch);
+  ctx.save(); ctx.beginPath(); ctx.rect(cxp,cyp,cw,ch); ctx.clip();
+  const cg=ctx.createLinearGradient(0,cyp,0,cyp+ch); cg.addColorStop(0,'#bfe3ff'); cg.addColorStop(1,'#eaf7ff'); ctx.fillStyle=cg; ctx.fillRect(cxp,cyp,cw,ch);
+  ctx.fillStyle='#7cc36a'; ctx.beginPath(); ctx.moveTo(cxp,cyp+ch); ctx.lineTo(cxp+cw*0.4,cyp+ch*0.6); ctx.lineTo(cxp+cw*0.85,cyp+ch); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#f6c945'; ctx.beginPath(); ctx.arc(cxp+cw*0.75,cyp+ch*0.3,6,0,7); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle='rgba(0,0,0,.12)'; ctx.lineWidth=1; ctx.strokeRect(cxp,cyp,cw,ch);
+
+  // table with brush jar + palette
+  const tx=W*0.16, ty=floorY+16;
+  ctx.fillStyle='#9a6b3f'; roundRect(tx-26,ty,52,8,2); ctx.fill();
+  ctx.fillRect(tx-22,ty+8,4,26); ctx.fillRect(tx+18,ty+8,4,26);
+  ctx.fillStyle='rgba(180,210,230,.85)'; roundRect(tx-17,ty-16,13,16,2); ctx.fill();
+  const bc=['#c0392b','#2980b9','#27ae60','#f1c40f'];
+  for(let i=0;i<4;i++){ ctx.strokeStyle=bc[i]; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(tx-14+i*3,ty-16); ctx.lineTo(tx-15+i*3,ty-27-i*2); ctx.stroke(); }
+  ctx.fillStyle='#caa472'; ctx.beginPath(); ctx.ellipse(tx+8,ty-3,12,7,0,0,7); ctx.fill();
+  const pc=['#c0392b','#2980b9','#27ae60','#f1c40f','#8e44ad'];
+  for(let i=0;i<5;i++){ ctx.fillStyle=pc[i]; ctx.beginPath(); ctx.arc(tx+2+i*4,ty-5+(i%2)*3,1.6,0,7); ctx.fill(); }
+
+  // potted plant in the corner
+  const plx=W*0.94, ply=floorY+12;
+  ctx.fillStyle='#b5651d'; roundRect(plx-10,ply,20,18,2); ctx.fill();
+  ctx.fillStyle='#3a9a3a';
+  for(let i=0;i<5;i++){ const a=-1.4+i*0.55; ctx.save(); ctx.translate(plx,ply); ctx.rotate(a+Math.sin(t*0.8+i)*0.05); ctx.beginPath(); ctx.ellipse(0,-16,4,16,0,0,7); ctx.fill(); ctx.restore(); }
+}
+registerScene('artstudio', drawArtStudio);
 
 function drawPet(){
   const acting = pet.animLock > 0;
