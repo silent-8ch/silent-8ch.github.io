@@ -129,6 +129,19 @@
   .setRow.danger{background:rgba(200,60,70,.25);}
   .setRow.danger .sv{color:#ff9a9a;}
   .setRow small{display:block;color:rgba(255,255,255,.5);font-weight:500;font-size:11px;margin-top:2px;}
+  @keyframes toastPop{ from{opacity:0;transform:translateX(-50%) translateY(-14px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
+  #toast{position:absolute;left:50%;top:12px;transform:translateX(-50%) translateY(0);z-index:20;background:#fff;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.32);padding:8px 14px;display:flex;align-items:center;gap:10px;pointer-events:none;max-width:86%;}
+  #toast.hide{display:none;}
+  #toast.show{animation:toastPop .3s ease;}
+  #toast .ti{font-size:24px;line-height:1;}
+  #toast .tt{display:block;font-weight:800;font-size:13px;color:#3a2a2a;}
+  #toast .ts{display:block;font-size:11px;color:#8a6a6a;}
+  #setSection{color:#fff;font-weight:700;font-size:13px;margin:14px 2px 6px;}
+  .achRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:13px;}
+  .achRow .ai{font-size:18px;}
+  .achRow.locked{opacity:.4;}
+  .achRow.locked .ai{filter:grayscale(1);}
+  .achRow small{display:block;color:rgba(255,255,255,.5);font-weight:500;font-size:11px;}
   #outfitPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
   #outfitPanel.hide{display:none;}
   #outfitHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -196,6 +209,7 @@
   <div id="stagewrap">
     <canvas id="cv"></canvas>
     <div id="speech"></div>
+    <div id="toast" class="hide"></div>
   </div>
 
   <div id="actions">
@@ -362,6 +376,7 @@ for (const key in SHEETS) loadSheet(key, SHEETS[key]);
 const DEFAULT_STATE = {
   hunger: 70, fun: 70, love: 70, energy: 80,
   overfed: 0, overdraw: 0,
+  feeds: 0, draws: 0, hugs: 0, rests: 0,
   x: W/2, y: H*0.68,
   lastSeen: null,
 };
@@ -441,6 +456,8 @@ function doAction(kind){
   if (cooldown > 0) return;
   cooldown = 0.6;
   sfx(kind);
+  const ck = {feed:'feeds',draw:'draws',hug:'hugs',rest:'rests'}[kind];
+  if (ck){ state[ck] = (state[ck]||0) + 1; if (typeof checkAchievements==='function') checkAchievements(); }
 
   if (kind === 'feed'){
     const wouldOverfeed = state.hunger + CONFIG.gains.feed > 100;
@@ -756,7 +773,7 @@ function loop(ts){
     findTrinket(dt);
     updatePet(dt);
     // refresh bars periodically (cheap)
-    hudAccum += dt; if (hudAccum > 0.25){ refreshHUD(); hudAccum = 0; }
+    hudAccum += dt; if (hudAccum > 0.25){ refreshHUD(); checkAchievements(); hudAccum = 0; }
     saveAccum += dt; if (saveAccum > 5){ save(); saveAccum = 0; }
   }
 
@@ -906,6 +923,47 @@ function buildCollection(){
     grid.appendChild(cell);
   });
 }
+/* ---- achievements + toasts ---- */
+const ACHIEVEMENTS = [
+  {id:'first_hug', icon:'🤗', name:'First Hug',       desc:'Give her a hug',            test:()=> (state.hugs||0) >= 1},
+  {id:'hug_50',    icon:'💞', name:'Hug Champion',    desc:'50 hugs',                  test:()=> (state.hugs||0) >= 50},
+  {id:'cookie_25', icon:'🍪', name:'Cookie Lover',    desc:'25 cookies',               test:()=> (state.feeds||0) >= 25},
+  {id:'cookie_100',icon:'🎂', name:'Cookie Monster',  desc:'100 cookies',              test:()=> (state.feeds||0) >= 100},
+  {id:'artist',    icon:'🎨', name:'Little Artist',   desc:'Draw together 25 times',   test:()=> (state.draws||0) >= 25},
+  {id:'napper',    icon:'😴', name:'Cozy Napper',     desc:'Rest 5 times',             test:()=> (state.rests||0) >= 5},
+  {id:'explorer',  icon:'🧭', name:'Explorer',        desc:'Visit 50 places',          test:()=> visited.size >= 50},
+  {id:'globetrot', icon:'🗺️', name:'Globetrotter',    desc:'Visit every place',        test:()=> visited.size >= SCENES.length},
+  {id:'collector', icon:'🧺', name:'Treasure Hunter', desc:'Collect 10 kinds',         test:()=> collectedKinds() >= 10},
+  {id:'week',      icon:'🔥', name:'Week Together',    desc:'A 7-day streak',           test:()=> (meta.streak||0) >= 7},
+  {id:'month',     icon:'🌟', name:'A Month of Us',   desc:'30 days together',         test:()=> (meta.totalDays||0) >= 30},
+];
+let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
+function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
+let toastQueue = [], toastBusy = false;
+function showToast(icon, title, sub){
+  toastQueue.push([icon,title,sub]);
+  if (toastBusy) return;
+  const el = document.getElementById('toast'); if(!el) return;
+  const next = ()=>{
+    if (!toastQueue.length){ toastBusy=false; return; }
+    toastBusy = true;
+    const [i,t,s] = toastQueue.shift();
+    el.innerHTML = `<span class="ti">${i}</span><span><span class="tt">${t}</span><span class="ts">${s||''}</span></span>`;
+    el.className = '';                 // visible (base), restart pop animation
+    void el.offsetWidth; el.classList.add('show');
+    setTimeout(()=>{ el.classList.add('hide'); setTimeout(next, 200); }, 2600);
+  };
+  next();
+}
+function checkAchievements(){
+  ACHIEVEMENTS.forEach(a=>{
+    if (!achieved.has(a.id) && a.test()){
+      achieved.add(a.id); saveAchieved();
+      showToast(a.icon, 'Achievement: '+a.name, a.desc + ' 🏆'); sfx('day'); hearts();
+    }
+  });
+}
+
 /* ---- settings: gentle sound, relaxed mode, reset ---- */
 let settings = (function(){ try{ const r=localStorage.getItem('bpet_settings'); if(r) return {sound:false,relaxed:false,...JSON.parse(r)}; }catch(e){} return {sound:false, relaxed:false}; })();
 function saveSettings(){ try{ localStorage.setItem('bpet_settings', JSON.stringify(settings)); }catch(e){} }
@@ -937,8 +995,16 @@ function buildSettings(){
   toggle('🌿 Relaxed mode', 'relaxed', 'Her needs drain half as fast');
   const reset=document.createElement('div'); reset.className='setRow danger';
   reset.innerHTML=`<span>♻️ Reset progress<small>Clears stats, days, passport & collection</small></span><span class="sv">Reset</span>`;
-  reset.addEventListener('click',()=>{ if(confirm('Reset all progress? This can’t be undone.')){ ['bpet','bpet_disabled','bpet_visited','bpet_meta','bpet_collection','bpet_outfit','bpet_settings'].forEach(k=>{ try{localStorage.removeItem(k);}catch(e){} }); location.reload(); } });
+  reset.addEventListener('click',()=>{ if(confirm('Reset all progress? This can’t be undone.')){ ['bpet','bpet_disabled','bpet_visited','bpet_meta','bpet_collection','bpet_outfit','bpet_settings','bpet_achieved'].forEach(k=>{ try{localStorage.removeItem(k);}catch(e){} }); location.reload(); } });
   list.appendChild(reset);
+  // achievements
+  const hdr=document.createElement('div'); hdr.id='setSection'; hdr.textContent=`🏆 Achievements ${achieved.size}/${ACHIEVEMENTS.length}`; list.appendChild(hdr);
+  ACHIEVEMENTS.forEach(a=>{
+    const got=achieved.has(a.id);
+    const row=document.createElement('div'); row.className='achRow'+(got?'':' locked');
+    row.innerHTML=`<span class="ai">${a.icon}</span><span>${a.name}<small>${a.desc}</small></span>`;
+    list.appendChild(row);
+  });
 }
 function openSettings(){ ensureAudio(); buildSettings(); document.getElementById('setPanel').classList.remove('hide'); }
 function closeSettings(){ document.getElementById('setPanel').classList.add('hide'); }
