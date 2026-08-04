@@ -624,13 +624,25 @@ stagewrap.addEventListener('pointerdown', (e)=>{
 });
 // a gentle boop on the head — she blushes and giggles (distinct from a hug)
 let petCd = 0;
+let petStreak = 0, petStreakTimer = 0;   // quick successive boops build a cuddle combo
+const PET_COMBO = { 3:'A little cuddle streak! ×3 💕', 5:'Mmm, don\'t stop ×5 🥰', 8:'You spoil me ×8 💖', 12:'I\'m the luckiest ×12 💞' };
 function doPet(){
   if (petCd > 0 || pet.animLock > 0) return;
   petCd = 0.5;
+  // combo: keep counting while boops keep coming inside the window
+  petStreak = (petStreakTimer > 0) ? petStreak + 1 : 1;
+  petStreakTimer = 2.6;
   pet.blush = Math.min(2.2, pet.blush + 1.4);
-  state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 4);
-  say(pick(LINES.pet)); sfx('tap');
-  fxAt(pet.x + rand(-14,14), pet.y - SHEETS.walk.displayH*0.6, pick(['💗','✨','😊']));
+  const milestone = PET_COMBO[petStreak];
+  if (milestone){
+    say(milestone); state.love = clamp(state.love + 10); state.fun = clamp(state.fun + 6);
+    hearts(); sfx('day');
+  } else {
+    state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 4);
+    say(pick(LINES.pet)); sfx('tap');
+    // show the running combo count once she's on a little roll
+    fxAt(pet.x + rand(-14,14), pet.y - SHEETS.walk.displayH*0.6, petStreak >= 2 ? ('×'+petStreak+' 💗') : pick(['💗','✨','😊']));
+  }
   refreshHUD();
 }
 
@@ -945,6 +957,7 @@ function loop(ts){
     if (cooldown>0) cooldown -= dt;
     if (interactCd>0) interactCd -= dt;
     if (petCd>0) petCd -= dt;
+    if (petStreakTimer>0) petStreakTimer -= dt;
     maybeNag(dt);
     idleThoughts(dt);
     happyTrail(dt);
