@@ -483,3 +483,190 @@ function fxNowSec(){ try{ return (performance && performance.now ? performance.n
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 3). Appended below rounds 1-2; none duplicate the
+   kiss / motes / balloon / butterfly / comet / humming features.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   7) TIME-OF-DAY LIGHT LEAK  —  a barely-there foreground wash of soft bokeh that
+   shifts with the clock: warm gold at dawn, gentle at midday, rosy at dusk, cool
+   blue at night. Alpha is tiny by design so it only adds depth, never haze.
+   -------------------------------------------------------------------------- */
+(function fxLightLeak(){
+  try{
+    // a few slow-drifting bokeh orbs, seeded once
+    const orbs = [];
+    for (let i=0;i<5;i++){
+      orbs.push({ bx: rand(0.08,0.92), by: rand(0.05,0.5), r: rand(24,52), ph: rand(0,Math.PI*2), sp: rand(0.05,0.12) });
+    }
+    let t = 0;
+    function palette(){
+      const h = (typeof currentHour === 'function') ? currentHour() : new Date().getHours();
+      if (h >= 5 && h < 8)   return { c:'255,205,120', a:0.075 };   // dawn — warm gold
+      if (h >= 8 && h < 17)  return { c:'255,244,220', a:0.045 };   // day  — soft cream
+      if (h >= 17 && h < 20) return { c:'255,170,150', a:0.075 };   // dusk — rosy
+      return { c:'150,180,255', a:0.06 };                            // night — cool blue
+    }
+    EXTRA_UPDATERS.push(function(dt){ t += dt; });
+    EXTRA_DRAWERS.push(function(){
+      const pal = palette();
+      ctx.save();
+      for (const o of orbs){
+        const x = (o.bx * W) + Math.sin(t*o.sp + o.ph) * 10;
+        const y = (o.by * H) + Math.cos(t*o.sp*0.8 + o.ph) * 8;
+        const a = pal.a * (0.65 + 0.35*Math.sin(t*0.5 + o.ph));      // gentle breathing
+        const g = ctx.createRadialGradient(x, y, 0, x, y, o.r);
+        g.addColorStop(0, 'rgba(' + pal.c + ',' + Math.max(0,a).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(' + pal.c + ',0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x, y, o.r, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   8) JOY RAINBOW  —  when her fun is brimming, a soft rainbow eases in across the
+   top of the scene, then fades away again as the moment passes. Low overall
+   opacity so it reads as a happy shimmer, not a solid band.
+   -------------------------------------------------------------------------- */
+(function fxRainbow(){
+  try{
+    const BANDS = ['255,120,120','255,180,110','255,235,130','150,220,150','130,190,255','160,150,240','210,150,230'];
+    let alpha = 0;
+    EXTRA_UPDATERS.push(function(dt){
+      let target = 0;
+      try{ target = (state && state.fun >= 96) ? 1 : 0; }catch(e){}
+      // ease toward target so it drifts in/out gently
+      alpha += (target - alpha) * Math.min(1, dt * 0.7);
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (alpha < 0.01) return;
+      const cx = W*0.5, cy = H*0.98, r0 = W*0.60;              // centre low so the arc curves over the top
+      ctx.save();
+      ctx.lineWidth = 5; ctx.lineCap = 'round';
+      for (let i=0;i<BANDS.length;i++){
+        ctx.strokeStyle = 'rgba(' + BANDS[i] + ',' + (0.16 * alpha).toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(cx, cy, r0 - i*5, Math.PI*1.02, Math.PI*1.98); ctx.stroke();
+      }
+      ctx.restore();
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   9) CATCH A GLIMMER  —  now and then a single catchable glimmer drifts through
+   (a firefly after dark, a floating leaf by day). Tap it to catch it; a little
+   keepsake badge in the corner keeps count. Purely optional, gently rewarding.
+   -------------------------------------------------------------------------- */
+(function fxCatch(){
+  try{
+    const KEY = 'bpet_fx_caught';
+    let count = 0;
+    try{ const r = localStorage.getItem(KEY); if (r) count = parseInt(r,10) || 0; }catch(e){}
+
+    // small keepsake badge appended to the stage (never edits the HTML)
+    let badge = null;
+    function ensureBadge(){
+      try{
+        if (badge) return badge;
+        const host = document.getElementById('stagewrap') || document.getElementById('game');
+        if (!host) return null;
+        badge = document.createElement('div');
+        badge.id = 'fxCatchBadge';
+        badge.style.cssText = [
+          'position:absolute','left:8px','bottom:8px','z-index:6','pointer-events:none',
+          'font:600 12px system-ui,sans-serif','color:#fff',
+          'background:rgba(0,0,0,0.32)','padding:3px 8px','border-radius:12px',
+          'backdrop-filter:blur(2px)','opacity:0','transition:opacity .4s','user-select:none',
+        ].join(';');
+        host.appendChild(badge);
+        return badge;
+      }catch(e){ return null; }
+    }
+    function refreshBadge(flash){
+      const b = ensureBadge(); if (!b) return;
+      b.textContent = '✨ ' + count + ' caught';
+      b.style.opacity = count > 0 ? '0.9' : '0';
+      if (flash){
+        b.style.transform = 'scale(1.18)';
+        setTimeout(()=>{ try{ b.style.transform = 'scale(1)'; }catch(e){} }, 160);
+      }
+    }
+    // show existing tally once the DOM is ready
+    setTimeout(()=> refreshBadge(false), 400);
+
+    let glimmer = null;
+    let timer = rand(18, 34);
+    function isNightNow(){ try{ return typeof isNight === 'function' && isNight(); }catch(e){ return false; } }
+    function spawn(){
+      const night = isNightNow();
+      glimmer = {
+        x: rand(W*0.14, W*0.86), y: rand(H*0.2, H*0.5),
+        tx: rand(W*0.14, W*0.86), ty: rand(H*0.18, H*0.5),
+        ph: rand(0,Math.PI*2), life: 0, max: rand(8, 12),
+        night, retarget: rand(1.6, 3),
+      };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!glimmer){
+        timer -= dt;
+        if (timer <= 0){ timer = rand(28, 55); if (!(pet && pet.resting)) spawn(); }
+        return;
+      }
+      const gm = glimmer;
+      gm.life += dt; gm.ph += dt; gm.retarget -= dt;
+      if (gm.retarget <= 0){ gm.retarget = rand(1.8,3.2); gm.tx = rand(W*0.12,W*0.88); gm.ty = rand(H*0.16,H*0.52); }
+      const dx = gm.tx-gm.x, dy = gm.ty-gm.y, d = Math.hypot(dx,dy)||1;
+      const step = 20*dt;
+      gm.x += dx/d*step + Math.sin(gm.ph*0.9)*6*dt;
+      gm.y += dy/d*step + Math.cos(gm.ph*0.7)*5*dt;
+      if (gm.life >= gm.max) glimmer = null;                    // drifts off if not caught
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!glimmer) return;
+      const gm = glimmer;
+      ctx.save();
+      if (gm.night){
+        const tw = 0.5 + 0.5*Math.sin(gm.ph*4);
+        const g = ctx.createRadialGradient(gm.x, gm.y, 0, gm.x, gm.y, 11);
+        g.addColorStop(0, 'rgba(255,240,150,' + (0.85*tw+0.1).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(255,240,150,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(gm.x, gm.y, 11, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,250,200,0.95)';
+        ctx.beginPath(); ctx.arc(gm.x, gm.y, 2.4, 0, 7); ctx.fill();
+      } else {
+        ctx.globalAlpha = 0.9;
+        ctx.font = '15px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.save(); ctx.translate(gm.x, gm.y); ctx.rotate(Math.sin(gm.ph)*0.5);
+        ctx.fillText('🍃', 0, 0); ctx.restore();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!glimmer) return false;
+        if (Math.hypot(px - glimmer.x, py - glimmer.y) > 18) return false;
+        const gx = glimmer.x, gy = glimmer.y, wasNight = glimmer.night;
+        glimmer = null;
+        count++;
+        try{ localStorage.setItem(KEY, String(count)); }catch(e){}
+        refreshBadge(true);
+        if (typeof fxAt === 'function'){
+          for (let i=0;i<4;i++) setTimeout(()=> fxAt(gx+rand(-12,12), gy+rand(-8,8), wasNight ? pick(['✨','🌟','💛']) : pick(['🍃','🌿','✨'])), i*70);
+        }
+        if (typeof sfx === 'function') sfx('find');
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        if (typeof say === 'function') say(pick(['Caught one! ✨','Ooh, got it! 🥰','For you 💛','A little treasure 🌟']));
+        timer = rand(30, 60);
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

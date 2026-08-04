@@ -41,6 +41,10 @@ const TRINKET_POOL = (()=>{
   g(['fencing','boxinggym'], ['🤺','🥊','🏅']);
   g(['balloonfest'], ['🎈','🎊','🪁']);
   g(['recordingstudio'], ['🎤','🎧','🎼']);
+  g(['jazzclub'], ['🎷','🎺','🎶']);
+  g(['ferriswheel'], ['🎡','🎠','🎟️']);
+  g(['mushroomglade'], ['🍄','🧚','🌿']);
+  g(['hammam'], ['♨️','🧖','🫧']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -171,7 +175,19 @@ const COMPLIMENTS = [
   'You are my calm and my adventure, all at once.',
   'Every version of you is my favorite version.',
   'I\'d do all the ordinary days over, just for you.',
-  'You make me believe in soft, good things.'
+  'You make me believe in soft, good things.',
+  'The way you love people is the eighth wonder of the world.',
+  'You could get lost in a crowd and I\'d still find you first.',
+  'Your name is my favorite word to say.',
+  'You make courage look like kindness.',
+  'I\'d recognize your laugh in a room of a thousand.',
+  'You are the softest landing after any hard day.',
+  'Somehow you make forever sound too short.',
+  'You turned my ordinary life into a love story.',
+  'I love who I get to be when I\'m with you.',
+  'You are my favorite plot twist.',
+  'Being near you feels like coming up for air.',
+  'I\'d marry you again tomorrow, and every tomorrow after.'
 ];
 function dailyCompliment(){
   try{
@@ -521,13 +537,19 @@ const LOVE_NOTES = [
   {day:600, text:'Some people search their whole lives for what we get to wake up to. I never forget how lucky that makes me. 🍀'},
   {day:730, text:'Two years, my love. You are still my favorite hello, my softest place, my whole heart. 💞'},
   {day:1000, text:'A thousand days with you — and it still feels like we\'re just getting started. Forever isn\'t long enough. 💍💛 —Paul'},
+  {day:4,  text:'Four little days in, and I already look forward to saying good morning to you in here. ☀️'},
+  {day:6,  text:'You laugh at my silly jokes even when they don\'t deserve it. I love you for that. 😄'},
+  {day:9,  text:'Nine days of tiny hellos. You make showing up the easiest, happiest habit. 💛'},
+  {day:15, text:'Halfway to a month, and I\'m still counting my luck one visit at a time. 🍀'},
+  {day:25, text:'Twenty-five days together. You keep proving that the small moments are the whole point. ✨'},
+  {day:35, text:'Past a month now, and I\'d happily do a thousand more ordinary days with you. 🥰'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){
   const list=document.getElementById('noteList'); if(!list) return; list.innerHTML='';
   const d=(meta&&meta.totalDays)||0;
   document.getElementById('noteHead').firstElementChild.textContent=`💌 Notes from Paul ${notesUnlocked()}/${LOVE_NOTES.length}`;
-  LOVE_NOTES.forEach(n=>{
+  LOVE_NOTES.slice().sort((a,b)=>a.day-b.day).forEach(n=>{
     if (d>=n.day){ const c=document.createElement('div'); c.className='noteCard';
       c.innerHTML=`<div class="nd">Day ${n.day}</div>${n.text}`; list.appendChild(c); }
     else { const c=document.createElement('div'); c.className='noteLocked';

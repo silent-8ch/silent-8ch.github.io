@@ -263,9 +263,13 @@ const SCENE_INTERACT = (()=>{
   g(['recordingstudio'], {lines:['Let\'s make music 🎶','Sing with me! 🎤','La la la 🎵'], emoji:'🎤', fun:5});
   g(['terrariumshop','nursery'], {lines:['Tiny green worlds 🌱','So cute and small!','Let\'s grow something 🌿'], emoji:'🌱', love:4});
   g(['rooftop'], {lines:['What a view up here! 🌆','The city lights ✨','So high up 🥰'], emoji:'🌆', fun:5});
+  g(['jazzclub'], {lines:['Smooth tunes 🎷','Sway with me…','So dreamy 🎶'], emoji:'🎷', fun:5});
+  g(['ferriswheel'], {lines:['Round and round! 🎡','Look how high! 😍','Ride with me? 🥰'], emoji:'🎡', love:5});
+  g(['mushroomglade'], {lines:['Look, little mushrooms! 🍄','So enchanted ✨','A fairy place 🧚'], emoji:'🍄', fun:5});
+  g(['hammam'], {lines:['So warm and steamy ♨️','Ahhh, relaxing 😌','Melting away…'], emoji:'♨️', energy:5});
   return map;
 })();
-const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛'];
+const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛'];
 let interactCd = 0;
 function tapScene(px, py){
   if (interactCd > 0 || pet.animLock > 0) return;

@@ -489,3 +489,218 @@ function drawHammam(){
   bowl(W*0.14,floorY+20); bowl(W*0.88,floorY+24);
 }
 registerScene('hammam', drawHammam);
+
+/* ── FARMERS MARKET (outdoor · sunny morning) ── */
+function drawFarmersMarket(){
+  const t = sceneTime, groundY = H*0.68;
+
+  // bright morning sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#8fc9ee'); sky.addColorStop(1,'#dcefdc');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='#fff4b0'; ctx.beginPath(); ctx.arc(W*0.14,H*0.12,20,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,244,176,.3)'; ctx.beginPath(); ctx.arc(W*0.14,H*0.12,32,0,7); ctx.fill();
+  drawCloud(W*0.55+Math.sin(t*0.1)*8,H*0.10,0.7); drawCloud(W*0.82+Math.sin(t*0.12+2)*6,H*0.16,0.5);
+
+  // rolling green hills behind
+  ctx.fillStyle='#6aa84a'; ctx.beginPath(); ctx.moveTo(0,groundY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,groundY-26-16*Math.sin(x*0.018+1)); } ctx.lineTo(W,groundY); ctx.fill();
+  ctx.fillStyle='#5a9a3e'; ctx.beginPath(); ctx.moveTo(0,groundY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,groundY-10-10*Math.sin(x*0.03+3)); } ctx.lineTo(W,groundY); ctx.fill();
+
+  // cobble/dirt path ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#b89a6a'); gr.addColorStop(1,'#94764a');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.fillStyle='rgba(120,95,60,.25)'; for (let i=0;i<40;i++){ const px=(i*67+11)%W, py=groundY+8+((i*43+7)%(H-groundY-8)); ctx.fillRect(px,py,2,2); }
+
+  // market stalls with striped canopy + produce crates (sides)
+  function stall(cx, awn){
+    const topY=groundY-96, w=100;
+    // posts + back
+    ctx.fillStyle='#7a5a38'; ctx.fillRect(cx-w/2,topY,4,groundY-topY); ctx.fillRect(cx+w/2-4,topY,4,groundY-topY);
+    // striped canopy (scalloped edge)
+    for (let i=0;i<8;i++){ ctx.fillStyle= i%2?'#f2ece0':awn;
+      ctx.beginPath(); ctx.moveTo(cx-w/2+i*(w/8),topY); ctx.lineTo(cx-w/2+(i+1)*(w/8),topY);
+      ctx.lineTo(cx-w/2+(i+1)*(w/8),topY+16); ctx.lineTo(cx-w/2+(i+0.5)*(w/8),topY+22); ctx.lineTo(cx-w/2+i*(w/8),topY+16); ctx.closePath(); ctx.fill(); }
+    // table
+    ctx.fillStyle='#6a4a2e'; ctx.fillRect(cx-w/2-2,groundY-30,w+4,10);
+    ctx.fillStyle='#4a3320'; ctx.fillRect(cx-w/2-2,groundY-20,w+4,20);
+    // produce crates on table
+    const veg=[['#e2482e',5],['#e0a020',4],['#7ab040',5],['#c04a8a',4]];
+    for (let c=0;c<4;c++){ const bx=cx-w/2+8+c*24, by=groundY-34;
+      ctx.fillStyle='#8a6038'; ctx.fillRect(bx-2,by,22,10);
+      ctx.fillStyle=veg[c][0]; for (let k=0;k<veg[c][1];k++){ ctx.beginPath(); ctx.arc(bx+3+k*4,by-1,3,0,7); ctx.fill(); } }
+    // hanging price flag
+    ctx.fillStyle='#c04a3a'; ctx.fillRect(cx-8,topY+22,16,10);
+  }
+  stall(W*0.20,'#c0392b');
+  stall(W*0.80,'#2a7a5a');
+
+  // bunting between stalls
+  ctx.strokeStyle='rgba(120,90,60,.6)'; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=0;x<=W;x+=8){ const y=H*0.30+Math.sin(x*0.05)*8; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+  for (let x=6;x<W;x+=18){ const y=H*0.30+Math.sin(x*0.05)*8; ctx.fillStyle=['#e05a5a','#e0b040','#5ab0e0','#60c060'][(x/18|0)%4];
+    ctx.beginPath(); ctx.moveTo(x-4,y); ctx.lineTo(x+4,y); ctx.lineTo(x,y+8); ctx.closePath(); ctx.fill(); }
+
+  // a basket of flowers in the foreground-left
+  const fbx=W*0.10, fby=groundY+24;
+  ctx.fillStyle='#a9742e'; ctx.beginPath(); ctx.moveTo(fbx-14,fby); ctx.lineTo(fbx+14,fby); ctx.lineTo(fbx+10,fby+16); ctx.lineTo(fbx-10,fby+16); ctx.closePath(); ctx.fill();
+  for (let k=0;k<7;k++){ ctx.fillStyle=['#e26fb0','#f2d04a','#e0603a','#a06fe0'][k%4]; ctx.beginPath(); ctx.arc(fbx-10+k*3.4,fby-4-Math.sin(k+ t)*2,3,0,7); ctx.fill(); }
+}
+registerScene('farmersmarket', drawFarmersMarket);
+
+/* ── SKI LODGE (indoor · fireplace · cozy winter) ── */
+function drawSkiLodge(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // timber wall
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#6a4a30'); wall.addColorStop(1,'#563a24');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  ctx.strokeStyle='rgba(0,0,0,.22)'; ctx.lineWidth=1; for (let y=20;y<floorY;y+=20){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // snowy window (left) with night mountains
+  const wx=W*0.14, wy=H*0.14, ww=W*0.30, wh=H*0.34;
+  ctx.fillStyle='#1e2a44'; ctx.fillRect(wx,wy,ww,wh);
+  ctx.fillStyle='#e8eef6'; ctx.beginPath(); ctx.moveTo(wx,wy+wh); for(let x=0;x<=ww;x+=10){ ctx.lineTo(wx+x,wy+wh-18-14*Math.sin(x*0.06)); } ctx.lineTo(wx+ww,wy+wh); ctx.fill();
+  for (let i=0;i<20;i++){ const sx=wx+((i*37+t*6)%ww), sy=wy+((i*29+t*10)%wh); ctx.fillStyle='rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(sx,sy,1.4,0,7); ctx.fill(); }
+  ctx.strokeStyle='#3a2818'; ctx.lineWidth=4; ctx.strokeRect(wx,wy,ww,wh); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.moveTo(wx,wy+wh/2); ctx.lineTo(wx+ww,wy+wh/2); ctx.stroke();
+
+  // stone fireplace (right) with animated flames
+  const fx=W*0.72, fy=H*0.20, fw=W*0.34, fh=floorY-fy;
+  ctx.fillStyle='#8a8078'; ctx.fillRect(fx,fy,fw,fh);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1;
+  for (let y=fy;y<floorY;y+=14){ for (let x=fx+((y/14|0)%2)*12; x<fx+fw; x+=24){ ctx.strokeRect(x,y,24,14); } }
+  // firebox
+  const bx=fx+8, by=fy+fh-46, bw=fw-16, bh=42;
+  ctx.fillStyle='#1a0e08'; ctx.fillRect(bx,by,bw,bh);
+  // logs
+  ctx.fillStyle='#5a3a20'; ctx.fillRect(bx+6,by+bh-10,bw-12,6); ctx.fillRect(bx+12,by+bh-16,bw-28,6);
+  // flames
+  for (let i=0;i<7;i++){ const flx=bx+8+i*(bw-16)/6; const fl=1+0.4*Math.sin(t*6+i*1.4); const fh2=(14+8*Math.sin(t*5+i))*fl;
+    ctx.fillStyle='#e05a1a'; ctx.beginPath(); ctx.moveTo(flx-5,by+bh-6); ctx.quadraticCurveTo(flx,by+bh-6-fh2,flx+5,by+bh-6); ctx.fill();
+    ctx.fillStyle='#f2b02a'; ctx.beginPath(); ctx.moveTo(flx-3,by+bh-6); ctx.quadraticCurveTo(flx,by+bh-6-fh2*0.6,flx+3,by+bh-6); ctx.fill(); }
+  ctx.fillStyle=`rgba(255,150,60,${0.14+0.05*Math.sin(t*4)})`; ctx.beginPath(); ctx.ellipse(bx+bw/2,by+bh,bw*0.7,30,0,0,7); ctx.fill();
+  // mantel with candles + a garland
+  ctx.fillStyle='#4a3420'; ctx.fillRect(fx-4,by-12,fw+8,10);
+  for (const cx of [fx+16,fx+fw-16]){ ctx.fillStyle='#efe6d0'; ctx.fillRect(cx-2,by-24,4,12); ctx.fillStyle=`rgba(255,200,90,${0.8+0.15*Math.sin(t*3+cx)})`; ctx.beginPath(); ctx.arc(cx,by-26,2.4,0,7); ctx.fill(); }
+
+  // hanging skis on the back wall (center-top)
+  const skX=W*0.46;
+  for (const off of [-6,6]){ ctx.fillStyle= off<0?'#c0392b':'#2a6ab0'; ctx.save(); ctx.translate(skX+off,H*0.10); ctx.rotate(0.2);
+    roundRect(-4,-2,8,70,4); ctx.fill(); ctx.restore(); }
+
+  // wood-plank floor + cozy rug
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#8a6038'); fl.addColorStop(1,'#6a482a');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let x=0;x<W;x+=28){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x-6,H); ctx.stroke(); }
+  ctx.fillStyle='#b0442e'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.90,110,26,0,0,7); ctx.fill();
+  ctx.fillStyle='#efe0c8'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.90,80,18,0,0,7); ctx.fill();
+  ctx.fillStyle='#b0442e'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.90,44,10,0,0,7); ctx.fill();
+}
+registerScene('skilodge', drawSkiLodge);
+
+/* ── CRYSTAL CAVE (underground · glowing geodes) ── */
+function drawCrystalCave(){
+  const t = sceneTime, floorY = H*0.70;
+
+  // deep cave darkness
+  const bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#140f26'); bg.addColorStop(0.6,'#1c1636'); bg.addColorStop(1,'#0e0a1c');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // ceiling rock with stalactites
+  ctx.fillStyle='#241a3a'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,40);
+  for (let x=W; x>=0; x-=30){ ctx.lineTo(x-15, 40+30*Math.abs(Math.sin(x*0.3))); ctx.lineTo(x-30,40); }
+  ctx.closePath(); ctx.fill();
+
+  // cave wall glow pools
+  for (const gx of [W*0.25,W*0.75]){ const g=ctx.createRadialGradient(gx,H*0.4,10,gx,H*0.4,120);
+    g.addColorStop(0,'rgba(90,140,230,.16)'); g.addColorStop(1,'rgba(90,140,230,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }
+
+  // glowing crystal clusters function
+  function crystal(cx,cy,sc,hue){
+    ctx.save(); ctx.translate(cx,cy); ctx.scale(sc,sc);
+    const glow=0.6+0.35*Math.sin(t*1.5+cx*0.1);
+    const shards=[[0,-40,10],[ -12,-26,8],[12,-30,8],[-6,-20,6],[7,-18,7]];
+    for (const [dx,ty,w] of shards){
+      ctx.fillStyle=`hsla(${hue},70%,${55+15*glow}%,0.9)`;
+      ctx.beginPath(); ctx.moveTo(dx-w,0); ctx.lineTo(dx,ty); ctx.lineTo(dx+w,0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle=`hsla(${hue},80%,80%,0.5)`; ctx.beginPath(); ctx.moveTo(dx-1,0); ctx.lineTo(dx,ty); ctx.lineTo(dx+3,ty*0.5); ctx.closePath(); ctx.fill();
+    }
+    // ambient glow
+    ctx.fillStyle=`hsla(${hue},80%,60%,${0.16*glow})`; ctx.beginPath(); ctx.arc(0,-20,30,0,7); ctx.fill();
+    ctx.restore();
+  }
+
+  // ground with underground pool reflecting crystals
+  ctx.fillStyle='#181228'; ctx.fillRect(0,floorY,W,H-floorY);
+  // still water pool (center back-ish, kept low so pet floor stays clear near y=H*0.72)
+  const poolY=floorY+8;
+  ctx.fillStyle='#0e1a34'; ctx.beginPath(); ctx.ellipse(W*0.5,poolY,130,14,0,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(120,170,240,.2)'; ctx.lineWidth=1;
+  for (let i=0;i<3;i++){ ctx.beginPath(); ctx.ellipse(W*0.5,poolY,80-i*20+Math.sin(t*2+i)*3,9-i*2,0,0,7); ctx.stroke(); }
+
+  // crystal clusters (sides + a small one back-center)
+  crystal(W*0.12,floorY+18,1.4,215);
+  crystal(W*0.26,floorY+8,0.8,270);
+  crystal(W*0.88,floorY+20,1.5,190);
+  crystal(W*0.74,floorY+6,0.85,300);
+  crystal(W*0.5,floorY-30,0.55,235);
+  // small ceiling crystals hanging
+  crystal(W*0.35,44,0.5,260); crystal(W*0.62,50,0.45,205);
+
+  // floating glowing dust motes
+  for (let i=0;i<22;i++){ const mx=(i*61+ Math.sin(t*0.4+i)*16)%W; const my=(i*53 + t*8)%H;
+    ctx.fillStyle=`rgba(150,190,255,${0.2+0.3*Math.abs(Math.sin(t*2+i))})`; ctx.beginPath(); ctx.arc(mx,my,1.3,0,7); ctx.fill(); }
+}
+registerScene('crystalcave', drawCrystalCave);
+
+/* ── LANTERN FESTIVAL (outdoor · night · floating sky/water lanterns) ── */
+function drawLanternFestival(){
+  const t = sceneTime, waterY = H*0.60;
+
+  // warm night sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY);
+  sky.addColorStop(0,'#1a1030'); sky.addColorStop(0.6,'#3a1a3a'); sky.addColorStop(1,'#6a2a3a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  // stars
+  for (let i=0;i<40;i++){ const sx=(i*79+7)%W, sy=(i*31+4)%(waterY*0.7);
+    ctx.fillStyle=`rgba(255,240,210,${0.2+0.3*Math.abs(Math.sin(t*1.2+i))})`; ctx.fillRect(sx,sy,1.1,1.1); }
+  // crescent moon
+  ctx.fillStyle='#f2ecc8'; ctx.beginPath(); ctx.arc(W*0.82,H*0.12,16,0,7); ctx.fill();
+  ctx.fillStyle='#1a1030'; ctx.beginPath(); ctx.arc(W*0.86,H*0.10,15,0,7); ctx.fill();
+
+  // distant town silhouette on far bank
+  ctx.fillStyle='#170c22';
+  let bx=0,s2=13; const rr=()=>{ s2=(s2*9301+49297)%233280; return s2/233280; };
+  while (bx<W){ const bw=18+Math.floor(rr()*20), bh=16+Math.floor(rr()*26); ctx.fillRect(bx,waterY-bh,bw,bh);
+    if (rr()>0.5){ ctx.fillStyle='rgba(255,200,120,.5)'; ctx.fillRect(bx+bw*0.3,waterY-bh*0.6,3,4); ctx.fillStyle='#170c22'; } bx+=bw+2; }
+
+  // floating sky lanterns drifting upward
+  function skyLantern(lx,ly,sc,glow){
+    ctx.save(); ctx.translate(lx,ly); ctx.scale(sc,sc);
+    ctx.fillStyle=`rgba(255,170,90,${0.25*glow})`; ctx.beginPath(); ctx.arc(0,0,16,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(240,140,70,${0.9})`; ctx.beginPath(); ctx.moveTo(-7,-8); ctx.lineTo(7,-8); ctx.lineTo(5,7); ctx.lineTo(-5,7); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=`rgba(255,220,120,${0.8+0.15*Math.sin(t*3+lx)})`; ctx.fillRect(-3,3,6,5);
+    ctx.fillStyle='#5a2a1a'; ctx.fillRect(-5,7,10,2);
+    ctx.restore();
+  }
+  for (let i=0;i<9;i++){ const lx=(i*47+ Math.sin(t*0.3+i)*24)%W; const ly=waterY-30-((t*7+i*45)%(waterY)); const sc=0.6+((i*7)%5)*0.14;
+    skyLantern(lx,ly,sc,0.7+0.3*Math.sin(t+i)); }
+
+  // river water
+  const wat=ctx.createLinearGradient(0,waterY,0,H); wat.addColorStop(0,'#3a1830'); wat.addColorStop(1,'#160a1c');
+  ctx.fillStyle=wat; ctx.fillRect(0,waterY,W,H-waterY);
+  // shimmering reflections of lantern light
+  ctx.strokeStyle='rgba(255,170,90,.12)'; ctx.lineWidth=1;
+  for (let y=waterY+6;y<H;y+=8){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.06+t*1.5+y)*1.6; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+
+  // floating water lanterns drifting across the surface
+  function waterLantern(lx,ly,col){
+    const bob=Math.sin(t*1.5+lx)*1.5;
+    ctx.fillStyle='#efe6d0'; ctx.beginPath(); ctx.ellipse(lx,ly+bob,10,4,0,0,7); ctx.fill();
+    ctx.fillStyle=col; roundRect(lx-5,ly-8+bob,10,9,2); ctx.fill();
+    ctx.fillStyle=`rgba(255,220,140,${0.85+0.12*Math.sin(t*4+lx)})`; ctx.beginPath(); ctx.arc(lx,ly-3+bob,2.2,0,7); ctx.fill();
+    // glow on water
+    ctx.fillStyle='rgba(255,180,90,.14)'; ctx.beginPath(); ctx.ellipse(lx,ly+6+bob,14,3,0,0,7); ctx.fill();
+  }
+  const cols=['#c0392b','#e0a020','#e26fb0','#5ab0e0'];
+  for (let i=0;i<6;i++){ const lx=((i*63 + t*10)%(W+40))-20; const ly=waterY+16+ (i%3)*20; waterLantern(lx,ly,cols[i%cols.length]); }
+}
+registerScene('lanternfestival', drawLanternFestival);
