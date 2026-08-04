@@ -6876,6 +6876,56 @@ function drawTeaPlantation(){
 }
 registerScene('teaplantation', drawTeaPlantation);
 
+/* ── RECORDING STUDIO (indoor · mixing console & vocal booth) ── */
+function drawRecordingStudio(){
+  const t=sceneTime, floorY=H*0.72;
+  // dim control room
+  ctx.fillStyle='#1e2028'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#2e3038'; ctx.fillRect(0,floorY,W,H-floorY);
+  // acoustic foam panels on the walls (wedge pattern)
+  ctx.fillStyle='#3a2e3a'; for(let y=0;y<floorY*0.5;y+=14) for(let x=0;x<W;x+=14){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+7,y+7); ctx.lineTo(x,y+14); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(x+14,y); ctx.lineTo(x+7,y+7); ctx.lineTo(x+14,y+14); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle='rgba(0,0,0,.3)'; ctx.fillRect(0,floorY*0.5,W,floorY*0.5);
+  // the vocal booth window (right) with a singer silhouette + hanging mic
+  const wx=W*0.7, wy=H*0.16, ww=W*0.26, wh=H*0.34;
+  ctx.fillStyle='#0e1a24'; ctx.fillRect(wx,wy,ww,wh); ctx.strokeStyle='#4a4e58'; ctx.lineWidth=4; ctx.strokeRect(wx,wy,ww,wh);
+  // warm light inside booth
+  ctx.fillStyle='rgba(200,150,90,.15)'; ctx.fillRect(wx+4,wy+4,ww-8,wh-8);
+  // hanging condenser mic
+  ctx.strokeStyle='#888'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(wx+ww*0.5,wy+4); ctx.lineTo(wx+ww*0.5,wy+wh*0.35); ctx.stroke();
+  ctx.fillStyle='#c8c8d0'; ctx.fillRect(wx+ww*0.5-4,wy+wh*0.35,8,14);
+  ctx.strokeStyle='#666'; ctx.strokeRect(wx+ww*0.5-8,wy+wh*0.33,16,20); // pop filter ring hint
+  // singer silhouette, subtly swaying
+  const sng=Math.sin(t*1.5)*3; ctx.fillStyle='#05080c'; ctx.fillRect(wx+ww*0.3+sng,wy+wh*0.5,14,wh*0.5); ctx.beginPath(); ctx.arc(wx+ww*0.3+7+sng,wy+wh*0.48,7,0,7); ctx.fill();
+  // the big mixing console (foreground, angled)
+  const cy=floorY-6; ctx.fillStyle='#2a2c34'; ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#3a3d46'; ctx.fillRect(0,cy-8,W,10);
+  // rows of knobs
+  for(let r=0;r<2;r++) for(let i=0;i<16;i++){ const kx=W*0.04+i*W*0.06, ky=cy+10+r*14;
+    ctx.fillStyle='#12141a'; ctx.beginPath(); ctx.arc(kx,ky,4,0,7); ctx.fill();
+    const ka=Math.sin(i*1.3+r)*1.2; ctx.strokeStyle='#c9a24a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(kx,ky); ctx.lineTo(kx+Math.cos(ka-Math.PI/2)*3,ky+Math.sin(ka-Math.PI/2)*3); ctx.stroke(); }
+  // channel faders (sliders that gently move)
+  for(let i=0;i<16;i++){ const fx=W*0.04+i*W*0.06; const track=H-cy-44;
+    ctx.fillStyle='#12141a'; ctx.fillRect(fx-1,cy+40,2,track);
+    const fv=(Math.sin(t*2+i*0.6)+1)/2; const fy=cy+40 + (1-fv)*track;
+    ctx.fillStyle='#c8ccd4'; ctx.fillRect(fx-4,fy-3,8,6); ctx.fillStyle='#8a8e96'; ctx.fillRect(fx-4,fy,8,1); }
+  // a pair of VU meters bouncing (left)
+  for(let m=0;m<2;m++){ const mx=W*0.08+m*W*0.12, my=H*0.2; ctx.fillStyle='#0a0c10'; ctx.fillRect(mx-24,my-16,48,26);
+    ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.strokeRect(mx-24,my-16,48,26);
+    // arc scale
+    ctx.strokeStyle='#556'; ctx.beginPath(); ctx.arc(mx,my+16,26,-Math.PI*0.9,-Math.PI*0.1); ctx.stroke();
+    const na=-Math.PI*0.9 + (0.5+0.5*Math.sin(t*6+m*1.5))*Math.PI*0.8; // bouncing needle
+    ctx.strokeStyle='#e0d060'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(mx,my+16); ctx.lineTo(mx+Math.cos(na)*24,my+16+Math.sin(na)*24); ctx.stroke();
+    // red zone
+    ctx.strokeStyle='#c02020'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(mx,my+16,26,-Math.PI*0.25,-Math.PI*0.1); ctx.stroke(); }
+  // studio monitor speakers on stands flanking the booth
+  for(const sxp of [W*0.5, W*0.98]){ ctx.fillStyle='#15161c'; ctx.fillRect(sxp-14,H*0.3,26,44);
+    ctx.fillStyle='#0a0b0e'; ctx.beginPath(); ctx.arc(sxp-1,H*0.34,7,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(sxp-1,H*0.5,4,0,7); ctx.fill(); }
+  // "REC" light glowing red above the booth
+  ctx.fillStyle=`rgba(230,40,40,${0.5+0.4*Math.sin(t*2)})`; ctx.fillRect(wx+ww*0.36,wy-14,ww*0.28,10);
+  ctx.fillStyle='#fff'; ctx.font='bold 7px sans-serif'; ctx.textAlign='center'; ctx.fillText('REC', wx+ww*0.5, wy-6); ctx.textAlign='left';
+}
+registerScene('recordingstudio', drawRecordingStudio);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
