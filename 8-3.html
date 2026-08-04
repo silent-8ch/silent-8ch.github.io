@@ -2531,6 +2531,49 @@ function drawLavender(){
 }
 registerScene('lavender', drawLavender);
 
+/* ── ARCADE (indoor · games) ── */
+function drawArcade(){
+  const t = sceneTime, floorY = H*0.66;
+
+  // dark neon room
+  ctx.fillStyle='#160f22'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='rgba(255,60,180,.05)'; ctx.fillRect(0,0,W,floorY);
+  ctx.font='bold 20px Segoe UI, sans-serif'; ctx.textAlign='center';
+  ctx.fillStyle=`rgba(255,80,200,${0.7+0.3*Math.sin(t*3)})`; ctx.fillText('★ ARCADE ★', W*0.5, H*0.11);
+  ctx.textAlign='left';
+
+  // carpet with neon flecks
+  ctx.fillStyle='#1a1030'; ctx.fillRect(0,floorY,W,H-floorY);
+  for (let i=0;i<40;i++){ const cx=(i*53+11)%W, cy=floorY+((i*37+7)%(H-floorY)); ctx.fillStyle=['#ff3ca0','#3cf0ff','#f0ff3c'][i%3]; ctx.globalAlpha=0.4; ctx.fillRect(cx,cy,2,2); }
+  ctx.globalAlpha=1;
+
+  // arcade cabinets
+  function cabinet(x,col,scr){
+    const cw=42, top=floorY-96;
+    ctx.fillStyle=scr; ctx.globalAlpha=0.10; ctx.fillRect(x-cw/2-4,top+16,cw+8,30); ctx.globalAlpha=1;
+    ctx.fillStyle=col; roundRect(x-cw/2,top,cw,96,4); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.globalAlpha=0.8; ctx.fillRect(x-cw/2+4,top+4,cw-8,10); ctx.globalAlpha=1;
+    ctx.fillStyle='#0a0a16'; ctx.fillRect(x-cw/2+5,top+18,cw-10,26);
+    ctx.fillStyle=scr; for (let k=0;k<6;k++){ if ((Math.floor(t*4)+k)%3===0) ctx.fillRect(x-cw/2+8+k*5, top+22+((k*7)%18), 3,3); }
+    ctx.fillStyle='#222'; ctx.fillRect(x-cw/2+4,top+48,cw-8,14);
+    ctx.fillStyle='#ff3c3c'; ctx.beginPath(); ctx.arc(x-6,top+55,2.5,0,7); ctx.fill();
+    ctx.fillStyle='#3cff6a'; ctx.beginPath(); ctx.arc(x+4,top+55,2.5,0,7); ctx.fill();
+  }
+  cabinet(W*0.18,'#7a2ea0','#3cf0ff');
+  cabinet(W*0.40,'#c02e6a','#f0ff3c');
+  cabinet(W*0.86,'#2e6ac0','#ff6adc');
+
+  // pinball machine
+  const pX=W*0.66, pTop=floorY-42;
+  ctx.fillStyle='#333'; ctx.fillRect(pX-24,pTop+36,4,floorY-(pTop+36)); ctx.fillRect(pX+20,pTop+36,4,floorY-(pTop+36));
+  ctx.fillStyle='#d0402e'; ctx.beginPath(); ctx.moveTo(pX-30,pTop+40); ctx.lineTo(pX+30,pTop+40); ctx.lineTo(pX+22,pTop); ctx.lineTo(pX-22,pTop); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#1a1a2a'; ctx.beginPath(); ctx.moveTo(pX-24,pTop+36); ctx.lineTo(pX+24,pTop+36); ctx.lineTo(pX+18,pTop+4); ctx.lineTo(pX-18,pTop+4); ctx.closePath(); ctx.fill();
+  ctx.fillStyle=`rgba(255,220,80,${0.6+0.4*Math.sin(t*6)})`; for (let i=0;i<5;i++){ ctx.beginPath(); ctx.arc(pX-14+i*7,pTop+12+((i%2)*10),2.5,0,7); ctx.fill(); }
+  ctx.fillStyle='#e04a2e'; ctx.fillRect(pX-26,pTop-24,52,24);
+  ctx.fillStyle=`rgba(80,220,255,${0.6+0.4*Math.sin(t*4+1)})`; ctx.fillRect(pX-20,pTop-18,40,12);
+}
+registerScene('arcade', drawArcade);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
