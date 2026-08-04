@@ -2441,6 +2441,52 @@ function drawAurora(){
 }
 registerScene('aurora', drawAurora);
 
+/* ── POTTERY STUDIO (indoor · ceramics) ── */
+function drawVessel(x,baseY,col,type){
+  ctx.fillStyle=col;
+  if (type===0){ ctx.beginPath(); ctx.moveTo(x-9,baseY-2); ctx.quadraticCurveTo(x,baseY+10,x+9,baseY-2); ctx.closePath(); ctx.fill(); }
+  else if (type===1){ ctx.beginPath(); ctx.moveTo(x-5,baseY-2); ctx.quadraticCurveTo(x-10,baseY-14,x-4,baseY-22); ctx.lineTo(x+4,baseY-22); ctx.quadraticCurveTo(x+10,baseY-14,x+5,baseY-2); ctx.closePath(); ctx.fill(); }
+  else { ctx.fillRect(x-6,baseY-16,12,16); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x+8,baseY-8,4,-1.2,1.2); ctx.stroke(); }
+}
+function drawPottery(){
+  const t = sceneTime, floorY = H*0.62;
+
+  // clay-tone wall + concrete floor
+  ctx.fillStyle='#cdbfae'; ctx.fillRect(0,0,W,floorY);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#9a9086'); fl.addColorStop(1,'#847a70');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.lineWidth=1;
+  for (let i=1;i<5;i++){ const y=floorY+i/5*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // shelves of finished ceramics
+  const shX=W*0.04, shW=W*0.40, glazes=['#5a7a6a','#9a5a3a','#3a5a7a','#7a6a4a','#8a4a5a'];
+  for (let s=0;s<3;s++){ const sy=H*0.12+s*H*0.13; ctx.fillStyle='#8a6b4a'; ctx.fillRect(shX,sy+22,shW,5); for (let i=0;i<5;i++) drawVessel(shX+12+i*((shW-20)/5), sy+22, glazes[(i+s)%5], i%3); }
+
+  // kiln (right) with a warm glow
+  const kX=W*0.82, kTop=floorY-56;
+  ctx.fillStyle='#7a4a3a'; roundRect(kX-24,kTop,48,56,4); ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.15)'; for (let by=kTop;by<floorY;by+=8){ ctx.beginPath(); ctx.moveTo(kX-24,by); ctx.lineTo(kX+24,by); ctx.stroke(); }
+  ctx.fillStyle='#2a1810'; roundRect(kX-14,kTop+16,28,26,3); ctx.fill();
+  const kg=ctx.createRadialGradient(kX,kTop+30,2,kX,kTop+30,20); kg.addColorStop(0,`rgba(255,140,40,${0.5+0.2*Math.sin(t*4)})`); kg.addColorStop(1,'rgba(255,140,40,0)');
+  ctx.fillStyle=kg; ctx.fillRect(kX-16,kTop+16,32,28);
+
+  // apron on a wall hook
+  ctx.fillStyle='#6a7a5a'; ctx.beginPath(); ctx.moveTo(W*0.62,H*0.14); ctx.lineTo(W*0.66,H*0.14); ctx.lineTo(W*0.68,H*0.30); ctx.lineTo(W*0.60,H*0.30); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#4a5a3a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.62,H*0.14); ctx.lineTo(W*0.585,H*0.16); ctx.moveTo(W*0.66,H*0.14); ctx.lineTo(W*0.70,H*0.16); ctx.stroke();
+
+  // potter's wheel with a pot forming
+  const wX=W*0.42, wY=floorY+26;
+  ctx.fillStyle='#4a4038'; ctx.fillRect(wX-8,wY+8,16,H-(wY+8));
+  ctx.fillStyle='#5a5048'; ctx.beginPath(); ctx.ellipse(wX,wY,34,12,0,0,7); ctx.fill();
+  ctx.fillStyle='#6a605a'; ctx.beginPath(); ctx.ellipse(wX,wY-2,30,10,0,0,7); ctx.fill();
+  const spin=Math.sin(t*10)*1.5;
+  ctx.fillStyle='#a86a44'; ctx.beginPath(); ctx.moveTo(wX-12,wY-4); ctx.quadraticCurveTo(wX-16+spin,wY-24,wX-8,wY-34); ctx.lineTo(wX+8,wY-34); ctx.quadraticCurveTo(wX+16+spin,wY-24,wX+12,wY-4); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#c98a5a'; ctx.beginPath(); ctx.ellipse(wX,wY-34,8,3,0,0,7); ctx.fill();
+  // stool
+  ctx.fillStyle='#5a3a22'; ctx.fillRect(wX-54,wY+2,20,4); ctx.fillRect(wX-52,wY+6,3,16); ctx.fillRect(wX-38,wY+6,3,16);
+}
+registerScene('pottery', drawPottery);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
