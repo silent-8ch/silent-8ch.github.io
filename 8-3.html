@@ -6048,6 +6048,54 @@ function drawWeaving(){
 }
 registerScene('weaving', drawWeaving);
 
+/* ── FROZEN WATERFALL (outdoor · winter ice cascade) ── */
+function drawFrozenFalls(){
+  const t=sceneTime, poolY=H*0.8;
+  // cold pale sky
+  const sky=ctx.createLinearGradient(0,0,0,poolY); sky.addColorStop(0,'#bcd2e6'); sky.addColorStop(1,'#e6eef4');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,poolY);
+  // faint sun halo
+  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(W*0.3,H*0.16,20,0,7); ctx.fill();
+  // dark rock cliff faces framing the falls
+  ctx.fillStyle='#5a5560'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W*0.34,0); ctx.lineTo(W*0.42,poolY); ctx.lineTo(0,poolY); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W,0); ctx.lineTo(W*0.66,0); ctx.lineTo(W*0.58,poolY); ctx.lineTo(W,poolY); ctx.closePath(); ctx.fill();
+  // snow caps on the cliff tops
+  ctx.fillStyle='#eef4fa'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W*0.34,0); ctx.lineTo(W*0.36,H*0.06); ctx.lineTo(0,H*0.08); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W,0); ctx.lineTo(W*0.66,0); ctx.lineTo(W*0.64,H*0.06); ctx.lineTo(W,H*0.08); ctx.closePath(); ctx.fill();
+  // the frozen cascade — vertical columns of blue-white ice between the cliffs
+  const fx0=W*0.36, fx1=W*0.64;
+  const iceGrad=ctx.createLinearGradient(0,0,0,poolY); iceGrad.addColorStop(0,'#dff0f8'); iceGrad.addColorStop(0.5,'#add6ec'); iceGrad.addColorStop(1,'#cfe6f2');
+  ctx.fillStyle=iceGrad; ctx.fillRect(fx0,0,fx1-fx0,poolY);
+  // bulging ice columns
+  for(let i=0;i<7;i++){ const cx=fx0+ (i+0.5)*(fx1-fx0)/7; const w=(fx1-fx0)/7*0.5;
+    ctx.fillStyle= i%2? 'rgba(255,255,255,.35)':'rgba(150,200,230,.35)';
+    ctx.beginPath(); ctx.moveTo(cx-w,0);
+    for(let y=0;y<=poolY;y+=20){ const bulge=Math.sin(y*0.05+i)*3; ctx.lineTo(cx-w+bulge, y); }
+    for(let y=poolY;y>=0;y-=20){ const bulge=Math.sin(y*0.05+i+1)*3; ctx.lineTo(cx+w+bulge, y); }
+    ctx.closePath(); ctx.fill();
+  }
+  // vertical flow striations frozen in place
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1; for(let i=0;i<16;i++){ const cx=fx0+i*(fx1-fx0)/16; ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx+Math.sin(cx)*2,poolY); ctx.stroke(); }
+  // hanging icicles along the top ledge
+  ctx.fillStyle='#e8f4fa'; for(let i=0;i<12;i++){ const ix=W*0.34+i*(W*0.32/11); const len=8+ (i%4)*8;
+    ctx.beginPath(); ctx.moveTo(ix-3,H*0.06); ctx.lineTo(ix+3,H*0.06); ctx.lineTo(ix,H*0.06+len); ctx.closePath(); ctx.fill(); }
+  // a faint inner glow where a thin trickle still flows behind the ice (animated shimmer)
+  ctx.strokeStyle=`rgba(120,200,240,${0.3+0.2*Math.sin(t*3)})`; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(W*0.5,H*0.08); for(let y=H*0.1;y<poolY;y+=16){ ctx.lineTo(W*0.5+Math.sin(y*0.1+t*2)*4, y); } ctx.stroke();
+  // frozen pool at the base with cracked ice
+  ctx.fillStyle='#c6e0ee'; ctx.fillRect(0,poolY,W,H-poolY);
+  ctx.strokeStyle='rgba(150,190,220,.6)'; ctx.lineWidth=1;
+  for(let i=0;i<5;i++){ ctx.beginPath(); ctx.moveTo(W*0.2+i*W*0.15,poolY+4); ctx.lineTo(W*0.3+i*W*0.15,H); ctx.stroke(); }
+  ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.ellipse(W*0.5,poolY+14,60,8,0,0,7); ctx.fill(); // snow dusting on pool
+  // snow-laden evergreens at the edges
+  function pine(x,base,s){ ctx.fillStyle='#3a5a44'; for(let k=0;k<3;k++){ ctx.beginPath(); ctx.moveTo(x-14*s+k*2,base-k*14*s); ctx.lineTo(x+14*s-k*2,base-k*14*s); ctx.lineTo(x,base-(k+1)*14*s-6*s); ctx.closePath(); ctx.fill(); }
+    ctx.fillStyle='rgba(255,255,255,.8)'; for(let k=0;k<3;k++){ ctx.beginPath(); ctx.moveTo(x-14*s+k*2,base-k*14*s); ctx.lineTo(x,base-(k+1)*14*s-6*s); ctx.lineTo(x-6*s,base-k*14*s-6*s); ctx.closePath(); ctx.fill(); } }
+  pine(W*0.12,poolY+6,1.0); pine(W*0.88,poolY+6,1.1);
+  // gentle snowfall
+  for(let i=0;i<24;i++){ const sx=(i*47+t*12)%W, sy=(i*33+t*20)%poolY; ctx.fillStyle='rgba(255,255,255,.8)'; ctx.fillRect(sx,sy,2,2); }
+}
+registerScene('frozenfalls', drawFrozenFalls);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
