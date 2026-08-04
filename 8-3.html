@@ -6835,6 +6835,47 @@ function drawEscapeRoom(){
 }
 registerScene('escaperoom', drawEscapeRoom);
 
+/* ── TEA PLANTATION (outdoor · terraced hills of tea bushes) ── */
+function drawTeaPlantation(){
+  const t=sceneTime, skyY=H*0.34;
+  // soft morning sky
+  const sky=ctx.createLinearGradient(0,0,0,skyY); sky.addColorStop(0,'#bcd8e8'); sky.addColorStop(1,'#eaf2e0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,skyY);
+  // hazy sun
+  ctx.fillStyle='rgba(255,248,220,.8)'; ctx.beginPath(); ctx.arc(W*0.24,H*0.14,20,0,7); ctx.fill();
+  // misty layered hills behind
+  ctx.fillStyle='#8fae90'; ctx.beginPath(); ctx.moveTo(0,skyY); ctx.quadraticCurveTo(W*0.3,skyY-24,W*0.6,skyY-6); ctx.quadraticCurveTo(W*0.85,skyY-20,W,skyY-4); ctx.lineTo(W,skyY); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.3)'; ctx.fillRect(0,skyY-8,W,8); // mist
+  // the plantation hillside — bright green with contour rows of tea bushes
+  const field=ctx.createLinearGradient(0,skyY,0,H); field.addColorStop(0,'#5f9a48'); field.addColorStop(1,'#417a30');
+  ctx.fillStyle=field; ctx.fillRect(0,skyY,W,H-skyY);
+  // contour rows following the hill's curves (curved hedgerows of tea)
+  for(let r=0;r<16;r++){ const ry=skyY+8+r*((H-skyY)/16); const amp=8+r*1.5;
+    ctx.strokeStyle= r%2? 'rgba(30,70,25,.5)':'rgba(60,120,45,.5)'; ctx.lineWidth=3+r*0.4;
+    ctx.beginPath(); for(let x=-10;x<=W+10;x+=10){ const y=ry + Math.sin(x*0.012 + r*0.3)*amp*0.4; if(x<=0)ctx.moveTo(x,y); else ctx.lineTo(x,y);} ctx.stroke();
+    // little bump texture along the row (bush tops)
+    ctx.fillStyle= r%2? '#4f8a3a':'#5f9a44';
+    for(let x=0;x<W;x+=12){ const y=ry + Math.sin(x*0.012 + r*0.3)*amp*0.4; ctx.beginPath(); ctx.arc(x,y-1,2+r*0.2,Math.PI,0); ctx.fill(); }
+  }
+  // a dirt footpath winding up through the rows
+  ctx.strokeStyle='#c8a86a'; ctx.lineWidth=8; ctx.beginPath(); ctx.moveTo(W*0.5,H); ctx.quadraticCurveTo(W*0.42,H*0.7,W*0.56,H*0.5); ctx.quadraticCurveTo(W*0.66,H*0.42,W*0.6,skyY+10); ctx.stroke();
+  // a few tea pickers with conical hats and back baskets, dotted along the rows
+  function picker(x,y,s){
+    ctx.fillStyle='#c9a24a'; ctx.beginPath(); ctx.moveTo(x-6*s,y-8*s); ctx.lineTo(x+6*s,y-8*s); ctx.lineTo(x,y-16*s); ctx.closePath(); ctx.fill(); // conical hat
+    ctx.fillStyle='#4a6a8a'; ctx.fillRect(x-3*s,y-8*s,6*s,12*s); // body (bent slightly)
+    ctx.fillStyle='#8a5a34'; ctx.fillRect(x+3*s,y-6*s,4*s,8*s); // back basket
+    // arm reaching to the bush, gentle picking motion
+    const pk=Math.sin(t*3+x)*2*s; ctx.strokeStyle='#4a6a8a'; ctx.lineWidth=1.5*s; ctx.beginPath(); ctx.moveTo(x-2*s,y-4*s); ctx.lineTo(x-8*s,y+pk); ctx.stroke();
+  }
+  picker(W*0.28, H*0.62, 1.0); picker(W*0.72, H*0.7, 1.1); picker(W*0.5, H*0.84, 1.2); picker(W*0.85, H*0.5, 0.8);
+  // a small tin-roof drying shed at the top of the path
+  const shx=W*0.6, shy=skyY+14; ctx.fillStyle='#8a6a44'; ctx.fillRect(shx-12,shy-8,24,10); ctx.fillStyle='#9aa0a6'; ctx.beginPath(); ctx.moveTo(shx-15,shy-8); ctx.lineTo(shx+15,shy-8); ctx.lineTo(shx+10,shy-16); ctx.lineTo(shx-10,shy-16); ctx.closePath(); ctx.fill();
+  // a couple of birds over the hills
+  for(let i=0;i<3;i++){ const bx=W*0.3+i*W*0.2+Math.sin(t*0.7+i)*12, by=H*0.16+i*6; ctx.strokeStyle='#5a5a52'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(bx-5,by); ctx.quadraticCurveTo(bx,by-4,bx+5,by); ctx.stroke(); }
+}
+registerScene('teaplantation', drawTeaPlantation);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
