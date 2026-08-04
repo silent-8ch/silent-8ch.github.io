@@ -149,6 +149,7 @@
       <div class="meter"><span class="lbl">🍪 Hunger</span><div class="bar"><div class="fill" id="f-hunger"></div></div></div>
       <div class="meter"><span class="lbl">🎨 Fun</span><div class="bar"><div class="fill" id="f-fun"></div></div></div>
       <div class="meter"><span class="lbl">💗 Love</span><div class="bar"><div class="fill" id="f-love"></div></div></div>
+      <div class="meter"><span class="lbl">⚡ Energy</span><div class="bar"><div class="fill" id="f-energy"></div></div></div>
     </div>
   </div>
 
@@ -161,6 +162,7 @@
     <button class="btn" data-action="feed"><span class="ic">🍪</span>Cookie</button>
     <button class="btn" data-action="draw"><span class="ic">🎨</span>Draw</button>
     <button class="btn" data-action="hug"><span class="ic">🤗</span>Hug</button>
+    <button class="btn" data-action="rest"><span class="ic">💤</span>Rest</button>
   </div>
 
   <div id="mapPanel" class="hide">
@@ -185,10 +187,10 @@ const CONFIG = {
   name: "My Love",              // <-- put her name here
 
   // How fast needs drain (points lost per real-time second). Lower = more relaxed.
-  decay: { hunger: 0.35, fun: 0.30, love: 0.25 },
+  decay: { hunger: 0.35, fun: 0.30, love: 0.25, energy: 0.18 },
 
   // How much each action gives back (0-100 scale)
-  gains: { feed: 34, draw: 30, hug: 40 },
+  gains: { feed: 34, draw: 30, hug: 40, rest: 45 },
 
   // Movement
   walkSpeed: 42,                // pixels per second (in the canvas's internal coords)
@@ -267,6 +269,9 @@ const LINES = {
   hungry:["I could go for a cookie…"],
   bored: ["I'm bored 😪"],
   needlove:["Need a hug 🥺"],
+  rest:  ["Zzz… 💤", "A little nap 😴", "So cozy…", "Mmm, rested 😌"],
+  tired: ["I'm so sleepy… 😴", "Can I nap? 💤", "My eyes are heavy…"],
+  sleepyNight:["It's late… 🌙", "Sleepy time 😴", "The stars are out ✨"],
 };
 
 /* ==========================  ENGINE  (edit below with care)  ============== */
@@ -297,7 +302,7 @@ for (const key in SHEETS) loadSheet(key, SHEETS[key]);
 
 /* ---------- game state ---------- */
 const DEFAULT_STATE = {
-  hunger: 70, fun: 70, love: 70,
+  hunger: 70, fun: 70, love: 70, energy: 80,
   overfed: 0, overdraw: 0,
   x: W/2, y: H*0.68,
   lastSeen: null,
@@ -315,6 +320,7 @@ const pet = {
   frame: 0, frameTime: 0,
   wanderTimer: 1.5,
   bob: 0,
+  resting: false, restTimer: 0, zzzTimer: 0,
 };
 
 /* ---------- save / load ---------- */
@@ -343,6 +349,7 @@ function applyAwayDecay(s){
   s.hunger = clamp(s.hunger - CONFIG.decay.hunger*secs*0.4);
   s.fun    = clamp(s.fun    - CONFIG.decay.fun*secs*0.4);
   s.love   = clamp(s.love   - CONFIG.decay.love*secs*0.4);
+  s.energy = clamp((s.energy ?? 80) - CONFIG.decay.energy*secs*0.4);
 }
 
 /* ---------- helpers ---------- */
@@ -353,6 +360,7 @@ function pick(arr){ return arr[(Math.random()*arr.length)|0]; }
 /* ---------- mood ---------- */
 function moodScore(){ return (state.hunger + state.fun + state.love)/3; }
 function moodInfo(){
+  if ((state.energy ?? 100) < 18) return {emoji:'😴', label:'sleepy', key:'sad'};
   const m = moodScore();
   if (m > 75) return {emoji:'😄', label:'delighted', key:'happy'};
   if (m > 55) return {emoji:'🙂', label:'happy',     key:'idle'};
@@ -406,6 +414,14 @@ function doAction(kind){
       state.overdraw = 0;
       playAnim('draw',1.8); say(pick(LINES.draw)); burst('🎨'); burst('🌈');
     }
+  }
+  if (kind === 'rest'){
+    pet.resting = true; pet.restTimer = 5; pet.zzzTimer = 0.1;
+    state.energy = clamp(state.energy + CONFIG.gains.rest);
+    state.love = clamp(state.love + 4);
+    say(pick(isNight() ? LINES.sleepyNight : LINES.rest));
+    pet.wanderTimer = 5.2;   // don't wander off the moment she wakes
+    refreshHUD(); save(); return;
   }
   if (kind === 'hug' ){
     state.love = clamp(state.love + CONFIG.gains.hug); state.fun = clamp(state.fun+8);
@@ -536,10 +552,10 @@ function throwUpFx(){
 }
 
 /* ---------- HUD ---------- */
-const fills = { hunger:document.getElementById('f-hunger'), fun:document.getElementById('f-fun'), love:document.getElementById('f-love') };
+const fills = { hunger:document.getElementById('f-hunger'), fun:document.getElementById('f-fun'), love:document.getElementById('f-love'), energy:document.getElementById('f-energy') };
 function barColor(v){ return v>55 ? 'var(--good)' : v>28 ? 'var(--warn)' : 'var(--bad)'; }
 function refreshHUD(){
-  for (const k of ['hunger','fun','love']){
+  for (const k of ['hunger','fun','love','energy']){
     fills[k].style.width = state[k] + '%';
     fills[k].style.background = barColor(state[k]);
   }
@@ -569,7 +585,8 @@ function maybeNag(dt){
   nagTimer -= dt;
   if (nagTimer > 0) return;
   nagTimer = 9;
-  if (state.hunger < 25){ say(pick(LINES.hungry)); }
+  if (state.energy < 22 && !pet.resting){ say(pick(LINES.tired)); }
+  else if (state.hunger < 25){ say(pick(LINES.hungry)); }
   else if (state.love < 25){ say(pick(LINES.needlove)); }
   else if (state.fun < 25){ say(pick(LINES.bored)); }
 }
@@ -594,6 +611,9 @@ function loop(ts){
     state.hunger = clamp(state.hunger - CONFIG.decay.hunger*dt);
     state.fun    = clamp(state.fun    - CONFIG.decay.fun*dt);
     state.love   = clamp(state.love   - CONFIG.decay.love*dt);
+    // energy drains ~2x faster at night unless she's resting
+    if (!pet.resting) state.energy = clamp(state.energy - CONFIG.decay.energy*dt*(isNight()?2:1));
+    else state.energy = clamp(state.energy + 9*dt);   // recover while resting
     // Reset overfed/overdraw only when stats drop significantly below full
     if (state.hunger < 80) state.overfed = 0;
     if (state.fun < 80) state.overdraw = 0;
@@ -624,6 +644,16 @@ function updatePet(dt){
     const s = SHEETS[pet.action] || SHEETS.walk;   // eat/draw have their own sheets
     if (pet.frameLock === null) advanceFrame(dt, s.fps, s.cols);
     if (pet.animLock <= 0){ pet.action = null; pet.frame = 0; pet.frameTime = 0; pet.frameLock = null; }
+    return;
+  }
+
+  // resting — she stays put, recovers energy, with floating Zzz
+  if (pet.resting){
+    pet.moving = false; pet.dir = 'down'; pet.frame = 0; pet.frameTime = 0;
+    pet.restTimer -= dt;
+    pet.zzzTimer -= dt;
+    if (pet.zzzTimer <= 0){ burst('💤'); pet.zzzTimer = 1.2; }
+    if (pet.restTimer <= 0 || state.energy >= 100) pet.resting = false;
     return;
   }
 
@@ -1055,6 +1085,8 @@ function dayNightWash(){
   if (h<20) return mix(dusk,night,(h-18)/2);   // dusk → night
   return night;                                // night
 }
+function currentHour(){ return dayNightForce!=null ? dayNightForce : (new Date().getHours() + new Date().getMinutes()/60); }
+function isNight(){ const h = currentHour(); return h < 6 || h >= 20; }
 function applyDayNight(scene){
   if (SCENE_NO_DAYNIGHT.has(scene)) return;
   const c = dayNightWash();
