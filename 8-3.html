@@ -7431,6 +7431,61 @@ function drawPetShop(){
 }
 registerScene('petshop', drawPetShop);
 
+/* ── BALLOON FESTIVAL (outdoor · hot-air balloons at dawn) ── */
+function drawBalloonFest(){
+  const t=sceneTime, groundY=H*0.78;
+  // soft dawn sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#f2b06a'); sky.addColorStop(0.5,'#f4d29a'); sky.addColorStop(1,'#eef0d8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  // low sun glow
+  ctx.fillStyle='rgba(255,245,210,.7)'; ctx.beginPath(); ctx.arc(W*0.5,groundY-6,40,0,7); ctx.fill();
+  // misty rolling hills below
+  ctx.fillStyle='#8aa86a'; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.quadraticCurveTo(W*0.3,groundY-16,W*0.55,groundY-2); ctx.quadraticCurveTo(W*0.8,groundY-18,W,groundY-4); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.fill();
+  ctx.fillStyle='#7a9a5a'; ctx.beginPath(); ctx.moveTo(0,groundY+14); ctx.quadraticCurveTo(W*0.5,groundY+2,W,groundY+16); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fillRect(0,groundY-6,W,10); // ground mist
+  // a hot-air balloon helper
+  function balloon(x,y,s,cols){
+    // envelope: stacked colored bands making a teardrop
+    const rw=26*s, rh=32*s;
+    for(let b=0;b<cols.length;b++){ ctx.fillStyle=cols[b];
+      ctx.beginPath();
+      const y0=y-rh + b*(rh*1.3/cols.length), y1=y-rh + (b+1)*(rh*1.3/cols.length);
+      const w0=Math.sin(Math.acos(Math.max(-1,Math.min(1,(y0-(y-rh*0.3))/rh))))*rw || rw;
+      // simpler: draw vertical gore bands via arcs
+      ctx.moveTo(x-rw,y-rh*0.3);
+      ctx.quadraticCurveTo(x-rw + b*(2*rw/cols.length), y-rh*1.1, x, y-rh*1.15);
+      ctx.quadraticCurveTo(x+rw - b*(2*rw/cols.length), y-rh*1.1, x+rw, y-rh*0.3);
+      ctx.closePath();
+    }
+    // Instead of that, draw a clean striped teardrop:
+    ctx.save(); ctx.beginPath(); ctx.moveTo(x,y-rh*1.2);
+    ctx.bezierCurveTo(x-rw*1.4,y-rh*1.1, x-rw*1.2,y-rh*0.1, x-rw*0.4,y+2); // left to base
+    ctx.lineTo(x+rw*0.4,y+2);
+    ctx.bezierCurveTo(x+rw*1.2,y-rh*0.1, x+rw*1.4,y-rh*1.1, x,y-rh*1.2);
+    ctx.closePath(); ctx.clip();
+    for(let i=0;i<cols.length;i++){ ctx.fillStyle=cols[i]; ctx.fillRect(x-rw*1.5 + i*(3*rw/cols.length), y-rh*1.3, 3*rw/cols.length +1, rh*1.5); }
+    // vertical gore highlight
+    ctx.fillStyle='rgba(255,255,255,.12)'; ctx.fillRect(x-2,y-rh*1.3,4,rh*1.5);
+    ctx.restore();
+    // basket + support lines + flame
+    ctx.strokeStyle='#5a4030'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x-rw*0.4,y+2); ctx.lineTo(x-4*s,y+16*s); ctx.moveTo(x+rw*0.4,y+2); ctx.lineTo(x+4*s,y+16*s); ctx.stroke();
+    ctx.fillStyle='#7a5230'; ctx.fillRect(x-5*s,y+16*s,10*s,7*s);
+    // burner flame flickering
+    if(Math.sin(t*6+x)>0.3){ ctx.fillStyle='rgba(255,150,40,.8)'; ctx.beginPath(); ctx.ellipse(x,y+2, 3*s,7*s,0,0,7); ctx.fill(); ctx.fillStyle='#ffd86a'; ctx.beginPath(); ctx.ellipse(x,y+1,1.5*s,4*s,0,0,7); ctx.fill(); }
+  }
+  // several balloons at varying heights, slowly drifting/bobbing
+  balloon(W*0.5, H*0.4 + Math.sin(t*0.8)*6, 1.3, ['#e0402a','#f2c14a','#e0402a','#f2c14a']);
+  balloon(W*0.2, H*0.52 + Math.sin(t*0.7+1)*6, 0.9, ['#4a86c0','#ffffff','#4a86c0','#ffffff']);
+  balloon(W*0.8, H*0.34 + Math.sin(t*0.9+2)*6, 1.0, ['#3a8a5a','#f2c14a','#e0609a','#3a8a5a']);
+  balloon(W*0.68, H*0.58 + Math.sin(t*0.6+3)*5, 0.7, ['#8a4ac0','#e0609a','#8a4ac0','#e0609a']);
+  balloon(W*0.34, H*0.66 + Math.sin(t*0.75+4)*5, 0.6, ['#e08030','#f2e04a','#e08030','#f2e04a']);
+  // a couple of tiny far balloons near the horizon
+  for(let i=0;i<3;i++){ const bx=W*0.1+i*W*0.35+Math.sin(t*0.5+i)*8; ctx.fillStyle=['#e0402a','#4a86c0','#3a8a5a'][i]; ctx.beginPath(); ctx.arc(bx,groundY-30,5,Math.PI,0); ctx.fill(); ctx.fillStyle='#5a4030'; ctx.fillRect(bx-1,groundY-24,2,2); }
+  // a few birds
+  for(let i=0;i<3;i++){ const gx=W*0.4+i*W*0.12+Math.sin(t*0.7+i)*10, gy=H*0.16+i*6; ctx.strokeStyle='#6a5a4a'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(gx-5,gy); ctx.quadraticCurveTo(gx,gy-4,gx+5,gy); ctx.stroke(); }
+}
+registerScene('balloonfest', drawBalloonFest);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
