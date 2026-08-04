@@ -3823,6 +3823,39 @@ function drawMountainSummit(){
 }
 registerScene('mountain', drawMountainSummit);
 
+/* ── APOTHECARY (indoor · herbalist) ── */
+function drawApothecary(){
+  const t = sceneTime, floorY = H*0.62;
+
+  ctx.fillStyle='#4a3626'; ctx.fillRect(0,0,W,floorY);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#7a5638'); fl.addColorStop(1,'#5e4228');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let i=1;i<5;i++){ const y=floorY+i/5*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  const glow=ctx.createRadialGradient(W*0.5,H*0.4,20,W*0.5,H*0.5,W*0.6); glow.addColorStop(0,'rgba(255,180,80,.1)'); glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=glow; ctx.fillRect(0,0,W,floorY);
+
+  // shelves of jars
+  const jarc=['#7ac05a','#e0a020','#c0392b','#8e6a3a','#5a9ee0','#a05fd0'];
+  for (let s=0;s<3;s++){ const sy=H*0.1+s*H*0.14; ctx.fillStyle='#3a2818'; ctx.fillRect(W*0.05,sy+20,W*0.9,4);
+    for (let i=0;i<9;i++){ const jx=W*0.09+i*W*0.1; ctx.fillStyle='rgba(220,235,240,.25)'; ctx.fillRect(jx-6,sy,12,20); ctx.fillStyle=jarc[(i+s)%6]; ctx.fillRect(jx-5,sy+8,10,11); ctx.fillStyle='#8a6a4a'; ctx.fillRect(jx-6,sy-2,12,3); }
+  }
+
+  // hanging dried herb bundles
+  for (const hx of [W*0.16,W*0.5,W*0.84]){ ctx.strokeStyle='#8a6a3a'; ctx.fillStyle='#8a6a3a'; ctx.fillRect(hx-3,H*0.5,6,4); ctx.fillStyle='#6a7a3a'; for (let k=0;k<7;k++){ const a=-1.3+k*0.4; ctx.save(); ctx.translate(hx,H*0.52); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,10,2,10,0,0,7); ctx.fill(); ctx.restore(); } }
+
+  // counter with brass scale + mortar
+  const cY=floorY-6;
+  ctx.fillStyle='#5a3a24'; ctx.fillRect(W*0.1,cY-24,W*0.8,24+ (H-cY)); ctx.fillStyle='#4a2f1c'; ctx.fillRect(W*0.1,cY-24,W*0.8,5);
+  const scX=W*0.30, scB=cY-24, tilt=Math.sin(t*1.5)*2;
+  ctx.strokeStyle='#c9a24a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(scX,scB); ctx.lineTo(scX,scB-24); ctx.moveTo(scX-16,scB-24); ctx.lineTo(scX+16,scB-24); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(scX-16,scB-24); ctx.lineTo(scX-16,scB-14+tilt); ctx.moveTo(scX+16,scB-24); ctx.lineTo(scX+16,scB-14-tilt); ctx.stroke();
+  ctx.fillStyle='#c9a24a'; ctx.beginPath(); ctx.ellipse(scX-16,scB-13+tilt,6,2,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(scX+16,scB-13-tilt,6,2,0,0,7); ctx.fill();
+  const mX=W*0.66, mB=cY-24;
+  ctx.fillStyle='#9a9288'; ctx.beginPath(); ctx.moveTo(mX-10,mB-12); ctx.lineTo(mX+10,mB-12); ctx.lineTo(mX+7,mB); ctx.lineTo(mX-7,mB); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#7a7268'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(mX+2,mB-8); ctx.lineTo(mX+10,mB-22); ctx.stroke();
+}
+registerScene('apothecary', drawApothecary);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
