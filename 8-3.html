@@ -5848,6 +5848,60 @@ function drawComicShop(){
 }
 registerScene('comicshop', drawComicShop);
 
+/* ── ALPINE MEADOW (outdoor · flowered pasture below snowy peaks) ── */
+function drawAlpineMeadow(){
+  const t=sceneTime, groundY=H*0.5;
+  // clear mountain sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#5aa0e0'); sky.addColorStop(1,'#cfe8f2');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  for(let i=0;i<3;i++){ const cx=((t*5+i*140)%(W+120))-60; ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.beginPath(); ctx.arc(cx,H*0.1+i*14,10,0,7); ctx.arc(cx+12,H*0.1+i*14+2,8,0,7); ctx.arc(cx-11,H*0.1+i*14+3,7,0,7); ctx.fill(); }
+  // snowy peaks
+  ctx.fillStyle='#8a9ab0'; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W*0.16,H*0.18); ctx.lineTo(W*0.32,groundY); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#7a8aa0'; ctx.beginPath(); ctx.moveTo(W*0.2,groundY); ctx.lineTo(W*0.44,H*0.12); ctx.lineTo(W*0.7,groundY); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#8a9ab0'; ctx.beginPath(); ctx.moveTo(W*0.58,groundY); ctx.lineTo(W*0.8,H*0.2); ctx.lineTo(W,groundY); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#eef4fa'; // snow caps
+  ctx.beginPath(); ctx.moveTo(W*0.16,H*0.18); ctx.lineTo(W*0.1,H*0.27); ctx.lineTo(W*0.22,H*0.27); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W*0.44,H*0.12); ctx.lineTo(W*0.36,H*0.24); ctx.lineTo(W*0.53,H*0.24); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W*0.8,H*0.2); ctx.lineTo(W*0.74,H*0.28); ctx.lineTo(W*0.87,H*0.28); ctx.closePath(); ctx.fill();
+  // dark evergreen tree line at the base of the mountains
+  ctx.fillStyle='#2f5a3a'; for(let i=0;i<W;i+=12){ ctx.beginPath(); ctx.moveTo(i,groundY); ctx.lineTo(i+6,groundY-12); ctx.lineTo(i+12,groundY); ctx.closePath(); ctx.fill(); }
+  // rolling green meadow
+  ctx.fillStyle='#6aa83e'; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.fillStyle='#5c9a34'; ctx.beginPath(); ctx.moveTo(0,groundY+20); ctx.quadraticCurveTo(W*0.5,groundY+2,W,groundY+24); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.fill();
+  // scattered wildflowers
+  const fc=['#f2e24a','#ffffff','#e0609a','#8a6ae0'];
+  for(let i=0;i<40;i++){ const fx=(i*53+11)%W, fy=groundY+10+ ((i*29)%(H-groundY-10)); const s=0.6+ (fy-groundY)/(H-groundY);
+    ctx.fillStyle=fc[i%4]; ctx.beginPath(); ctx.arc(fx,fy,2*s,0,7); ctx.fill(); ctx.fillStyle='#f2e24a'; ctx.beginPath(); ctx.arc(fx,fy,0.8*s,0,7); ctx.fill(); }
+  // a cow helper (brown & white, with a bell), tail flicking, head bobbing to graze
+  function cow(x,y,s){
+    const graze=Math.sin(t*1.5+x)*0.1;
+    // body
+    ctx.fillStyle='#f0ece4'; ctx.beginPath(); ctx.ellipse(x,y,18*s,10*s,0,0,7); ctx.fill();
+    // brown patches
+    ctx.fillStyle='#7a4a2a'; ctx.beginPath(); ctx.ellipse(x-6*s,y-2*s,6*s,5*s,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x+8*s,y+2*s,5*s,4*s,0,0,7); ctx.fill();
+    // legs
+    ctx.strokeStyle='#5a3a22'; ctx.lineWidth=2*s; for(let l=-1;l<=1;l+=2){ ctx.beginPath(); ctx.moveTo(x+l*10*s,y+8*s); ctx.lineTo(x+l*10*s,y+18*s); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x+l*4*s,y+8*s); ctx.lineTo(x+l*4*s,y+18*s); ctx.stroke(); }
+    // head (lowered to graze)
+    ctx.save(); ctx.translate(x-18*s,y-2*s); ctx.rotate(0.5+graze);
+    ctx.fillStyle='#f0ece4'; ctx.fillRect(-2*s,0,8*s,7*s); ctx.fillStyle='#e0b0a0'; ctx.fillRect(4*s,4*s,4*s,3*s); // muzzle
+    ctx.fillStyle='#5a3a22'; ctx.fillRect(-2*s,-2*s,2*s,3*s); ctx.fillRect(4*s,-2*s,2*s,3*s); // ears/horns
+    ctx.restore();
+    // bell
+    ctx.fillStyle='#c9a24a'; ctx.fillRect(x-19*s,y+2*s,4*s,4*s);
+    // flicking tail
+    ctx.strokeStyle='#5a3a22'; ctx.lineWidth=1.5*s; ctx.beginPath(); ctx.moveTo(x+17*s,y-4*s); ctx.lineTo(x+22*s+Math.sin(t*4+x)*3, y+6*s); ctx.stroke();
+  }
+  cow(W*0.3, groundY+50, 0.9);
+  cow(W*0.62, groundY+70, 1.1);
+  cow(W*0.82, groundY+40, 0.75);
+  // a little wooden chalet on the right
+  const cx=W*0.9, cy=groundY+30;
+  ctx.fillStyle='#8a6a44'; ctx.fillRect(cx-14,cy-14,28,18); ctx.fillStyle='#5a3a24'; ctx.beginPath(); ctx.moveTo(cx-18,cy-14); ctx.lineTo(cx+18,cy-14); ctx.lineTo(cx,cy-26); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#c98a3a'; ctx.fillRect(cx-4,cy-6,8,10);
+}
+registerScene('alpinemeadow', drawAlpineMeadow);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
