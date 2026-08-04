@@ -3394,6 +3394,44 @@ function drawCafe(){
 }
 registerScene('cafe', drawCafe);
 
+/* ── RAINY CITY STREET (outdoor · evening) ── */
+function drawRainyStreet(){
+  const t = sceneTime, sidewalkY = H*0.66;
+
+  const sky=ctx.createLinearGradient(0,0,0,sidewalkY); sky.addColorStop(0,'#1a2438'); sky.addColorStop(1,'#3a4a60');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,sidewalkY);
+
+  // buildings (deterministic)
+  let seed=3; const rnd=()=>{ seed=(seed*9301+49297)%233280; return seed/233280; };
+  let bx=0;
+  while (bx<W){
+    const bw=40+Math.floor(rnd()*30), bh=60+Math.floor(rnd()*70), bTop=sidewalkY-bh;
+    ctx.fillStyle=`rgb(${30+Math.floor(rnd()*20)},${34+Math.floor(rnd()*20)},${46+Math.floor(rnd()*20)})`; ctx.fillRect(bx,bTop,bw,bh);
+    for (let wy=bTop+8;wy<sidewalkY-8;wy+=12) for (let wx=bx+6;wx<bx+bw-6;wx+=12){ if (rnd()>0.4){ ctx.fillStyle=`rgba(255,210,120,${0.4+0.4*rnd()})`; ctx.fillRect(wx,wy,6,7); } }
+    bx+=bw+2;
+  }
+  ctx.textAlign='left';
+  ctx.fillStyle=`rgba(255,80,180,${0.7+0.3*Math.sin(t*3)})`; ctx.font='bold 12px Segoe UI, sans-serif'; ctx.fillText('OPEN', W*0.12, sidewalkY-70);
+  ctx.fillStyle=`rgba(80,220,255,${0.7+0.3*Math.sin(t*2+1)})`; ctx.font='bold 10px Segoe UI, sans-serif'; ctx.fillText('DINER', W*0.68, sidewalkY-92);
+
+  // wet street + reflections
+  const st=ctx.createLinearGradient(0,sidewalkY,0,H); st.addColorStop(0,'#2a2e36'); st.addColorStop(1,'#1a1e26');
+  ctx.fillStyle=st; ctx.fillRect(0,sidewalkY,W,H-sidewalkY);
+  ctx.globalAlpha=0.2; for (let i=0;i<10;i++){ const rx=(i*41+13)%W; ctx.fillStyle=['#ffd278','#ff50b4','#50dcff'][i%3]; ctx.fillRect(rx,sidewalkY,3,30+((i*17)%30)); } ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(120,150,180,.2)'; for (const p of [[W*0.3,H*0.82,30],[W*0.7,H*0.90,40],[W*0.15,H*0.94,24]]){ ctx.beginPath(); ctx.ellipse(p[0],p[1],p[2],p[2]*0.3,0,0,7); ctx.fill(); }
+
+  // streetlamp + glow
+  const lX=W*0.85, lB=sidewalkY;
+  ctx.fillStyle='rgba(255,220,150,.06)'; ctx.beginPath(); ctx.moveTo(lX-6,lB-88); ctx.lineTo(lX-40,H); ctx.lineTo(lX+40,H); ctx.lineTo(lX+6,lB-88); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#2a2e34'; ctx.fillRect(lX-2,lB-90,4,90);
+  ctx.fillStyle='rgba(255,220,150,.25)'; ctx.beginPath(); ctx.arc(lX,lB-88,24,0,7); ctx.fill();
+  ctx.fillStyle='#ffe0a0'; ctx.beginPath(); ctx.arc(lX,lB-88,4,0,7); ctx.fill();
+
+  // rain
+  ctx.strokeStyle='rgba(180,200,220,.4)'; ctx.lineWidth=1; for (let i=0;i<60;i++){ const seed2=i*53.1, rx=((seed2*1.7 + t*400)%(W+40))-20, ry=(seed2*2.3 + t*600)%H; ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx-4,ry+10); ctx.stroke(); }
+}
+registerScene('rainystreet', drawRainyStreet);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
