@@ -3792,6 +3792,37 @@ function drawDiner(){
 }
 registerScene('diner', drawDiner);
 
+/* ── MOUNTAIN SUMMIT (outdoor · alpine) ── */
+function drawMountainSummit(){
+  const t = sceneTime, ledgeY = H*0.64;
+
+  const sky=ctx.createLinearGradient(0,0,0,ledgeY); sky.addColorStop(0,'#6ab0e8'); sky.addColorStop(1,'#cfe8f5');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,ledgeY);
+  ctx.fillStyle='rgba(255,250,220,.5)'; ctx.beginPath(); ctx.arc(W*0.78,H*0.16,26,0,7); ctx.fill();
+  ctx.fillStyle='#fffbe0'; ctx.beginPath(); ctx.arc(W*0.78,H*0.16,16,0,7); ctx.fill();
+
+  const layers=[['#8a9ac0',0.40],['#6a7aa8',0.48],['#4a5a88',0.56]];
+  for (const [col,yf] of layers){ ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(0,H*yf); let x=0; while (x<=W){ const peak=H*yf - 20 - (Math.sin(x*0.05+yf*10)*0.5+0.5)*40; ctx.lineTo(x,peak); x+=W/8; } ctx.lineTo(W,H*yf); ctx.lineTo(W,ledgeY); ctx.lineTo(0,ledgeY); ctx.closePath(); ctx.fill(); }
+
+  // sea of clouds
+  ctx.fillStyle='rgba(255,255,255,.7)'; for (let i=0;i<6;i++){ const cx=(i*W/5 + Math.sin(t*0.2+i)*10); ctx.beginPath(); ctx.ellipse(cx,H*0.56+((i%2)*8),40,10,0,0,7); ctx.fill(); }
+
+  // snowy ledge
+  const ledge=ctx.createLinearGradient(0,ledgeY,0,H); ledge.addColorStop(0,'#f0f6fb'); ledge.addColorStop(1,'#c8d6e2');
+  ctx.fillStyle=ledge; ctx.beginPath(); ctx.moveTo(0,ledgeY+10); ctx.quadraticCurveTo(W*0.3,ledgeY-6,W*0.6,ledgeY+8); ctx.quadraticCurveTo(W*0.85,ledgeY-4,W,ledgeY+10); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#7a7268'; for (const r of [[W*0.2,ledgeY+34,10],[W*0.82,ledgeY+44,12]]){ ctx.beginPath(); ctx.moveTo(r[0]-r[2],r[1]); ctx.lineTo(r[0],r[1]-r[2]); ctx.lineTo(r[0]+r[2],r[1]); ctx.closePath(); ctx.fill(); }
+
+  // summit cairn + flag
+  const flX=W*0.5, flB=ledgeY+16;
+  ctx.fillStyle='#6a6258'; ctx.beginPath(); ctx.arc(flX,flB,6,0,7); ctx.fill(); ctx.fillStyle='#7a7268'; ctx.beginPath(); ctx.arc(flX,flB-8,4,0,7); ctx.fill();
+  ctx.strokeStyle='#5a4a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(flX,flB-10); ctx.lineTo(flX,flB-34); ctx.stroke();
+  ctx.fillStyle='#e0504a'; ctx.beginPath(); ctx.moveTo(flX,flB-34); ctx.lineTo(flX+16+Math.sin(t*4)*2,flB-30); ctx.lineTo(flX,flB-26); ctx.closePath(); ctx.fill();
+
+  // soaring bird
+  ctx.strokeStyle='#444'; ctx.lineWidth=1.5; const gx=W*0.3+Math.sin(t*0.3)*40; ctx.beginPath(); ctx.moveTo(gx-6,H*0.24); ctx.quadraticCurveTo(gx,H*0.22,gx,H*0.24); ctx.quadraticCurveTo(gx,H*0.22,gx+6,H*0.24); ctx.stroke();
+}
+registerScene('mountain', drawMountainSummit);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
