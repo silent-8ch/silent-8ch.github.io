@@ -5348,6 +5348,52 @@ function drawTerrariumShop(){
 }
 registerScene('terrariumshop', drawTerrariumShop);
 
+/* ── SALT FLATS (outdoor · mirror salt pan at dusk) ── */
+function drawSaltFlats(){
+  const t=sceneTime, horizon=H*0.5;
+  // dusk gradient sky
+  const sky=ctx.createLinearGradient(0,0,0,horizon);
+  sky.addColorStop(0,'#6a5a9a'); sky.addColorStop(0.5,'#d98aa0'); sky.addColorStop(1,'#f6c98a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizon);
+  // sun near the horizon
+  const sunX=W*0.5, sunY=horizon-8;
+  ctx.fillStyle='#ffe0a0'; ctx.beginPath(); ctx.arc(sunX,sunY,22,0,7); ctx.fill();
+  ctx.globalAlpha=0.3; ctx.beginPath(); ctx.arc(sunX,sunY,36,0,7); ctx.fill(); ctx.globalAlpha=1;
+  // clouds
+  for(let i=0;i<4;i++){ const cx=((t*4+i*110)%(W+120))-60, cy=H*0.14+i*16;
+    ctx.fillStyle=`rgba(255,220,210,${0.5-i*0.08})`; ctx.beginPath(); ctx.ellipse(cx,cy,26,6,0,0,7); ctx.fill(); }
+  // distant mountains
+  ctx.fillStyle='#7a6a86'; ctx.beginPath(); ctx.moveTo(0,horizon); ctx.lineTo(W*0.18,horizon-22); ctx.lineTo(W*0.34,horizon); ctx.lineTo(W*0.6,horizon-16); ctx.lineTo(W*0.82,horizon); ctx.lineTo(W,horizon-20); ctx.lineTo(W,horizon); ctx.closePath(); ctx.fill();
+  // the wet salt pan reflecting everything (mirror)
+  const refl=ctx.createLinearGradient(0,horizon,0,H);
+  refl.addColorStop(0,'#f0c890'); refl.addColorStop(0.4,'#d68aa0'); refl.addColorStop(1,'#8a7aa8');
+  ctx.fillStyle=refl; ctx.fillRect(0,horizon,W,H-horizon);
+  // mirrored sun (blurred, wavering column)
+  for(let i=0;i<14;i++){ const gy=horizon+2+i*((H-horizon)/14); const wob=Math.sin(t*2+i*0.6)*6;
+    ctx.fillStyle=`rgba(255,224,160,${0.5-i*0.03})`; ctx.fillRect(sunX-14+wob, gy, 28, 3); }
+  // mirrored mountains (faint, inverted)
+  ctx.save(); ctx.globalAlpha=0.3; ctx.fillStyle='#7a6a86';
+  ctx.beginPath(); ctx.moveTo(0,horizon); ctx.lineTo(W*0.18,horizon+22); ctx.lineTo(W*0.34,horizon); ctx.lineTo(W*0.6,horizon+16); ctx.lineTo(W*0.82,horizon); ctx.lineTo(W,horizon+20); ctx.lineTo(W,horizon); ctx.closePath(); ctx.fill();
+  ctx.restore();
+  // the polygonal salt crust pattern emerging in the foreground
+  ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1;
+  for(let r=0;r<5;r++){ const y=H*0.72+r*((H-H*0.72)/5); const scale=1+r*0.5;
+    for(let x=-20;x<W+20;x+=28*scale){ const cx=x+ (r%2)*14*scale;
+      ctx.beginPath();
+      ctx.moveTo(cx,y); ctx.lineTo(cx+14*scale,y+6*scale); ctx.lineTo(cx+28*scale,y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx+14*scale,y+6*scale); ctx.lineTo(cx+14*scale,y+ (14)*scale); ctx.stroke();
+    }
+  }
+  // a thin shimmer of standing water highlights
+  ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1.5;
+  for(let i=0;i<4;i++){ const ry=horizon+30+i*24; ctx.beginPath(); for(let x=0;x<=W;x+=12){ const yy=ry+Math.sin(x*0.05+t*1.5+i)*1.5; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // a lone person's tiny silhouette + long reflection near center for scale
+  const px=W*0.66;
+  ctx.fillStyle='#2a2436'; ctx.fillRect(px-1,horizon-14,2,14); ctx.beginPath(); ctx.arc(px,horizon-16,2,0,7); ctx.fill();
+  ctx.globalAlpha=0.3; ctx.fillRect(px-1,horizon,2,12); ctx.globalAlpha=1;
+}
+registerScene('saltflats', drawSaltFlats);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
