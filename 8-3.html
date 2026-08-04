@@ -6263,6 +6263,49 @@ function drawBallroom(){
 }
 registerScene('ballroom', drawBallroom);
 
+/* ── VOLCANO (outdoor · night eruption with a lava river) ── */
+function drawVolcano(){
+  const t=sceneTime, groundY=H*0.7;
+  // night sky, tinted red-orange near the summit
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#160e1a'); sky.addColorStop(0.7,'#3a1a20'); sky.addColorStop(1,'#5a2418');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  // stars away from the glow (left side)
+  for(let i=0;i<30;i++){ const sx=(i*37)%(W*0.5), sy=(i*53)%(groundY*0.6); ctx.fillStyle=`rgba(255,255,255,${0.3+0.3*Math.sin(t*2+i)})`; ctx.fillRect(sx,sy,1.2,1.2); }
+  // the volcano cone silhouette
+  const vx=W*0.5, summitY=H*0.28, baseY=groundY;
+  ctx.fillStyle='#1a1216'; ctx.beginPath(); ctx.moveTo(W*0.1,baseY); ctx.lineTo(vx-16,summitY); ctx.lineTo(vx+16,summitY); ctx.lineTo(W*0.9,baseY); ctx.closePath(); ctx.fill();
+  // crater glow at the summit
+  const cg=ctx.createRadialGradient(vx,summitY,2,vx,summitY,40); cg.addColorStop(0,`rgba(255,220,120,${0.8+0.2*Math.sin(t*6)})`); cg.addColorStop(1,'rgba(255,100,20,0)');
+  ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(vx,summitY,40,0,7); ctx.fill();
+  ctx.fillStyle='#ffcf6a'; ctx.beginPath(); ctx.ellipse(vx,summitY,14,5,0,0,7); ctx.fill();
+  // ash & smoke plume billowing upward, drifting
+  for(let i=0;i<7;i++){ const py=summitY - i*26; const px=vx + Math.sin(t*0.6+i*0.5)*i*4;
+    ctx.fillStyle=`rgba(60,50,55,${0.5-i*0.05})`; ctx.beginPath(); ctx.arc(px,py,10+i*4,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(90,70,70,${0.3-i*0.03})`; ctx.beginPath(); ctx.arc(px-8,py+4,7+i*3,0,7); ctx.fill(); }
+  // glowing ember sparks flung from the crater
+  for(let i=0;i<14;i++){ const life=(t*30+i*40)%120; const a=-Math.PI/2 + (i-7)*0.12;
+    const ex=vx+Math.cos(a)*life*0.6, ey=summitY+Math.sin(a)*life*0.6 - life*0.3;
+    ctx.globalAlpha=Math.max(0,1-life/120); ctx.fillStyle= i%2?'#ffcf6a':'#ff7a2a'; ctx.fillRect(ex,ey,2.4,2.4); ctx.globalAlpha=1; }
+  // lava rivers running down the cone (glowing veins)
+  function lavaRun(offX){ ctx.strokeStyle='#ff5a1a'; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.moveTo(vx+offX*0.2,summitY+4);
+    let x=vx+offX*0.2, y=summitY+4; for(let k=0;k<8;k++){ x += offX*0.1 + Math.sin(k+offX)*4; y += (baseY-summitY)/8; ctx.lineTo(x,y); }
+    ctx.stroke();
+    ctx.strokeStyle=`rgba(255,220,120,${0.6+0.3*Math.sin(t*5+offX)})`; ctx.lineWidth=1.5; ctx.stroke();
+  }
+  lavaRun(-30); lavaRun(24);
+  // foreground: cooled black lava field with glowing cracks + a lava pool
+  ctx.fillStyle='#120c10'; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.strokeStyle=`rgba(255,90,30,.7)`; ctx.lineWidth=1.5;
+  for(let i=0;i<7;i++){ ctx.beginPath(); ctx.moveTo(i*W*0.15,groundY+6); ctx.lineTo(i*W*0.15+30+Math.sin(i)*10, H); ctx.stroke(); }
+  // a molten pool glowing at the base of the cone
+  const pg=ctx.createRadialGradient(vx,groundY+10,2,vx,groundY+10,60); pg.addColorStop(0,'#ffdc80'); pg.addColorStop(0.4,'#ff6a1a'); pg.addColorStop(1,'rgba(120,30,10,0)');
+  ctx.fillStyle=pg; ctx.beginPath(); ctx.ellipse(vx,groundY+16,60,14,0,0,7); ctx.fill();
+  // heat shimmer over the pool
+  ctx.fillStyle=`rgba(255,140,60,${0.1+0.05*Math.sin(t*4)})`; ctx.beginPath(); ctx.ellipse(vx,groundY+16,50,10,0,0,7); ctx.fill();
+}
+registerScene('volcano', drawVolcano);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
