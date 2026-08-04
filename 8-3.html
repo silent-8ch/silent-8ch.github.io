@@ -118,6 +118,7 @@
   #banner.hide{display:none;}
   /* map / locations */
   #mapBtn{cursor:pointer;font-size:18px;line-height:1;user-select:none;}
+  #daysChip{font-size:12px;font-weight:700;color:var(--accent);background:#fff;padding:3px 8px;border-radius:20px;box-shadow:0 1px 3px var(--shadow);user-select:none;cursor:default;}
   #mapPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
   #mapPanel.hide{display:none;}
   #mapHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -145,6 +146,7 @@
     <div id="titlebar">
       <span id="petname">Loading…</span>
       <div style="display:flex;align-items:center;gap:10px;">
+        <span id="daysChip" title="Days together">💛 1</span>
         <span id="mapBtn" title="Locations">🗺️</span>
         <span id="mood">🙂 okay</span>
       </div>
@@ -773,6 +775,38 @@ const PASSPORT_BADGES = [
   {n:50, icon:'⭐', name:'Adventurer'}, {n:100, icon:'🏆', name:'Voyager'},
 ];
 function earnedBadges(){ return PASSPORT_BADGES.filter(b=>visited.size>=b.n); }
+
+/* ---- "days together": distinct days visited + consecutive-day streak ---- */
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function daysBetween(a,b){ return Math.round((new Date(b+'T00:00') - new Date(a+'T00:00'))/86400000); }
+let meta = (function(){ try{ const r=localStorage.getItem('bpet_meta'); if(r) return JSON.parse(r); }catch(e){} return null; })()
+  || { firstDay:null, lastDay:null, totalDays:0, streak:0 };
+function saveMeta(){ try{ localStorage.setItem('bpet_meta', JSON.stringify(meta)); }catch(e){} }
+function updateDaysChip(){ const el=document.getElementById('daysChip'); if(el){ el.textContent='💛 '+meta.totalDays; el.title=`${meta.totalDays} day${meta.totalDays===1?'':'s'} together`+(meta.streak>1?` · ${meta.streak}-day streak`:''); } }
+function initDaysTogether(){
+  const t = todayStr();
+  const firstEver = !meta.firstDay;
+  if (firstEver) meta.firstDay = t;
+  const isNewDay = meta.lastDay !== t;
+  if (isNewDay){
+    meta.streak = (meta.lastDay && daysBetween(meta.lastDay, t) === 1) ? (meta.streak||0)+1 : 1;
+    meta.lastDay = t;
+    meta.totalDays = (meta.totalDays||0) + 1;
+    saveMeta();
+    // gentle new-day greeting + a small "good morning" gift (skip the very first ever)
+    if (!firstEver){
+      setTimeout(()=>{
+        say(meta.streak>1 ? `Day ${meta.totalDays} together! 💛 (${meta.streak}-day streak)` : `Day ${meta.totalDays} together! 💛`);
+        hearts();
+        state.hunger=clamp(state.hunger+10); state.fun=clamp(state.fun+10); state.love=clamp(state.love+10); state.energy=clamp(state.energy+10);
+        refreshHUD();
+      }, 1400);
+    } else {
+      setTimeout(()=>{ say('Hi! 💛'); }, 1200);
+    }
+  }
+  updateDaysChip();
+}
 function markVisited(name){
   if (visited.has(name)) return;
   const before = visited.size;
@@ -7835,11 +7869,11 @@ function roundRect(x,y,w,h,rr){ ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x
 function getVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
 /* ---------- boot ---------- */
-say('Hi! 💛');
 // on load, drop into a random enabled location (then every change is random too)
 (function(){ const en = enabledIndices(); if (en.length) currentScene = en[Math.floor(Math.random()*en.length)]; })();
 resize();
 refreshHUD();
+initDaysTogether();   // greets her, counts the day, updates the 💛 chip
 requestAnimationFrame(loop);
 window.addEventListener('beforeunload', save);
 </script>
