@@ -328,6 +328,104 @@ const SCENE_INTERACT = (()=>{
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];
+
+/* ---- generic tap-region system: tapping different AREAS gives different reactions,
+   flavored by the current scene. Makes EVERY scene (incl. future ones) reactive. ---- */
+const REGION_SKY    = { lines:['Look up there! ☁️','Something in the sky ✨','Way up high! 🕊️','The view above us 🌤️','Up above us 🌈'], emojis:['☁️','✨','🌤️','🕊️'] };
+const REGION_GROUND = { lines:['Something in the grass 🌿','Down by our feet 👀','Ooh, on the ground! 🐞','What\'s down here? 🍃','Look, right here! 🌱'], emojis:['🌿','🌱','🐞','🍃'] };
+const REGION_MID    = { lines:['Ooh, over here!','What\'s this? 👀','Come see! 💫','Right here 🥰','Look at this!'], emojis:['💫','✨','💛'] };
+// px,py are canvas coords; returns {line, emoji, sp} using the scene's flavor
+function regionReaction(px, py){
+  const scene = SCENES[currentScene];
+  const sp = SCENE_INTERACT[scene];
+  const trinkets = (typeof TRINKET_POOL === 'object' && TRINKET_POOL[scene])
+                || (typeof TRINKET_DEFAULT !== 'undefined' ? TRINKET_DEFAULT : ['✨']);
+  let line, emoji;
+  if (py < H*0.36){                                   // upper / sky band
+    line  = pick(REGION_SKY.lines);
+    emoji = pick(Math.random() < 0.3 ? trinkets : REGION_SKY.emojis);
+  } else if (py > H*0.60){                            // lower / ground band
+    line  = pick(REGION_GROUND.lines);
+    emoji = pick(Math.random() < 0.4 ? trinkets : REGION_GROUND.emojis);
+  } else if (sp){                                     // middle band — prefer the place's own flavor
+    line  = pick(sp.lines.concat(REGION_MID.lines));
+    emoji = pick([sp.emoji].concat(trinkets));
+  } else {
+    line  = pick(REGION_MID.lines.concat(AMBIENT));
+    emoji = pick(trinkets.concat(REGION_MID.emojis));
+  }
+  return { line, emoji, sp };
+}
+
+/* ---- hand-authored object hotspots: normalized coords (nx,ny in 0..1 of the WxH
+   canvas), r = tap radius in px, e = burst emoji, lines = unique reactions. A tap
+   inside a spot wins over the generic region reaction. ---- */
+const SCENE_SPOTS = {
+  beach: [
+    {nx:0.82, ny:0.14, r:55, e:'☀️', lines:['The warm sun ☀️','So bright and cheery!','Sunshine on my face 😊']},
+    {nx:0.50, ny:0.50, r:72, e:'🌊', lines:['The waves! 🌊','Splashy splashy 💦','The sea sounds so nice 🐚']},
+    {nx:0.24, ny:0.80, r:46, e:'🐚', lines:['A seashell! 🐚','Can I keep it? 🥰','Listen — the ocean! 🐚']},
+    {nx:0.70, ny:0.80, r:50, e:'🏰', lines:['A sandcastle! 🏰','Let\'s build one 🥰','Don\'t let the tide get it!']},
+  ],
+  backyard: [
+    {nx:0.20, ny:0.34, r:60, e:'🌳', lines:['Our big tree 🌳','So shady and cool','A bird\'s up there! 🐦']},
+    {nx:0.76, ny:0.74, r:50, e:'🌷', lines:['I planted these 🌷','Smell them! 💐','So colorful 🌸']},
+    {nx:0.50, ny:0.15, r:55, e:'☀️', lines:['What a lovely day ☀️','Not a cloud… 🌤️','Let\'s stay outside 🥰']},
+    {nx:0.50, ny:0.82, r:70, e:'🌿', lines:['Soft grass 🌿','Let\'s lie down here','A little ladybug! 🐞']},
+  ],
+  river: [
+    {nx:0.50, ny:0.55, r:74, e:'💧', lines:['The river flows by 💧','So clear and cool!','A little fish! 🐟']},
+    {nx:0.28, ny:0.72, r:48, e:'🪨', lines:['Stepping stones 🪨','Careful, slippery!','Hop hop hop 🐸']},
+    {nx:0.80, ny:0.34, r:58, e:'🌲', lines:['Tall trees 🌲','So green and peaceful','Birdsong 🐦']},
+    {nx:0.50, ny:0.14, r:52, e:'☁️', lines:['Fluffy clouds ☁️','So blue up there','A dragonfly! 🦋']},
+  ],
+  bakery: [
+    {nx:0.75, ny:0.50, r:54, e:'🔥', lines:['The warm oven 🔥','Fresh bread! 🍞','Mmm, that smell 😋']},
+    {nx:0.24, ny:0.44, r:54, e:'🍞', lines:['So many loaves 🍞','Which one? 🥖','Still warm!']},
+    {nx:0.50, ny:0.72, r:50, e:'🧁', lines:['Cupcakes! 🧁','Frosting… 😋','One for each of us? 🥰']},
+    {nx:0.52, ny:0.18, r:44, e:'✨', lines:['So cozy in here','Warm and sweet 💛','My favorite little shop']},
+  ],
+  library: [
+    {nx:0.20, ny:0.40, r:60, e:'📚', lines:['So many books! 📚','Which story? 📖','I love it here 🥰']},
+    {nx:0.75, ny:0.68, r:50, e:'🪑', lines:['A comfy chair 🪑','Read to me? 📖','Cozy corner 💛']},
+    {nx:0.58, ny:0.30, r:42, e:'💡', lines:['Warm little lamp 💡','So snug','Perfect for reading']},
+    {nx:0.85, ny:0.44, r:42, e:'🪜', lines:['The tall ladder 🪜','Way up high!','Careful up there!']},
+  ],
+  aquarium: [
+    {nx:0.50, ny:0.45, r:74, e:'🐠', lines:['Look at the fish! 🐠','So many colors 🌈','They\'re dancing 🐟']},
+    {nx:0.25, ny:0.34, r:46, e:'🪼', lines:['Jellyfish! 🪼','So glowy ✨','Floaty floaty']},
+    {nx:0.70, ny:0.72, r:50, e:'⭐', lines:['A starfish! ⭐','On the sand 🐚','So still and pretty']},
+    {nx:0.82, ny:0.40, r:44, e:'🦈', lines:['A shark! 🦈','Eek — but cool 😮','Don\'t worry, it\'s glass!']},
+  ],
+  cherryblossom: [
+    {nx:0.34, ny:0.30, r:64, e:'🌸', lines:['So many blossoms! 🌸','Pink everywhere 💗','Falling like snow ❄️']},
+    {nx:0.60, ny:0.80, r:58, e:'🌸', lines:['Petals on the ground 🌸','A soft pink carpet','Let\'s gather some 🥰']},
+    {nx:0.76, ny:0.70, r:46, e:'🪑', lines:['Sit with me? 🪑','Best seat in spring 🌸','Just us and the petals 💛']},
+    {nx:0.58, ny:0.14, r:50, e:'🍃', lines:['A gentle breeze 🍃','Petals in the air ✨','So dreamy up there']},
+  ],
+  campsite: [
+    {nx:0.50, ny:0.68, r:54, e:'🔥', lines:['The campfire 🔥','So warm and crackly','Marshmallows? 🥰']},
+    {nx:0.22, ny:0.60, r:54, e:'⛺', lines:['Our little tent ⛺','Cozy inside 💛','Snuggle up later 🥰']},
+    {nx:0.55, ny:0.14, r:60, e:'⭐', lines:['So many stars! ⭐','Make a wish ✨','The whole sky is out 🌌']},
+    {nx:0.82, ny:0.40, r:48, e:'🌲', lines:['Tall dark trees 🌲','An owl! 🦉','So quiet out here']},
+  ],
+  greenhouse: [
+    {nx:0.30, ny:0.45, r:60, e:'🪴', lines:['So many plants! 🪴','So green and alive 🌿','They love it here 💚']},
+    {nx:0.70, ny:0.55, r:54, e:'🌺', lines:['Bright flowers 🌺','Smell this one! 💐','So many colors 🌈']},
+    {nx:0.50, ny:0.78, r:46, e:'💧', lines:['Time to water 💧','Drip drip','Helping them grow 🌱']},
+    {nx:0.50, ny:0.16, r:54, e:'☀️', lines:['Sun through the glass ☀️','So warm and bright','Like a little jungle 🌴']},
+  ],
+};
+// nearest hotspot hit for the current scene, or null
+function spotAt(px, py){
+  const arr = SCENE_SPOTS[SCENES[currentScene]];
+  if (!arr) return null;
+  for (const s of arr){
+    const dx = px - s.nx*W, dy = py - s.ny*H;
+    if (dx*dx + dy*dy <= s.r*s.r) return s;
+  }
+  return null;
+}
 let interactCd = 0;
 function tapScene(px, py){
   if (interactCd > 0 || pet.animLock > 0) return;
@@ -337,17 +435,26 @@ function tapScene(px, py){
   pet.ty = Math.max(H*0.66, Math.min(H*0.82, py));
   pet.wanderTimer = rand(3,5);
   pet.dir = px < pet.x ? 'left' : 'right';
-  const sp = SCENE_INTERACT[SCENES[currentScene]];
+  // (1) hand-authored object hotspot wins if the tap lands on one
+  const spot = spotAt(px, py);
+  if (spot){
+    say(pick(spot.lines)); burstAt(spot.e, px, py); sfx('tap');
+    state.fun = clamp(state.fun + 4); refreshHUD();
+    return;
+  }
+  // (2) otherwise a generic region reaction, flavored by this scene
+  const rr = regionReaction(px, py);
+  say(rr.line); burstAt(rr.emoji, px, py); sfx('tap');
+  const sp = rr.sp;
   if (sp){
-    say(pick(sp.lines)); burstAt(sp.emoji, px, py); sfx('tap');
     if (sp.love)   state.love   = clamp(state.love   + sp.love);
     if (sp.fun)    state.fun    = clamp(state.fun    + sp.fun);
     if (sp.energy) state.energy = clamp(state.energy + sp.energy);
     if (sp.hunger) state.hunger = clamp(state.hunger + sp.hunger);
-    refreshHUD();
   } else {
-    say(pick(AMBIENT));
+    state.fun = clamp(state.fun + 3);
   }
+  refreshHUD();
 }
 
 function throwUpFx(){

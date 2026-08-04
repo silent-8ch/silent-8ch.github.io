@@ -3696,3 +3696,197 @@ function drawMossGarden(){
   ctx.fillStyle='#c0402a'; for (let k=0;k<5;k++){ const a=k/5*6.28; ctx.beginPath(); ctx.arc(W*0.5+Math.cos(a)*7,groundY-18+Math.sin(a)*5,4,0,7); ctx.fill(); }
 }
 registerScene('mossgarden', drawMossGarden);
+
+/* ── WINTER CHALET (indoor · alpine cabin with a fire & big view) ── */
+function drawWinterChalet(){
+  const t = sceneTime, floorY = H*0.74;
+
+  // warm knotty-pine walls
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#8a6238'); wall.addColorStop(1,'#6e4c2a');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1; for (let y=18;y<floorY;y+=20){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); ctx.fillStyle='rgba(255,240,210,.05)'; ctx.fillRect(0,y,W,2); }
+  // wood knots
+  ctx.fillStyle='rgba(60,40,20,.3)'; for (const [kx,ky] of [[W*0.2,H*0.22],[W*0.55,H*0.4],[W*0.8,H*0.16]]){ ctx.beginPath(); ctx.ellipse(kx,ky,3,5,0,0,7); ctx.fill(); }
+  // sloped ceiling beam
+  ctx.fillStyle='#4a3420'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,10); ctx.lineTo(0,H*0.06); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#5a3e26'; ctx.save(); ctx.translate(0,0); ctx.transform(1,0.05,0,1,0,0); ctx.fillRect(-4,H*0.20,W+8,8); ctx.restore();
+
+  // huge picture window with snowy alpine peaks (center-left)
+  const wx=W*0.08, wy=H*0.12, ww=W*0.42, wh=H*0.42;
+  const wg=ctx.createLinearGradient(0,wy,0,wy+wh); wg.addColorStop(0,'#9cc4e2'); wg.addColorStop(1,'#e6eef4'); ctx.fillStyle=wg; ctx.fillRect(wx,wy,ww,wh);
+  // mountains
+  ctx.fillStyle='#8a9ab0'; ctx.beginPath(); ctx.moveTo(wx,wy+wh); for (let x=0;x<=ww;x+=10){ ctx.lineTo(wx+x,wy+wh-30-30*Math.abs(Math.sin(x*0.03+1))); } ctx.lineTo(wx+ww,wy+wh); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(wx,wy+wh); for (let x=0;x<=ww;x+=10){ const peak=wy+wh-30-30*Math.abs(Math.sin(x*0.03+1)); ctx.lineTo(wx+x,peak+ (Math.abs(Math.sin(x*0.03+1))<0.7?100:14)); } ctx.lineTo(wx+ww,wy+wh); ctx.fill();
+  // falling snow in the window
+  for (let i=0;i<18;i++){ const sx=wx+((i*31+t*5)%ww); const sy=wy+((i*27+t*12)%wh); ctx.fillStyle='rgba(255,255,255,.85)'; ctx.beginPath(); ctx.arc(sx,sy,1.3,0,7); ctx.fill(); }
+  ctx.strokeStyle='#3a2818'; ctx.lineWidth=5; ctx.strokeRect(wx,wy,ww,wh); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.moveTo(wx,wy+wh/2); ctx.lineTo(wx+ww,wy+wh/2); ctx.stroke();
+
+  // stone fireplace (right) with fire
+  const fx=W*0.60, fy=H*0.16, fw=W*0.36, fh=floorY-fy;
+  ctx.fillStyle='#8a8078'; ctx.fillRect(fx,fy,fw,fh);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let y=fy;y<floorY;y+=14){ for (let x=fx+((y/14|0)%2)*12; x<fx+fw; x+=24){ ctx.strokeRect(x,y,24,14); } }
+  const bx=fx+10, by=fy+fh-42, bw=fw-20, bh=38; ctx.fillStyle='#1a0e08'; ctx.fillRect(bx,by,bw,bh);
+  ctx.fillStyle='#5a3a20'; ctx.fillRect(bx+6,by+bh-8,bw-12,5); ctx.fillRect(bx+12,by+bh-13,bw-28,5);
+  for (let i=0;i<6;i++){ const flx=bx+8+i*(bw-16)/5; const fl2=(12+7*Math.sin(t*6+i)); ctx.fillStyle='#e0641a'; ctx.beginPath(); ctx.moveTo(flx-4,by+bh-6); ctx.quadraticCurveTo(flx,by+bh-6-fl2,flx+4,by+bh-6); ctx.fill(); ctx.fillStyle='#f2b02a'; ctx.beginPath(); ctx.moveTo(flx-2,by+bh-6); ctx.quadraticCurveTo(flx,by+bh-6-fl2*0.6,flx+2,by+bh-6); ctx.fill(); }
+  ctx.fillStyle=`rgba(255,150,60,${0.14+0.05*Math.sin(t*4)})`; ctx.beginPath(); ctx.ellipse(bx+bw/2,by+bh,bw*0.7,26,0,0,7); ctx.fill();
+  // mantel with a clock + stockings
+  ctx.fillStyle='#4a3420'; ctx.fillRect(fx-4,by-12,fw+8,10);
+  ctx.fillStyle='#efe6d0'; ctx.beginPath(); ctx.arc(fx+fw*0.5,by-24,7,0,7); ctx.fill(); ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(fx+fw*0.5,by-24); ctx.lineTo(fx+fw*0.5,by-29); ctx.stroke();
+  for (let i=0;i<3;i++){ ctx.fillStyle=['#c0392b','#3a7a3a','#c0392b'][i]; ctx.beginPath(); ctx.moveTo(fx+10+i*22,by-12); ctx.lineTo(fx+10+i*22,by-4); ctx.lineTo(fx+16+i*22,by+2); ctx.lineTo(fx+18+i*22,by-2); ctx.lineTo(fx+16+i*22,by-12); ctx.closePath(); ctx.fill(); ctx.fillStyle='#fff'; ctx.fillRect(fx+10+i*22,by-12,8,2); }
+
+  // plank floor + fur rug + snowshoes on the wall
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#8a6038'); fl.addColorStop(1,'#6a482a'); ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let x=0;x<W;x+=28){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x-6,H); ctx.stroke(); }
+  ctx.fillStyle='#e8e0d0'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.90,100,22,0,0,7); ctx.fill(); ctx.strokeStyle='rgba(180,170,150,.5)'; ctx.lineWidth=1; for (let i=0;i<24;i++){ const rx=W*0.5-94+i*8; ctx.beginPath(); ctx.moveTo(rx,H*0.90-16); ctx.lineTo(rx+2,H*0.90-20); ctx.stroke(); }
+  // steaming cocoa mug on the rug (left, low)
+  const mx=W*0.20, my=H*0.90; ctx.fillStyle='#c0392b'; roundRect(mx-7,my-8,14,12,2); ctx.fill(); ctx.fillStyle='#3a2418'; ctx.beginPath(); ctx.ellipse(mx,my-8,7,2.4,0,0,7); ctx.fill(); ctx.strokeStyle='#c0392b'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(mx+9,my-2,3,-1,1.4); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5; ctx.beginPath(); for (let k=0;k<=6;k++){ const yy=my-10-k*4, xx=mx+Math.sin(t*3+k*0.6)*3; k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy);} ctx.stroke();
+}
+registerScene('winterchalet', drawWinterChalet);
+
+/* ── PENGUIN COVE (outdoor · icy antarctic shore) ── */
+function drawPenguinCove(){
+  const t = sceneTime, iceY = H*0.56, waterY = H*0.44;
+
+  // cold pale sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#a8cfe6'); sky.addColorStop(1,'#e0eef2');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  ctx.fillStyle='rgba(255,250,235,.7)'; ctx.beginPath(); ctx.arc(W*0.78,H*0.14,16,0,7); ctx.fill();
+  drawCloud(W*0.2+Math.sin(t*0.08)*8,H*0.09,0.6); drawCloud(W*0.55+Math.sin(t*0.07+2)*6,H*0.15,0.45);
+
+  // distant icebergs on the horizon
+  ctx.fillStyle='#cfe2ee'; for (const [bx,bw,bh] of [[W*0.1,60,30],[W*0.5,80,40],[W*0.82,50,26]]){ ctx.beginPath(); ctx.moveTo(bx-bw/2,waterY); ctx.lineTo(bx-bw*0.2,waterY-bh); ctx.lineTo(bx+bw*0.1,waterY-bh*0.7); ctx.lineTo(bx+bw/2,waterY); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle='#b8d4e2'; for (const [bx,bw] of [[W*0.1,60],[W*0.5,80],[W*0.82,50]]){ ctx.fillRect(bx-bw/2,waterY-3,bw,3); }
+
+  // cold sea between horizon and ice shelf
+  const sea=ctx.createLinearGradient(0,waterY,0,iceY); sea.addColorStop(0,'#3a7a9a'); sea.addColorStop(1,'#2a6284'); ctx.fillStyle=sea; ctx.fillRect(0,waterY,W,iceY-waterY);
+  ctx.strokeStyle='rgba(220,240,245,.2)'; ctx.lineWidth=1; for (let y=waterY+4;y<iceY;y+=6){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.06+t*1.4+y)*1.4; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+  // a penguin swimming/porpoising in the water
+  const swx=(t*40)%(W+40)-20; ctx.fillStyle='#1a2028'; ctx.beginPath(); ctx.ellipse(swx,waterY+16+Math.sin(t*4)*4,9,4,0.3,0,7); ctx.fill();
+
+  // icy shelf foreground (fills lower canvas)
+  const ice=ctx.createLinearGradient(0,iceY,0,H); ice.addColorStop(0,'#e8f2f8'); ice.addColorStop(1,'#c4dae6'); ctx.fillStyle=ice; ctx.fillRect(0,iceY,W,H-iceY);
+  // ice cracks + sheen
+  ctx.strokeStyle='rgba(150,190,215,.4)'; ctx.lineWidth=1; for (let i=0;i<6;i++){ const cx=(i*61+15)%W; ctx.beginPath(); ctx.moveTo(cx,iceY+6); ctx.lineTo(cx+ (i%2?18:-14), iceY+40+ (i*10)%40); ctx.stroke(); }
+  ctx.fillStyle='rgba(255,255,255,.3)'; ctx.beginPath(); ctx.ellipse(W*0.4,iceY+30,120,14,0,0,7); ctx.fill();
+  // a small snow mound + ice hole
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(W*0.86,iceY+10,26,10,0,Math.PI,0); ctx.fill();
+  ctx.fillStyle='#2a6284'; ctx.beginPath(); ctx.ellipse(W*0.2,H*0.86,16,6,0,0,7); ctx.fill();
+
+  // waddling penguins on the ice (sides + a couple mid) with tiny wing wobble
+  function penguin(px,py,sc,facing){ ctx.save(); ctx.translate(px,py); ctx.scale(sc*facing,sc);
+    // body
+    ctx.fillStyle='#1a2028'; ctx.beginPath(); ctx.ellipse(0,-10,10,15,0,0,7); ctx.fill();
+    // white belly
+    ctx.fillStyle='#f4f6f4'; ctx.beginPath(); ctx.ellipse(1,-8,6,12,0,0,7); ctx.fill();
+    // head
+    ctx.fillStyle='#1a2028'; ctx.beginPath(); ctx.arc(0,-26,7,0,7); ctx.fill();
+    ctx.fillStyle='#f4f6f4'; ctx.beginPath(); ctx.arc(1,-25,4,-0.4,1.6); ctx.fill();
+    // beak + eye
+    ctx.fillStyle='#e0902a'; ctx.beginPath(); ctx.moveTo(6,-26); ctx.lineTo(12,-25); ctx.lineTo(6,-23); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(3,-28,1.4,0,7); ctx.fill(); ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(3.4,-28,0.7,0,7); ctx.fill();
+    // flipper (wobbling)
+    ctx.fillStyle='#1a2028'; ctx.save(); ctx.translate(-8,-12); ctx.rotate(Math.sin(t*4+px)*0.3); ctx.beginPath(); ctx.ellipse(0,4,3,10,0,0,7); ctx.fill(); ctx.restore();
+    // feet
+    ctx.fillStyle='#e0902a'; ctx.beginPath(); ctx.ellipse(-3,4,3,1.6,0,0,7); ctx.ellipse(4,4,3,1.6,0,0,7); ctx.fill();
+    ctx.restore(); }
+  penguin(W*0.16,H*0.80,1.2,1); penguin(W*0.30,H*0.72,0.9,-1); penguin(W*0.84,H*0.82,1.3,-1); penguin(W*0.70,H*0.74,0.9,1);
+  // a fluffy grey chick beside the big one
+  ctx.fillStyle='#8a9098'; ctx.beginPath(); ctx.ellipse(W*0.22,H*0.82,6,8,0,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(W*0.22,H*0.76,4,0,7); ctx.fill(); ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(W*0.225,H*0.76,0.8,0,7); ctx.fill();
+  // gentle snow flurries
+  for (let i=0;i<24;i++){ const sx=(i*47+t*6)%W; const sy=(i*53+t*16)%H; ctx.fillStyle='rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(sx,sy,1+(i%2)*0.6,0,7); ctx.fill(); }
+}
+registerScene('penguincove', drawPenguinCove);
+
+/* ── FIREFLY PIER (outdoor · lakeside dock at dusk) ── */
+function drawFireflyPier(){
+  const t = sceneTime, waterY = H*0.48, dockY = H*0.74;
+
+  // dusk gradient sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#2a3a6a'); sky.addColorStop(0.5,'#6a5a8a'); sky.addColorStop(1,'#e0a878');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  // early stars up high
+  for (let i=0;i<24;i++){ const sx=(i*71+5)%W, sy=(i*23+3)%(waterY*0.5); ctx.fillStyle=`rgba(255,250,235,${0.2+0.3*Math.abs(Math.sin(t*1.2+i))})`; ctx.fillRect(sx,sy,1.1,1.1); }
+  // setting sun low on the horizon
+  ctx.fillStyle='rgba(255,200,120,.4)'; ctx.beginPath(); ctx.arc(W*0.5,waterY-4,30,0,7); ctx.fill(); ctx.fillStyle='#ffce8a'; ctx.beginPath(); ctx.arc(W*0.5,waterY-4,18,0,7); ctx.fill();
+
+  // dark tree-lined far shore
+  ctx.fillStyle='#1e2a2e'; ctx.beginPath(); ctx.moveTo(0,waterY); for (let x=0;x<=W;x+=14){ ctx.lineTo(x,waterY-10-8*Math.abs(Math.sin(x*0.05))); } ctx.lineTo(W,waterY); ctx.fill();
+
+  // calm lake with sunset reflection
+  const wat=ctx.createLinearGradient(0,waterY,0,dockY); wat.addColorStop(0,'#3a4a6a'); wat.addColorStop(1,'#2a3450'); ctx.fillStyle=wat; ctx.fillRect(0,waterY,W,dockY-waterY);
+  for (let y=waterY; y<dockY; y+=3){ const p=(y-waterY)/(dockY-waterY); const wob=Math.sin(y*0.5+t*1.8)*(2+p*8); ctx.fillStyle=`rgba(255,190,110,${0.22*(1-p)})`; ctx.fillRect(W*0.5-8+wob,y,16+p*6,2); }
+  ctx.strokeStyle='rgba(180,200,225,.12)'; ctx.lineWidth=1; for (let y=waterY+8;y<dockY;y+=9){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.06+t*1.3+y)*1.5; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+
+  // wooden pier extending toward the viewer (foreground)
+  const deck=ctx.createLinearGradient(0,dockY,0,H); deck.addColorStop(0,'#5a4028'); deck.addColorStop(1,'#3a2818'); ctx.fillStyle=deck; ctx.fillRect(0,dockY,W,H-dockY);
+  ctx.strokeStyle='rgba(0,0,0,.3)'; ctx.lineWidth=1; for (let i=-3;i<=8;i++){ const x0=W*0.5+i*26, x1=W*0.5+i*72; ctx.beginPath(); ctx.moveTo(x0,dockY); ctx.lineTo(x1,H); ctx.stroke(); }
+  ctx.strokeStyle='rgba(255,225,180,.08)'; for (let y=dockY+6;y<H;y+=10){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.fillStyle='rgba(255,225,180,.12)'; ctx.fillRect(0,dockY,W,3);
+  // a couple of pier posts with a lantern (left)
+  const px=W*0.12; ctx.fillStyle='#241810'; ctx.fillRect(px-3,dockY-54,6,54); ctx.fillStyle='#3a2a1a'; ctx.fillRect(px-8,dockY-66,16,14);
+  ctx.fillStyle='rgba(255,200,120,.3)'; ctx.beginPath(); ctx.arc(px,dockY-58,18,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(255,205,120,${0.85+0.12*Math.sin(t*2.5)})`; roundRect(px-5,dockY-64,10,12,2); ctx.fill();
+  // right post
+  ctx.fillStyle='#241810'; ctx.fillRect(W*0.9-3,dockY-40,6,40);
+
+  // MANY fireflies drifting over the water and pier (blinking)
+  for (let i=0;i<26;i++){ const fx=(i*53 + Math.sin(t*0.5+i)*30)%W; const fy=waterY+10 + ((i*37)% (dockY-waterY+20)) + Math.sin(t*1.2+i)*10; const blink=Math.sin(t*3+i*1.3);
+    if (blink>0){ ctx.fillStyle=`rgba(190,255,140,${blink*0.9})`; ctx.beginPath(); ctx.arc(fx,fy,1.6,0,7); ctx.fill(); ctx.fillStyle=`rgba(190,255,140,${blink*0.25})`; ctx.beginPath(); ctx.arc(fx,fy,5,0,7); ctx.fill(); } }
+  // a jar of caught fireflies glowing on the pier (right, low)
+  const jx=W*0.86, jy=H*0.90; ctx.fillStyle='rgba(200,230,235,.25)'; roundRect(jx-8,jy-16,16,18,4); ctx.fill(); ctx.fillStyle='#8a6038'; ctx.fillRect(jx-8,jy-18,16,3);
+  for (let i=0;i<4;i++){ const bl=Math.max(0,Math.sin(t*4+i*2)); ctx.fillStyle=`rgba(190,255,140,${0.4+bl*0.5})`; ctx.beginPath(); ctx.arc(jx-4+ (i%2)*7, jy-10+ (i>1?6:0), 1.6,0,7); ctx.fill(); }
+}
+registerScene('fireflypier', drawFireflyPier);
+
+/* ── HERB DRYING SHED (indoor · rustic botanical workshop) ── */
+function drawHerbShed(){
+  const t = sceneTime, benchY = H*0.66;
+
+  // weathered plank wall
+  const wall=ctx.createLinearGradient(0,0,0,benchY); wall.addColorStop(0,'#8a7a58'); wall.addColorStop(1,'#6e5e40');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,benchY);
+  ctx.strokeStyle='rgba(0,0,0,.16)'; ctx.lineWidth=1; for (let x=0;x<W;x+=22){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,benchY); ctx.stroke(); }
+
+  // small window with green outside (right) letting in light
+  const wx=W*0.72, wy=H*0.10, ww=W*0.22, wh=H*0.24;
+  ctx.fillStyle='#bcd8b0'; ctx.fillRect(wx,wy,ww,wh); ctx.fillStyle='rgba(255,250,200,.3)'; ctx.fillRect(wx,wy,ww,wh*0.4);
+  ctx.strokeStyle='#4a3420'; ctx.lineWidth=3; ctx.strokeRect(wx,wy,ww,wh); ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.moveTo(wx,wy+wh/2); ctx.lineTo(wx+ww,wy+wh/2); ctx.stroke();
+  // dusty light beam from the window
+  ctx.fillStyle='rgba(255,245,200,.08)'; ctx.beginPath(); ctx.moveTo(wx,wy+wh); ctx.lineTo(wx+ww,wy+wh); ctx.lineTo(wx+ww-30,benchY); ctx.lineTo(wx-40,benchY); ctx.closePath(); ctx.fill();
+
+  // ceiling beam with MANY hanging bundles of drying herbs (the theme)
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(0,H*0.08,W,7);
+  const herbCols=['#5a7a3a','#7a8a3a','#8a6a3a','#6a8a4a','#9a7a4a','#5a8a5a','#a08a4a'];
+  for (let i=0;i<11;i++){ const bx=W*0.05+i*W*0.09; const len=20+ (i%4)*10; const sway=Math.sin(t*1.1+i)*2;
+    ctx.strokeStyle='#5a4a30'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(bx,H*0.08+7); ctx.lineTo(bx+sway,H*0.08+12); ctx.stroke();
+    // tied stem top
+    ctx.fillStyle='#8a6a3a'; ctx.fillRect(bx+sway-2,H*0.08+12,4,4);
+    // drooping leaves (bundle hanging down)
+    ctx.strokeStyle=herbCols[i%herbCols.length]; ctx.lineWidth=1.4; ctx.fillStyle=herbCols[i%herbCols.length];
+    for (let k=-3;k<=3;k++){ ctx.beginPath(); ctx.moveTo(bx+sway,H*0.08+16); ctx.quadraticCurveTo(bx+sway+k*3, H*0.08+16+len*0.6, bx+sway+k*2.4, H*0.08+16+len); ctx.stroke(); }
+    // little flower/seed heads
+    if (i%3===0){ ctx.fillStyle='#c07ab0'; ctx.beginPath(); ctx.arc(bx+sway,H*0.08+16+len,2.4,0,7); ctx.fill(); } }
+
+  // a shelf of labeled jars (left)
+  ctx.fillStyle='#4a3420'; ctx.fillRect(W*0.04,H*0.42,W*0.30,5);
+  for (let i=0;i<5;i++){ const jx=W*0.07+i*W*0.055; ctx.fillStyle='rgba(210,225,215,.5)'; roundRect(jx-5,H*0.42-16,10,16,2); ctx.fill(); ctx.fillStyle=herbCols[i%herbCols.length]; ctx.fillRect(jx-4,H*0.42-9,8,9); ctx.fillStyle='#efe6d0'; ctx.fillRect(jx-4,H*0.42-6,8,4); ctx.fillStyle='#5a3a1a'; ctx.fillRect(jx-5,H*0.42-18,10,3); }
+
+  // wooden work bench
+  const bench=ctx.createLinearGradient(0,benchY,0,H); bench.addColorStop(0,'#7a5a3a'); bench.addColorStop(1,'#5a4028'); ctx.fillStyle=bench; ctx.fillRect(0,benchY,W,H-benchY);
+  ctx.fillStyle='rgba(255,240,200,.1)'; ctx.fillRect(0,benchY,W,3);
+  ctx.strokeStyle='rgba(0,0,0,.16)'; ctx.lineWidth=1; for (let x=0;x<W;x+=30){ ctx.beginPath(); ctx.moveTo(x,benchY); ctx.lineTo(x-8,H); ctx.stroke(); }
+
+  // a mortar & pestle (center-back, high) + cut herbs + twine (sides, low)
+  const px2=W*0.5, py2=benchY+14; ctx.fillStyle='#9a9088'; ctx.beginPath(); ctx.ellipse(px2,py2,14,7,0,0,Math.PI); ctx.fill(); ctx.fillStyle='#b0a89c'; ctx.beginPath(); ctx.ellipse(px2,py2-1,14,4,0,0,7); ctx.fill(); ctx.fillStyle='#5a7a3a'; ctx.beginPath(); ctx.ellipse(px2,py2-1,8,2.4,0,0,7); ctx.fill();
+  ctx.strokeStyle='#7a6a5a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(px2+6,py2-2); ctx.lineTo(px2+16,py2-14); ctx.stroke();
+  // scattered cut herbs on the bench (left, low)
+  ctx.strokeStyle='#5a8a3a'; ctx.lineWidth=1; for (let i=0;i<8;i++){ const hx=W*0.16+ (i*5); ctx.beginPath(); ctx.moveTo(hx,H*0.90); ctx.lineTo(hx+rand(-4,4),H*0.90-rand(2,6)); ctx.stroke(); }
+  // ball of twine (right, low)
+  ctx.fillStyle='#d8c088'; ctx.beginPath(); ctx.arc(W*0.86,H*0.90,8,0,7); ctx.fill(); ctx.strokeStyle='rgba(150,120,70,.6)'; ctx.lineWidth=0.7; for (let k=0;k<5;k++){ ctx.beginPath(); ctx.arc(W*0.86,H*0.90,8-k*1.4,k,k+3); ctx.stroke(); }
+  // a hanging scale (center-left, mid)
+  ctx.strokeStyle='#8a8a92'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.36,H*0.30); ctx.lineTo(W*0.36,H*0.40); ctx.moveTo(W*0.30,H*0.40); ctx.lineTo(W*0.42,H*0.40); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.30,H*0.40); ctx.lineTo(W*0.30,H*0.44); ctx.moveTo(W*0.42,H*0.40); ctx.lineTo(W*0.42,H*0.44); ctx.stroke();
+  ctx.fillStyle='#b0a89c'; ctx.beginPath(); ctx.ellipse(W*0.30,H*0.44,6,2,0,0,7); ctx.ellipse(W*0.42,H*0.44,6,2,0,0,7); ctx.fill();
+}
+registerScene('herbshed', drawHerbShed);

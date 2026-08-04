@@ -70,6 +70,8 @@ const SCENE_LABELS = {
   cheesecave:'Cheese Cave',
   citrusgrove:'Citrus Grove', watermill:'Watermill', quiltshop:'Quilt Shop',
   mossgarden:'Moss Garden',
+  winterchalet:'Winter Chalet', penguincove:'Penguin Cove', fireflypier:'Firefly Pier',
+  herbshed:'Herb Drying Shed',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

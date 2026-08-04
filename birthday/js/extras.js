@@ -2765,3 +2765,139 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 18). Two scene-gated micro-interactions. No always-on
+   overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   40) CHEESE TASTING  —  in the cheese cave a little wheel sits on a board. Tap to
+   cut and taste a wedge; she savours each one and the wheel slowly empties, then
+   a fresh one is set out. A cosy little tasting. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxCheese(){
+  try{
+    const SHOPS = new Set(['cheesecave','cheeseshop']);
+    let wheel = null;                    // {x,y,eaten,cd,refresh}
+    function inShop(){ try{ return (typeof SCENES!=='undefined') && SHOPS.has(SCENES[currentScene]); }catch(e){ return false; } }
+    const NOTES = ['Mmm, nutty 🧀','Sharp! 😋','So creamy 🥰','One more taste? 🧀','Divine 💛'];
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inShop()){ wheel = null; return; }
+      if (!wheel){ wheel = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.72)), y: rand(H*0.66,H*0.74), eaten:0, cd:0, refresh:0 }; }
+      if (wheel.cd > 0) wheel.cd -= dt;
+      if (wheel.refresh > 0){ wheel.refresh -= dt; if (wheel.refresh <= 0){ wheel.eaten = 0; } }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!wheel || !inShop()) return;
+      const x = wheel.x, y = wheel.y, R = 15;
+      ctx.save();
+      // board
+      ctx.fillStyle = '#7a5233';
+      if (typeof roundRect === 'function'){ roundRect(x-22, y+7, 44, 6, 3); ctx.fill(); } else ctx.fillRect(x-22, y+7, 44, 6);
+      // cheese wheel (top view slightly tilted) with wedges removed
+      const total = 6, left = total - wheel.eaten;
+      ctx.translate(x, y);
+      for (let i=0;i<total;i++){
+        const a0 = (i/total)*Math.PI*2 - Math.PI/2, a1 = ((i+1)/total)*Math.PI*2 - Math.PI/2;
+        const gone = i >= left;
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,a0,a1); ctx.closePath();
+        ctx.fillStyle = gone ? 'rgba(90,60,35,0.25)' : '#f2d67a';
+        ctx.fill();
+        if (!gone){ ctx.strokeStyle = '#d9b84a'; ctx.lineWidth = 0.6; ctx.stroke(); }
+      }
+      // rind
+      ctx.strokeStyle = '#e0a83a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0,0,R,0,7); ctx.stroke();
+      // a couple of holes
+      ctx.fillStyle = 'rgba(200,160,60,0.7)'; if (left>0){ ctx.beginPath(); ctx.arc(-4,-3,1.6,0,7); ctx.arc(3,4,1.2,0,7); ctx.fill(); }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!wheel || !inShop()) return false;
+        if (Math.hypot(px - wheel.x, py - wheel.y) > 20) return false;
+        if (wheel.cd > 0) return true;
+        wheel.cd = 0.9;
+        if (typeof sfx === 'function') sfx('feed');
+        if (typeof burstAt === 'function') burstAt('🧀', wheel.x, wheel.y - 10);
+        if (typeof say === 'function') say(pick(NOTES));
+        try{ state.hunger = clamp(state.hunger + 5); state.love = clamp(state.love + 2); state.fun = clamp(state.fun + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        wheel.eaten++;
+        if (wheel.eaten >= 6){
+          wheel.refresh = 3;
+          if (typeof hearts === 'function') hearts();
+          if (typeof say === 'function') setTimeout(()=>{ try{ say('All gone — that was lovely 🥰'); }catch(e){} }, 900);
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   41) LIGHT A LANTERN  —  at the lantern festival a paper lantern waits, unlit. Tap
+   to light it: it glows warm, lifts gently into the night, and drifts up and away
+   carrying a little wish. Another takes its place. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxLantern(){
+  try{
+    const FEST = new Set(['lanternfestival','nightmarket','riverlanterns','templenight']);
+    let lan = null;                      // {x,y,lit,rise,glow,hue,cd,sway}
+    function atFest(){ try{ return (typeof SCENES!=='undefined') && FEST.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function fresh(){ lan = { x: Math.max(W*0.2, Math.min(W*0.8, rand(W*0.35,W*0.65))), y: rand(H*0.62,H*0.7), lit:false, rise:0, glow:0, hue: pick(['#ff8f4a','#ff5b6a','#ffd166','#ff9ec4']), cd:0, sway:rand(0,Math.PI*2) }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!atFest()){ lan = null; return; }
+      if (!lan){ fresh(); }
+      lan.sway += dt; if (lan.cd > 0) lan.cd -= dt;
+      if (lan.lit){
+        lan.glow = Math.min(1, lan.glow + dt*2);
+        lan.rise += dt;
+        lan.y -= (12 + lan.rise*8) * dt;                       // accelerates upward
+        lan.x += Math.sin(lan.sway*0.8) * 6 * dt;
+        if (lan.y < -30) fresh();                              // gone into the sky; set out another
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!lan || !atFest()) return;
+      const x = lan.x + (lan.lit ? Math.sin(lan.sway*1.4)*2 : 0), y = lan.y;
+      const w = 12, h = 16;
+      ctx.save();
+      if (lan.lit && lan.glow > 0){
+        const g = ctx.createRadialGradient(x, y, 0, x, y, 26);
+        g.addColorStop(0, 'rgba(255,190,110,' + (0.5*lan.glow).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(255,190,110,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 26, 0, 7); ctx.fill();
+      }
+      // top and bottom caps
+      ctx.fillStyle = '#7a3b2a'; ctx.fillRect(x-5, y-h/2-2, 10, 2); ctx.fillRect(x-5, y+h/2, 10, 2);
+      // body
+      ctx.fillStyle = lan.lit ? lan.hue : '#9a6a55';
+      ctx.beginPath(); ctx.ellipse(x, y, w/2, h/2, 0, 0, 7); ctx.fill();
+      // ribs
+      ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 0.6;
+      ctx.beginPath(); ctx.moveTo(x, y-h/2); ctx.lineTo(x, y+h/2); ctx.moveTo(x-w/4, y-h*0.4); ctx.lineTo(x-w/4, y+h*0.4); ctx.moveTo(x+w/4, y-h*0.4); ctx.lineTo(x+w/4, y+h*0.4); ctx.stroke();
+      // tassel
+      ctx.strokeStyle = '#e0b04a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y+h/2+2); ctx.lineTo(x, y+h/2+6); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!lan || !atFest() || lan.lit) return false;
+        if (px < lan.x - 11 || px > lan.x + 11 || py < lan.y - 14 || py > lan.y + 12) return false;
+        if (lan.cd > 0) return true;
+        lan.cd = 0.5; lan.lit = true; lan.glow = 0.15;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') fxAt(lan.x, lan.y - 14, pick(['🏮','✨','💛']));
+        if (typeof say === 'function') say(pick(['Make a wish and let it go… 🏮','Up it floats ✨','So beautiful 🥰','I wished for us 💛']));
+        try{ state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
