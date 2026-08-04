@@ -2974,6 +2974,43 @@ function drawBalloons(){
 }
 registerScene('balloons', drawBalloons);
 
+/* ── RECORD SHOP (indoor · vinyl) ── */
+function drawRecordShop(){
+  const t = sceneTime, floorY = H*0.62;
+
+  // wall + floor
+  ctx.fillStyle='#2e2836'; ctx.fillRect(0,0,W,floorY);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#5a4a3a'); fl.addColorStop(1,'#463829');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let x=0;x<W;x+=24){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x,H); ctx.stroke(); }
+
+  // sign
+  ctx.fillStyle='#f2c14e'; ctx.font='bold 14px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('◉ RECORDS ◉', W*0.5, H*0.055); ctx.textAlign='left';
+
+  // wall of album covers
+  const gx=W*0.06, gy=H*0.09, cs=W*0.14, cvC=['#e0504a','#f2b03a','#5a9ee0','#7ac05a','#c05fd0','#e8628c'];
+  for (let r=0;r<2;r++) for (let c=0;c<6;c++){ const x=gx+c*cs, y=gy+r*cs; if (x+cs*0.9>W) continue; ctx.fillStyle=cvC[(r*6+c)%6]; ctx.fillRect(x,y,cs*0.9,cs*0.9); ctx.fillStyle='#1a1a1a'; ctx.beginPath(); ctx.arc(x+cs*0.45,y+cs*0.45,cs*0.28,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x+cs*0.45,y+cs*0.45,cs*0.06,0,7); ctx.fill(); }
+
+  // record bins
+  function bin(x){
+    const by=floorY-6, bw=W*0.26, bh=40;
+    ctx.fillStyle='#6a4a2a'; ctx.fillRect(x,by-bh,bw,bh); ctx.fillStyle='#5a3a1a'; ctx.fillRect(x,by-bh,bw,6);
+    for (let i=0;i<14;i++){ ctx.fillStyle=['#333','#444','#555522','#225555','#552255'][i%5]; ctx.save(); ctx.translate(x+6+i*((bw-12)/14),by-4); ctx.rotate(-0.15); ctx.fillRect(0,-bh+8,3,bh-8); ctx.restore(); }
+    ctx.fillStyle='#4a2f18'; ctx.fillRect(x,by,bw,H-by);
+  }
+  bin(W*0.06); bin(W*0.40);
+
+  // turntable on a stand
+  const tX=W*0.82, tY=floorY-30;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(tX-20,tY+26,4,floorY-(tY+26)); ctx.fillRect(tX+16,tY+26,4,floorY-(tY+26));
+  ctx.fillStyle='#222'; roundRect(tX-24,tY,48,26,3); ctx.fill();
+  ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(tX-4,tY+13,11,0,7); ctx.fill();
+  ctx.strokeStyle='#555'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(tX-4,tY+13,8,t*3,t*3+5); ctx.stroke();
+  ctx.fillStyle='#e0504a'; ctx.beginPath(); ctx.arc(tX-4,tY+13,3,0,7); ctx.fill();
+  ctx.strokeStyle='#888'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(tX+14,tY+4); ctx.lineTo(tX+2,tY+12); ctx.stroke();
+}
+registerScene('recordshop', drawRecordShop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
