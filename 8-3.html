@@ -2043,6 +2043,68 @@ function drawBakery(){
 }
 registerScene('bakery', drawBakery);
 
+/* ── COZY LIBRARY (indoor · reading) ── */
+function drawLibrary(){
+  const t = sceneTime, floorY = H*0.62;
+
+  // dark wood wall + plank floor
+  ctx.fillStyle='#3a2b22'; ctx.fillRect(0,0,W,floorY);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#7a5230'); fl.addColorStop(1,'#5f3f24');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1;
+  for (let i=1;i<6;i++){ const y=floorY+i/6*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // bookshelf (left) full of colourful spines
+  const bsX=W*0.03, bsY=H*0.06, bsW=W*0.58, bsH=floorY-bsY-6, shelves=5, shelfH=bsH/shelves;
+  ctx.fillStyle='#4a3524'; ctx.fillRect(bsX-4,bsY-4,bsW+8,bsH+8);
+  const spineCols=['#8c3b3b','#3b6e8c','#3b8c5a','#b58a2e','#6e3b8c','#a0522d','#2e6e6e','#8c6e3b'];
+  for (let s=0;s<shelves;s++){
+    const sy=bsY+s*shelfH;
+    ctx.fillStyle='#241a10'; ctx.fillRect(bsX,sy,bsW,shelfH);
+    let x=bsX+3, bi=s*7;
+    while (x<bsX+bsW-6){
+      const bw=5+(bi*37%5), bh=shelfH-6-(bi*13%6);
+      ctx.fillStyle=spineCols[bi%spineCols.length];
+      ctx.fillRect(x, sy+shelfH-4-bh, bw, bh);
+      x+=bw+2; bi++;
+    }
+    ctx.fillStyle='#3a2a1a'; ctx.fillRect(bsX,sy+shelfH-4,bsW,4);
+  }
+
+  // fireplace (right) with animated fire
+  const fpX=W*0.70, fpW=W*0.26, fpTop=H*0.30, fpBot=floorY;
+  ctx.fillStyle='#6e4a3a'; ctx.fillRect(fpX-6,fpTop-8,fpW+12,fpBot-fpTop+8);
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1;
+  for (let by=fpTop-8;by<fpBot;by+=8){ ctx.beginPath(); ctx.moveTo(fpX-6,by); ctx.lineTo(fpX+fpW+6,by); ctx.stroke(); }
+  const fbX=fpX+8, fbY=fpTop+10, fbW=fpW-16, fbH=fpBot-fbY;
+  ctx.fillStyle='#1a1008'; ctx.fillRect(fbX,fbY,fbW,fbH);
+  const glow=ctx.createRadialGradient(fbX+fbW/2,fbY+fbH*0.7,4,fbX+fbW/2,fbY+fbH*0.7,fbW);
+  glow.addColorStop(0,'rgba(255,150,50,.6)'); glow.addColorStop(1,'rgba(255,150,50,0)');
+  ctx.fillStyle=glow; ctx.fillRect(fbX-12,fbY,fbW+24,fbH+12);
+  ctx.strokeStyle='#5a3a20'; ctx.lineWidth=5; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(fbX+6,fbY+fbH-6); ctx.lineTo(fbX+fbW-6,fbY+fbH-10); ctx.stroke(); ctx.lineCap='butt';
+  const fcx=fbX+fbW/2, fbaseY=fbY+fbH-8, fcol=['#ff5a00','#ff8a1f','#ffc21f','#ffe07a'];
+  for (let i=0;i<4;i++){ const a=0.7+0.3*Math.sin(t*7+i*1.7), h=fbH*0.55*a*(1-i*0.12), off=(i-1.5)*7; ctx.fillStyle=fcol[i]; ctx.beginPath(); ctx.moveTo(fcx+off-6,fbaseY); ctx.quadraticCurveTo(fcx+off+Math.sin(t*9+i)*4,fbaseY-h*0.6,fcx+off,fbaseY-h); ctx.quadraticCurveTo(fcx+off+6,fbaseY-h*0.6,fcx+off+6,fbaseY); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle='#4a3524'; ctx.fillRect(fpX-10,fpTop-14,fpW+20,8);
+
+  // armchair on the floor
+  const acX=W*0.32, acY=floorY-4;
+  ctx.fillStyle='#7a3b4a'; roundRect(acX-26,acY-48,52,48,8); ctx.fill();
+  ctx.fillStyle='#8c4a5a'; roundRect(acX-30,acY-40,11,40,5); ctx.fill(); roundRect(acX+19,acY-40,11,40,5); ctx.fill();
+  ctx.fillStyle='#9a5a68'; roundRect(acX-20,acY-24,40,14,5); ctx.fill();
+
+  // floor reading lamp
+  const lpX=W*0.13, lpY=floorY;
+  ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(lpX,lpY); ctx.lineTo(lpX,lpY-92); ctx.stroke();
+  ctx.fillStyle='rgba(255,225,150,.18)'; ctx.beginPath(); ctx.arc(lpX,lpY-92,26,0,7); ctx.fill();
+  ctx.fillStyle='#e8c96a'; ctx.beginPath(); ctx.moveTo(lpX-14,lpY-92); ctx.lineTo(lpX+14,lpY-92); ctx.lineTo(lpX+9,lpY-110); ctx.lineTo(lpX-9,lpY-110); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#2a1e14'; ctx.beginPath(); ctx.ellipse(lpX,lpY,10,3,0,0,7); ctx.fill();
+
+  // rug
+  ctx.fillStyle='rgba(140,60,74,.28)'; ctx.beginPath(); ctx.ellipse(W*0.4,H*0.83,W*0.34,H*0.08,0,0,7); ctx.fill();
+}
+registerScene('library', drawLibrary);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
