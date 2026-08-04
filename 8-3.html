@@ -3348,6 +3348,52 @@ function drawFireflies(){
 }
 registerScene('fireflies', drawFireflies);
 
+/* ── COFFEE SHOP (indoor · café) ── */
+function drawCafe(){
+  const t = sceneTime, floorY = H*0.62;
+
+  ctx.fillStyle='#4a3a30'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#6a4a34'; ctx.fillRect(0,floorY-24,W,24);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#8a6a4a'); fl.addColorStop(1,'#6e5238');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let x=0;x<W;x+=22){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x,H); ctx.stroke(); }
+
+  // pendant light
+  ctx.strokeStyle='#2a1e14'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.3,0); ctx.lineTo(W*0.3,H*0.1); ctx.stroke();
+  ctx.fillStyle='rgba(255,220,150,.18)'; ctx.beginPath(); ctx.arc(W*0.3,H*0.14,20,0,7); ctx.fill();
+  ctx.fillStyle='#2a2018'; ctx.beginPath(); ctx.moveTo(W*0.3-12,H*0.1+10); ctx.lineTo(W*0.3+12,H*0.1+10); ctx.lineTo(W*0.3+8,H*0.1); ctx.lineTo(W*0.3-8,H*0.1); ctx.closePath(); ctx.fill();
+
+  // chalkboard menu
+  ctx.fillStyle='#2a2a24'; roundRect(W*0.06,H*0.1,W*0.2,H*0.22,4); ctx.fill(); ctx.strokeStyle='#c9a06a'; ctx.lineWidth=3; roundRect(W*0.06,H*0.1,W*0.2,H*0.22,4); ctx.stroke();
+  ctx.fillStyle='#e8dcc4'; ctx.font='bold 9px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('~ CAFE ~', W*0.16, H*0.145);
+  ctx.font='7px Segoe UI, sans-serif'; ctx.textAlign='left'; ctx.fillStyle='#c8bca4';
+  const items=['Espresso','Latte','Mocha','Cocoa']; for (let i=0;i<4;i++) ctx.fillText('- '+items[i], W*0.08, H*0.185+i*11);
+
+  // counter + espresso machine
+  const cY=floorY-40;
+  ctx.fillStyle='#5a3a24'; ctx.fillRect(W*0.4,cY,W*0.56,H-cY);
+  ctx.fillStyle='#3a2418'; ctx.fillRect(W*0.4,cY,W*0.56,6);
+  const eX=W*0.52, eY=cY;
+  ctx.fillStyle='#b0b4b8'; roundRect(eX-20,eY-30,40,30,3); ctx.fill();
+  ctx.fillStyle='#8a8e92'; ctx.fillRect(eX-16,eY-26,32,10);
+  ctx.fillStyle='#3a3e42'; ctx.fillRect(eX-8,eY-14,16,10);
+  ctx.fillStyle='#d8dce0'; ctx.fillRect(eX-6,eY-4,4,4); ctx.fillRect(eX+2,eY-4,4,4);
+  ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=2; ctx.beginPath(); for (let k=0;k<=6;k++){ const yy=eY-30-k*5, xx=eX+10+Math.sin(t*3+k*0.6)*3; k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy); } ctx.stroke();
+  for (let i=0;i<3;i++){ ctx.fillStyle='#e8e0d4'; ctx.beginPath(); ctx.arc(W*0.74+i*16,cY-4,5,0,7); ctx.fill(); }
+
+  // mug shelf
+  ctx.fillStyle='#6a4a34'; ctx.fillRect(W*0.62,H*0.14,W*0.32,4);
+  for (let i=0;i<5;i++){ ctx.fillStyle=['#c0392b','#2980b9','#27ae60','#f1c40f','#8e44ad'][i]; ctx.fillRect(W*0.64+i*16-4,H*0.14-10,8,10); }
+
+  // café table + chair + steaming cup
+  const tX=W*0.2, tY=floorY+22;
+  ctx.fillStyle='#3a2418'; ctx.fillRect(tX-2,tY,4,H-tY); ctx.beginPath(); ctx.ellipse(tX,tY,20,6,0,0,7); ctx.fill();
+  ctx.fillStyle='#e8e0d4'; ctx.beginPath(); ctx.arc(tX,tY-4,4,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5; ctx.beginPath(); for (let k=0;k<=4;k++){ const yy=tY-8-k*4; k===0?ctx.moveTo(tX,yy):ctx.lineTo(tX+Math.sin(t*3+k)*2, yy); } ctx.stroke();
+  ctx.fillStyle='#5a3a24'; ctx.fillRect(tX-34,tY-2,4,H-tY); ctx.fillRect(tX-34,tY-20,4,18); ctx.fillRect(tX-46,tY-2,14,4);
+}
+registerScene('cafe', drawCafe);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
