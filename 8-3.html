@@ -145,6 +145,23 @@
   #placeLabel{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:17;background:rgba(42,33,28,.72);color:#fff;font-size:12px;font-weight:700;letter-spacing:.2px;padding:5px 12px;border-radius:16px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.25);}
   #placeLabel.hide{display:none;}
   #placeLabel.show{animation:placeIn .3s ease;}
+  #padPanel{position:absolute;inset:0;background:rgba(42,33,28,.9);z-index:16;display:block;overflow-y:auto;padding:14px;backdrop-filter:blur(3px);}
+  #padPanel.hide{display:none;}
+  #padHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  #padClose{cursor:pointer;font-size:18px;padding:0 4px;}
+  #padTools{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+  #padColors{display:flex;gap:5px;flex:1;flex-wrap:wrap;}
+  #padColors .sw{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+  #padColors .sw.sel{border-color:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.3);}
+  #padTools button{border:none;background:rgba(255,255,255,.16);color:#fff;font-weight:700;font-size:12px;padding:6px 10px;border-radius:10px;cursor:pointer;}
+  #padSave{background:var(--accent) !important;}
+  #padCanvas{position:relative !important;display:block;width:250px;height:170px;margin:4px auto;background:#fff;border-radius:10px;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:crosshair;}
+  #padGalleryLbl{color:rgba(255,255,255,.6);font-size:11px;font-weight:600;margin:10px 2px 6px;}
+  #padGallery{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+  #padGallery .gthumb{position:relative;flex:none;}
+  #padGallery img{width:66px;height:45px;border-radius:8px;background:#fff;object-fit:cover;display:block;}
+  #padGallery .gdel{position:absolute;top:-6px;right:-6px;background:#c8404a;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;line-height:18px;text-align:center;cursor:pointer;font-weight:700;}
+  #padGallery .empty{color:rgba(255,255,255,.4);font-size:12px;}
   #setSection{color:#fff;font-weight:700;font-size:13px;margin:14px 2px 6px;}
   .achRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:13px;}
   .achRow .ai{font-size:18px;}
@@ -268,6 +285,18 @@
     <div id="noteHead"><span>💌 Notes from Paul</span><span id="noteClose">✕</span></div>
     <div id="noteHint">Little letters that unlock as your days together add up 💛</div>
     <div id="noteList"></div>
+  </div>
+
+  <div id="padPanel" class="hide">
+    <div id="padHead"><span>✏️ Draw Together</span><span id="padClose">✕</span></div>
+    <div id="padTools">
+      <div id="padColors"></div>
+      <button id="padClear">Clear</button>
+      <button id="padSave">Save 💾</button>
+    </div>
+    <canvas id="padCanvas" width="280" height="190"></canvas>
+    <div id="padGalleryLbl">Saved drawings</div>
+    <div id="padGallery"></div>
   </div>
 
 </div>
@@ -1203,6 +1232,42 @@ function buildNotes(){
 function openNotes(){ buildNotes(); document.getElementById('notePanel').classList.remove('hide'); }
 function closeNotes(){ document.getElementById('notePanel').classList.add('hide'); }
 
+/* ---- draw-together pad + saved gallery ---- */
+const PAD_COLORS = ['#2a2a30','#e0402a','#e0902a','#f2c14a','#3a8a5a','#2a86c0','#8a4ac0','#e0709a','#8a5a34','#ffffff'];
+let padColor = '#2a2a30', padCtx = null, padDrawing = false, padInited = false;
+let gallery = (function(){ try{ const r=localStorage.getItem('bpet_gallery'); if(r) return JSON.parse(r); }catch(e){} return []; })();
+function saveGallery(){ try{ localStorage.setItem('bpet_gallery', JSON.stringify(gallery)); }catch(e){} }
+function padInit(){
+  const cv=document.getElementById('padCanvas'); padCtx=cv.getContext('2d');
+  padCtx.fillStyle='#fff'; padCtx.fillRect(0,0,cv.width,cv.height);
+  padCtx.lineCap='round'; padCtx.lineJoin='round';
+  const pos=(e)=>{ const r=cv.getBoundingClientRect(); return { x:(e.clientX-r.left)/r.width*cv.width, y:(e.clientY-r.top)/r.height*cv.height }; };
+  cv.addEventListener('pointerdown',(e)=>{ padDrawing=true; const p=pos(e); padCtx.strokeStyle=padColor; padCtx.lineWidth=(padColor==='#ffffff')?16:3.5; padCtx.beginPath(); padCtx.moveTo(p.x,p.y); padCtx.lineTo(p.x+0.1,p.y+0.1); padCtx.stroke(); try{cv.setPointerCapture(e.pointerId);}catch(_){} });
+  cv.addEventListener('pointermove',(e)=>{ if(!padDrawing) return; const p=pos(e); padCtx.lineTo(p.x,p.y); padCtx.stroke(); });
+  cv.addEventListener('pointerup',()=>{ padDrawing=false; });
+  cv.addEventListener('pointercancel',()=>{ padDrawing=false; });
+  padInited=true;
+}
+function buildPadColors(){ const c=document.getElementById('padColors'); if(!c) return; c.innerHTML='';
+  PAD_COLORS.forEach(col=>{ const s=document.createElement('div'); s.className='sw'+(col===padColor?' sel':''); s.style.background=col;
+    if(col==='#ffffff'){ s.style.border='2px solid #bbb'; s.title='Eraser'; } s.addEventListener('click',()=>{ padColor=col; buildPadColors(); }); c.appendChild(s); });
+}
+function buildGallery(){ const g=document.getElementById('padGallery'); if(!g) return; g.innerHTML='';
+  if(!gallery.length){ g.innerHTML='<span class="empty">No drawings yet — make one! 🎨</span>'; return; }
+  gallery.forEach((data,i)=>{ const w=document.createElement('div'); w.className='gthumb';
+    const img=document.createElement('img'); img.src=data; img.alt='drawing';
+    const del=document.createElement('span'); del.className='gdel'; del.textContent='✕';
+    del.addEventListener('click',()=>{ gallery.splice(i,1); saveGallery(); buildGallery(); });
+    w.appendChild(img); w.appendChild(del); g.appendChild(w); });
+}
+function padSaveDrawing(){ const cv=document.getElementById('padCanvas'); let data; try{ data=cv.toDataURL('image/png'); }catch(e){ return; }
+  gallery.unshift(data); if(gallery.length>6) gallery.length=6; saveGallery(); buildGallery();
+  say('I made you a drawing! 🎨💛'); hearts(); state.fun=clamp(state.fun+10); state.love=clamp(state.love+6); refreshHUD(); if(typeof sfx==='function') sfx('draw');
+}
+function padClearCanvas(){ if(!padCtx) return; const cv=document.getElementById('padCanvas'); padCtx.fillStyle='#fff'; padCtx.fillRect(0,0,cv.width,cv.height); }
+function openPad(){ if(!padInited) padInit(); buildPadColors(); buildGallery(); document.getElementById('padPanel').classList.remove('hide'); }
+function closePad(){ document.getElementById('padPanel').classList.add('hide'); }
+
 /* ---- "days together": distinct days visited + consecutive-day streak ---- */
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function daysBetween(a,b){ return Math.round((new Date(b+'T00:00') - new Date(a+'T00:00'))/86400000); }
@@ -1371,6 +1436,21 @@ document.getElementById('setBtn').addEventListener('click', openSettings);
 document.getElementById('setClose').addEventListener('click', closeSettings);
 document.getElementById('daysChip').addEventListener('click', openNotes);
 document.getElementById('noteClose').addEventListener('click', closeNotes);
+document.getElementById('padClose').addEventListener('click', closePad);
+document.getElementById('padClear').addEventListener('click', padClearCanvas);
+document.getElementById('padSave').addEventListener('click', padSaveDrawing);
+// tap Draw to play; hold Draw to open the drawing pad
+(function(){
+  const drawBtn = document.querySelector('.btn[data-action="draw"]');
+  if (!drawBtn) return;
+  drawBtn.title = 'Tap to draw together · hold to open the drawing pad';
+  let lp = null, longPressed = false;
+  drawBtn.addEventListener('pointerdown', ()=>{ longPressed=false; lp=setTimeout(()=>{ longPressed=true; openPad(); }, 450); });
+  const cancel = ()=> clearTimeout(lp);
+  drawBtn.addEventListener('pointerup', cancel);
+  drawBtn.addEventListener('pointerleave', cancel);
+  drawBtn.addEventListener('click', (e)=>{ if (longPressed){ e.stopImmediatePropagation(); e.preventDefault(); longPressed=false; } }, true);
+})();
 document.getElementById('mapAll').addEventListener('click', ()=>{ disabledScenes.clear(); saveDisabled(); buildMapList(); });
 document.getElementById('mapNone').addEventListener('click', ()=>{ disabledScenes = new Set(SCENES); saveDisabled(); buildMapList(); });
 
