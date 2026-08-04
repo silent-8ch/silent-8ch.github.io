@@ -2620,6 +2620,62 @@ function drawRooftop(){
 }
 registerScene('rooftop', drawRooftop);
 
+/* ── TEA HOUSE (indoor · tea ceremony) ── */
+function drawTeaHouse(){
+  const t = sceneTime, floorY = H*0.60;
+
+  // warm wall
+  ctx.fillStyle='#e8dcc4'; ctx.fillRect(0,0,W,floorY);
+  // glowing shoji screen
+  const shX=W*0.55, shW=W*0.42, shY=H*0.08, shH=floorY-shY-4;
+  ctx.fillStyle='#f7ead0'; ctx.fillRect(shX,shY,shW,shH);
+  ctx.fillStyle='rgba(255,220,150,.18)'; ctx.fillRect(shX,shY,shW,shH);
+  ctx.strokeStyle='#7a5a3a'; ctx.lineWidth=3; ctx.strokeRect(shX,shY,shW,shH);
+  ctx.lineWidth=1.5;
+  for (let x=shX;x<=shX+shW+1;x+=shW/4){ ctx.beginPath(); ctx.moveTo(x,shY); ctx.lineTo(x,shY+shH); ctx.stroke(); }
+  for (let y=shY;y<=shY+shH+1;y+=shH/5){ ctx.beginPath(); ctx.moveTo(shX,y); ctx.lineTo(shX+shW,y); ctx.stroke(); }
+
+  // hanging scroll
+  const scX=W*0.16, scY=H*0.10;
+  ctx.fillStyle='#efe6d2'; ctx.fillRect(scX-14,scY,28,64);
+  ctx.fillStyle='#8a5a3a'; ctx.fillRect(scX-16,scY-4,32,4); ctx.fillRect(scX-16,scY+64,32,4);
+  ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(scX,scY+12); ctx.quadraticCurveTo(scX+6,scY+28,scX-4,scY+40); ctx.stroke();
+  ctx.beginPath(); ctx.arc(scX,scY+50,4,0,7); ctx.stroke();
+
+  // tatami floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#bcae7a'); fl.addColorStop(1,'#a89a68');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(120,110,70,.25)'; ctx.lineWidth=1; for (let y=floorY+4;y<H;y+=4){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.strokeStyle='#3a4a2a'; ctx.lineWidth=2;
+  for (let x=0;x<=W;x+=W/3){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x,H); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(0,floorY+(H-floorY)/2); ctx.lineTo(W,floorY+(H-floorY)/2); ctx.stroke();
+
+  // paper lantern
+  const lX=W*0.32, lY=H*0.06;
+  ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lX,0); ctx.lineTo(lX,lY); ctx.stroke();
+  ctx.fillStyle='rgba(255,180,90,.18)'; ctx.beginPath(); ctx.arc(lX,lY+15,26,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(255,180,90,${0.7+0.1*Math.sin(t*2)})`; roundRect(lX-12,lY,24,30,10); ctx.fill();
+  ctx.strokeStyle='#c04a2a'; for (let i=1;i<4;i++){ ctx.beginPath(); ctx.moveTo(lX-12,lY+i*7); ctx.lineTo(lX+12,lY+i*7); ctx.stroke(); }
+
+  // low tea table with teapot, cups, steam
+  const tX=W*0.42, tY=floorY+30;
+  ctx.fillStyle='#6a4326'; roundRect(tX-40,tY,80,10,3); ctx.fill(); ctx.fillRect(tX-34,tY+10,5,14); ctx.fillRect(tX+29,tY+10,5,14);
+  ctx.fillStyle='#3a5a4a'; ctx.beginPath(); ctx.ellipse(tX-10,tY-6,12,9,0,0,7); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(tX-22,tY-6); ctx.lineTo(tX-30,tY-12); ctx.lineTo(tX-28,tY-4); ctx.closePath(); ctx.fill();
+  ctx.fillRect(tX-11,tY-18,2,4);
+  ctx.fillStyle='#efe6d2'; ctx.beginPath(); ctx.arc(tX+10,tY-2,4,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(tX+22,tY-2,4,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=2; ctx.beginPath();
+  for (let k=0;k<=8;k++){ const yy=tY-14-k*4, xx=tX-10+Math.sin(t*3+k*0.6)*3; k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy); } ctx.stroke();
+
+  // bonsai on a stand
+  const boX=W*0.87, boY=floorY+8;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(boX-14,boY,28,6); ctx.fillRect(boX-12,boY+6,4,14); ctx.fillRect(boX+8,boY+6,4,14);
+  ctx.fillStyle='#7a5a3a'; ctx.beginPath(); ctx.ellipse(boX,boY-2,12,4,0,0,7); ctx.fill();
+  ctx.strokeStyle='#5a3a22'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(boX,boY-2); ctx.lineTo(boX-2,boY-16); ctx.lineTo(boX+6,boY-22); ctx.stroke();
+  ctx.fillStyle='#4a7a3a'; ctx.beginPath(); ctx.ellipse(boX+6,boY-24,12,6,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(boX-6,boY-18,8,5,0,0,7); ctx.fill();
+}
+registerScene('teahouse', drawTeaHouse);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
