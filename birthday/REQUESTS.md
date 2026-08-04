@@ -16,7 +16,9 @@ ever both touch it, I rebase on your version first so your text always wins.
 
 ## Inbox
 <!-- add your requests below this line -->
-
+- Add 10 magic and mysticism related rooms/scenes
+- **Drawing journal feature**: she keeps a drawing journal where she leaves entries about her adventures — hugs she got, places she visited, actions that happened. She shares pictures she draws. This should be a viewable journal/diary the player can flip through.
+- **Content focus: interactivity** — clicking things in the scenes should have lots of unique responses — at least text reactions, ideally effects too. Every scene should have several clickable objects/elements with their own responses. Make scenes feel alive and reactive, not just backdrops.
 
 ## Done
 <!-- I'll move handled items here, newest first, with a note + commit short-sha -->
