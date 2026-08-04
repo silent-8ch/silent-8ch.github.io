@@ -3168,6 +3168,43 @@ function drawToyShop(){
 }
 registerScene('toyshop', drawToyShop);
 
+/* ── SNOWY CABIN (outdoor · winter day) ── */
+function drawSnowyCabin(){
+  const t = sceneTime, groundY = H*0.58;
+
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#bcd8ec'); sky.addColorStop(1,'#e6f0f6');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='#d8e6ef'; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.quadraticCurveTo(W*0.3,groundY-40,W*0.6,groundY-10); ctx.quadraticCurveTo(W*0.85,groundY-30,W,groundY-6); ctx.lineTo(W,groundY); ctx.closePath(); ctx.fill();
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#f0f6fb'); gr.addColorStop(1,'#dae6ef');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+
+  for (let i=0;i<5;i++) drawSnowPine(W*0.1+i*W*0.12, groundY+6, 26+((i*23)%14));
+
+  // cabin
+  const cX=W*0.66, cB=groundY+40, cW=W*0.36, cH=54;
+  ctx.fillStyle='#7a4a2a'; ctx.fillRect(cX-cW/2,cB-cH,cW,cH);
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1; for (let y=cB-cH+6;y<cB;y+=8){ ctx.beginPath(); ctx.moveTo(cX-cW/2,y); ctx.lineTo(cX+cW/2,y); ctx.stroke(); }
+  ctx.fillStyle='#5a3a22'; ctx.beginPath(); ctx.moveTo(cX-cW/2-6,cB-cH); ctx.lineTo(cX,cB-cH-30); ctx.lineTo(cX+cW/2+6,cB-cH); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.moveTo(cX-cW/2-6,cB-cH); ctx.lineTo(cX,cB-cH-30); ctx.lineTo(cX+cW/2+6,cB-cH); ctx.closePath(); ctx.clip(); ctx.fillStyle='#f4faff'; ctx.fillRect(cX-cW/2-6,cB-cH-30,cW+12,12); ctx.restore();
+  ctx.fillStyle='#ffd88a'; ctx.fillRect(cX-14,cB-cH+12,20,18);
+  ctx.strokeStyle='#5a3a22'; ctx.lineWidth=2; ctx.strokeRect(cX-14,cB-cH+12,20,18); ctx.beginPath(); ctx.moveTo(cX-4,cB-cH+12); ctx.lineTo(cX-4,cB-cH+30); ctx.moveTo(cX-14,cB-cH+21); ctx.lineTo(cX+6,cB-cH+21); ctx.stroke();
+  ctx.fillStyle='#5a3a22'; ctx.fillRect(cX+12,cB-30,14,30);
+  ctx.fillStyle='#6a4a3a'; ctx.fillRect(cX+cW/2-16,cB-cH-24,8,16);
+  ctx.strokeStyle='rgba(200,200,200,.5)'; ctx.lineWidth=3; ctx.beginPath(); for (let k=0;k<=8;k++){ const yy=cB-cH-24-k*6, xx=cX+cW/2-12+Math.sin(t*2+k*0.6)*5; k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy); } ctx.stroke();
+
+  // snowman
+  const sX=W*0.26, sB=groundY+50;
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(sX,sB-8,12,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(sX,sB-26,9,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(sX,sB-40,6,0,7); ctx.fill();
+  ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(sX-2,sB-41,1,0,7); ctx.arc(sX+2,sB-41,1,0,7); ctx.fill();
+  ctx.fillStyle='#e0802a'; ctx.beginPath(); ctx.moveTo(sX,sB-39); ctx.lineTo(sX+6,sB-38); ctx.lineTo(sX,sB-37); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#5a3a22'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(sX-8,sB-26); ctx.lineTo(sX-16,sB-30); ctx.moveTo(sX+8,sB-26); ctx.lineTo(sX+16,sB-30); ctx.stroke();
+  ctx.fillStyle='#c04a3a'; ctx.fillRect(sX-6,sB-48,12,3); ctx.fillRect(sX-4,sB-54,8,6);
+
+  // falling snow
+  ctx.fillStyle='rgba(255,255,255,.9)'; for (let i=0;i<30;i++){ const seed=i*41.7, sx=(((seed*1.6+Math.sin(t+i)*10)%W)+W)%W, sy=(seed*2.2+t*16)%H; ctx.beginPath(); ctx.arc(sx,sy,1.3,0,7); ctx.fill(); }
+}
+registerScene('snowycabin', drawSnowyCabin);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
