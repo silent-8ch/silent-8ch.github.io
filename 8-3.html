@@ -5493,6 +5493,60 @@ function drawMeteorShower(){
 }
 registerScene('meteorshower', drawMeteorShower);
 
+/* ── LETTERPRESS SHOP (indoor · printing with a platen press) ── */
+function drawLetterpress(){
+  const t=sceneTime, floorY=H*0.66;
+  // inky workshop
+  ctx.fillStyle='#c2b79a'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#6a5a44'; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='#a99a78'; ctx.fillRect(0,H*0.12,W,2);
+  // type-case cabinet on the left (grid of little compartments)
+  const cx=W*0.06, cy=H*0.14, cw=W*0.26, ch=H*0.34;
+  ctx.fillStyle='#5a3e26'; ctx.fillRect(cx-4,cy-4,cw+8,ch+8);
+  ctx.fillStyle='#c8b088'; ctx.fillRect(cx,cy,cw,ch);
+  ctx.strokeStyle='#8a7452'; ctx.lineWidth=1;
+  for(let r=0;r<6;r++) for(let c=0;c<7;c++){ ctx.strokeRect(cx+c*(cw/7),cy+r*(ch/6),cw/7,ch/6);
+    if((r*7+c)%3===0){ ctx.fillStyle='#3a3a42'; ctx.fillRect(cx+c*(cw/7)+2,cy+r*(ch/6)+3,3,ch/6-6); } }
+  // drying line with fresh prints pinned overhead, gently fluttering
+  ctx.strokeStyle='#8a7452'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.38,H*0.08); ctx.lineTo(W*0.98,H*0.06); ctx.stroke();
+  const prints=['#f4efe2','#eef2f4','#f6ecec','#eef4ec'];
+  for(let i=0;i<5;i++){ const px=W*0.42+i*W*0.12, flap=Math.sin(t*2+i)*3;
+    ctx.save(); ctx.translate(px,H*0.07); ctx.rotate(flap*0.02);
+    ctx.fillStyle=prints[i%prints.length]; ctx.fillRect(-14,0,28,34);
+    ctx.fillStyle='#2a2a30'; ctx.fillRect(-9,6,18,3); ctx.fillRect(-9,13,12,2); ctx.fillRect(-9,18,16,2); // "text"
+    ctx.fillStyle='#8a2a2a'; ctx.fillRect(-9,24,8,6);
+    ctx.restore();
+    ctx.fillStyle='#888'; ctx.fillRect(px-1,H*0.06,2,4); } // clothespin
+  // the cast-iron platen press (center) with a big rotating flywheel
+  const bx=W*0.5, by=floorY;
+  ctx.fillStyle='#2f3a3a'; ctx.fillRect(bx-30,by-70,60,70); // frame body
+  ctx.fillStyle='#3a4a4a'; ctx.fillRect(bx-34,by-8,68,8+(H-by)); // base
+  // the round ink disk at top
+  ctx.fillStyle='#1a1a1e'; ctx.beginPath(); ctx.arc(bx,by-72,16,0,7); ctx.fill();
+  ctx.fillStyle='#2a2a30'; ctx.save(); ctx.translate(bx,by-72); ctx.rotate(t*0.6); ctx.beginPath(); ctx.moveTo(-16,0); ctx.lineTo(16,0); ctx.stroke?.(); ctx.restore();
+  ctx.fillStyle='rgba(120,120,140,.3)'; ctx.beginPath(); ctx.arc(bx-5,by-77,5,0,7); ctx.fill(); // ink sheen
+  // the platen (hinged plate) that opens & closes to print
+  const openAmt=(Math.sin(t*1.6)+1)/2; // 0 closed .. 1 open
+  ctx.save(); ctx.translate(bx,by-30); ctx.rotate(-openAmt*0.7);
+  ctx.fillStyle='#4a5a5a'; ctx.fillRect(-4,-24,8,48); // platen with paper
+  ctx.fillStyle='#f4efe2'; ctx.fillRect(-2,-20,10,40);
+  ctx.restore();
+  // the big flywheel on the right side, spinning
+  const wx=bx+44, wy=by-40, wr=26, rot=t*2.4;
+  ctx.strokeStyle='#1e1e22'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(wx,wy,wr,0,7); ctx.stroke();
+  ctx.strokeStyle='#3a3a42'; ctx.lineWidth=2; for(let s=0;s<6;s++){ const a=rot+s*Math.PI/3; ctx.beginPath(); ctx.moveTo(wx,wy); ctx.lineTo(wx+Math.cos(a)*wr,wy+Math.sin(a)*wr); ctx.stroke(); }
+  ctx.fillStyle='#5a5a62'; ctx.beginPath(); ctx.arc(wx,wy,4,0,7); ctx.fill();
+  // the operator's flywheel handle knob
+  ctx.fillStyle='#8a3a2a'; ctx.beginPath(); ctx.arc(wx+Math.cos(rot)*(wr-4),wy+Math.sin(rot)*(wr-4),3,0,7); ctx.fill();
+  // ink cans + a brayer roller on a side table (right)
+  const tx=W*0.86, ty=floorY-2;
+  ctx.fillStyle='#5a3e26'; ctx.fillRect(tx-18,ty-6,W*0.16,6+(H-ty));
+  const ink=['#c8202a','#2a4a9a','#1a1a1e','#d0a030'];
+  for(let i=0;i<4;i++){ ctx.fillStyle=ink[i]; ctx.fillRect(tx-14+i*10,ty-16,8,10); ctx.fillStyle='#aaa'; ctx.fillRect(tx-14+i*10,ty-18,8,2); }
+  ctx.fillStyle='#333'; ctx.fillRect(tx-16,ty-24,22,4); ctx.fillStyle='#8a7452'; ctx.fillRect(tx+4,ty-26,2,6); // brayer
+}
+registerScene('letterpress', drawLetterpress);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
