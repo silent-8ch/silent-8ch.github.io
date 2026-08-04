@@ -459,7 +459,9 @@ stagewrap.addEventListener('pointerdown', (e)=>{
   // sprite occupies roughly a box above the feet point (pet.x, pet.y)
   const h = SHEETS.walk.displayH;
   const halfW = h * 0.32;
-  if (px > pet.x-halfW && px < pet.x+halfW && py > pet.y-h && py < pet.y+12) doAction('hug');
+  if (px > pet.x-halfW && px < pet.x+halfW && py > pet.y-h && py < pet.y+12){ doAction('hug'); return; }
+  // tapping elsewhere: she looks over, walks to the spot, and reacts to the place
+  tapScene(px, py);
 });
 
 /* ---------- scripted animation ---------- */
@@ -500,7 +502,47 @@ function fxAt(px, py, chars){
   setTimeout(()=> el.remove(), 1300);
 }
 function burst(ch){ for(let i=0;i<3;i++) setTimeout(()=> fxAt(pet.x + rand(-24,24), pet.y-30, ch), i*90); }
+function burstAt(ch, px, py){ for(let i=0;i<3;i++) setTimeout(()=> fxAt(px + rand(-14,14), py-8, ch), i*90); }
 function hearts(){ for(let i=0;i<5;i++) setTimeout(()=> fxAt(pet.x + rand(-30,30), pet.y-30, pick(['💗','💛','💖'])), i*80); }
+
+/* ---------- tap the scene: she walks over & reacts to the place ---------- */
+const SCENE_INTERACT = (()=>{
+  const map = {};
+  const g = (names, o) => names.forEach(n => map[n] = o);
+  g(['catcafe'], {lines:['Kitty! 🐱','So soft…','Purrr 🐱'], emoji:'🐱', love:5});
+  g(['florist','cherryblossom','lavender','tulipfield','sunflowers','greenhouse','topiary','hedgemaze','pasture','alpinemeadow','vineyard','orchard','teaplantation'], {lines:['Mmm, flowers 🌸','Smells lovely 💐','So pretty!'], emoji:'🌸', fun:5});
+  g(['snowycabin','library','forge','candleshop','glassblowing','bakery'], {lines:['So warm 🔥','Cozy…','Toasty! 🔥'], emoji:'🔥', energy:6});
+  g(['koipond','aquarium','tidepools','coralreef','marina','fishingdock','river','waterlily'], {lines:['Fishies! 🐟','So calming…','Look at them go 🐠'], emoji:'🐟', fun:5});
+  g(['fireflies','meteorshower','observatory','planetarium','aurora','biobay','glowwormcave'], {lines:['Make a wish ✨','So magical 🌟','The lights!'], emoji:'✨', love:5});
+  g(['chocolateshop','candyshop','icecreamparlor','cafe','diner','cheeseshop'], {lines:['Yummy smells 🍪','I want a treat!','Mmm 😋'], emoji:'😋', hunger:5});
+  g(['beach'], {lines:['A seashell! 🐚','Sandy toes 🏖️','The waves 🌊'], emoji:'🐚', fun:5});
+  g(['musicroom','recordshop','ballroom','cinema','carnival','arcade'], {lines:['I love this song 🎵','Dance with me!','La la la 🎶'], emoji:'🎵', fun:5});
+  g(['petshop','butterflydome','aviary','savanna','backyard'], {lines:['Hi little ones! 🐾','So cute!','Animals 🥰'], emoji:'🐾', love:5});
+  g(['spa','hotspring','zengarden','bamboo'], {lines:['So relaxing… 😌','Ahhh 💆','Peaceful.'], emoji:'💧', energy:5});
+  return map;
+})();
+const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?'];
+let interactCd = 0;
+function tapScene(px, py){
+  if (interactCd > 0 || pet.animLock > 0) return;
+  interactCd = 1.2;
+  // walk toward the tapped spot (feet stay on the floor band)
+  pet.tx = Math.max(W*0.14, Math.min(W*0.86, px));
+  pet.ty = Math.max(H*0.66, Math.min(H*0.82, py));
+  pet.wanderTimer = rand(3,5);
+  pet.dir = px < pet.x ? 'left' : 'right';
+  const sp = SCENE_INTERACT[SCENES[currentScene]];
+  if (sp){
+    say(pick(sp.lines)); burstAt(sp.emoji, px, py);
+    if (sp.love)   state.love   = clamp(state.love   + sp.love);
+    if (sp.fun)    state.fun    = clamp(state.fun    + sp.fun);
+    if (sp.energy) state.energy = clamp(state.energy + sp.energy);
+    if (sp.hunger) state.hunger = clamp(state.hunger + sp.hunger);
+    refreshHUD();
+  } else {
+    say(pick(AMBIENT));
+  }
+}
 
 function throwUpFx(){
   const r = cv.getBoundingClientRect();
@@ -623,6 +665,7 @@ function loop(ts){
     if (state.hunger < 80) state.overfed = 0;
     if (state.fun < 80) state.overdraw = 0;
     if (cooldown>0) cooldown -= dt;
+    if (interactCd>0) interactCd -= dt;
     maybeNag(dt);
     updatePet(dt);
     // refresh bars periodically (cheap)
