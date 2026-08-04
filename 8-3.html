@@ -6926,6 +6926,54 @@ function drawRecordingStudio(){
 }
 registerScene('recordingstudio', drawRecordingStudio);
 
+/* ── CRANBERRY BOG (outdoor · flooded autumn harvest) ── */
+function drawCranberryBog(){
+  const t=sceneTime, waterY=H*0.34;
+  // crisp autumn sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#8fc4e8'); sky.addColorStop(1,'#dceaf0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  for(let i=0;i<3;i++){ const cx=((t*5+i*150)%(W+120))-60; ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.beginPath(); ctx.arc(cx,H*0.1+i*14,11,0,7); ctx.arc(cx+13,H*0.1+i*14+3,8,0,7); ctx.arc(cx-12,H*0.1+i*14+3,7,0,7); ctx.fill(); }
+  // treeline of autumn colors around the bog
+  const fol=['#d0602a','#e0902a','#c04a2a','#e0b83a'];
+  for(let i=0;i<12;i++){ ctx.fillStyle=fol[i%4]; ctx.beginPath(); ctx.arc(i*W/12+8,waterY-4,12+(i%3)*4,0,7); ctx.fill(); }
+  ctx.fillStyle='#5a4a2a'; ctx.fillRect(0,waterY-4,W,6); // earthen dike
+  // the flooded bog water (dark, reflective)
+  const water=ctx.createLinearGradient(0,waterY,0,H); water.addColorStop(0,'#5a7a5a'); water.addColorStop(1,'#3a5a44');
+  ctx.fillStyle=water; ctx.fillRect(0,waterY,W,H-waterY);
+  // reflections of the autumn trees
+  ctx.save(); ctx.globalAlpha=0.25; for(let i=0;i<12;i++){ ctx.fillStyle=fol[i%4]; ctx.fillRect(i*W/12, waterY+2, W/12, 14+Math.sin(t*2+i)*2); } ctx.restore();
+  // ripple shimmer
+  for(let i=0;i<6;i++){ const ry=waterY+16+i*((H-waterY)/6); ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=ry+Math.sin(x*0.05+t*1.4+i)*2; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // vast raft of floating red cranberries corralled by a boom (the classic red carpet)
+  // the corral boom (floating yellow line) forming an arc
+  ctx.strokeStyle='#e0c020'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(W*0.06,waterY+30); ctx.quadraticCurveTo(W*0.5,H*0.66,W*0.7,waterY+40); ctx.stroke();
+  // dense berries inside the boom
+  ctx.save(); ctx.beginPath(); ctx.moveTo(W*0.06,waterY+30); ctx.quadraticCurveTo(W*0.5,H*0.66,W*0.7,waterY+40); ctx.lineTo(W*0.7,waterY+30); ctx.lineTo(W*0.06,waterY+30); ctx.closePath(); ctx.clip();
+  for(let i=0;i<400;i++){ const bx=(i*47+ (i%7)*13)%(W*0.7)+ W*0.02; const by=waterY+30 + ((i*29)% Math.floor(H*0.32)); const bob=Math.sin(t*2+i)*0.6;
+    ctx.fillStyle= i%5? '#c0202a' : '#e0404a'; ctx.beginPath(); ctx.arc(bx,by+bob,2.2,0,7); ctx.fill();
+    ctx.fillStyle='rgba(255,180,180,.5)'; ctx.fillRect(bx-1,by-1+bob,0.8,0.8); }
+  ctx.restore();
+  // scattered loose berries drifting outside the boom
+  for(let i=0;i<20;i++){ const bx=(i*61+t*8)%W; const by=H*0.78+ (i*23)%(H*0.2); ctx.fillStyle='#c0202a'; ctx.beginPath(); ctx.arc(bx,by,2,0,7); ctx.fill(); }
+  // a worker in chest waders pushing the boom, standing in the water
+  function wader(x){ const push=Math.sin(t*1.5+x)*3;
+    ctx.fillStyle='#e0b020'; ctx.fillRect(x-5,H*0.62,10,H*0.2); // yellow waders
+    ctx.fillStyle='#2a5a8a'; ctx.fillRect(x-5,H*0.56,10,H*0.07); // jacket
+    ctx.fillStyle='#f0d0a8'; ctx.beginPath(); ctx.arc(x,H*0.53,5,0,7); ctx.fill();
+    ctx.fillStyle='#c04a2a'; ctx.beginPath(); ctx.arc(x,H*0.51,5.5,Math.PI,0); ctx.fill(); // cap
+    // arms on a push-pole
+    ctx.strokeStyle='#8a6a44'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x+push,H*0.5); ctx.lineTo(x+push+20,H*0.7); ctx.stroke();
+    ctx.strokeStyle='#2a5a8a'; ctx.beginPath(); ctx.moveTo(x,H*0.58); ctx.lineTo(x+push+6,H*0.62); ctx.stroke();
+  }
+  wader(W*0.34); wader(W*0.6);
+  // a wooden collection truck/box on the far dike
+  ctx.fillStyle='#5a3a24'; ctx.fillRect(W*0.8,waterY-16,W*0.16,14);
+  ctx.fillStyle='#c0202a'; for(let i=0;i<8;i++) ctx.fillRect(W*0.81+i*W*0.018,waterY-13,3,3);
+}
+registerScene('cranberrybog', drawCranberryBog);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
