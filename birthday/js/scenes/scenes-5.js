@@ -937,3 +937,228 @@ function drawKiteHill(){
   ctx.fillStyle='rgba(255,255,255,.3)'; for (let x=-26;x<26;x+=8){ ctx.fillRect(x,-8,2,16); } ctx.restore();
 }
 registerScene('kitehill', drawKiteHill);
+
+/* ── FLOWER MARKET (outdoor · sunny street stalls) ── */
+function drawFlowerMarket(){
+  const t = sceneTime, groundY = H*0.70;
+
+  // soft morning sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#9ed0ee'); sky.addColorStop(1,'#f0e4ee');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='#fff6c8'; ctx.beginPath(); ctx.arc(W*0.82,H*0.12,18,0,7); ctx.fill();
+  drawCloud(W*0.2+Math.sin(t*0.09)*8,H*0.10,0.6); drawCloud(W*0.55+Math.sin(t*0.07+2)*6,H*0.16,0.45);
+
+  // pastel shopfronts behind
+  const fronts=['#e7b7c4','#c4d7b0','#b9c8e2','#e6d2a6'];
+  for (let i=0;i<4;i++){ const bx=i*(W/4); ctx.fillStyle=fronts[i]; ctx.fillRect(bx,H*0.22,W/4,groundY-H*0.22);
+    // door + window
+    ctx.fillStyle='rgba(90,70,60,.5)'; ctx.fillRect(bx+W/4*0.2,groundY-40,W/4*0.24,40);
+    ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(bx+W/4*0.55,groundY-40,W/4*0.28,26);
+    // little pitched roof band
+    ctx.fillStyle='rgba(0,0,0,.08)'; ctx.fillRect(bx,H*0.22,W/4,6); }
+
+  // striped awning strip across the shopfronts
+  for (let i=0;i<12;i++){ ctx.fillStyle= i%2?'#f2ece0':'#d05a6a'; ctx.beginPath();
+    ctx.moveTo(i*(W/12),H*0.30); ctx.lineTo((i+1)*(W/12),H*0.30); ctx.lineTo((i+1)*(W/12),H*0.30+14); ctx.lineTo((i+0.5)*(W/12),H*0.30+20); ctx.lineTo(i*(W/12),H*0.30+14); ctx.closePath(); ctx.fill(); }
+
+  // cobble ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#b0a598'); gr.addColorStop(1,'#8c8074');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.strokeStyle='rgba(0,0,0,.14)'; ctx.lineWidth=1;
+  for (let y=groundY+8;y<H;y+=9){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    for (let x=((y/9|0)%2)*11; x<W; x+=22){ ctx.beginPath(); ctx.moveTo(x,y-9); ctx.lineTo(x,y); ctx.stroke(); } }
+
+  // flower bucket rows (sides + a low center row), lots of color
+  function bucket(bx,by,fc){
+    ctx.fillStyle='#8a9aa4'; ctx.beginPath(); ctx.moveTo(bx-9,by); ctx.lineTo(bx+9,by); ctx.lineTo(bx+7,by+16); ctx.lineTo(bx-7,by+16); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#7a8a94'; ctx.fillRect(bx-9,by,18,3);
+    // blooms
+    for (let k=0;k<6;k++){ const a=k/6*6.28; const fx2=bx+Math.cos(a)*6, fy2=by-8+Math.sin(a)*4 - (k%2)*3 + Math.sin(t*1.5+k+bx)*1;
+      ctx.strokeStyle='#3a7a3a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(fx2,fy2); ctx.stroke();
+      ctx.fillStyle=fc; ctx.beginPath(); ctx.arc(fx2,fy2,3.2,0,7); ctx.fill();
+      ctx.fillStyle='#fff2b0'; ctx.beginPath(); ctx.arc(fx2,fy2,1,0,7); ctx.fill(); }
+  }
+  const fc=['#e2482e','#e0b040','#e26fb0','#a06fe0','#f2f2f2','#e08a4a','#d04a8a'];
+  // left cluster
+  bucket(W*0.10,groundY+12,fc[0]); bucket(W*0.20,groundY+16,fc[2]); bucket(W*0.15,groundY+30,fc[4]);
+  // right cluster
+  bucket(W*0.90,groundY+12,fc[3]); bucket(W*0.80,groundY+16,fc[1]); bucket(W*0.85,groundY+30,fc[6]);
+  // a wooden crate of potted tulips on a small table (right-back, high)
+  ctx.fillStyle='#8a6038'; ctx.fillRect(W*0.66,groundY-6,42,10);
+  for (let k=0;k<5;k++){ const px=W*0.66+6+k*8; ctx.strokeStyle='#3a7a3a'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(px,groundY-6); ctx.lineTo(px,groundY-18); ctx.stroke();
+    ctx.fillStyle=fc[k%fc.length]; ctx.beginPath(); ctx.ellipse(px,groundY-20,3,4,0,0,7); ctx.fill(); }
+
+  // hanging flower baskets from the awning
+  for (const hx of [W*0.34,W*0.62]){ ctx.strokeStyle='#6a5a3a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(hx,H*0.30+18); ctx.lineTo(hx,H*0.30+30); ctx.stroke();
+    ctx.fillStyle='#8a6038'; ctx.beginPath(); ctx.arc(hx,H*0.30+34,8,0,Math.PI); ctx.fill();
+    for (let k=0;k<5;k++){ ctx.fillStyle=fc[(k+2)%fc.length]; ctx.beginPath(); ctx.arc(hx-6+k*3,H*0.30+34+Math.sin(t+k)*1.5,2.4,0,7); ctx.fill(); } }
+}
+registerScene('flowermarket', drawFlowerMarket);
+
+/* ── SNOW GLOBE SHOP (indoor · whimsical curio store) ── */
+function drawSnowGlobeShop(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // cozy teal wall
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#22485a'); wall.addColorStop(1,'#2f6272');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  // wainscot stripe
+  ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(0,floorY-24,W,24);
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,floorY-24); ctx.lineTo(W,floorY-24); ctx.stroke();
+
+  // warm pendant light
+  ctx.strokeStyle='#1a2a30'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.5,0); ctx.lineTo(W*0.5,H*0.08); ctx.stroke();
+  ctx.fillStyle='rgba(255,220,150,.18)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.13,40,0,7); ctx.fill();
+  ctx.fillStyle='#2a2018'; ctx.beginPath(); ctx.moveTo(W*0.5-14,H*0.08); ctx.lineTo(W*0.5+14,H*0.08); ctx.lineTo(W*0.5+8,H*0.13); ctx.lineTo(W*0.5-8,H*0.13); ctx.closePath(); ctx.fill();
+  ctx.fillStyle=`rgba(255,220,140,${0.85+0.1*Math.sin(t*2)})`; ctx.beginPath(); ctx.arc(W*0.5,H*0.135,4,0,7); ctx.fill();
+
+  // wooden display shelves with snow globes
+  function globe(gx,gy,r,scene){
+    // globe glass
+    const g=ctx.createRadialGradient(gx-r*0.3,gy-r*0.3,1,gx,gy,r);
+    g.addColorStop(0,'rgba(210,235,245,.9)'); g.addColorStop(1,'rgba(150,200,220,.75)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(gx,gy,r,0,7); ctx.fill();
+    // mini scene inside
+    ctx.save(); ctx.beginPath(); ctx.arc(gx,gy,r-1,0,7); ctx.clip();
+    if (scene==='tree'){ ctx.fillStyle='#2f7a3a'; ctx.beginPath(); ctx.moveTo(gx,gy-r*0.6); ctx.lineTo(gx-r*0.5,gy+r*0.4); ctx.lineTo(gx+r*0.5,gy+r*0.4); ctx.closePath(); ctx.fill(); }
+    else if (scene==='house'){ ctx.fillStyle='#c05a4a'; ctx.fillRect(gx-r*0.4,gy-r*0.1,r*0.8,r*0.5); ctx.fillStyle='#7a3a2a'; ctx.beginPath(); ctx.moveTo(gx-r*0.5,gy-r*0.1); ctx.lineTo(gx,gy-r*0.5); ctx.lineTo(gx+r*0.5,gy-r*0.1); ctx.fill(); }
+    else { ctx.fillStyle='#dfe8ee'; ctx.beginPath(); ctx.arc(gx,gy+r*0.1,r*0.35,0,7); ctx.arc(gx-r*0.25,gy+r*0.3,r*0.25,0,7); ctx.arc(gx+r*0.25,gy+r*0.3,r*0.25,0,7); ctx.fill(); }
+    // snow base
+    ctx.fillStyle='#eef4f8'; ctx.beginPath(); ctx.ellipse(gx,gy+r*0.55,r,r*0.35,0,0,7); ctx.fill();
+    // swirling snowflakes
+    for (let k=0;k<10;k++){ const a=t*1.2+k*0.63; const sr=(r*0.7)*((k%5)/5); const sx=gx+Math.cos(a)*sr; const sy=gy+r*0.4 - ((t*10+k*7)%(r*1.3));
+      ctx.fillStyle='rgba(255,255,255,.9)'; ctx.beginPath(); ctx.arc(sx,sy,1,0,7); ctx.fill(); }
+    ctx.restore();
+    // glass shine
+    ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.ellipse(gx-r*0.35,gy-r*0.35,r*0.22,r*0.12,-0.6,0,7); ctx.fill();
+    // base
+    ctx.fillStyle='#6a4a2e'; roundRect(gx-r*0.8,gy+r*0.7,r*1.6,r*0.5,2); ctx.fill();
+    ctx.fillStyle='#8a5a3a'; ctx.fillRect(gx-r*0.8,gy+r*0.7,r*1.6,2);
+  }
+  // two shelves
+  for (const sy of [H*0.30,H*0.50]){ ctx.fillStyle='#5a3a24'; ctx.fillRect(W*0.06,sy+14,W*0.88,6); ctx.fillStyle='#3a2418'; ctx.fillRect(W*0.06,sy+20,W*0.88,3);
+    const scenes=['tree','house','snowman'];
+    for (let i=0;i<4;i++){ const gx=W*0.16+i*W*0.22; globe(gx,sy,13,scenes[(i+ (sy>H*0.4?1:0))%3]); } }
+
+  // plank floor + rug
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#8a6038'); fl.addColorStop(1,'#6a482a');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1; for (let x=0;x<W;x+=28){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x-6,H); ctx.stroke(); }
+  ctx.fillStyle='#2f6272'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.90,100,22,0,0,7); ctx.fill();
+  ctx.fillStyle='#3f7282'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.90,64,14,0,0,7); ctx.fill();
+
+  // a big feature globe on a small counter (left, low)
+  globe(W*0.16,floorY+18,20,'house');
+}
+registerScene('snowglobeshop', drawSnowGlobeShop);
+
+/* ── NIGHT GARDEN (outdoor · illuminated flowers at night) ── */
+function drawNightGarden(){
+  const t = sceneTime, groundY = H*0.62;
+
+  // deep blue night sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#101838'); sky.addColorStop(1,'#243a5a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  for (let i=0;i<40;i++){ const sx=(i*79+5)%W, sy=(i*29+3)%(groundY*0.7); ctx.fillStyle=`rgba(230,240,255,${0.2+0.3*Math.abs(Math.sin(t*1.2+i))})`; ctx.fillRect(sx,sy,1.1,1.1); }
+  // soft moon
+  ctx.fillStyle='rgba(240,244,220,.2)'; ctx.beginPath(); ctx.arc(W*0.8,H*0.13,30,0,7); ctx.fill();
+  ctx.fillStyle='#eef0d8'; ctx.beginPath(); ctx.arc(W*0.8,H*0.13,17,0,7); ctx.fill();
+
+  // dark hedge silhouette + a lit pergola arch
+  ctx.fillStyle='#0e2018'; ctx.fillRect(0,groundY-26,W,30);
+  ctx.fillStyle='#12281c'; for (let x=0;x<W;x+=16){ ctx.beginPath(); ctx.arc(x,groundY-26,9,Math.PI,0); ctx.fill(); }
+  // string lights on a wire arch
+  ctx.strokeStyle='rgba(120,90,60,.5)'; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=0;x<=W;x+=8){ const y=H*0.20+Math.sin(x*0.02)*Math.sin(1)*10 - Math.sin(x/W*Math.PI)*30; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+  for (let x=10;x<W;x+=20){ const y=H*0.20 - Math.sin(x/W*Math.PI)*30; ctx.fillStyle=`rgba(255,220,150,${0.6+0.4*Math.sin(t*3+x)})`; ctx.beginPath(); ctx.arc(x,y,2.4,0,7); ctx.fill();
+    ctx.fillStyle='rgba(255,220,150,.12)'; ctx.beginPath(); ctx.arc(x,y,6,0,7); ctx.fill(); }
+
+  // garden ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#1a3020'); gr.addColorStop(1,'#0f1e14');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  // a lantern-lit stone path down the middle (kept dark/low so pet reads)
+  ctx.fillStyle='#2a3a32'; ctx.beginPath(); ctx.moveTo(W*0.5-14,groundY); ctx.lineTo(W*0.5+14,groundY); ctx.lineTo(W*0.5+40,H); ctx.lineTo(W*0.5-40,H); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.3)'; ctx.lineWidth=1; for (let y=groundY+12;y<H;y+=14){ ctx.beginPath(); ctx.moveTo(W*0.5-14-(y-groundY)*0.22,y); ctx.lineTo(W*0.5+14+(y-groundY)*0.22,y); ctx.stroke(); }
+
+  // glowing luminaria flowers along the beds (sides)
+  function glowFlower(fx,fy,col,sc){
+    ctx.strokeStyle='#25402a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(fx,fy+10*sc); ctx.lineTo(fx,fy); ctx.stroke();
+    const glow=0.6+0.35*Math.sin(t*1.5+fx);
+    ctx.fillStyle=col.replace('rgb','rgba').replace(')',`,${0.18*glow})`); ctx.beginPath(); ctx.arc(fx,fy,14*sc,0,7); ctx.fill();
+    ctx.save(); ctx.translate(fx,fy); ctx.scale(sc,sc);
+    for (let k=0;k<6;k++){ const a=k/6*6.28; ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(Math.cos(a)*5,Math.sin(a)*5,4,2.6,a,0,7); ctx.fill(); }
+    ctx.fillStyle='#fff2c0'; ctx.beginPath(); ctx.arc(0,0,2.2,0,7); ctx.fill();
+    ctx.restore();
+  }
+  glowFlower(W*0.10,groundY+14,'rgb(230,120,190)',1.3);
+  glowFlower(W*0.20,groundY+30,'rgb(150,150,255)',1.0);
+  glowFlower(W*0.90,groundY+14,'rgb(120,220,200)',1.3);
+  glowFlower(W*0.82,groundY+32,'rgb(255,180,120)',1.0);
+  glowFlower(W*0.30,groundY+8,'rgb(200,140,255)',0.7);
+  glowFlower(W*0.72,groundY+8,'rgb(255,220,120)',0.7);
+
+  // fireflies / floating glints
+  for (let i=0;i<16;i++){ const fx=(i*61+ Math.sin(t*0.5+i)*20)%W; const fy=groundY-20+Math.sin(t*1.5+i)*18 - (i%4)*8;
+    ctx.fillStyle=`rgba(200,255,150,${0.2+0.4*Math.abs(Math.sin(t*3+i))})`; ctx.beginPath(); ctx.arc(fx,fy,1.4,0,7); ctx.fill(); }
+
+  // a small garden lantern on a post (left, low)
+  const px=W*0.12, py=groundY+40;
+  ctx.fillStyle='#241a14'; ctx.fillRect(px-2,py-40,4,40);
+  ctx.fillStyle='rgba(255,200,120,.25)'; ctx.beginPath(); ctx.arc(px,py-46,16,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(255,205,120,${0.85+0.1*Math.sin(t*2.5)})`; roundRect(px-6,py-52,12,14,2); ctx.fill();
+  ctx.fillStyle='#241a14'; ctx.fillRect(px-7,py-54,14,3);
+}
+registerScene('nightgarden', drawNightGarden);
+
+/* ── MOCHI SHOP (indoor · pastel wagashi sweets) ── */
+function drawMochiShop(){
+  const t = sceneTime, counterY = H*0.66;
+
+  // soft pink pastel wall
+  const wall=ctx.createLinearGradient(0,0,0,counterY); wall.addColorStop(0,'#f6dbe4'); wall.addColorStop(1,'#f0c9d8');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,counterY);
+  // gentle polka pattern
+  ctx.fillStyle='rgba(255,255,255,.35)'; for (let y=20;y<counterY;y+=26){ for (let x=((y/26|0)%2)*13; x<W; x+=26){ ctx.beginPath(); ctx.arc(x,y,2.4,0,7); ctx.fill(); } }
+
+  // fabric banner sign with a little mochi emblem
+  ctx.fillStyle='#c85a7a'; roundRect(W*0.32,H*0.06,W*0.36,26,4); ctx.fill();
+  ctx.fillStyle='#fff2f6'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.06+13,10,7,0,0,7); ctx.fill();
+  ctx.fillStyle='#e2607a'; ctx.beginPath(); ctx.arc(W*0.5,H*0.06+13,3,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(W*0.40,H*0.06+13); ctx.lineTo(W*0.44,H*0.06+13); ctx.moveTo(W*0.56,H*0.06+13); ctx.lineTo(W*0.60,H*0.06+13); ctx.stroke();
+  // little bobbing paper garland
+  for (let i=0;i<9;i++){ const gx=i*(W/8); ctx.fillStyle=['#f2a0b8','#f2d0a0','#a0d8c0','#c0b0e0'][i%4];
+    ctx.beginPath(); ctx.moveTo(gx,H*0.14); ctx.lineTo(gx+8,H*0.14); ctx.lineTo(gx+4,H*0.14+8+Math.sin(t*2+i)*1.5); ctx.closePath(); ctx.fill(); }
+
+  // wall shelf with jars of colored mochi
+  ctx.fillStyle='#c89a6a'; ctx.fillRect(W*0.08,H*0.30,W*0.84,6);
+  for (let i=0;i<5;i++){ const jx=W*0.16+i*W*0.16;
+    ctx.fillStyle='rgba(255,255,255,.5)'; roundRect(jx-11,H*0.30-24,22,24,4); ctx.fill();
+    const mc=['#f2a0b8','#a0d8b0','#f2e2a0','#c0b0e0','#f2c0a0'][i];
+    for (let k=0;k<4;k++){ ctx.fillStyle=mc; ctx.beginPath(); ctx.arc(jx-6+(k%2)*12, H*0.30-6-(k>1?8:0), 4,0,7); ctx.fill(); }
+    ctx.fillStyle='#b07a4a'; ctx.fillRect(jx-11,H*0.30-28,22,4); }
+
+  // wood display counter
+  const cnt=ctx.createLinearGradient(0,counterY,0,H); cnt.addColorStop(0,'#dcbf94'); cnt.addColorStop(1,'#c0a06e');
+  ctx.fillStyle=cnt; ctx.fillRect(0,counterY,W,H-counterY);
+  ctx.fillStyle='rgba(255,250,230,.2)'; ctx.fillRect(0,counterY,W,4);
+  // glass case front
+  ctx.fillStyle='rgba(200,230,240,.18)'; ctx.fillRect(0,counterY,W,H*0.16);
+  ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1; ctx.strokeRect(2,counterY+2,W-4,H*0.16-2);
+
+  // trays of mochi/wagashi in the case (sides, leaving center a bit open)
+  function mochi(mx,my,col,top){ ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(mx,my,8,6,0,0,7); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.ellipse(mx-2,my-2,3,2,0,0,7); ctx.fill();
+    if (top==='dot'){ ctx.fillStyle='#e2607a'; ctx.beginPath(); ctx.arc(mx,my-1,2,0,7); ctx.fill(); }
+    else if (top==='leaf'){ ctx.fillStyle='#5a9a4a'; ctx.beginPath(); ctx.ellipse(mx,my-4,3,1.6,0.5,0,7); ctx.fill(); } }
+  function tray(tx,cols){ ctx.fillStyle='#6a4a2e'; roundRect(tx-30,counterY+22,60,18,3); ctx.fill();
+    for (let i=0;i<3;i++){ for (let j=0;j<2;j++){ mochi(tx-18+i*18, counterY+28+j*8, cols[(i+j)%cols.length], ['dot','leaf','none'][(i+j)%3]); } } }
+  tray(W*0.20,['#f2a0b8','#a0d8b0','#f2e2a0']);
+  tray(W*0.80,['#c0b0e0','#f2c0a0','#a0c8e0']);
+
+  // a dango skewer standing in a small cup (center-back, high)
+  const dx=W*0.5, dy=counterY+8;
+  ctx.strokeStyle='#c8a060'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(dx,dy+18); ctx.lineTo(dx,dy-14); ctx.stroke();
+  for (let k=0;k<3;k++){ ctx.fillStyle=['#f2e2c0','#c8e0b0','#f2b8c8'][k]; ctx.beginPath(); ctx.arc(dx,dy-10+k*10,5,0,7); ctx.fill(); }
+}
+registerScene('mochishop', drawMochiShop);

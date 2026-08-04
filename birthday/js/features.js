@@ -49,6 +49,10 @@ const TRINKET_POOL = (()=>{
   g(['skilodge'], ['⛷️','☕','🔥']);
   g(['crystalcave'], ['💎','🔮','🪩']);
   g(['lanternfestival'], ['🏮','🎏','🕯️']);
+  g(['sushibar'], ['🍣','🍥','🥢']);
+  g(['seasidecarousel'], ['🎠','🐴','🎪']);
+  g(['potionkitchen'], ['🧪','⚗️','🔮']);
+  g(['kitehill'], ['🪁','🌬️','🍃']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -122,6 +126,9 @@ const ACHIEVEMENTS = [
   {id:'days_180',    icon:'🌻', name:'Half a Year of Us',desc:'180 days together',        test:()=> (meta.totalDays||0) >= 180},
   {id:'days_365',    icon:'🎉', name:'A Whole Year',     desc:'365 days together',        test:()=> (meta.totalDays||0) >= 365},
   {id:'gallery_full',icon:'🖼️', name:'Full Gallery',     desc:'Fill the drawing gallery', test:()=> (typeof gallery!=='undefined') && gallery.length >= 6},
+  {id:'draw_250',    icon:'🎭', name:'Prolific Painter',  desc:'Draw together 250 times',  test:()=> (state.draws||0) >= 250},
+  {id:'collect_75',  icon:'🗃️', name:'Master Collector',  desc:'Collect 75 kinds',         test:()=> collectedKinds() >= 75},
+  {id:'streak_30',   icon:'🌟', name:'Month-Long Streak', desc:'A 30-day streak',          test:()=> (meta.streak||0) >= 30},
 ];
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
@@ -204,7 +211,12 @@ const COMPLIMENTS = [
   'You make me want to keep every promise I ever made you.',
   'Loving you is the one thing I\'ll never get tired of.',
   'You are my good-morning and my thank-goodness-you\'re-home.',
-  'Of all my lucky days, the luckiest is the one I met you.'
+  'Of all my lucky days, the luckiest is the one I met you.',
+  'You make the whole idea of forever feel cozy.',
+  'I love that our quietest days are still my favorites.',
+  'You carry so much light you don\'t even notice it spilling.',
+  'Wherever you are is the direction I\'m always facing.',
+  'You are my one wish that keeps coming true.'
 ];
 function dailyCompliment(){
   try{
@@ -367,6 +379,11 @@ const OUTFITS = [
   {id:'bunnyears',  label:'Bunny ears',      icon:'🐰'},
   {id:'santahat',   label:'Santa hat',       icon:'🎅'},
   {id:'antlers',    label:'Reindeer antlers',icon:'🦌'},
+  {id:'strawhat',    label:'Straw boater',    icon:'🌾'},
+  {id:'pilotcap',    label:'Pilot cap',       icon:'✈️'},
+  {id:'snowflakeclip',label:'Snowflake clip', icon:'❄️'},
+  {id:'starhairpin', label:'Star hairpin',    icon:'⭐'},
+  {id:'mushroomcap', label:'Mushroom cap',    icon:'🍄'},
 ];
 let outfit = (function(){ try{ return localStorage.getItem('bpet_outfit') || 'auto'; }catch(e){ return 'auto'; } })();
 function saveOutfit(){ try{ localStorage.setItem('bpet_outfit', outfit); }catch(e){} }
@@ -522,6 +539,41 @@ function drawAccessory(kind, cx, topY, s){
       ctx.moveTo(bx+side*1.6*s,topY-6*s); ctx.lineTo(bx+side*4*s,topY-9*s);
       ctx.stroke();
     }
+  } else if (kind==='strawhat'){
+    ctx.fillStyle='#e8cf8a';
+    ctx.beginPath(); ctx.ellipse(cx,topY+7*s,16*s,4.5*s,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx,topY+4*s,8*s,5*s,0,0,7); ctx.fill();
+    ctx.strokeStyle='#c9a24a'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.ellipse(cx,topY+7*s,16*s,4.5*s,0,0,7); ctx.stroke();
+    ctx.fillStyle='#5aa0e0'; ctx.fillRect(cx-8*s,topY+5*s,16*s,2.2*s);
+  } else if (kind==='pilotcap'){
+    ctx.fillStyle='#7a5a3a';
+    ctx.beginPath(); ctx.arc(cx,topY+5*s,10*s,Math.PI,0); ctx.fill(); ctx.fillRect(cx-10*s,topY+4*s,20*s,3*s);
+    ctx.fillStyle='#5a4230'; ctx.beginPath(); ctx.ellipse(cx,topY+8*s,12*s,2.6*s,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle='#cfe4f5';
+    ctx.beginPath(); ctx.arc(cx-4*s,topY-1*s,3*s,0,7); ctx.arc(cx+4*s,topY-1*s,3*s,0,7); ctx.fill();
+    ctx.fillStyle='#8ab0d0'; ctx.beginPath(); ctx.arc(cx-4*s,topY-1*s,1.5*s,0,7); ctx.arc(cx+4*s,topY-1*s,1.5*s,0,7); ctx.fill();
+  } else if (kind==='snowflakeclip'){
+    ctx.strokeStyle='#9fd4f0'; ctx.lineWidth=1.4*s; ctx.lineCap='round';
+    const sx=cx+7*s, sy=topY+3*s, r=4*s;
+    for(let i=0;i<6;i++){ const a=i/6*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+Math.cos(a)*r,sy+Math.sin(a)*r); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx+Math.cos(a)*r*0.6,sy+Math.sin(a)*r*0.6); ctx.lineTo(sx+Math.cos(a+0.4)*r*0.85,sy+Math.sin(a+0.4)*r*0.85); ctx.stroke();
+    }
+    ctx.fillStyle='#eaf6ff'; ctx.beginPath(); ctx.arc(sx,sy,1.2*s,0,7); ctx.fill();
+  } else if (kind==='starhairpin'){
+    const sx=cx+7*s, sy=topY+3*s, R=4*s, r=1.8*s;
+    ctx.fillStyle='#f2c14e'; ctx.beginPath();
+    for(let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, rad=(i%2===0)?R:r; const px=sx+Math.cos(a)*rad, py=sy+Math.sin(a)*rad; i?ctx.lineTo(px,py):ctx.moveTo(px,py); }
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#fff6cf'; ctx.beginPath(); ctx.arc(sx,sy,1.1*s,0,7); ctx.fill();
+    ctx.strokeStyle='#c9a24a'; ctx.lineWidth=1*s; ctx.beginPath(); ctx.moveTo(sx,sy+R); ctx.lineTo(sx-1*s,sy+7*s); ctx.stroke();
+  } else if (kind==='mushroomcap'){
+    ctx.fillStyle='#d64545';
+    ctx.beginPath(); ctx.ellipse(cx,topY+5*s,11*s,7*s,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle='#e07a58'; ctx.fillRect(cx-11*s,topY+4.5*s,22*s,1.4*s);
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(cx-5*s,topY+1*s,1.8*s,0,7); ctx.arc(cx+4*s,topY,1.5*s,0,7); ctx.arc(cx,topY+3*s,1.3*s,0,7); ctx.arc(cx+7*s,topY+3*s,1.1*s,0,7); ctx.fill();
   }
   ctx.restore();
 }
@@ -564,6 +616,9 @@ const LOVE_NOTES = [
   {day:18, text:'You have a way of making even a tiny screen feel full of you. I adore that. 🥰'},
   {day:45, text:'A month and a half of little visits. Loving you never once felt like effort. ✨'},
   {day:80, text:'Almost three months in, and my heart still does the same happy thing it always has. 💗'},
+  {day:55, text:'Fifty-five days of little check-ins, and each one still feels like a tiny date. 💛'},
+  {day:110, text:'Over a hundred days now. I keep thinking I\'ve loved you as much as I can, and then tomorrow comes. 🥰'},
+  {day:160, text:'You\'ve turned this little routine into something I\'d never want to miss. That\'s you all over. ✨'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){

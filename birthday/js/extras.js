@@ -894,3 +894,157 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 5). More interactive / contained moments — occasional,
+   self-clearing, scene-aware. No always-on overlays.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   13) SHE BRINGS YOU A FLOWER  —  every great while she wanders to a spot, picks
+   a little something, and offers it to you with a note. No taps needed; it's a
+   quiet, spontaneous moment of affection that clears itself.
+   -------------------------------------------------------------------------- */
+(function fxFlowerGift(){
+  try{
+    let phase = 'idle';                  // 'idle' | 'goto' | 'done'
+    let timer = rand(80, 150);
+    let guard = 0, target = null, flower = '🌸';
+    const NOTES = ['I picked this just for you 🌸','A little something, because I love you 💛','For you, my favorite person 🥰','Thinking of you always 💐'];
+
+    function busy(){
+      try{
+        return (pet.animLock>0) || pet.resting || (typeof isCrying==='function' && isCrying())
+          || (typeof speech!=='undefined' && speech.classList && speech.classList.contains('show'));
+      }catch(e){ return true; }
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (phase === 'idle'){
+        timer -= dt;
+        if (timer <= 0){
+          timer = rand(120, 220);
+          if (busy()) return;
+          const mood = (typeof moodScore==='function') ? moodScore() : 60;
+          if (mood < 45) return;                       // only when she's in good spirits
+          flower = pick(['🌸','🌷','🌼','💐','🌹','🌻']);
+          target = { x: rand(W*0.2, W*0.8), y: rand(H*0.7, H*0.8) };
+          if (typeof fxWalkHerTo === 'function') fxWalkHerTo(target.x, target.y);
+          phase = 'goto'; guard = 5;
+        }
+        return;
+      }
+      if (phase === 'goto'){
+        guard -= dt;
+        const near = target && Math.hypot(pet.x - target.x, pet.y - target.y) < 22;
+        if (near || guard <= 0){
+          phase = 'done';
+          if (typeof burstAt === 'function') burstAt(flower, pet.x, pet.y - 8);
+          if (typeof say === 'function') say('Look what I found for you… ' + flower);
+          if (typeof hearts === 'function') hearts();
+          if (typeof sfx === 'function') sfx('find');
+          setTimeout(()=>{ try{ if (typeof showToast==='function') showToast(flower,'A gift for you', pick(NOTES)); }catch(e){} }, 1400);
+          try{ state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          setTimeout(()=>{ phase = 'idle'; }, 2500);
+        }
+      }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   14) MUSIC IN THE AIR  —  only in music-y scenes, tiny notes drift up from her
+   now and then (a little more lively when she's walking). Scene-gated, so it
+   never plays elsewhere and adds no clutter to other places.
+   -------------------------------------------------------------------------- */
+(function fxMusicNotes(){
+  try{
+    const MUSIC = new Set(['musicroom','recordshop','recordingstudio','jazzclub','concerthall','ballroom','bandstand','cinema','carnival','arcade','operahouse']);
+    let t = rand(2, 4);
+    EXTRA_UPDATERS.push(function(dt){
+      t -= dt;
+      if (t > 0) return;
+      try{
+        const scene = (typeof SCENES!=='undefined') ? SCENES[currentScene] : null;
+        if (!scene || !MUSIC.has(scene)){ t = rand(2, 4); return; }
+        if (!pet || pet.resting || pet.animLock>0 || (typeof isCrying==='function' && isCrying())){ t = rand(2,4); return; }
+        t = pet.moving ? rand(0.9, 1.6) : rand(2.2, 3.6);     // livelier on the move
+        const h = (typeof SHEETS!=='undefined' && SHEETS.walk && SHEETS.walk.displayH) || 150;
+        if (typeof fxAt === 'function') fxAt(pet.x + rand(-14,14), pet.y - h*rand(0.8,1.0), pick(['♪','♫','🎵','🎶']));
+      }catch(e){ t = rand(2,4); }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   15) SLEEPY VISITOR CAT  —  once in a while a little cat curls up on the floor
+   for a nap. Tap to give it a gentle pet — it purrs, she coos, and everyone's a
+   bit happier. It naps for a while, then quietly wanders off.
+   -------------------------------------------------------------------------- */
+(function fxNapCat(){
+  try{
+    let cat = null;                      // {x,y,ttl,breathe,zzz,petCd,color}
+    let timer = rand(60, 110);
+    const COLORS = ['#d9a066','#8a8a8a','#e8c07a','#5a5a5a','#c98a5a'];
+
+    function spawn(){
+      cat = { x: rand(W*0.22, W*0.78), y: rand(H*0.72, H*0.80), ttl: rand(26, 40), breathe: rand(0,Math.PI*2), zzz: 2, petCd: 0, color: pick(COLORS) };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!cat){
+        timer -= dt;
+        if (timer <= 0){ timer = rand(80, 140); if (!(pet && pet.resting)) spawn(); }
+        return;
+      }
+      cat.breathe += dt; cat.ttl -= dt;
+      if (cat.petCd > 0) cat.petCd -= dt;
+      cat.zzz -= dt;
+      if (cat.zzz <= 0){ cat.zzz = rand(3.5, 5.5); if (typeof fxAt === 'function') fxAt(cat.x + 14, cat.y - 12, '💤'); }
+      if (cat.ttl <= 0) cat = null;      // nap's over — it slips away
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!cat) return;
+      const c = cat;
+      const br = 1 + Math.sin(c.breathe*2) * 0.04;            // slow breathing
+      ctx.save();
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.16)';
+      ctx.beginPath(); ctx.ellipse(c.x, c.y + 5, 22, 5, 0, 0, 7); ctx.fill();
+      // curled body
+      ctx.fillStyle = c.color;
+      ctx.beginPath(); ctx.ellipse(c.x, c.y, 20, 11*br, 0, 0, 7); ctx.fill();
+      // tail curling around the front
+      ctx.strokeStyle = c.color; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(c.x + 14, c.y + 2, 10, Math.PI*1.1, Math.PI*2.1); ctx.stroke();
+      // head resting on the left
+      ctx.fillStyle = c.color;
+      ctx.beginPath(); ctx.arc(c.x - 15, c.y - 2, 8, 0, 7); ctx.fill();
+      // ears
+      ctx.beginPath();
+      ctx.moveTo(c.x - 20, c.y - 8); ctx.lineTo(c.x - 17, c.y - 15); ctx.lineTo(c.x - 13, c.y - 9); ctx.closePath();
+      ctx.moveTo(c.x - 12, c.y - 9); ctx.lineTo(c.x - 9, c.y - 15); ctx.lineTo(c.x - 6, c.y - 8); ctx.closePath();
+      ctx.fill();
+      // closed sleepy eye
+      ctx.strokeStyle = 'rgba(40,30,25,0.8)'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(c.x - 16, c.y - 2, 2.4, Math.PI*0.15, Math.PI*0.85); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!cat) return false;
+        if (px < cat.x - 24 || px > cat.x + 24 || py < cat.y - 18 || py > cat.y + 12) return false;
+        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(cat.x + rand(-14,14), cat.y - 10, pick(['🐾','💗','😺'])), i*80);
+        if (cat.petCd <= 0){
+          cat.petCd = 1.4; cat.ttl = Math.max(cat.ttl, 10);   // a good pet keeps it around a little
+          if (typeof sfx === 'function') sfx('tap');
+          if (typeof say === 'function') say(pick(['So soft 🐱','Purrr…','Kitty! 🐈','Hello, sweet thing 🥰']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
