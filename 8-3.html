@@ -1190,6 +1190,38 @@ const SFX = {
 };
 function sfx(kind){ if(!settings.sound) return; ensureAudio(); (SFX[kind]||[]).forEach(n=> tone(n[0],n[1],n[2],n[3])); }
 
+// compose the current scene into a little framed "photo" with a caption
+function buildKeepsakeCanvas(){
+  const pad=14, capH=48;
+  const oc=document.createElement('canvas'); oc.width=W+pad*2; oc.height=H+pad*2+capH;
+  const o=oc.getContext('2d');
+  o.fillStyle='#f6e6cf'; o.fillRect(0,0,oc.width,oc.height);            // warm mat/frame
+  o.drawImage(cv, pad, pad, W, H);                                       // the moment itself
+  o.strokeStyle='rgba(0,0,0,.12)'; o.lineWidth=1; o.strokeRect(pad+0.5,pad+0.5,W-1,H-1);
+  const place=sceneLabel(SCENES[currentScene]);
+  const d=new Date(); const ds=(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+  o.textAlign='center';
+  o.fillStyle='#8a5a4a'; o.font='700 16px system-ui,Segoe UI,sans-serif';
+  o.fillText('📍 '+place+'  ·  '+ds, oc.width/2, H+pad*2+20);
+  o.fillStyle='#c98a86'; o.font='600 13px system-ui,Segoe UI,sans-serif';
+  o.fillText('a moment with '+CONFIG.name+'  💛', oc.width/2, H+pad*2+40);
+  return oc;
+}
+function saveKeepsake(){
+  try{
+    const oc=buildKeepsakeCanvas();
+    oc.toBlob(function(blob){
+      if(!blob) return;
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download='keepsake-'+SCENES[currentScene]+'.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    });
+    if(typeof showToast==='function') showToast('📸','Keepsake saved','A little photo of this moment 💛');
+    sfx('find');
+  }catch(e){ console.log('keepsake error', e); }
+}
 function buildSettings(){
   const list=document.getElementById('setList'); if(!list) return; list.innerHTML='';
   const toggle=(label, key, sub)=>{
@@ -1200,6 +1232,10 @@ function buildSettings(){
   };
   toggle('🔊 Sound', 'sound', 'Gentle chimes when you play with her');
   toggle('🌿 Relaxed mode', 'relaxed', 'Her needs drain half as fast');
+  const keep=document.createElement('div'); keep.className='setRow';
+  keep.innerHTML=`<span>📸 Save a keepsake<small>Download a little photo of this moment</small></span><span class="sv">Save</span>`;
+  keep.addEventListener('click', saveKeepsake);
+  list.appendChild(keep);
   const reset=document.createElement('div'); reset.className='setRow danger';
   reset.innerHTML=`<span>♻️ Reset progress<small>Clears stats, days, passport & collection</small></span><span class="sv">Reset</span>`;
   reset.addEventListener('click',()=>{ if(confirm('Reset all progress? This can’t be undone.')){ ['bpet','bpet_disabled','bpet_visited','bpet_meta','bpet_collection','bpet_outfit','bpet_settings','bpet_achieved'].forEach(k=>{ try{localStorage.removeItem(k);}catch(e){} }); location.reload(); } });
