@@ -5239,6 +5239,53 @@ function drawGlassblowing(){
 }
 registerScene('glassblowing', drawGlassblowing);
 
+/* ── COASTAL CLIFFS (outdoor · sea cliffs, crashing surf below) ── */
+function drawCliffs(){
+  const t=sceneTime, seaY=H*0.5;
+  // breezy sky
+  const sky=ctx.createLinearGradient(0,0,0,seaY); sky.addColorStop(0,'#7ab6dc'); sky.addColorStop(1,'#cfe6ee');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,seaY);
+  for(let i=0;i<3;i++){ const cx=((t*7+i*150)%(W+120))-60; ctx.fillStyle='rgba(255,255,255,.8)';
+    ctx.beginPath(); ctx.arc(cx,H*0.1+i*20,12,0,7); ctx.arc(cx+14,H*0.1+i*20+3,9,0,7); ctx.arc(cx-12,H*0.1+i*20+4,8,0,7); ctx.fill(); }
+  // ocean
+  const sea=ctx.createLinearGradient(0,seaY,0,H); sea.addColorStop(0,'#2f6f9a'); sea.addColorStop(1,'#1f5170');
+  ctx.fillStyle=sea; ctx.fillRect(0,seaY,W,H-seaY);
+  // swell lines
+  for(let i=0;i<7;i++){ const ry=seaY+10+i*((H-seaY)/8); ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=ry+Math.sin(x*0.05+t*1.2+i)*2.5; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // distant headland on the right
+  ctx.fillStyle='#4a6a58'; ctx.beginPath(); ctx.moveTo(W,seaY); ctx.lineTo(W,seaY-30); ctx.quadraticCurveTo(W*0.82,seaY-24,W*0.7,seaY); ctx.closePath(); ctx.fill();
+  // the main cliff mass on the left (grassy top, rocky face)
+  ctx.fillStyle='#7a6a52'; // rock
+  ctx.beginPath(); ctx.moveTo(0,seaY-40); ctx.lineTo(W*0.44,seaY-40);
+  ctx.lineTo(W*0.5,seaY+30); ctx.lineTo(W*0.34,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  // rock striations
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1.5;
+  for(let i=0;i<6;i++){ ctx.beginPath(); ctx.moveTo(0,seaY-30+i*14); ctx.lineTo(W*0.42+i*6,seaY-26+i*16); ctx.stroke(); }
+  ctx.fillStyle='#8a7a60'; ctx.beginPath(); ctx.moveTo(W*0.34,H); ctx.lineTo(W*0.5,seaY+30); ctx.lineTo(W*0.5,H); ctx.closePath(); ctx.fill();
+  // grassy clifftop
+  ctx.fillStyle='#5f9a44'; ctx.beginPath(); ctx.moveTo(0,seaY-40); ctx.lineTo(W*0.44,seaY-40); ctx.lineTo(W*0.44,seaY-52); ctx.quadraticCurveTo(W*0.2,seaY-64,0,seaY-54); ctx.closePath(); ctx.fill();
+  // wind-bent grass tufts + a couple of wildflowers on the edge
+  for(let i=0;i<10;i++){ const gx=i*W*0.045; ctx.strokeStyle='#4f8a38'; ctx.lineWidth=1; const bend=3+Math.sin(t*2+i);
+    ctx.beginPath(); ctx.moveTo(gx,seaY-52); ctx.quadraticCurveTo(gx+bend,seaY-60,gx+bend*2,seaY-64); ctx.stroke(); }
+  for(let i=0;i<3;i++){ const fx=W*0.06+i*W*0.1; ctx.fillStyle=['#f2c14e','#e86a9a','#ffffff'][i]; ctx.beginPath(); ctx.arc(fx,seaY-64,2.5,0,7); ctx.fill(); }
+  // white lighthouse-less — instead a small trig cairn on top
+  ctx.fillStyle='#9a9a92'; ctx.beginPath(); ctx.moveTo(W*0.14,seaY-54); ctx.lineTo(W*0.18,seaY-54); ctx.lineTo(W*0.16,seaY-72); ctx.closePath(); ctx.fill();
+  // crashing surf where the waves hit the cliff base — animated foam bursts
+  const baseX=W*0.46, baseY=seaY+26;
+  const burst=(Math.sin(t*1.6)+1)/2; // 0..1 pulse
+  ctx.fillStyle=`rgba(255,255,255,${0.5+0.4*burst})`;
+  for(let i=0;i<14;i++){ const a=-Math.PI*0.1 - i*0.12; const r=(10+burst*34)*(0.6+ (i%3)*0.2);
+    ctx.beginPath(); ctx.arc(baseX+Math.cos(a)*r*0.7, baseY - Math.sin(-a)*r - burst*20, 4+burst*4,0,7); ctx.fill(); }
+  // foam pool at the base
+  ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.ellipse(baseX+10,baseY+8,30,7,0,0,7); ctx.fill();
+  // gulls wheeling over the sea
+  for(let i=0;i<4;i++){ const gx=W*0.55+Math.sin(t*0.6+i*1.7)*W*0.3, gy=H*0.2+Math.cos(t*0.8+i)*24+i*6;
+    ctx.strokeStyle='#f0f0ec'; ctx.lineWidth=1.5; ctx.beginPath();
+    ctx.moveTo(gx-5,gy); ctx.quadraticCurveTo(gx,gy-4,gx+5,gy); ctx.stroke(); }
+}
+registerScene('cliffs', drawCliffs);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
