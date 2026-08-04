@@ -5749,6 +5749,54 @@ function drawCheeseShop(){
 }
 registerScene('cheeseshop', drawCheeseShop);
 
+/* ── CANYON (outdoor · red-rock gorge with a river far below) ── */
+function drawCanyon(){
+  const t=sceneTime, riverY=H*0.82;
+  // hazy warm sky in a slot of blue at the top
+  const sky=ctx.createLinearGradient(0,0,0,H*0.3); sky.addColorStop(0,'#8fc0e0'); sky.addColorStop(1,'#f0d8a8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*0.3);
+  // far canyon wall (hazy, receding)
+  ctx.fillStyle='#c88a6a'; ctx.fillRect(0,H*0.24,W,riverY-H*0.24);
+  // layered strata on the far wall
+  const strata=['#b87a5a','#c88a6a','#a56a4a','#d09a72','#bd8060'];
+  for(let i=0;i<8;i++){ ctx.fillStyle=strata[i%strata.length]; ctx.fillRect(0,H*0.24+i*((riverY-H*0.24)/8), W, (riverY-H*0.24)/8 * 0.7); }
+  // atmospheric haze wash over the far wall
+  ctx.fillStyle='rgba(240,220,200,.25)'; ctx.fillRect(0,H*0.24,W,riverY-H*0.24);
+  // the river far below, winding, catching light
+  ctx.fillStyle='#4a7a86'; ctx.fillRect(0,riverY,W,H-riverY);
+  ctx.fillStyle='#6a9aa6'; ctx.beginPath(); ctx.moveTo(0,riverY+6); ctx.quadraticCurveTo(W*0.3,riverY+2,W*0.55,riverY+10); ctx.quadraticCurveTo(W*0.8,riverY+18,W,riverY+8); ctx.lineTo(W,riverY+22); ctx.lineTo(0,riverY+22); ctx.fill();
+  for(let i=0;i<4;i++){ ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=1; ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=riverY+12+i*4+Math.sin(x*0.06+t*1.5+i)*1.5; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // FOREGROUND canyon walls framing left & right (dark, textured, in shadow)
+  function wall(side){ const dir=side; ctx.save();
+    ctx.fillStyle='#7a3f28';
+    ctx.beginPath();
+    if(dir<0){ ctx.moveTo(0,0); ctx.lineTo(W*0.34,0); ctx.lineTo(W*0.2,riverY); ctx.lineTo(0,riverY); }
+    else { ctx.moveTo(W,0); ctx.lineTo(W*0.66,0); ctx.lineTo(W*0.82,riverY); ctx.lineTo(W,riverY); }
+    ctx.closePath(); ctx.fill();
+    // strata bands on the near wall
+    ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=2;
+    for(let i=1;i<10;i++){ const y=riverY*i/10; ctx.beginPath();
+      if(dir<0){ ctx.moveTo(0,y); ctx.lineTo(W*0.34 - (W*0.14)*(y/riverY), y+4); }
+      else { ctx.moveTo(W,y); ctx.lineTo(W*0.66 + (W*0.16)*(y/riverY), y+4); }
+      ctx.stroke(); }
+    // vertical erosion streaks
+    ctx.strokeStyle='rgba(0,0,0,.12)'; ctx.lineWidth=1;
+    for(let i=0;i<5;i++){ const x= dir<0? W*0.05+i*W*0.05 : W*0.7+i*W*0.05; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x-dir*10,riverY); ctx.stroke(); }
+    ctx.restore();
+  }
+  wall(-1); wall(1);
+  // a scrubby bush + a saguaro-like plant on a ledge
+  ctx.fillStyle='#5a7a3a'; ctx.beginPath(); ctx.arc(W*0.24,riverY-40,8,0,7); ctx.fill();
+  ctx.fillStyle='#4f7a3a'; ctx.fillRect(W*0.74,riverY-70,5,50); ctx.fillRect(W*0.72,riverY-56,3,14); ctx.fillRect(W*0.78,riverY-60,3,16);
+  // two hawks circling on thermals between the walls
+  for(let i=0;i<2;i++){ const a=t*0.5+i*Math.PI; const hx=W*0.5+Math.cos(a)*W*0.16, hy=H*0.4+Math.sin(a)*H*0.08;
+    ctx.strokeStyle='#3a2a20'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(hx-7,hy); ctx.quadraticCurveTo(hx,hy-5,hx+7,hy); ctx.stroke(); }
+  // sun-shaft cutting diagonally into the gorge
+  ctx.save(); ctx.globalAlpha=0.1; ctx.fillStyle='#fff2c0';
+  ctx.beginPath(); ctx.moveTo(W*0.34,0); ctx.lineTo(W*0.44,0); ctx.lineTo(W*0.34,riverY); ctx.lineTo(W*0.26,riverY); ctx.closePath(); ctx.fill(); ctx.restore();
+}
+registerScene('canyon', drawCanyon);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
