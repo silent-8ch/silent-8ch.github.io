@@ -2213,3 +2213,264 @@ function drawPlanetLab(){
   ctx.restore();
 }
 registerScene('planetlab', drawPlanetLab);
+
+/* ══════════════════ MAGIC & MYSTICISM ══════════════════ */
+
+/* ── WIZARD TOWER (indoor · astronomer-mage study) ── */
+function drawWizardTower(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // deep indigo stone tower interior
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#1a1436'); wall.addColorStop(1,'#2a1e44');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  // curved stone-block courses (round room)
+  ctx.strokeStyle='rgba(0,0,0,.22)'; ctx.lineWidth=1;
+  for (let y=18;y<floorY;y+=20){ ctx.beginPath(); ctx.moveTo(0,y); ctx.quadraticCurveTo(W*0.5,y+6,W,y); ctx.stroke();
+    for (let x=((y/20|0)%2)*20; x<W; x+=40){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+20); ctx.stroke(); } }
+
+  // arched window showing a starry night + moon
+  const wx=W*0.5, wy=H*0.10, ww=64, wh=H*0.34;
+  ctx.fillStyle='#0a1030'; ctx.beginPath(); ctx.moveTo(wx-ww/2,wy+wh); ctx.lineTo(wx-ww/2,wy+ww/2); ctx.arc(wx,wy+ww/2,ww/2,Math.PI,0); ctx.lineTo(wx+ww/2,wy+wh); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.moveTo(wx-ww/2,wy+wh); ctx.lineTo(wx-ww/2,wy+ww/2); ctx.arc(wx,wy+ww/2,ww/2,Math.PI,0); ctx.lineTo(wx+ww/2,wy+wh); ctx.closePath(); ctx.clip();
+  for (let i=0;i<30;i++){ const sx=wx-ww/2+((i*37)%ww); const sy=wy+((i*53)%wh); ctx.fillStyle=`rgba(230,240,255,${0.3+0.5*Math.abs(Math.sin(t*1.5+i))})`; ctx.fillRect(sx,sy,1.2,1.2); }
+  ctx.fillStyle='#e8ecc8'; ctx.beginPath(); ctx.arc(wx+14,wy+30,10,0,7); ctx.fill(); ctx.fillStyle='#0a1030'; ctx.beginPath(); ctx.arc(wx+18,wy+27,9,0,7); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle='#4a3a6a'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(wx-ww/2,wy+wh); ctx.lineTo(wx-ww/2,wy+ww/2); ctx.arc(wx,wy+ww/2,ww/2,Math.PI,0); ctx.lineTo(wx+ww/2,wy+wh); ctx.stroke();
+
+  // shelves of potions + books (sides)
+  for (const [sx,dir] of [[W*0.12,-1],[W*0.88,1]]){ for (let s=0;s<2;s++){ const sy=H*0.20+s*H*0.20;
+    ctx.fillStyle='#3a2a1a'; ctx.fillRect(sx-24,sy+18,48,4);
+    for (let i=0;i<4;i++){ const bx=sx-18+i*10; if (i%2){ ctx.fillStyle=['#7ae0c0','#e07ab0','#e0c04a','#7a9ae0'][i]; ctx.fillRect(bx-3,sy+8,6,10); ctx.fillStyle='#8a5a3a'; ctx.fillRect(bx-1.5,sy+5,3,3);} else { ctx.fillStyle=['#8a3a3a','#3a5a8a','#3a7a4a'][i%3]; ctx.fillRect(bx-4,sy+4,8,14);} } } }
+
+  // hanging celestial mobile (orrery-ish)
+  const ox=W*0.28, oy=H*0.12;
+  ctx.strokeStyle='#5a4a2a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(ox,0); ctx.lineTo(ox,oy); ctx.stroke();
+  ctx.fillStyle='#e0b84a'; ctx.beginPath(); ctx.arc(ox,oy+6,4,0,7); ctx.fill();
+  for (let k=0;k<3;k++){ const a=t*0.6+k*2.09; ctx.strokeStyle='rgba(200,180,120,.4)'; ctx.beginPath(); ctx.arc(ox,oy+6,10+k*6,0,7); ctx.stroke();
+    const mx=ox+Math.cos(a)*(10+k*6), my=oy+6+Math.sin(a)*(10+k*6)*0.5; ctx.fillStyle=['#7a9ae0','#c85a4a','#5ad0a0'][k]; ctx.beginPath(); ctx.arc(mx,my,2.4,0,7); ctx.fill(); }
+
+  // floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#2e2440'); fl.addColorStop(1,'#1e1730');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1; for (let x=0;x<W;x+=30){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x-8,H); ctx.stroke(); }
+  // glowing arcane rug (star pattern, center-low)
+  ctx.fillStyle='rgba(120,90,200,.2)'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.90,90,20,0,0,7); ctx.fill();
+  ctx.strokeStyle=`rgba(160,130,240,${0.4+0.2*Math.sin(t*2)})`; ctx.lineWidth=1; ctx.save(); ctx.translate(W*0.5,H*0.90); ctx.scale(1,0.22);
+  ctx.beginPath(); for (let k=0;k<5;k++){ const a=k*4*Math.PI/5-Math.PI/2; const r=60; k===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);} ctx.closePath(); ctx.stroke(); ctx.restore();
+
+  // lectern with a glowing open spellbook (left, low, off-center)
+  const lx=W*0.18, ly=floorY+18;
+  ctx.fillStyle='#3a2a1a'; ctx.beginPath(); ctx.moveTo(lx-16,ly+22); ctx.lineTo(lx-4,ly+22); ctx.lineTo(lx-2,ly); ctx.lineTo(lx-18,ly); ctx.closePath(); ctx.fill(); ctx.fillRect(lx-12,ly+22,4,14);
+  ctx.fillStyle='#e8dcc4'; ctx.beginPath(); ctx.moveTo(lx-20,ly); ctx.lineTo(lx-2,ly-4); ctx.lineTo(lx,ly+4); ctx.lineTo(lx-18,ly+8); ctx.closePath(); ctx.fill();
+  ctx.fillStyle=`rgba(150,220,255,${0.3+0.2*Math.sin(t*3)})`; ctx.beginPath(); ctx.ellipse(lx-10,ly+1,10,5,0,0,7); ctx.fill();
+  for (let i=0;i<5;i++){ const gx=lx-10+Math.sin(t*1.5+i)*8; const gy=ly-((t*14+i*8)%24); ctx.fillStyle=`rgba(180,230,255,${0.7-((t*14+i*8)%24)/34})`; ctx.fillRect(gx,gy,1.6,1.6); }
+
+  // floating candle (right, high)
+  const cx=W*0.80, cy=floorY-30+Math.sin(t*1.2)*4;
+  ctx.fillStyle='rgba(255,200,120,.2)'; ctx.beginPath(); ctx.arc(cx,cy-4,12,0,7); ctx.fill();
+  ctx.fillStyle='#efe6d0'; ctx.fillRect(cx-2,cy,4,12); ctx.fillStyle='#f2b02a'; ctx.beginPath(); ctx.ellipse(cx,cy-3,2,4,0,0,7); ctx.fill();
+}
+registerScene('wizardtower', drawWizardTower);
+
+/* ── FORTUNE TELLER PARLOR (indoor · crystal-ball reading room) ── */
+function drawFortuneTeller(){
+  const t = sceneTime, floorY = H*0.70;
+
+  // rich draped fabric walls
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#4a1a3a'); wall.addColorStop(1,'#6a2444');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  // drapery folds
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=2; for (let x=10;x<W;x+=26){ ctx.beginPath(); ctx.moveTo(x,0); ctx.quadraticCurveTo(x+8,floorY*0.5,x,floorY); ctx.stroke(); }
+  ctx.strokeStyle='rgba(255,200,220,.08)'; for (let x=22;x<W;x+=26){ ctx.beginPath(); ctx.moveTo(x,0); ctx.quadraticCurveTo(x+8,floorY*0.5,x,floorY); ctx.stroke(); }
+
+  // gold star & moon symbols on the wall
+  ctx.fillStyle=`rgba(230,200,90,${0.6+0.2*Math.sin(t*2)})`;
+  for (const [mx,my,r] of [[W*0.16,H*0.16,6],[W*0.84,H*0.14,7],[W*0.30,H*0.26,4],[W*0.72,H*0.28,5]]){ ctx.save(); ctx.translate(mx,my); for (let k=0;k<5;k++){ ctx.rotate(6.28/5); ctx.beginPath(); ctx.moveTo(0,-r); ctx.lineTo(r*0.3,-r*0.3); ctx.lineTo(r,0); ctx.lineTo(0,0); ctx.closePath(); ctx.fill(); } ctx.restore(); }
+  ctx.fillStyle='rgba(230,200,90,.5)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.12,10,0.6,5.7); ctx.fill();
+
+  // hanging beaded lamp
+  ctx.strokeStyle='#3a1a2a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.5,0); ctx.lineTo(W*0.5,H*0.05); ctx.stroke();
+  ctx.fillStyle='rgba(230,120,60,.3)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.09,20,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(230,140,70,${0.8+0.12*Math.sin(t*2)})`; roundRect(W*0.5-12,H*0.05,24,20,8); ctx.fill();
+  for (let i=0;i<7;i++){ ctx.fillStyle='#e0b84a'; ctx.beginPath(); ctx.arc(W*0.5-12+i*4,H*0.05+22,1.6,0,7); ctx.fill(); }
+
+  // patterned floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#3a2030'); fl.addColorStop(1,'#281622');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(200,150,90,.2)'; ctx.lineWidth=1; for (let x=-2;x<=8;x++){ ctx.beginPath(); ctx.moveTo(W*0.5+x*24,floorY); ctx.lineTo(W*0.5+x*60,H); ctx.stroke(); }
+
+  // round table draped in cloth (center-back, high) with a glowing crystal ball
+  const tx=W*0.5, ty=floorY+8;
+  ctx.fillStyle='#5a2a4a'; ctx.beginPath(); ctx.moveTo(tx-46,ty); ctx.lineTo(tx+46,ty); ctx.lineTo(tx+40,H); ctx.lineTo(tx-40,H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#3a1a30'; ctx.beginPath(); ctx.ellipse(tx,ty,46,10,0,0,7); ctx.fill();
+  ctx.fillStyle='#e0b84a'; for (let x=tx-40;x<tx+40;x+=12){ ctx.beginPath(); ctx.moveTo(x,ty+18); ctx.lineTo(x+6,ty+26); ctx.lineTo(x+12,ty+18); ctx.fill(); } // tassel fringe
+  // brass stand
+  ctx.fillStyle='#c9a24a'; ctx.beginPath(); ctx.moveTo(tx-10,ty-4); ctx.lineTo(tx+10,ty-4); ctx.lineTo(tx+5,ty-12); ctx.lineTo(tx-5,ty-12); ctx.closePath(); ctx.fill();
+  // crystal ball with swirling mist inside
+  const bx=tx, by=ty-24, br=20;
+  ctx.fillStyle='rgba(150,200,240,.2)'; ctx.beginPath(); ctx.arc(bx,by,br+8,0,7); ctx.fill();
+  const bg=ctx.createRadialGradient(bx-6,by-6,2,bx,by,br); bg.addColorStop(0,'#eaf4ff'); bg.addColorStop(1,'#8ab0d8');
+  ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(bx,by,br,0,7); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(bx,by,br-1,0,7); ctx.clip();
+  for (let i=0;i<3;i++){ const a=t*0.8+i*2.1; ctx.fillStyle=`rgba(140,110,210,${0.25})`; ctx.beginPath(); ctx.ellipse(bx+Math.cos(a)*7,by+Math.sin(a)*7,10,6,a,0,7); ctx.fill(); }
+  // little sparks/future-visions
+  for (let i=0;i<5;i++){ ctx.fillStyle=`rgba(255,255,255,${0.4+0.4*Math.sin(t*3+i)})`; ctx.beginPath(); ctx.arc(bx-8+ (i*4), by-6+Math.sin(t*2+i)*6, 1,0,7); ctx.fill(); }
+  ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(bx-7,by-7,4,2.5,-0.6,0,7); ctx.fill();
+
+  // tarot cards fanned on the table (left) + a candle (right)
+  for (let i=0;i<4;i++){ ctx.save(); ctx.translate(tx-30,ty-2); ctx.rotate(-0.5+i*0.25); ctx.fillStyle='#2a1a3a'; roundRect(-5,-16,10,16,2); ctx.fill(); ctx.strokeStyle='#e0b84a'; ctx.lineWidth=0.8; ctx.strokeRect(-5,-16,10,16); ctx.fillStyle='#e0b84a'; ctx.beginPath(); ctx.arc(0,-8,1.6,0,7); ctx.fill(); ctx.restore(); }
+  const cx=tx+34, cy=ty-6; ctx.fillStyle='rgba(255,200,120,.25)'; ctx.beginPath(); ctx.arc(cx,cy-6,10,0,7); ctx.fill();
+  ctx.fillStyle='#efe6d0'; ctx.fillRect(cx-2,cy-4,4,10); ctx.fillStyle='#f2b02a'; ctx.beginPath(); ctx.ellipse(cx,cy-6,2,4,0,0,7); ctx.fill();
+}
+registerScene('fortuneteller', drawFortuneTeller);
+
+/* ── RUNE CIRCLE (outdoor · glowing standing stones at night) ── */
+function drawRuneCircle(){
+  const t = sceneTime, groundY = H*0.58;
+
+  // night sky with moon + stars
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#0c1030'); sky.addColorStop(0.6,'#1a1a44'); sky.addColorStop(1,'#2e2a54');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  for (let i=0;i<50;i++){ const sx=(i*67+5)%W, sy=(i*37+3)%(groundY*0.9); ctx.fillStyle=`rgba(230,240,255,${0.2+0.35*Math.abs(Math.sin(t*1.3+i))})`; ctx.fillRect(sx,sy,1.1,1.1); }
+  ctx.fillStyle='rgba(230,235,210,.16)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.18,40,0,7); ctx.fill();
+  ctx.fillStyle='#e8ecc8'; ctx.beginPath(); ctx.arc(W*0.5,H*0.18,24,0,7); ctx.fill();
+  ctx.fillStyle='rgba(200,205,180,.4)'; ctx.beginPath(); ctx.arc(W*0.5-8,H*0.16,5,0,7); ctx.arc(W*0.5+7,H*0.20,4,0,7); ctx.fill();
+
+  // distant dark hills
+  ctx.fillStyle='#141a2e'; ctx.beginPath(); ctx.moveTo(0,groundY); for (let x=0;x<=W;x+=18){ ctx.lineTo(x,groundY-16-12*Math.sin(x*0.02+1)); } ctx.lineTo(W,groundY); ctx.fill();
+
+  // moor ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#1e2822'); gr.addColorStop(1,'#101812');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+
+  // central glowing rune circle inscribed on the ground (ellipse for perspective)
+  const ccx=W*0.5, ccy=H*0.84;
+  ctx.save(); ctx.translate(ccx,ccy); ctx.scale(1,0.34);
+  const pulse=0.5+0.3*Math.sin(t*2);
+  ctx.strokeStyle=`rgba(120,200,255,${pulse})`; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(0,0,120,0,7); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,100,0,7); ctx.stroke();
+  // inscribed pentagram-ish lines
+  ctx.strokeStyle=`rgba(150,120,240,${0.4+0.2*Math.sin(t*2+1)})`; ctx.lineWidth=1.5; ctx.beginPath();
+  for (let k=0;k<=5;k++){ const a=k*4*Math.PI/5-Math.PI/2; const x=Math.cos(a)*100,y=Math.sin(a)*100; k===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+  // rune glyphs around the ring
+  ctx.strokeStyle=`rgba(120,220,255,${pulse})`; ctx.lineWidth=2;
+  for (let k=0;k<12;k++){ const a=k/12*6.28; const x=Math.cos(a)*110, y=Math.sin(a)*110; ctx.beginPath(); ctx.moveTo(x-3,y-4); ctx.lineTo(x+3,y+4); ctx.moveTo(x+2,y-4); ctx.lineTo(x-1,y); ctx.stroke(); }
+  ctx.restore();
+  // soft glow over the circle
+  const cg=ctx.createRadialGradient(ccx,ccy,4,ccx,ccy,90); cg.addColorStop(0,`rgba(120,200,255,${0.12*pulse+0.05})`); cg.addColorStop(1,'rgba(120,200,255,0)'); ctx.fillStyle=cg; ctx.fillRect(0,groundY,W,H-groundY);
+
+  // ring of standing stones (larger toward front, glowing runes on them)
+  function stone(px,py,h,w,glow){ ctx.fillStyle='#3a3a44'; roundRect(px-w/2,py-h,w,h,4); ctx.fill();
+    ctx.fillStyle='#2a2a34'; ctx.fillRect(px-w/2,py-h,w*0.4,h);
+    // glowing rune carving
+    ctx.strokeStyle=`rgba(120,210,255,${glow})`; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px,py-h*0.7); ctx.lineTo(px,py-h*0.3); ctx.moveTo(px,py-h*0.55); ctx.lineTo(px+w*0.2,py-h*0.45); ctx.moveTo(px,py-h*0.45); ctx.lineTo(px-w*0.2,py-h*0.35); ctx.stroke(); }
+  // back stones (small)
+  stone(W*0.30,groundY+14,26,10,0.5+0.3*Math.sin(t*2)); stone(W*0.70,groundY+14,26,10,0.5+0.3*Math.sin(t*2+1));
+  stone(W*0.5,groundY+8,22,9,0.5+0.3*Math.sin(t*2+2));
+  // side stones (medium)
+  stone(W*0.16,groundY+40,40,14,0.5+0.3*Math.sin(t*2+3)); stone(W*0.84,groundY+40,40,14,0.5+0.3*Math.sin(t*2+4));
+  // front stones (big, framing) — kept to far sides so center circle/pet reads
+  stone(W*0.06,groundY+78,58,18,0.5+0.3*Math.sin(t*2+5)); stone(W*0.94,groundY+78,58,18,0.5+0.3*Math.sin(t*2+6));
+
+  // floating motes of arcane light rising
+  for (let i=0;i<16;i++){ const mx=ccx+Math.sin(t*0.6+i)*80; const my=groundY-6+ ((groundY) - ((t*10+i*20)%(H-groundY+40))); ctx.fillStyle=`rgba(150,220,255,${0.2+0.4*Math.abs(Math.sin(t*2+i))})`; ctx.beginPath(); ctx.arc(mx,my,1.4,0,7); ctx.fill(); }
+}
+registerScene('runecircle', drawRuneCircle);
+
+/* ── ARCANE LIBRARY (indoor · floating glowing grimoires) ── */
+function drawArcaneLibrary(){
+  const t = sceneTime, floorY = H*0.74;
+
+  // vast dim library
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#161028'); wall.addColorStop(1,'#241a3a');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+
+  // tall bookshelves receding (both sides, perspective)
+  function shelf(baseX,dir){ for (let s=0;s<7;s++){ const sy=H*0.06+s*H*0.10; const inset=Math.abs(baseX-W*0.5)*0.0;
+    const sx=baseX; const sw=W*0.26;
+    ctx.fillStyle='#2a1e14'; ctx.fillRect(sx,sy,sw,5);
+    for (let i=0;i<8;i++){ const bx=sx+3+i*(sw-6)/8; const bh=H*0.10-8-((i*3)%4); ctx.fillStyle=['#5a2a3a','#2a4a5a','#4a3a1a','#3a2a4a','#2a4a2a'][(i+s)%5]; ctx.fillRect(bx,sy-bh,(sw-6)/8-1,bh);
+      ctx.fillStyle='rgba(220,190,110,.4)'; ctx.fillRect(bx,sy-bh+2,(sw-6)/8-1,1); } } }
+  shelf(0,-1); shelf(W*0.74,1);
+  // dark central aisle vanishing to a glowing arch
+  ctx.fillStyle='#0e0a1a'; ctx.beginPath(); ctx.moveTo(W*0.34,H*0.06); ctx.lineTo(W*0.66,H*0.06); ctx.lineTo(W*0.60,floorY); ctx.lineTo(W*0.40,floorY); ctx.closePath(); ctx.fill();
+  const arch=ctx.createRadialGradient(W*0.5,H*0.30,4,W*0.5,H*0.30,70); arch.addColorStop(0,`rgba(150,120,240,${0.3+0.1*Math.sin(t*2)})`); arch.addColorStop(1,'rgba(150,120,240,0)');
+  ctx.fillStyle=arch; ctx.fillRect(W*0.3,H*0.10,W*0.4,H*0.5);
+
+  // floating glowing grimoires drifting & flapping
+  function grimoire(gx,gy,sc,col){ const flap=Math.sin(t*3+gx)*0.5; ctx.save(); ctx.translate(gx,gy); ctx.scale(sc,sc);
+    // glow
+    ctx.fillStyle=`rgba(${col},0.18)`; ctx.beginPath(); ctx.arc(0,0,20,0,7); ctx.fill();
+    // pages (open book)
+    ctx.fillStyle='#e8dcc4'; ctx.beginPath(); ctx.moveTo(0,-2); ctx.quadraticCurveTo(-14,-6-flap*4,-16,4); ctx.quadraticCurveTo(-8,2,0,6); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0,-2); ctx.quadraticCurveTo(14,-6+flap*4,16,4); ctx.quadraticCurveTo(8,2,0,6); ctx.closePath(); ctx.fill();
+    // cover spine
+    ctx.fillStyle=`rgb(${col})`; ctx.fillRect(-1.5,-4,3,12);
+    // magic sparkle trail
+    ctx.fillStyle=`rgba(${col},0.8)`; ctx.beginPath(); ctx.arc(0,-8,1.6,0,7); ctx.fill();
+    ctx.restore(); }
+  grimoire(W*0.30,H*0.30+Math.sin(t*0.8)*10,1.2,'170,130,240');
+  grimoire(W*0.68,H*0.24+Math.sin(t*0.7+2)*12,1.0,'110,200,220');
+  grimoire(W*0.5,H*0.44+Math.sin(t*0.9+1)*8,0.9,'230,180,110');
+  grimoire(W*0.20,H*0.50+Math.sin(t*0.6+3)*10,0.8,'220,120,180');
+  grimoire(W*0.80,H*0.48+Math.sin(t*0.75+4)*10,0.85,'130,220,150');
+
+  // floating candles dotted around
+  for (const [cx,cy] of [[W*0.14,H*0.20],[W*0.86,H*0.18],[W*0.5,H*0.14]]){ const fy=cy+Math.sin(t*1.2+cx)*4;
+    ctx.fillStyle='rgba(255,200,120,.2)'; ctx.beginPath(); ctx.arc(cx,fy-3,9,0,7); ctx.fill();
+    ctx.fillStyle='#efe6d0'; ctx.fillRect(cx-1.5,fy,3,9); ctx.fillStyle='#f2b02a'; ctx.beginPath(); ctx.ellipse(cx,fy-3,1.6,3.4,0,0,7); ctx.fill(); }
+
+  // dark wood floor with a glowing sigil
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#241a30'); fl.addColorStop(1,'#160f22');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.3)'; ctx.lineWidth=1; for (let x=0;x<W;x+=30){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x-8,H); ctx.stroke(); }
+  ctx.save(); ctx.translate(W*0.5,H*0.90); ctx.scale(1,0.26); ctx.strokeStyle=`rgba(160,130,240,${0.4+0.2*Math.sin(t*2)})`; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(0,0,70,0,7); ctx.stroke(); ctx.beginPath(); ctx.arc(0,0,54,0,7); ctx.stroke();
+  ctx.beginPath(); for (let k=0;k<=6;k++){ const a=k/6*6.28; k===0?ctx.moveTo(Math.cos(a)*62,Math.sin(a)*62):ctx.lineTo(Math.cos(a)*62,Math.sin(a)*62);} ctx.stroke(); ctx.restore();
+}
+registerScene('arcanelibrary', drawArcaneLibrary);
+
+/* ── FAIRY RING (outdoor · enchanted mushroom ring at night) ── */
+function drawFairyRing(){
+  const t = sceneTime, groundY = H*0.56;
+
+  // twilight enchanted-forest sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#1a1440'); sky.addColorStop(0.6,'#2a2454'); sky.addColorStop(1,'#3a3a5a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  for (let i=0;i<40;i++){ const sx=(i*71+5)%W, sy=(i*31+3)%(groundY*0.8); ctx.fillStyle=`rgba(230,240,255,${0.2+0.3*Math.abs(Math.sin(t*1.4+i))})`; ctx.fillRect(sx,sy,1.1,1.1); }
+
+  // silhouetted forest with a light-dappled clearing
+  ctx.fillStyle='#10201a'; for (let i=0;i<6;i++){ const tx=i*70; ctx.fillRect(tx-8,groundY-100,16,100); ctx.beginPath(); ctx.arc(tx,groundY-100,30,0,7); ctx.fill(); }
+  // moonbeam into the clearing
+  ctx.fillStyle='rgba(190,210,255,.08)'; ctx.beginPath(); ctx.moveTo(W*0.4,0); ctx.lineTo(W*0.6,0); ctx.lineTo(W*0.7,groundY+40); ctx.lineTo(W*0.3,groundY+40); ctx.closePath(); ctx.fill();
+
+  // grassy clearing floor
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#1e3a26'); gr.addColorStop(1,'#122414');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+
+  // the fairy ring — circle of glowing mushrooms (ellipse in perspective)
+  const rcx=W*0.5, rcy=H*0.82, rrx=110, rry=34;
+  // glowing worn grass ring under it
+  ctx.strokeStyle=`rgba(150,255,200,${0.2+0.12*Math.sin(t*2)})`; ctx.lineWidth=6; ctx.save(); ctx.translate(rcx,rcy); ctx.scale(1,rry/rrx); ctx.beginPath(); ctx.arc(0,0,rrx,0,7); ctx.stroke(); ctx.restore();
+  const cg=ctx.createRadialGradient(rcx,rcy,6,rcx,rcy,rrx); cg.addColorStop(0,'rgba(120,255,190,0.10)'); cg.addColorStop(1,'rgba(120,255,190,0)'); ctx.fillStyle=cg; ctx.fillRect(0,groundY,W,H-groundY);
+  // mushrooms around the ring
+  function fmush(mx,my,sc){ ctx.save(); ctx.translate(mx,my); ctx.scale(sc,sc); const glow=0.5+0.3*Math.sin(t*2+mx);
+    ctx.fillStyle=`rgba(160,255,210,${0.22*glow})`; ctx.beginPath(); ctx.arc(0,-4,14,0,7); ctx.fill();
+    ctx.fillStyle='#e8eee0'; ctx.beginPath(); ctx.moveTo(-3,0); ctx.lineTo(-4,-9); ctx.lineTo(4,-9); ctx.lineTo(3,0); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#c65a8a'; ctx.beginPath(); ctx.ellipse(0,-9,9,6,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle='#f0e0ef'; for (let k=0;k<3;k++){ ctx.beginPath(); ctx.arc(-4+k*4,-10,1.4,0,7); ctx.fill(); }
+    ctx.restore(); }
+  for (let k=0;k<10;k++){ const a=k/10*6.28; const mx=rcx+Math.cos(a)*rrx; const my=rcy+Math.sin(a)*rry; const sc=0.7+ (my-rcy+rry)/(2*rry)*0.8; fmush(mx,my,sc); }
+
+  // dancing fairy lights (wisps) circling above the ring
+  for (let i=0;i<10;i++){ const a=t*1.2+i*0.63; const rad=rrx*0.7*(0.6+0.4*Math.sin(t*0.7+i)); const fx=rcx+Math.cos(a)*rad; const fy=rcy-20+Math.sin(a)*rad*0.3 - Math.abs(Math.sin(t+i))*10;
+    const gl=0.5+0.5*Math.sin(t*4+i); ctx.fillStyle=`rgba(200,255,210,${gl})`; ctx.beginPath(); ctx.arc(fx,fy,2,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(150,255,190,${gl*0.3})`; ctx.beginPath(); ctx.arc(fx,fy,5,0,7); ctx.fill();
+    // tiny trailing sparkle
+    ctx.fillStyle=`rgba(255,255,255,${gl*0.6})`; ctx.fillRect(fx-Math.cos(a)*4,fy-Math.sin(a)*2,1,1); }
+
+  // glowing wildflowers + toadstool bits (sides, low)
+  for (const [fx,fc] of [[W*0.10,'120,220,255'],[W*0.90,'255,180,220'],[W*0.16,'200,160,255']]){ ctx.fillStyle=`rgba(${fc},${0.6+0.3*Math.sin(t*2+fx)})`; for (let k=0;k<5;k++){ const a=k/5*6.28; ctx.beginPath(); ctx.arc(fx+Math.cos(a)*3,H*0.92+Math.sin(a)*3,1.6,0,7); ctx.fill(); } ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(fx,H*0.92,1.2,0,7); ctx.fill(); }
+}
+registerScene('fairyring', drawFairyRing);

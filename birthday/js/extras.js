@@ -1805,3 +1805,131 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 11). Two scene-gated, contained moments — one magic,
+   one cosy. No always-on overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   26) SPELL ORB  —  in the magic scenes a little enchanted orb floats and pulses
+   with an inner glow. Tap it to cast a shimmer of sparkles and a whispered charm.
+   Its hue drifts through the spectrum. Lives only in magical places.
+   -------------------------------------------------------------------------- */
+(function fxSpellOrb(){
+  try{
+    const MAGIC = new Set(['magicshop','potionkitchen','crystalcave','apothecary','wizardtower','tarotparlor','alchemylab','enchantedforest','witchcottage']);
+    let orb = null;                      // {x,y,t,hue,cd,flash}
+    function inMagic(){ try{ return (typeof SCENES!=='undefined') && MAGIC.has(SCENES[currentScene]); }catch(e){ return false; } }
+    const CHARMS = ['✨ Bibbidi… ✨','A little magic 🔮','Sparkle, sparkle 💫','For you, a charm 🪄','Shazam! 🌟'];
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inMagic()){ orb = null; return; }
+      if (!orb){ orb = { bx: rand(W*0.3,W*0.7), by: rand(H*0.28,H*0.44), t: rand(0,Math.PI*2), hue: rand(0,360), cd:0, flash:0 }; }
+      orb.t += dt; orb.hue = (orb.hue + dt*24) % 360;
+      if (orb.cd > 0) orb.cd -= dt; if (orb.flash > 0) orb.flash -= dt;
+    });
+    function orbPos(){ return { x: orb.bx + Math.sin(orb.t*0.8)*20, y: orb.by + Math.cos(orb.t*1.1)*10 }; }
+
+    EXTRA_DRAWERS.push(function(){
+      if (!orb || !inMagic()) return;
+      const { x, y } = orbPos();
+      const pulse = 0.5 + 0.5*Math.sin(orb.t*3);
+      const r = 9 + pulse*1.5 + (orb.flash>0 ? orb.flash*8 : 0);
+      const col = 'hsl(' + orb.hue.toFixed(0) + ',80%,70%)';
+      ctx.save();
+      // aura
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r*2.4);
+      g.addColorStop(0, 'hsla(' + orb.hue.toFixed(0) + ',80%,70%,0.55)');
+      g.addColorStop(1, 'hsla(' + orb.hue.toFixed(0) + ',80%,70%,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r*2.4, 0, 7); ctx.fill();
+      // orb body
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+      // inner light
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath(); ctx.arc(x - r*0.3, y - r*0.3, r*0.32, 0, 7); ctx.fill();
+      // orbiting sparks
+      for (let i=0;i<3;i++){ const a = orb.t*2 + i*(Math.PI*2/3); const ox = x + Math.cos(a)*(r+5), oy = y + Math.sin(a)*(r+5); ctx.globalAlpha = 0.6+0.4*Math.sin(orb.t*4+i); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ox, oy, 1.4, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!orb || !inMagic()) return false;
+        const { x, y } = orbPos();
+        if (Math.hypot(px - x, py - y) > 20) return false;
+        if (orb.cd > 0) return true;
+        orb.cd = 1; orb.flash = 0.6; orb.hue = (orb.hue + 60) % 360;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') for (let i=0;i<5;i++) setTimeout(()=> fxAt(x+rand(-16,16), y+rand(-14,14), pick(['✨','💫','🔮','🪄','🌟'])), i*70);
+        if (typeof say === 'function') say(pick(CHARMS));
+        try{ state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   27) CAMPFIRE  —  at the campsite a little fire crackles on the ground. Tap it to
+   toss on a twig; it flares up warm and bright, embers rising, and she cosies up.
+   Feeding it also restores a bit of energy. Only appears at the campsite.
+   -------------------------------------------------------------------------- */
+(function fxCampfire(){
+  try{
+    let fire = null;                     // {x,y,flare,t,embers:[]}
+    function atCamp(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'campsite'; }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!atCamp()){ fire = null; return; }
+      if (!fire){ fire = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.30)), y: rand(H*0.76,H*0.82), flare:0, t:rand(0,10), cd:0, embers:[] }; }
+      fire.t += dt; if (fire.flare > 0) fire.flare -= dt*0.6; if (fire.cd > 0) fire.cd -= dt;
+      // embers drift up and fade
+      for (let i=fire.embers.length-1;i>=0;i--){ const e=fire.embers[i]; e.t+=dt; e.x+=e.vx*dt; e.y+=e.vy*dt; e.vy*=0.99; if (e.t>=e.life) fire.embers.splice(i,1); }
+      // steady gentle embers
+      if (Math.random() < (0.5 + fire.flare) * dt * 6){ fire.embers.push({ x: fire.x+rand(-4,4), y: fire.y-8, vx: rand(-6,6), vy: rand(-24,-14), t:0, life: rand(0.8,1.6) }); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!fire || !atCamp()) return;
+      const x = fire.x, base = fire.y;
+      const flick = Math.sin(fire.t*12)*0.12 + Math.sin(fire.t*7)*0.08;
+      const scale = 1 + fire.flare*0.5 + flick;
+      ctx.save();
+      // logs
+      ctx.strokeStyle = '#6b4a2f'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x-10, base+3); ctx.lineTo(x+10, base-1);
+                       ctx.moveTo(x-10, base-1); ctx.lineTo(x+10, base+3); ctx.stroke();
+      // glow
+      const g = ctx.createRadialGradient(x, base-6, 0, x, base-6, 26*scale);
+      g.addColorStop(0, 'rgba(255,170,60,' + (0.4+fire.flare*0.3).toFixed(3) + ')');
+      g.addColorStop(1, 'rgba(255,170,60,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, base-6, 26*scale, 0, 7); ctx.fill();
+      // flame layers
+      function flame(h, w, col){ ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x-w, base); ctx.quadraticCurveTo(x-w*0.5, base-h*0.6, x, base-h); ctx.quadraticCurveTo(x+w*0.5, base-h*0.6, x+w, base); ctx.closePath(); ctx.fill(); }
+      flame(24*scale, 9, '#ff6a2a');
+      flame(17*scale, 6, '#ffb03a');
+      flame(9*scale, 3.5, '#ffe89a');
+      // embers
+      for (const e of fire.embers){ ctx.globalAlpha = Math.max(0, 1 - e.t/e.life); ctx.fillStyle = pick(['#ffcf6a']); ctx.fillStyle = '#ffcf6a'; ctx.beginPath(); ctx.arc(e.x, e.y, 1.1, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!fire || !atCamp()) return false;
+        if (Math.hypot(px - fire.x, py - (fire.y - 10)) > 26) return false;
+        if (fire.cd > 0) return true;
+        fire.cd = 0.7; fire.flare = Math.min(1.4, fire.flare + 0.9);
+        for (let i=0;i<8;i++) fire.embers.push({ x: fire.x+rand(-6,6), y: fire.y-10, vx: rand(-14,14), vy: rand(-34,-18), t:0, life: rand(0.9,1.7) });
+        if (typeof sfx === 'function') sfx('rest');
+        if (typeof fxAt === 'function') fxAt(fire.x, fire.y-24, pick(['🔥','✨','🪵']));
+        if (typeof say === 'function') say(pick(['So warm 🔥','Cosy… 🥰','Marshmallows? 🍡','Stay by the fire with me 💛']));
+        try{ state.energy = clamp(state.energy + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

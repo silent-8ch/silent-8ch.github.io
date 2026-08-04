@@ -73,6 +73,10 @@ const TRINKET_POOL = (()=>{
   g(['treehouse'], ['🌳','🪵','🐿️']);
   g(['desertoasis'], ['🌴','🐫','💧']);
   g(['dumplinghouse'], ['🥟','🥢','🍜']);
+  g(['sakuratunnel'], ['🌸','🍥','🎐']);
+  g(['igloo'], ['🧊','🐧','❄️']);
+  g(['mistyforest'], ['🌲','🌫️','🍄']);
+  g(['planetlab'], ['🪐','🛰️','🌠']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -161,6 +165,8 @@ const ACHIEVEMENTS = [
   {id:'rest_200',    icon:'🌜', name:'Sweetest Dreams',    desc:'Rest 200 times',           test:()=> (state.rests||0) >= 200},
   {id:'streak_60',   icon:'☄️', name:'Two-Month Streak',   desc:'A 60-day streak',          test:()=> (meta.streak||0) >= 60},
   {id:'days_730',    icon:'🎇', name:'Two Years Together',  desc:'730 days together',        test:()=> (meta.totalDays||0) >= 730},
+  {id:'streak_90',   icon:'🔆', name:'Season-Long Streak',  desc:'A 90-day streak',          test:()=> (meta.streak||0) >= 90},
+  {id:'days_1000',   icon:'👑', name:'A Thousand Days',     desc:'1000 days together',       test:()=> (meta.totalDays||0) >= 1000},
 ];
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
@@ -666,6 +672,9 @@ const LOVE_NOTES = [
   {day:19, text:'Nineteen days, and you\'ve quietly become the best part of my little daily rhythm. 💛'},
   {day:95, text:'Almost a hundred days of us. I keep thinking it can\'t get sweeter, and you keep proving me wrong. 🍯'},
   {day:180, text:'Half a year together in here. Thank you for making the ordinary feel like a celebration. 🎈'},
+  {day:20, text:'Twenty days in, and my favorite little ritual is still just getting to say hi to you. 👋💛'},
+  {day:130, text:'Every time I open this, you remind me that love is mostly a lot of small, faithful showings-up. 🌷'},
+  {day:240, text:'However far we wander in here, my heart always ends up in the same place — right beside yours. 💞'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){
