@@ -3011,6 +3011,43 @@ function drawRecordShop(){
 }
 registerScene('recordshop', drawRecordShop);
 
+/* ── WATERFALL GROTTO (outdoor · lush) ── */
+function drawWaterfall(){
+  const t = sceneTime, poolTop = H*0.46, shoreY = H*0.64;
+
+  ctx.fillStyle='#2a3a2a'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#bfe0d0'; ctx.fillRect(0,0,W,H*0.10);
+
+  // cliff walls + moss
+  ctx.fillStyle='#4a4238';
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W*0.34,0); ctx.lineTo(W*0.28,poolTop); ctx.lineTo(0,poolTop); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W,0); ctx.lineTo(W*0.66,0); ctx.lineTo(W*0.72,poolTop); ctx.lineTo(W,poolTop); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#3a5a2a'; ctx.fillRect(0,poolTop-8,W*0.30,8); ctx.fillRect(W*0.72,poolTop-8,W*0.30,8);
+
+  // waterfall
+  const wx0=W*0.36, wx1=W*0.64;
+  ctx.fillStyle='#cfe8f0'; ctx.fillRect(wx0,H*0.06,wx1-wx0,poolTop-H*0.06);
+  ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=2;
+  for (let i=0;i<9;i++){ const x=wx0+4+i*((wx1-wx0-8)/9); ctx.beginPath(); for (let y=H*0.08;y<poolTop;y+=8){ ctx.lineTo(x+Math.sin(y*0.1+t*6+i)*1.5,y); } ctx.stroke(); }
+
+  // pool
+  const pool=ctx.createLinearGradient(0,poolTop,0,shoreY); pool.addColorStop(0,'#4a9ea8'); pool.addColorStop(1,'#2a6a72');
+  ctx.fillStyle=pool; ctx.fillRect(0,poolTop,W,shoreY-poolTop);
+  ctx.fillStyle='rgba(255,255,255,.75)'; for (let i=0;i<12;i++){ const fx=wx0+((i*17)%(wx1-wx0)), r=3+Math.abs(Math.sin(t*4+i))*3; ctx.beginPath(); ctx.arc(fx,poolTop+3,r,0,7); ctx.fill(); }
+  ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=1; for (let i=0;i<3;i++){ const y=poolTop+12+i*10; ctx.beginPath(); for (let x=0;x<=W;x+=8){ x===0?ctx.moveTo(x,y):ctx.lineTo(x, y+Math.sin(x*0.1+t*2+i)*1.5); } ctx.stroke(); }
+  ctx.fillStyle='rgba(255,255,255,.10)'; for (let i=0;i<5;i++){ ctx.beginPath(); ctx.ellipse(wx0+((i*40)%(wx1-wx0)), poolTop+4+Math.sin(t+i)*3, 20,7,0,0,7); ctx.fill(); }
+
+  // mossy bank + rocks
+  const bank=ctx.createLinearGradient(0,shoreY,0,H); bank.addColorStop(0,'#4a6a34'); bank.addColorStop(1,'#3a5228');
+  ctx.fillStyle=bank; ctx.fillRect(0,shoreY,W,H-shoreY);
+  ctx.fillStyle='#6a6258'; for (const b of [[W*0.2,shoreY+10,14],[W*0.8,shoreY+16,18],[W*0.5,shoreY+30,12]]){ ctx.beginPath(); ctx.ellipse(b[0],b[1],b[2],b[2]*0.6,0,0,7); ctx.fill(); }
+
+  // ferns
+  ctx.strokeStyle='#3a7a3a'; ctx.lineWidth=2;
+  for (const fx of [W*0.08,W*0.92]){ for (let k=0;k<5;k++){ const a=-1.4+k*0.6; ctx.beginPath(); ctx.moveTo(fx,H); ctx.quadraticCurveTo(fx+Math.cos(a)*20,H-30,fx+Math.cos(a)*30,H-52); ctx.stroke(); } }
+}
+registerScene('waterfall', drawWaterfall);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
