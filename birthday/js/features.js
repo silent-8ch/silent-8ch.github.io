@@ -53,6 +53,10 @@ const TRINKET_POOL = (()=>{
   g(['seasidecarousel'], ['🎠','🐴','🎪']);
   g(['potionkitchen'], ['🧪','⚗️','🔮']);
   g(['kitehill'], ['🪁','🌬️','🍃']);
+  g(['flowermarket'], ['💐','🌷','🌻']);
+  g(['snowglobeshop'], ['🌨️','⛄','🏔️']);
+  g(['nightgarden'], ['🌌','🦉','🌼']);
+  g(['mochishop'], ['🍡','🍮','🧋']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -129,6 +133,9 @@ const ACHIEVEMENTS = [
   {id:'draw_250',    icon:'🎭', name:'Prolific Painter',  desc:'Draw together 250 times',  test:()=> (state.draws||0) >= 250},
   {id:'collect_75',  icon:'🗃️', name:'Master Collector',  desc:'Collect 75 kinds',         test:()=> collectedKinds() >= 75},
   {id:'streak_30',   icon:'🌟', name:'Month-Long Streak', desc:'A 30-day streak',          test:()=> (meta.streak||0) >= 30},
+  {id:'feed_500',    icon:'🍩', name:'Snack Legend',      desc:'500 cookies',              test:()=> (state.feeds||0) >= 500},
+  {id:'rest_100',    icon:'😴', name:'Hundred Naps',      desc:'Rest 100 times',           test:()=> (state.rests||0) >= 100},
+  {id:'days_120',    icon:'📅', name:'Four Months of Us', desc:'120 days together',        test:()=> (meta.totalDays||0) >= 120},
 ];
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
@@ -619,6 +626,9 @@ const LOVE_NOTES = [
   {day:55, text:'Fifty-five days of little check-ins, and each one still feels like a tiny date. 💛'},
   {day:110, text:'Over a hundred days now. I keep thinking I\'ve loved you as much as I can, and then tomorrow comes. 🥰'},
   {day:160, text:'You\'ve turned this little routine into something I\'d never want to miss. That\'s you all over. ✨'},
+  {day:8,  text:'Eight days, and you\'ve already made this little place feel like ours. 💛'},
+  {day:13, text:'Unlucky number? Not with you here — you make every day feel like a good omen. 🍀'},
+  {day:70, text:'Ten weeks of tiny hellos, and you are still worth every single one. 🥰'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){

@@ -46,7 +46,8 @@ const SCENE_LABELS = {
   lanternfestival:'Lantern Festival', sushibar:'Sushi Bar', seasidecarousel:'Seaside Carousel',
   potionkitchen:'Potion Kitchen', kitehill:'Kite Hill',
   flowermarket:'Flower Market', snowglobeshop:'Snow Globe Shop', nightgarden:'Night Garden',
-  mochishop:'Mochi Shop',
+  mochishop:'Mochi Shop', aquariumtunnel:'Aquarium Tunnel', starrymeadow:'Starry Meadow',
+  harbornight:'Harbor at Night', giftwrapshop:'Gift Wrap Shop',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

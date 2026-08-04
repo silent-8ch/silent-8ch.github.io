@@ -1048,3 +1048,197 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 6). Quality over quantity — two polished, contained
+   moments. No always-on overlays; both are conditional/occasional and self-clear.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   16) A LITTLE PICNIC  —  when her fun and love are both brimming, she lays out a
+   gingham blanket and basket beside her for the two of you. Tap the basket to
+   share a treat. It stays a short while, then she gently packs it away.
+   -------------------------------------------------------------------------- */
+(function fxPicnic(){
+  try{
+    let pic = null;                      // {x,y,ttl,bob,basketCd,treatShown}
+    let timer = rand(70, 120);
+    const TREATS = ['🍓','🥪','🧁','🍇','🍒','🥐'];
+
+    function busy(){
+      try{
+        return (pet.animLock>0) || pet.resting || (typeof isCrying==='function' && isCrying());
+      }catch(e){ return true; }
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!pic){
+        timer -= dt;
+        if (timer <= 0){
+          timer = rand(110, 190);
+          if (busy()) return;
+          if (!(state && state.fun >= 82 && state.love >= 82)) return;   // only in a truly happy moment
+          const side = (pet.x < W*0.5) ? 1 : -1;                          // set it on the roomier side
+          const bx = Math.max(W*0.24, Math.min(W*0.76, pet.x + side*46));
+          const by = Math.max(H*0.72, Math.min(H*0.80, pet.y + 6));
+          pic = { x: bx, y: by, ttl: rand(26, 36), bob: 0, basketCd: 0, treatShown: 0 };
+          if (typeof say === 'function') say(pick(['A little picnic? 🧺','Come sit with me 💛','Perfect day for this 🥪']));
+          if (typeof sfx === 'function') sfx('day');
+          setTimeout(()=>{ try{ if (typeof showToast==='function') showToast('🧺','Picnic time','Just the two of us 💛'); }catch(e){} }, 900);
+          try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return;
+      }
+      pic.bob += dt; pic.ttl -= dt;
+      if (pic.basketCd > 0) pic.basketCd -= dt;
+      if (pic.treatShown > 0) pic.treatShown -= dt;
+      if (pic.ttl <= 0) pic = null;      // packed away
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pic) return;
+      const p = pic, bw = 62, bh = 30;
+      const x0 = p.x - bw/2, y0 = p.y - bh/2;
+      ctx.save();
+      // soft shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.14)';
+      ctx.beginPath(); ctx.ellipse(p.x, p.y + bh*0.42, bw*0.52, 5, 0, 0, 7); ctx.fill();
+      // blanket base
+      if (typeof roundRect === 'function'){ ctx.fillStyle = '#f4ece0'; roundRect(x0, y0, bw, bh, 4); ctx.fill(); }
+      else { ctx.fillStyle = '#f4ece0'; ctx.fillRect(x0, y0, bw, bh); }
+      // gingham checks (clipped to the blanket)
+      ctx.save();
+      if (typeof roundRect === 'function'){ roundRect(x0, y0, bw, bh, 4); ctx.clip(); }
+      const cols = 6, rows = 3, cwd = bw/cols, chd = bh/rows;
+      ctx.fillStyle = 'rgba(210,90,90,0.5)';
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) if ((r+c)%2===0) ctx.fillRect(x0 + c*cwd, y0 + r*chd, cwd, chd);
+      ctx.restore();
+      // basket on the right end
+      const bkx = p.x + bw*0.28, bky = p.y - 5;
+      ctx.strokeStyle = '#9c6b3f'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(bkx, bky - 2, 7, Math.PI, 0); ctx.stroke();      // handle
+      ctx.fillStyle = '#b5794a';
+      if (typeof roundRect === 'function'){ roundRect(bkx - 9, bky - 2, 18, 12, 2); ctx.fill(); }
+      else ctx.fillRect(bkx - 9, bky - 2, 18, 12);
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(bkx-9, bky+3); ctx.lineTo(bkx+9, bky+3); ctx.stroke();
+      // a couple of treats on the blanket
+      ctx.font = '11px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('🍓', p.x - bw*0.28, p.y + 1);
+      ctx.fillText('🥪', p.x - bw*0.06, p.y + 2);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pic) return false;
+        const bkx = pic.x + 62*0.28, bky = pic.y - 5;
+        if (px < bkx - 13 || px > bkx + 13 || py < bky - 12 || py > bky + 12) return false;
+        const treat = pick(TREATS);
+        if (typeof burstAt === 'function') burstAt(treat, bkx, bky - 6);
+        if (pic.basketCd <= 0){
+          pic.basketCd = 1.2; pic.ttl = Math.max(pic.ttl, 8);
+          if (typeof sfx === 'function') sfx('feed');
+          if (typeof say === 'function') say(pick(['Yum! ' + treat, 'Share with me? 🥰', 'My favorite ' + treat, 'Mmm 💛']));
+          try{ state.hunger = clamp(state.hunger + 4); state.love = clamp(state.love + 3); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   17) CONNECT THE STARS  —  now and then after dark, a scatter of soft stars
+   twinkles in the sky. Tap them one by one to draw your own little constellation;
+   join them all and a wish lights up. If left, they simply fade back into night.
+   -------------------------------------------------------------------------- */
+(function fxConstellation(){
+  try{
+    let stars = null;                    // array of {x,y,tw,on}
+    let order = [];                      // indices in the sequence you connect
+    let timer = rand(45, 85);
+    let ttl = 0, done = 0;
+
+    function isNightNow(){ try{ return typeof isNight === 'function' && isNight(); }catch(e){ return false; } }
+
+    function spawn(){
+      const n = 5, pts = [];
+      let tries = 0;
+      while (pts.length < n && tries < 120){
+        tries++;
+        const cand = { x: rand(W*0.14, W*0.86), y: rand(H*0.06, H*0.30), tw: rand(0,Math.PI*2), on: false };
+        if (pts.every(p => Math.hypot(p.x-cand.x, p.y-cand.y) > 34)) pts.push(cand);
+      }
+      if (pts.length < 3) { stars = null; return; }
+      stars = pts; order = []; ttl = 16; done = 0;
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!stars){
+        timer -= dt;
+        if (timer <= 0){ timer = rand(70, 120); if (isNightNow() && !(pet && pet.resting)) spawn(); }
+        return;
+      }
+      for (const s of stars) s.tw += dt * 2.2;
+      if (done > 0){ done -= dt; if (done <= 0) stars = null; return; }
+      ttl -= dt;
+      if (ttl <= 0) stars = null;        // faded back into the night
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!stars) return;
+      ctx.save();
+      // connecting lines (in the order you tapped)
+      if (order.length > 1){
+        ctx.strokeStyle = 'rgba(210,225,255,0.55)'; ctx.lineWidth = 1; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(stars[order[0]].x, stars[order[0]].y);
+        for (let i=1;i<order.length;i++) ctx.lineTo(stars[order[i]].x, stars[order[i]].y);
+        ctx.stroke();
+      }
+      const complete = (done > 0);
+      for (const s of stars){
+        const tw = 0.55 + 0.45*Math.sin(s.tw);
+        const r = s.on ? 2.8 : 2.0;
+        const a = s.on ? 1 : (0.45 + 0.35*tw);
+        if (s.on || complete){
+          const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, 7);
+          g.addColorStop(0, 'rgba(255,255,235,' + (0.8*a).toFixed(3) + ')');
+          g.addColorStop(1, 'rgba(255,255,235,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s.x, s.y, 7, 0, 7); ctx.fill();
+        }
+        ctx.fillStyle = 'rgba(255,255,245,' + a.toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!stars || done > 0) return false;
+        let hit = -1, best = 20;
+        for (let i=0;i<stars.length;i++){
+          if (stars[i].on) continue;
+          const d = Math.hypot(px - stars[i].x, py - stars[i].y);
+          if (d < best){ best = d; hit = i; }
+        }
+        if (hit < 0) return false;
+        stars[hit].on = true; order.push(hit); ttl = Math.max(ttl, 6);
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof fxAt === 'function') fxAt(stars[hit].x, stars[hit].y - 4, '✨');
+        if (order.length >= stars.length){
+          // constellation complete — a wish lights up
+          done = 2.2;
+          let cx=0, cy=0; stars.forEach(s=>{ cx+=s.x; cy+=s.y; });
+          cx/=stars.length; cy/=stars.length;
+          if (typeof fxAt === 'function') for (let i=0;i<5;i++) setTimeout(()=> fxAt(cx+rand(-16,16), cy+rand(-10,10), pick(['🌟','✨','💫','💛'])), i*80);
+          if (typeof sfx === 'function') sfx('find');
+          try{ state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          if (typeof say === 'function') say(pick(['Our own little constellation ✨','I wished for us 💫','You hung the stars 🌟','Made just for you 💛']));
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

@@ -1162,3 +1162,211 @@ function drawMochiShop(){
   for (let k=0;k<3;k++){ ctx.fillStyle=['#f2e2c0','#c8e0b0','#f2b8c8'][k]; ctx.beginPath(); ctx.arc(dx,dy-10+k*10,5,0,7); ctx.fill(); }
 }
 registerScene('mochishop', drawMochiShop);
+
+/* ── AQUARIUM TUNNEL (indoor · walk-through glass tunnel) ── */
+function drawAquariumTunnel(){
+  const t = sceneTime, floorY = H*0.78;
+
+  // deep blue water all around (fills whole canvas)
+  const water=ctx.createLinearGradient(0,0,0,H); water.addColorStop(0,'#0a3a5a'); water.addColorStop(0.5,'#13567e'); water.addColorStop(1,'#0a2f48');
+  ctx.fillStyle=water; ctx.fillRect(0,0,W,H);
+
+  // arched glass tunnel framing — concentric arches receding to a bright end
+  for (let i=6;i>=0;i--){ const s=i/6; const aw=W*0.5*(0.3+s*0.9), ah=H*0.46*(0.3+s*0.9); const ay=H*0.42;
+    ctx.strokeStyle=`rgba(200,235,255,${0.10+0.06*(1-s)})`; ctx.lineWidth=2+ (1-s)*2;
+    ctx.beginPath(); ctx.ellipse(W*0.5,ay,aw,ah,0,Math.PI,0); ctx.stroke();
+    // side rails down from arch ends
+    ctx.beginPath(); ctx.moveTo(W*0.5-aw,ay); ctx.lineTo(W*0.5-aw,floorY); ctx.moveTo(W*0.5+aw,ay); ctx.lineTo(W*0.5+aw,floorY); ctx.stroke(); }
+  // bright far end of tunnel
+  const endg=ctx.createRadialGradient(W*0.5,H*0.40,4,W*0.5,H*0.40,60); endg.addColorStop(0,'rgba(180,240,255,.4)'); endg.addColorStop(1,'rgba(180,240,255,0)');
+  ctx.fillStyle=endg; ctx.fillRect(0,0,W,H);
+
+  // wavering caustic light from the surface
+  ctx.strokeStyle='rgba(150,220,255,.12)'; ctx.lineWidth=2;
+  for (let i=0;i<6;i++){ ctx.beginPath(); for (let x=0;x<=W;x+=8){ const y=20+i*14+Math.sin(x*0.05+t*1.5+i)*5; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke(); }
+
+  // rising bubbles
+  for (let i=0;i<20;i++){ const bx=(i*61+9)%W; const by=(H - ((t*18+i*40)%H)); const br=1+ (i%3);
+    ctx.fillStyle='rgba(220,245,255,.25)'; ctx.beginPath(); ctx.arc(bx,by,br,0,7); ctx.fill(); }
+
+  // swimming fish (school + a couple big ones)
+  function fish(fx,fy,sc,col,dir){ ctx.save(); ctx.translate(fx,fy); ctx.scale(dir*sc,sc);
+    ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(0,0,10,5,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-9,0); ctx.lineTo(-16,-5); ctx.lineTo(-16,5); ctx.closePath(); ctx.fill(); // tail
+    ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.arc(5,-1,1.4,0,7); ctx.fill();
+    ctx.restore(); }
+  for (let i=0;i<6;i++){ const fx=((t*24+i*40)%(W+60))-30; const fy=H*0.18+i*10+Math.sin(t*2+i)*6; fish(fx,fy,0.7,'#f2a83a',1); }
+  for (let i=0;i<5;i++){ const fx=W+30-((t*20+i*50)%(W+60)); const fy=H*0.30+i*8+Math.sin(t*1.7+i)*5; fish(fx,fy,0.6,'#5ad0d0',-1); }
+  fish((t*16)%(W+80)-40, H*0.24, 1.4, '#e2604a', 1);
+  // a drifting jellyfish
+  const jx=W*0.24, jy=H*0.16+Math.sin(t*0.8)*10;
+  ctx.fillStyle='rgba(220,160,220,.55)'; ctx.beginPath(); ctx.arc(jx,jy,10,Math.PI,0); ctx.fill();
+  ctx.strokeStyle='rgba(220,160,220,.4)'; ctx.lineWidth=1.5; for (let k=-3;k<=3;k++){ ctx.beginPath(); ctx.moveTo(jx+k*2.4,jy); ctx.quadraticCurveTo(jx+k*2.4+Math.sin(t*2+k)*3,jy+12,jx+k*2.4,jy+20); ctx.stroke(); }
+
+  // sandy tunnel floor + a few plants/coral at the base sides
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#3a5a6a'); fl.addColorStop(1,'#243c48');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(0,floorY,W,4);
+  // seaweed (sides)
+  ctx.strokeStyle='#2f7a5a'; ctx.lineWidth=3;
+  for (const sx of [W*0.08,W*0.14,W*0.88,W*0.93]){ ctx.beginPath(); ctx.moveTo(sx,H); for (let k=0;k<=6;k++){ const yy=H-k*8; const xx=sx+Math.sin(t*1.5+k*0.6+sx)*5; ctx.lineTo(xx,yy);} ctx.stroke(); }
+  // coral clumps
+  ctx.fillStyle='#e2607a'; ctx.beginPath(); ctx.arc(W*0.10,floorY+10,6,0,7); ctx.arc(W*0.90,floorY+12,7,0,7); ctx.fill();
+}
+registerScene('aquariumtunnel', drawAquariumTunnel);
+
+/* ── STARRY MEADOW (outdoor · night field under the milky way) ── */
+function drawStarryMeadow(){
+  const t = sceneTime, groundY = H*0.66;
+
+  // deep night sky with gradient
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#0a0e26'); sky.addColorStop(0.6,'#1a1a44'); sky.addColorStop(1,'#3a2a54');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  // milky way band (diagonal soft glow)
+  ctx.save(); ctx.translate(W*0.5,groundY*0.4); ctx.rotate(-0.5);
+  const mw=ctx.createLinearGradient(0,-16,0,16); mw.addColorStop(0,'rgba(180,190,255,0)'); mw.addColorStop(0.5,'rgba(190,200,255,.14)'); mw.addColorStop(1,'rgba(180,190,255,0)');
+  ctx.fillStyle=mw; ctx.fillRect(-260,-16,520,32); ctx.restore();
+  // dense stars, some twinkling
+  for (let i=0;i<110;i++){ const sx=(i*57+7)%W, sy=(i*89+3)%(groundY*0.95); const tw=0.3+0.5*Math.abs(Math.sin(t*1.5+i*0.7));
+    ctx.fillStyle=`rgba(255,255,${230+((i*13)%25)},${tw})`; const r=(i%17===0)?1.6:0.9; ctx.fillRect(sx,sy,r,r); }
+  // a slow shooting star
+  const shp=(t*0.4)%6; if (shp<1){ const sx=W*0.2+shp*W*0.6, sy=H*0.10+shp*40;
+    ctx.strokeStyle=`rgba(255,255,255,${1-shp})`; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx-22,sy-9); ctx.stroke(); }
+  // low crescent moon
+  ctx.fillStyle='#f2ecc8'; ctx.beginPath(); ctx.arc(W*0.16,H*0.14,13,0,7); ctx.fill();
+  ctx.fillStyle='#1a1a44'; ctx.beginPath(); ctx.arc(W*0.20,H*0.12,12,0,7); ctx.fill();
+
+  // rolling meadow silhouette
+  ctx.fillStyle='#16241a'; ctx.beginPath(); ctx.moveTo(0,groundY); for (let x=0;x<=W;x+=16){ ctx.lineTo(x,groundY-14-10*Math.sin(x*0.02+1)); } ctx.lineTo(W,groundY); ctx.fill();
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#1e3222'); gr.addColorStop(1,'#101c12');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+
+  // grass tufts catching starlight (sides)
+  ctx.strokeStyle='rgba(120,150,110,.5)'; ctx.lineWidth=1;
+  for (let i=0;i<70;i++){ const gx=(i*53+9)%W; const gy=groundY+8+((i*37+7)%(H-groundY-8)); ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx+Math.sin(t+i)*2,gy-6); ctx.stroke(); }
+
+  // fireflies/glow specks drifting over the field
+  for (let i=0;i<18;i++){ const fx=(i*61+ Math.sin(t*0.5+i)*22)%W; const fy=groundY-10+Math.sin(t*1.3+i)*16 - (i%5)*7;
+    ctx.fillStyle=`rgba(220,255,170,${0.15+0.4*Math.abs(Math.sin(t*3+i))})`; ctx.beginPath(); ctx.arc(fx,fy,1.4,0,7); ctx.fill(); }
+
+  // a cozy lantern + folded blanket in the foreground-left (low, off-center)
+  const lx=W*0.12, ly=H*0.90;
+  ctx.fillStyle='rgba(255,200,120,.2)'; ctx.beginPath(); ctx.arc(lx,ly-6,18,0,7); ctx.fill();
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(lx-6,ly-2,12,3); ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lx,ly-18); ctx.lineTo(lx,ly-12); ctx.stroke();
+  ctx.fillStyle=`rgba(255,205,120,${0.85+0.1*Math.sin(t*2.5)})`; roundRect(lx-6,ly-14,12,12,3); ctx.fill();
+  // telescope silhouette (right, low)
+  const tx=W*0.86, ty=H*0.92;
+  ctx.strokeStyle='#2a2a34'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(tx-8,ty); ctx.lineTo(tx,ty-14); ctx.moveTo(tx+8,ty); ctx.lineTo(tx,ty-14); ctx.moveTo(tx,ty); ctx.lineTo(tx,ty-14); ctx.stroke();
+  ctx.save(); ctx.translate(tx,ty-16); ctx.rotate(-0.6); ctx.fillStyle='#3a3a48'; roundRect(-3,-12,6,20,2); ctx.fill(); ctx.fillStyle='#5a5a68'; ctx.fillRect(-4,-14,8,4); ctx.restore();
+}
+registerScene('starrymeadow', drawStarryMeadow);
+
+/* ── HARBOR AT NIGHT (outdoor · boats & lit quay) ── */
+function drawHarborNight(){
+  const t = sceneTime, waterY = H*0.52, quayY = H*0.72;
+
+  // dusk-night sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#13203e'); sky.addColorStop(0.6,'#2a3358'); sky.addColorStop(1,'#5a4a5e');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  for (let i=0;i<34;i++){ const sx=(i*71+7)%W, sy=(i*29+3)%(waterY*0.7); ctx.fillStyle=`rgba(230,238,255,${0.2+0.3*Math.abs(Math.sin(t*1.2+i))})`; ctx.fillRect(sx,sy,1.1,1.1); }
+
+  // far shore town with warm lit windows
+  ctx.fillStyle='#0e1424';
+  let bx=0,s2=29; const rr=()=>{ s2=(s2*9301+49297)%233280; return s2/233280; };
+  while (bx<W){ const bw=20+Math.floor(rr()*22), bh=22+Math.floor(rr()*34); ctx.fillStyle='#0e1424'; ctx.fillRect(bx,waterY-bh,bw,bh);
+    for (let wy=waterY-bh+5; wy<waterY-4; wy+=8) for (let wx=bx+4; wx<bx+bw-4; wx+=7){ if (rr()>0.55){ ctx.fillStyle=`rgba(255,205,120,${0.5+0.4*rr()})`; ctx.fillRect(wx,wy,2.5,3); } }
+    bx+=bw+2; }
+  // small lighthouse on the far right point
+  ctx.fillStyle='#e8e2d4'; ctx.fillRect(W*0.92,waterY-46,8,46); ctx.fillStyle='#c0392b'; ctx.fillRect(W*0.92,waterY-38,8,6); ctx.fillRect(W*0.92,waterY-24,8,6);
+  ctx.fillStyle=`rgba(255,240,180,${0.5+0.5*Math.sin(t*2)})`; ctx.beginPath(); ctx.arc(W*0.94,waterY-50,3,0,7); ctx.fill();
+
+  // harbor water with reflected light columns
+  const wat=ctx.createLinearGradient(0,waterY,0,quayY); wat.addColorStop(0,'#16294a'); wat.addColorStop(1,'#0c1a30');
+  ctx.fillStyle=wat; ctx.fillRect(0,waterY,W,quayY-waterY);
+  for (const [rx,rc] of [[W*0.2,'255,205,120'],[W*0.5,'200,220,255'],[W*0.94,'255,240,180']]){
+    for (let y=waterY; y<quayY; y+=3){ const p=(y-waterY)/(quayY-waterY); const wob=Math.sin(y*0.5+t*2)*(2+p*8);
+      ctx.fillStyle=`rgba(${rc},${0.18*(1-p)})`; ctx.fillRect(rx-3+wob,y,6+p*4,2); } }
+  ctx.strokeStyle='rgba(150,180,220,.12)'; ctx.lineWidth=1; for (let y=waterY+6;y<quayY;y+=9){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.06+t*1.4+y)*1.5; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+
+  // moored sailboats bobbing
+  function boat(bx0,scale,hull){ const bob=Math.sin(t*1.1+bx0)*2; ctx.save(); ctx.translate(bx0,waterY+10+bob); ctx.scale(scale,scale);
+    ctx.fillStyle=hull; ctx.beginPath(); ctx.moveTo(-20,0); ctx.quadraticCurveTo(0,12,20,0); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#cfd6e0'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-30); ctx.stroke();
+    ctx.fillStyle='rgba(240,244,250,.9)'; ctx.beginPath(); ctx.moveTo(0,-28); ctx.lineTo(0,-4); ctx.lineTo(14,-6); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0,-28); ctx.lineTo(0,-4); ctx.lineTo(-12,-6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='rgba(255,210,130,.9)'; ctx.beginPath(); ctx.arc(0,-2,1.6,0,7); ctx.fill(); ctx.restore(); }
+  boat(W*0.24,1.0,'#3a5a8a'); boat(W*0.7,0.8,'#7a3a4a'); boat(W*0.5,0.6,'#3a6a5a');
+
+  // stone quay in foreground with lampposts and bollards
+  const quay=ctx.createLinearGradient(0,quayY,0,H); quay.addColorStop(0,'#4a4a52'); quay.addColorStop(1,'#2e2e36');
+  ctx.fillStyle=quay; ctx.fillRect(0,quayY,W,H-quayY);
+  ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1; for (let x=0;x<W;x+=30){ ctx.beginPath(); ctx.moveTo(x,quayY); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y=quayY+10;y<H;y+=12){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // edge highlight
+  ctx.fillStyle='rgba(255,235,200,.10)'; ctx.fillRect(0,quayY,W,3);
+  // lampposts (sides, tall)
+  function lamppost(px){ ctx.fillStyle='#20202a'; ctx.fillRect(px-2,quayY-56,4,56); ctx.fillRect(px-6,quayY-58,12,5);
+    ctx.fillStyle='rgba(255,210,130,.22)'; ctx.beginPath(); ctx.arc(px,quayY-62,14,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(255,215,135,${0.85+0.1*Math.sin(t*2.5+px)})`; roundRect(px-5,quayY-68,10,12,3); ctx.fill(); }
+  lamppost(W*0.10); lamppost(W*0.90);
+  // bollards with rope
+  ctx.fillStyle='#1a1a22'; ctx.beginPath(); ctx.arc(W*0.30,quayY-4,5,Math.PI,0); ctx.fill(); ctx.fillRect(W*0.30-5,quayY-4,10,8);
+  ctx.beginPath(); ctx.arc(W*0.70,quayY-4,5,Math.PI,0); ctx.fill(); ctx.fillRect(W*0.70-5,quayY-4,10,8);
+  ctx.strokeStyle='#5a4a34'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(W*0.30,quayY-6); ctx.quadraticCurveTo(W*0.5,quayY+8,W*0.70,quayY-6); ctx.stroke();
+}
+registerScene('harbornight', drawHarborNight);
+
+/* ── GIFT WRAP SHOP (indoor · cozy paper & ribbon boutique) ── */
+function drawGiftWrapShop(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // warm cream wall with subtle stripes
+  ctx.fillStyle='#f3e8d8'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='rgba(210,180,150,.18)'; for (let x=0;x<W;x+=18){ ctx.fillRect(x,0,9,floorY); }
+
+  // bunting of little triangular flags near ceiling
+  ctx.strokeStyle='rgba(150,110,90,.5)'; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=0;x<=W;x+=8){ const y=14+Math.sin(x*0.05)*6; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+  for (let x=6;x<W;x+=18){ const y=14+Math.sin(x*0.05)*6; ctx.fillStyle=['#e26f8a','#e0b040','#6fbfe0','#7ac86a'][(x/18|0)%4]; ctx.beginPath(); ctx.moveTo(x-5,y); ctx.lineTo(x+5,y); ctx.lineTo(x,y+9); ctx.closePath(); ctx.fill(); }
+
+  // wall rack of vertical wrapping-paper rolls (patterned)
+  const rackY=H*0.20;
+  ctx.fillStyle='#c9a06a'; ctx.fillRect(W*0.06,rackY-6,W*0.5,6); ctx.fillRect(W*0.06,rackY+56,W*0.5,6);
+  const rollPat=['dots','stripes','stars','check','dots','stripes'];
+  const rollCol=['#e26f8a','#6fbfe0','#e0b040','#7ac86a','#c07ae0','#e08a5a'];
+  for (let i=0;i<6;i++){ const rx=W*0.10+i*W*0.078; ctx.fillStyle=rollCol[i]; roundRect(rx-6,rackY,12,56,3); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.55)';
+    if (rollPat[i]==='dots'){ for (let k=0;k<8;k++){ ctx.beginPath(); ctx.arc(rx-3+(k%2)*6, rackY+6+((k/2)|0)*14, 1.6,0,7); ctx.fill(); } }
+    else if (rollPat[i]==='stripes'){ for (let k=0;k<7;k++){ ctx.fillRect(rx-6,rackY+4+k*8,12,2); } }
+    else if (rollPat[i]==='stars'){ for (let k=0;k<5;k++){ ctx.fillRect(rx-2,rackY+8+k*11,3,3); } }
+    else { for (let k=0;k<24;k++){ if ((k+((k/4)|0))%2===0){ ctx.fillRect(rx-6+(k%4)*3, rackY+4+((k/4)|0)*9, 3,3); } } }
+    // paper roll open end (top)
+    ctx.fillStyle='rgba(255,255,255,.7)'; ctx.beginPath(); ctx.ellipse(rx,rackY,6,2.4,0,0,7); ctx.fill(); }
+
+  // spools of ribbon on a wall peg (right)
+  for (let i=0;i<3;i++){ const sx=W*0.72+ (i%2)*W*0.14, sy=H*0.16+((i/2)|0)*0.0 + i*H*0.10;
+    ctx.fillStyle=['#d04a6a','#4aa0d0','#e0b040'][i]; ctx.beginPath(); ctx.arc(sx,sy,12,0,7); ctx.fill();
+    ctx.fillStyle='#f3e8d8'; ctx.beginPath(); ctx.arc(sx,sy,4,0,7); ctx.fill();
+    // dangling ribbon
+    ctx.strokeStyle=['#d04a6a','#4aa0d0','#e0b040'][i]; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(sx,sy+12); for (let k=0;k<=5;k++){ ctx.lineTo(sx+Math.sin(t*1.5+k+i)*4, sy+12+k*6); } ctx.stroke(); }
+
+  // wood counter/worktable
+  const cnt=ctx.createLinearGradient(0,floorY,0,H); cnt.addColorStop(0,'#b98a58'); cnt.addColorStop(1,'#966b3e');
+  ctx.fillStyle=cnt; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='rgba(255,245,225,.15)'; ctx.fillRect(0,floorY,W,4);
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1; for (let x=0;x<W;x+=32){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x-8,H); ctx.stroke(); }
+
+  // wrapped present with a bow on the counter (left, low, off-center)
+  function present(px,py,box,rib){ ctx.fillStyle=box; roundRect(px-18,py-18,36,18,2); ctx.fill();
+    ctx.fillStyle=rib; ctx.fillRect(px-3,py-18,6,18); ctx.fillRect(px-18,py-11,36,5);
+    // bow
+    ctx.fillStyle=rib; ctx.beginPath(); ctx.ellipse(px-6,py-20,6,4,-0.5,0,7); ctx.ellipse(px+6,py-20,6,4,0.5,0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(px,py-20,2.4,0,7); ctx.fill(); }
+  present(W*0.16,floorY+22,'#e26f8a','#f2e2a0');
+  present(W*0.30,floorY+26,'#6fbfe0','#d04a6a');
+  // a pair of scissors + ribbon curl on the right
+  ctx.strokeStyle='#8a8a92'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.8,floorY+18); ctx.lineTo(W*0.86,floorY+26); ctx.moveTo(W*0.8,floorY+26); ctx.lineTo(W*0.86,floorY+18); ctx.stroke();
+  ctx.fillStyle='#c04a6a'; ctx.beginPath(); ctx.arc(W*0.79,floorY+16,2.4,0,7); ctx.arc(W*0.79,floorY+28,2.4,0,7); ctx.fill();
+  ctx.strokeStyle='#e0b040'; ctx.lineWidth=2; ctx.beginPath(); for (let k=0;k<=8;k++){ const cx=W*0.7+k*3; ctx.lineTo(cx, floorY+30+Math.sin(k*1.2)*3);} ctx.stroke();
+}
+registerScene('giftwrapshop', drawGiftWrapShop);
