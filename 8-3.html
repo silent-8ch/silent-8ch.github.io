@@ -145,6 +145,9 @@
   #placeLabel{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:17;background:rgba(42,33,28,.72);color:#fff;font-size:12px;font-weight:700;letter-spacing:.2px;padding:5px 12px;border-radius:16px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.25);}
   #placeLabel.hide{display:none;}
   #placeLabel.show{animation:placeIn .3s ease;}
+  @keyframes twinkle{ 0%,100%{transform:scale(1);opacity:.8;} 50%{transform:scale(1.28);opacity:1;filter:drop-shadow(0 0 6px #fff8d0);} }
+  #starWish{position:absolute;z-index:18;font-size:26px;cursor:pointer;user-select:none;animation:twinkle 1.4s ease-in-out infinite;}
+  #starWish.hide{display:none;}
   #padPanel{position:absolute;inset:0;background:rgba(42,33,28,.9);z-index:16;display:block;overflow-y:auto;padding:14px;backdrop-filter:blur(3px);}
   #padPanel.hide{display:none;}
   #padHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
@@ -247,6 +250,7 @@
     <div id="toast" class="hide"></div>
     <div id="wishBar" class="hide"></div>
     <div id="placeLabel" class="hide"></div>
+    <div id="starWish" class="hide">⭐</div>
   </div>
 
   <div id="actions">
@@ -704,6 +708,33 @@ function updateWish(dt){
   }
 }
 
+/* ---- wish on a star at night ---- */
+let starTimer = 30 + Math.random()*40, starExpire = 0, starActive = false;
+function nightNow(){ return isNight() || SCENE_NO_DAYNIGHT.has(SCENES[currentScene]); }
+function showStar(){
+  const el = document.getElementById('starWish'); if (!el) return;
+  el.style.left = (8 + Math.random()*72) + '%';
+  el.style.top  = (6 + Math.random()*22) + '%';
+  el.classList.remove('hide'); starActive = true; starExpire = 9;
+}
+function grantStar(){
+  if (!starActive) return; starActive = false;
+  const el = document.getElementById('starWish'); if (el) el.classList.add('hide');
+  say(pick(["I wished for us 💫", "Make a wish… ✨", "🌟 Wish made!", "I wished you'd stay 🥰"]));
+  hearts(); state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 4); refreshHUD();
+  if (typeof sfx==='function') sfx('find');
+  if (typeof collection==='object'){ collection['✨'] = (collection['✨']||0) + 1; saveCollection(); }
+}
+function updateStar(dt){
+  if (starActive){ starExpire -= dt; if (starExpire <= 0){ starActive=false; const el=document.getElementById('starWish'); if(el) el.classList.add('hide'); } return; }
+  starTimer -= dt;
+  if (starTimer <= 0){ starTimer = 60 + Math.random()*80;
+    if (!nightNow()) return;
+    if (pet.animLock>0 || pet.resting || isCrying()) return;
+    showStar();
+  }
+}
+
 /* ---------- tap the scene: she walks over & reacts to the place ---------- */
 const SCENE_INTERACT = (()=>{
   const map = {};
@@ -903,6 +934,7 @@ function loop(ts){
     idleThoughts(dt);
     findTrinket(dt);
     updateWish(dt);
+    updateStar(dt);
     updatePet(dt);
     // refresh bars periodically (cheap)
     hudAccum += dt; if (hudAccum > 0.25){ refreshHUD(); checkAchievements(); hudAccum = 0; }
@@ -1443,6 +1475,7 @@ document.getElementById('setBtn').addEventListener('click', openSettings);
 document.getElementById('setClose').addEventListener('click', closeSettings);
 document.getElementById('daysChip').addEventListener('click', openNotes);
 document.getElementById('noteClose').addEventListener('click', closeNotes);
+document.getElementById('starWish').addEventListener('click', grantStar);
 document.getElementById('padClose').addEventListener('click', closePad);
 document.getElementById('padClear').addEventListener('click', padClearCanvas);
 document.getElementById('padSave').addEventListener('click', padSaveDrawing);
