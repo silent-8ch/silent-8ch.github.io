@@ -2158,6 +2158,60 @@ function drawCherryBlossom(){
 }
 registerScene('cherryblossom', drawCherryBlossom);
 
+/* ── AQUARIUM HALL (indoor · marine life) ── */
+function drawAquarium(){
+  const t = sceneTime, floorY = H*0.66;
+
+  // dim hall wall
+  ctx.fillStyle='#1e2630'; ctx.fillRect(0,0,W,floorY);
+
+  // big tank
+  const tX=W*0.08, tY=H*0.08, tW=W*0.84, tH=floorY-tY-18;
+  const wa=ctx.createLinearGradient(0,tY,0,tY+tH); wa.addColorStop(0,'#1a6ea0'); wa.addColorStop(1,'#0e4a72');
+  ctx.fillStyle=wa; ctx.fillRect(tX,tY,tW,tH);
+
+  ctx.save(); ctx.beginPath(); ctx.rect(tX,tY,tW,tH); ctx.clip();
+  // caustic light bands
+  ctx.globalAlpha=0.10; ctx.fillStyle='#bff0ff';
+  for (let i=0;i<6;i++){ const x=tX+((i*tW/5 + t*12)%(tW+40))-20; ctx.beginPath(); ctx.moveTo(x,tY); ctx.lineTo(x+30,tY); ctx.lineTo(x+10,tY+tH); ctx.lineTo(x-20,tY+tH); ctx.closePath(); ctx.fill(); }
+  ctx.globalAlpha=1;
+  // sandy bottom + rocks + seaweed
+  ctx.fillStyle='#d9c48a'; ctx.beginPath(); ctx.moveTo(tX,tY+tH); ctx.quadraticCurveTo(tX+tW*0.3,tY+tH-14,tX+tW*0.6,tY+tH-6); ctx.quadraticCurveTo(tX+tW*0.85,tY+tH-16,tX+tW,tY+tH-8); ctx.lineTo(tX+tW,tY+tH); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#3a4650'; ctx.beginPath(); ctx.ellipse(tX+tW*0.5,tY+tH-8,26,12,0,0,7); ctx.fill();
+  ctx.strokeStyle='#2e8b57'; ctx.lineWidth=4; ctx.lineCap='round';
+  for (const sx of [tX+tW*0.2,tX+tW*0.75,tX+tW*0.85]){ ctx.beginPath(); ctx.moveTo(sx,tY+tH-6); for (let k=1;k<=5;k++){ const yy=tY+tH-6-k*10, xx=sx+Math.sin(t*2+k+sx*0.1)*5; ctx.lineTo(xx,yy);} ctx.stroke(); }
+  ctx.lineCap='butt';
+  // fish
+  const fishCols=['#ff8a3d','#ffd24d','#6ad0ff','#ff6a8d','#a0e060'];
+  for (let i=0;i<7;i++){
+    const speed=(i%2?1:-1)*(14+i*3);
+    const fx=tX+(((i*tW/6 + t*speed)%tW)+tW)%tW;
+    const fy=tY+22+i*tH*0.10+Math.sin(t*1.5+i)*8;
+    const dir=speed>0?1:-1;
+    ctx.save(); ctx.translate(fx,fy); ctx.scale(dir,1);
+    ctx.fillStyle=fishCols[i%5];
+    ctx.beginPath(); ctx.ellipse(0,0,8,5,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-8,0); ctx.lineTo(-14,-5); ctx.lineTo(-14,5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(5,-1,1.4,0,7); ctx.fill();
+    ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(5.4,-1,0.7,0,7); ctx.fill();
+    ctx.restore();
+  }
+  // bubbles
+  ctx.fillStyle='rgba(255,255,255,.4)';
+  for (let i=0;i<12;i++){ const bx=tX+tW*0.2+(i*37%tW), by=tY+tH-((t*20+i*25)%tH); ctx.beginPath(); ctx.arc(bx,by,1.5+(i%3),0,7); ctx.fill(); }
+  ctx.restore();
+
+  // tank frame + glass sheen
+  ctx.strokeStyle='#0c1a24'; ctx.lineWidth=8; ctx.strokeRect(tX,tY,tW,tH);
+  ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(tX+4,tY+4,tW-8,10);
+
+  // blue-lit floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#24303a'); fl.addColorStop(1,'#1a242c');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='rgba(90,180,230,.10)'; ctx.beginPath(); ctx.ellipse(W*0.5,floorY+10,W*0.42,22,0,0,7); ctx.fill();
+}
+registerScene('aquarium', drawAquarium);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
