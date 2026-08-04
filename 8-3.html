@@ -3568,6 +3568,44 @@ function drawBamboo(){
 }
 registerScene('bamboo', drawBamboo);
 
+/* ── CLOCKMAKER'S SHOP (indoor · horology) ── */
+function drawClockmaker(){
+  const t = sceneTime, floorY = H*0.64;
+
+  ctx.fillStyle='#6a4a34'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='rgba(0,0,0,.06)'; for (let y=0;y<floorY;y+=18) ctx.fillRect(0,y,W,1);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#8a6a4a'); fl.addColorStop(1,'#6e5238');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+
+  function clock(cx,cy,r,rate){
+    ctx.fillStyle='#e8dcc4'; ctx.beginPath(); ctx.arc(cx,cy,r,0,7); ctx.fill(); ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=2; ctx.stroke();
+    ctx.strokeStyle='#5a4a3a'; ctx.lineWidth=1; for (let k=0;k<12;k++){ const a=k/12*6.28; ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*(r-2),cy+Math.sin(a)*(r-2)); ctx.lineTo(cx+Math.cos(a)*(r-4),cy+Math.sin(a)*(r-4)); ctx.stroke(); }
+    const hh=t*rate*0.3, mh=t*rate;
+    ctx.strokeStyle='#2a1a10'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(hh-1.57)*r*0.5, cy+Math.sin(hh-1.57)*r*0.5); ctx.stroke();
+    ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(mh-1.57)*r*0.75, cy+Math.sin(mh-1.57)*r*0.75); ctx.stroke();
+    ctx.fillStyle='#2a1a10'; ctx.beginPath(); ctx.arc(cx,cy,1.5,0,7); ctx.fill();
+  }
+  clock(W*0.14,H*0.16,16,0.5); clock(W*0.34,H*0.12,12,0.8); clock(W*0.34,H*0.30,10,0.3); clock(W*0.14,H*0.36,13,0.6);
+  clock(W*0.72,H*0.16,15,0.4); clock(W*0.58,H*0.30,11,0.7);
+
+  // grandfather clock with pendulum
+  const gX=W*0.86, gB=floorY;
+  ctx.fillStyle='#5a3a1a'; ctx.fillRect(gX-16,gB-100,32,100);
+  ctx.fillStyle='#3a2410'; ctx.fillRect(gX-12,gB-70,24,64);
+  clock(gX,gB-84,12,0.5);
+  const pa=Math.sin(t*2)*0.4;
+  ctx.strokeStyle='#c9a24a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(gX,gB-66); ctx.lineTo(gX+Math.sin(pa)*20,gB-14); ctx.stroke();
+  ctx.fillStyle='#e8c24a'; ctx.beginPath(); ctx.arc(gX+Math.sin(pa)*20,gB-12,6,0,7); ctx.fill();
+
+  // workbench with gears + magnifier
+  const wX=W*0.28, wY=floorY-6;
+  ctx.fillStyle='#4a3220'; ctx.fillRect(wX-40,wY-24,80,24); ctx.fillRect(wX-36,wY,6,H-wY); ctx.fillRect(wX+30,wY,6,H-wY);
+  function gear(x,y,r,col){ ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); for (let k=0;k<8;k++){ const a=k/8*6.28+t*0.5; ctx.fillRect(x+Math.cos(a)*r-1,y+Math.sin(a)*r-1,2.5,2.5); } ctx.fillStyle='#3a2a1a'; ctx.beginPath(); ctx.arc(x,y,r*0.4,0,7); ctx.fill(); }
+  gear(wX-16,wY-28,7,'#c9a24a'); gear(wX-4,wY-24,5,'#b0b4b8');
+  ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(wX+16,wY-30,6,0,7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(wX+20,wY-26); ctx.lineTo(wX+26,wY-20); ctx.stroke();
+}
+registerScene('clockmaker', drawClockmaker);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
