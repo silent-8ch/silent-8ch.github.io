@@ -704,3 +704,236 @@ function drawLanternFestival(){
   for (let i=0;i<6;i++){ const lx=((i*63 + t*10)%(W+40))-20; const ly=waterY+16+ (i%3)*20; waterLantern(lx,ly,cols[i%cols.length]); }
 }
 registerScene('lanternfestival', drawLanternFestival);
+
+/* ── SUSHI BAR (indoor · counter · itamae station) ── */
+function drawSushiBar(){
+  const t = sceneTime, counterY = H*0.66;
+
+  // indigo plaster wall
+  const wall=ctx.createLinearGradient(0,0,0,counterY); wall.addColorStop(0,'#1f3a4a'); wall.addColorStop(1,'#2f556a');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,counterY);
+  // horizontal shiplap seams
+  ctx.strokeStyle='rgba(0,0,0,.16)'; ctx.lineWidth=1; for (let y=18;y<counterY;y+=20){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // noren curtain (top)
+  const norH=44;
+  ctx.fillStyle='#243b6a'; ctx.fillRect(0,0,W,norH);
+  ctx.fillStyle='#1a2b50'; for (let i=1;i<5;i++){ ctx.fillRect(i*(W/5)-1,0,2,norH); }
+  // white brush glyphs
+  ctx.strokeStyle='rgba(240,244,255,.9)'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.arc(W*0.30,24,9,0.3,5.6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.60,12); ctx.lineTo(W*0.60,34); ctx.moveTo(W*0.54,20); ctx.lineTo(W*0.66,20); ctx.stroke();
+
+  // hanging paper lanterns
+  for (const lx of [W*0.14,W*0.86]){ ctx.strokeStyle='#1a2b40'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lx,norH); ctx.lineTo(lx,norH+8); ctx.stroke();
+    ctx.fillStyle='rgba(255,180,90,.22)'; ctx.beginPath(); ctx.arc(lx,norH+20,18,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(240,150,80,${0.82+0.12*Math.sin(t*2+lx)})`; roundRect(lx-10,norH+8,20,26,9); ctx.fill();
+    ctx.strokeStyle='#a04020'; for (let k=1;k<4;k++){ ctx.beginPath(); ctx.moveTo(lx-10,norH+8+k*6.5); ctx.lineTo(lx+10,norH+8+k*6.5); ctx.stroke(); } }
+
+  // a framed wave print (center back)
+  const px=W*0.5-40, py=norH+18;
+  ctx.fillStyle='#e8dcc4'; ctx.fillRect(px,py,80,50); ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=3; ctx.strokeRect(px,py,80,50);
+  ctx.strokeStyle='#2a6a9a'; ctx.lineWidth=2; ctx.beginPath();
+  for (let x=0;x<=80;x+=6){ const yy=py+34+Math.sin(x*0.12)*8; x===0?ctx.moveTo(px+x,yy):ctx.lineTo(px+x,yy);} ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(px+64,py+22,8,Math.PI,0.2); ctx.fill();
+
+  // light wood counter
+  const cnt=ctx.createLinearGradient(0,counterY,0,H); cnt.addColorStop(0,'#e0c088'); cnt.addColorStop(1,'#c2a066');
+  ctx.fillStyle=cnt; ctx.fillRect(0,counterY,W,H-counterY);
+  ctx.fillStyle='rgba(255,250,220,.18)'; ctx.fillRect(0,counterY,W,4);
+  ctx.strokeStyle='rgba(150,110,60,.3)'; ctx.lineWidth=1; for (let x=0;x<W;x+=34){ ctx.beginPath(); ctx.moveTo(x,counterY); ctx.lineTo(x-8,H); ctx.stroke(); }
+
+  // sushi geta (wooden plates) with nigiri — kept to the sides
+  function nigiri(nx,ny,fish){ ctx.fillStyle='#f4efe6'; ctx.beginPath(); ctx.ellipse(nx,ny,9,5,0,0,7); ctx.fill();
+    ctx.fillStyle=fish; ctx.beginPath(); ctx.ellipse(nx,ny-3,9,3.4,0,0,7); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=0.7; ctx.beginPath(); ctx.moveTo(nx-6,ny-3); ctx.lineTo(nx+6,ny-3); ctx.stroke(); }
+  function geta(gx){ ctx.fillStyle='#6a4a2e'; roundRect(gx-34,counterY+16,68,20,3); ctx.fill();
+    ctx.fillStyle='#4a3320'; ctx.fillRect(gx-30,counterY+34,8,6); ctx.fillRect(gx+22,counterY+34,8,6);
+    nigiri(gx-18,counterY+22,'#e8794a'); nigiri(gx,counterY+22,'#e2a0a8'); nigiri(gx+18,counterY+22,'#dfe0d4');
+    // wasabi + ginger dab
+    ctx.fillStyle='#7ab040'; ctx.beginPath(); ctx.arc(gx-30,counterY+22,2.4,0,7); ctx.fill();
+    ctx.fillStyle='#f0c0c8'; ctx.beginPath(); ctx.arc(gx+30,counterY+22,3,0,7); ctx.fill(); }
+  geta(W*0.20); geta(W*0.80);
+
+  // soy bottle + chopstick rest center-back on counter (small, high)
+  ctx.fillStyle='#222'; roundRect(W*0.5-4,counterY+6,8,14,2); ctx.fill(); ctx.fillStyle='#c0392b'; ctx.fillRect(W*0.5-4,counterY+6,8,3);
+
+  // steam-free but a green plant in a vase (right)
+  ctx.fillStyle='#3a6a9a'; roundRect(W*0.62,counterY+20,10,16,2); ctx.fill();
+  ctx.fillStyle='#4a8a4a'; for (const a of [-0.5,0,0.5]){ ctx.save(); ctx.translate(W*0.62+5,counterY+20); ctx.rotate(a); ctx.fillRect(-1.5,-22,3,22); ctx.restore(); }
+}
+registerScene('sushibar', drawSushiBar);
+
+/* ── SEASIDE CAROUSEL (outdoor · sunny boardwalk) ── */
+function drawSeasideCarousel(){
+  const t = sceneTime, boardY = H*0.72, seaY = H*0.44;
+
+  // bright sky
+  const sky=ctx.createLinearGradient(0,0,0,seaY); sky.addColorStop(0,'#63b4ea'); sky.addColorStop(1,'#bfe6f5');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,seaY);
+  ctx.fillStyle='#fff4b0'; ctx.beginPath(); ctx.arc(W*0.85,H*0.11,20,0,7); ctx.fill();
+  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.09,0.7); drawCloud(W*0.5+Math.sin(t*0.08+2)*6,H*0.15,0.5);
+
+  // sea
+  const sea=ctx.createLinearGradient(0,seaY,0,boardY); sea.addColorStop(0,'#2e8bc0'); sea.addColorStop(1,'#4aa8c8');
+  ctx.fillStyle=sea; ctx.fillRect(0,seaY,W,boardY-seaY);
+  ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1;
+  for (let y=seaY+6;y<boardY;y+=8){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.07+t*1.5+y)*1.6; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+
+  // the carousel (center, slightly back)
+  const cx=W*0.5, topY=seaY-6, roofR=70, baseY=boardY-6;
+  // center pole
+  ctx.fillStyle='#c9a24a'; ctx.fillRect(cx-3,topY,6,baseY-topY);
+  // striped conical roof
+  for (let i=0;i<10;i++){ ctx.fillStyle= i%2?'#e2482e':'#f2ece0';
+    ctx.beginPath(); ctx.moveTo(cx,topY-30); ctx.lineTo(cx-roofR+i*(2*roofR/10),topY+6); ctx.lineTo(cx-roofR+(i+1)*(2*roofR/10),topY+6); ctx.closePath(); ctx.fill(); }
+  // finial
+  ctx.fillStyle='#e0b040'; ctx.beginPath(); ctx.arc(cx,topY-32,4,0,7); ctx.fill();
+  // roof rim with bulbs
+  ctx.fillStyle='#c9a24a'; ctx.fillRect(cx-roofR,topY+4,2*roofR,5);
+  for (let i=0;i<=10;i++){ const bx=cx-roofR+i*(2*roofR/10); ctx.fillStyle=`rgba(255,240,150,${0.6+0.4*Math.sin(t*4+i)})`; ctx.beginPath(); ctx.arc(bx,topY+11,2,0,7); ctx.fill(); }
+  // rotating horses on poles (3 visible, sinusoidal bob + horizontal sway = rotation feel)
+  const horseCols=['#f2d0d8','#d0e0f2','#f2e6c0'];
+  for (let i=0;i<3;i++){ const ph=t*0.8+i*2.094; const hx=cx+Math.sin(ph)*(roofR-16); const depth=(Math.cos(ph)+1)/2; const sc=0.7+depth*0.5;
+    const hy=(topY+baseY)/2 + Math.sin(ph)*8 + Math.sin(t*3+i)*3;
+    ctx.globalAlpha=0.5+depth*0.5;
+    // brass pole
+    ctx.strokeStyle='#e0b040'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(hx,topY+9); ctx.lineTo(hx,hy+14*sc); ctx.stroke();
+    // horse body
+    ctx.save(); ctx.translate(hx,hy); ctx.scale(sc,sc);
+    ctx.fillStyle=horseCols[i]; roundRect(-12,-6,24,12,5); ctx.fill();
+    ctx.fillStyle=horseCols[i]; ctx.beginPath(); ctx.moveTo(10,-4); ctx.lineTo(18,-12); ctx.lineTo(20,-6); ctx.lineTo(12,2); ctx.closePath(); ctx.fill(); // head/neck
+    ctx.fillStyle='#c07a3a'; ctx.beginPath(); ctx.moveTo(-12,-4); ctx.lineTo(-18,-10); ctx.lineTo(-12,2); ctx.fill(); // tail
+    ctx.strokeStyle='#8a5a2a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-6,6); ctx.lineTo(-8,14); ctx.moveTo(6,6); ctx.lineTo(8,14); ctx.stroke(); // legs
+    ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(16,-8,1.2,0,7); ctx.fill();
+    ctx.restore(); ctx.globalAlpha=1; }
+
+  // boardwalk deck (foreground)
+  const deck=ctx.createLinearGradient(0,boardY,0,H); deck.addColorStop(0,'#c9a878'); deck.addColorStop(1,'#a2825a');
+  ctx.fillStyle=deck; ctx.fillRect(0,boardY,W,H-boardY);
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1; for (let y=boardY+6;y<H;y+=10){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // railing posts along the sea edge
+  ctx.fillStyle='#e8e2d4'; for (let x=6;x<W;x+=40){ ctx.fillRect(x,boardY-16,4,16); } ctx.fillRect(0,boardY-8,W,3);
+}
+registerScene('seasidecarousel', drawSeasideCarousel);
+
+/* ── POTION KITCHEN (indoor · witchy apothecary lab) ── */
+function drawPotionKitchen(){
+  const t = sceneTime, floorY = H*0.70;
+
+  // moody stone wall
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#241a2e'); wall.addColorStop(1,'#3a2a44');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1;
+  for (let y=16;y<floorY;y+=18){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    for (let x=((y/18|0)%2)*18; x<W; x+=36){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+18); ctx.stroke(); } }
+
+  // green cauldron-glow ambience
+  const glowc=ctx.createRadialGradient(W*0.5,floorY-6,10,W*0.5,floorY-6,150);
+  glowc.addColorStop(0,'rgba(120,230,140,.22)'); glowc.addColorStop(1,'rgba(120,230,140,0)');
+  ctx.fillStyle=glowc; ctx.fillRect(0,0,W,floorY);
+
+  // shelves of glowing potion bottles (top, across)
+  for (let s=0;s<2;s++){ const sy=H*0.10+s*H*0.14;
+    ctx.fillStyle='#4a3420'; ctx.fillRect(W*0.06,sy+22,W*0.88,5);
+    const potcols=['#7ae0c0','#e07ab0','#e0c04a','#7a9ae0','#c07ae0','#e08a4a','#8ae04a'];
+    for (let i=0;i<7;i++){ const bx=W*0.10+i*W*0.115, bh=14+((i*3+s)%4)*4;
+      // bottle
+      ctx.fillStyle='#2a2436'; ctx.fillRect(bx-5,sy+22-bh,10,bh);
+      ctx.fillStyle=potcols[(i+s*3)%potcols.length]; ctx.fillRect(bx-4,sy+22-bh+3,8,bh-4);
+      // liquid glow shimmer
+      ctx.fillStyle=`rgba(255,255,255,${0.2+0.2*Math.sin(t*2+i+s)})`; ctx.fillRect(bx-4,sy+22-bh+3,8,3);
+      // cork
+      ctx.fillStyle='#8a5a3a'; ctx.fillRect(bx-2.5,sy+22-bh-4,5,4); }
+  }
+
+  // hanging dried herbs (corners)
+  for (const hx of [W*0.10,W*0.90]){ ctx.strokeStyle='#6a5a3a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(hx,0); ctx.lineTo(hx,26); ctx.stroke();
+    ctx.fillStyle='#5a7a3a'; for (let k=0;k<5;k++){ ctx.beginPath(); ctx.ellipse(hx+(k%2?4:-4),26+k*5,3,7,k%2?0.4:-0.4,0,7); ctx.fill(); } }
+
+  // stone floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#3a2f3a'); fl.addColorStop(1,'#251d28');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1; for (let y=floorY+10;y<H;y+=14){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // bubbling cauldron (left side, off-center to keep pet floor clear)
+  const cx=W*0.20, cy=floorY+18;
+  // fire under it
+  for (let i=0;i<5;i++){ const flx=cx-12+i*6; const fh=8+5*Math.sin(t*6+i); ctx.fillStyle='#e0641a'; ctx.beginPath(); ctx.moveTo(flx-3,cy+18); ctx.quadraticCurveTo(flx,cy+18-fh,flx+3,cy+18); ctx.fill();
+    ctx.fillStyle='#f2b02a'; ctx.beginPath(); ctx.moveTo(flx-1.5,cy+18); ctx.quadraticCurveTo(flx,cy+18-fh*0.6,flx+1.5,cy+18); ctx.fill(); }
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(cx-16,cy+16,32,4); ctx.fillRect(cx-14,cy+14,4,6); ctx.fillRect(cx+10,cy+14,4,6);
+  // pot
+  ctx.fillStyle='#1a1a20'; ctx.beginPath(); ctx.arc(cx,cy,18,0,Math.PI); ctx.fill(); ctx.fillRect(cx-18,cy-4,36,4);
+  ctx.fillStyle='#5ad08a'; ctx.beginPath(); ctx.ellipse(cx,cy-4,16,5,0,0,7); ctx.fill();
+  // bubbles
+  for (let i=0;i<5;i++){ const bx=cx-10+ (i*5); const by=cy-4-((t*20+i*13)%22); const br=1.4+Math.sin(t*3+i)*0.8;
+    ctx.fillStyle=`rgba(150,240,170,${0.7-((t*20+i*13)%22)/30})`; ctx.beginPath(); ctx.arc(bx,by,Math.max(0.4,br),0,7); ctx.fill(); }
+  // green vapor
+  ctx.strokeStyle='rgba(150,240,170,.25)'; ctx.lineWidth=2; ctx.beginPath();
+  for (let k=0;k<=9;k++){ const yy=cy-8-k*5, xx=cx+Math.sin(t*2+k*0.6)*5; k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy);} ctx.stroke();
+
+  // open spellbook on a small table (right side)
+  const bx=W*0.82, by=floorY+22;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(bx-24,by+8,48,6); ctx.fillRect(bx-20,by+14,4,14); ctx.fillRect(bx+16,by+14,4,14);
+  ctx.fillStyle='#6a4a2e'; ctx.beginPath(); ctx.moveTo(bx-24,by+8); ctx.lineTo(bx,by+2); ctx.lineTo(bx+24,by+8); ctx.lineTo(bx,by+12); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#efe6d0'; ctx.beginPath(); ctx.moveTo(bx-22,by+7); ctx.lineTo(bx,by+2); ctx.lineTo(bx,by+9); ctx.lineTo(bx-22,by+11); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(bx+22,by+7); ctx.lineTo(bx,by+2); ctx.lineTo(bx,by+9); ctx.lineTo(bx+22,by+11); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='rgba(120,80,40,.6)'; ctx.lineWidth=0.6; for (let k=1;k<4;k++){ ctx.beginPath(); ctx.moveTo(bx-18,by+5+k*1.5); ctx.lineTo(bx-3,by+3+k*1.5); ctx.stroke(); }
+  // floating sparkle above the book
+  for (let i=0;i<5;i++){ const sx=bx+Math.sin(t*1.5+i)*10; const sy=by-6-((t*14+i*10)%26); ctx.fillStyle=`rgba(200,255,210,${0.6-((t*14+i*10)%26)/40})`; ctx.fillRect(sx,sy,1.6,1.6); }
+}
+registerScene('potionkitchen', drawPotionKitchen);
+
+/* ── KITE HILL (outdoor · breezy afternoon) ── */
+function drawKiteHill(){
+  const t = sceneTime, hillY = H*0.64;
+
+  // wide breezy sky
+  const sky=ctx.createLinearGradient(0,0,0,hillY); sky.addColorStop(0,'#5fa8e6'); sky.addColorStop(1,'#c4e6f2');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,hillY);
+  ctx.fillStyle='#fff4b0'; ctx.beginPath(); ctx.arc(W*0.16,H*0.13,18,0,7); ctx.fill();
+  // fast-moving puffy clouds
+  drawCloud((W*0.4 + t*6)%(W+80)-40,H*0.10,0.7);
+  drawCloud((W*0.8 + t*4)%(W+80)-40,H*0.20,0.55);
+  drawCloud((W*0.1 + t*5)%(W+80)-40,H*0.28,0.45);
+
+  // flying kites with tails
+  function kite(kx,ky,col,sway){
+    const a=Math.sin(t*1.2+sway)*0.3;
+    ctx.save(); ctx.translate(kx,ky); ctx.rotate(a);
+    // diamond
+    ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(0,-14); ctx.lineTo(11,0); ctx.lineTo(0,16); ctx.lineTo(-11,0); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,-14); ctx.lineTo(0,16); ctx.moveTo(-11,0); ctx.lineTo(11,0); ctx.stroke();
+    // highlight panel
+    ctx.fillStyle='rgba(255,255,255,.3)'; ctx.beginPath(); ctx.moveTo(0,-14); ctx.lineTo(11,0); ctx.lineTo(0,0); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // wavy tail with bows
+    ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.beginPath();
+    for (let k=0;k<=8;k++){ const yy=ky+16+k*7; const xx=kx+Math.sin(t*3+k*0.7+sway)*8; k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy);} ctx.stroke();
+    for (let k=1;k<8;k+=2){ const yy=ky+16+k*7; const xx=kx+Math.sin(t*3+k*0.7+sway)*8; ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(xx-4,yy-2); ctx.lineTo(xx+4,yy+2); ctx.lineTo(xx+4,yy-2); ctx.lineTo(xx-4,yy+2); ctx.closePath(); ctx.fill(); }
+    // string down toward the hill
+    ctx.strokeStyle='rgba(80,80,80,.4)'; ctx.lineWidth=0.6; ctx.beginPath(); ctx.moveTo(kx,ky+16); ctx.quadraticCurveTo((kx+W*0.5)/2, hillY-20, W*0.5, hillY+6); ctx.stroke();
+  }
+  kite(W*0.30,H*0.20,'#e2482e',0);
+  kite(W*0.66,H*0.15,'#3a7ad0',2);
+  kite(W*0.82,H*0.32,'#e0b040',4);
+
+  // birds far off
+  ctx.strokeStyle='rgba(60,70,90,.5)'; ctx.lineWidth=1;
+  for (let i=0;i<3;i++){ const bx=(W*0.5+i*30 + t*8)%W, by=H*0.09+i*6; ctx.beginPath(); ctx.moveTo(bx-4,by); ctx.quadraticCurveTo(bx,by-3,bx+4,by); ctx.stroke(); }
+
+  // grassy hill
+  const gr=ctx.createLinearGradient(0,hillY,0,H); gr.addColorStop(0,'#6aae42'); gr.addColorStop(1,'#4a8a2e');
+  ctx.fillStyle=gr; ctx.beginPath(); ctx.moveTo(0,hillY+14); ctx.quadraticCurveTo(W*0.5,hillY-14,W,hillY+14); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  // wind-swept grass blades leaning one way
+  ctx.strokeStyle='rgba(40,90,20,.4)'; ctx.lineWidth=1;
+  for (let i=0;i<60;i++){ const gx=(i*61+9)%W; const gy=hillY+18+((i*37+7)%(H-hillY-18)); const lean=6+Math.sin(t*2+i)*2;
+    ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx+lean,gy-7); ctx.stroke(); }
+  // little wildflowers (sides)
+  for (const [fx,fc] of [[W*0.10,'#e2d04a'],[W*0.90,'#e26fb0'],[W*0.16,'#ffffff']]){ ctx.fillStyle=fc; for (let k=0;k<4;k++){ const a=k/4*6.28; ctx.beginPath(); ctx.arc(fx+Math.cos(a)*2.5,H*0.86+Math.sin(a)*2.5,1.6,0,7); ctx.fill(); } ctx.fillStyle='#e0b040'; ctx.beginPath(); ctx.arc(fx,H*0.86,1.4,0,7); ctx.fill(); }
+  // a picnic blanket corner (foreground-left, low)
+  ctx.save(); ctx.translate(W*0.14,H*0.92); ctx.rotate(-0.1);
+  ctx.fillStyle='rgba(210,80,80,.5)'; roundRect(-26,-8,52,16,3); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.3)'; for (let x=-26;x<26;x+=8){ ctx.fillRect(x,-8,2,16); } ctx.restore();
+}
+registerScene('kitehill', drawKiteHill);

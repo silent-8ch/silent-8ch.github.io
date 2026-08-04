@@ -670,3 +670,227 @@ function fxNowSec(){ try{ return (performance && performance.now ? performance.n
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 4). Interactive / contained — no new always-on
+   overlays. Objects appear only occasionally and clear themselves.
+   ========================================================================== */
+
+/* small shared helper: send her walking to a floor spot (mirrors tapScene). */
+function fxWalkHerTo(px, py){
+  try{
+    pet.tx = Math.max(W*0.14, Math.min(W*0.86, px));
+    pet.ty = Math.max(H*0.66, Math.min(H*0.82, py));
+    pet.dir = (px < pet.x) ? 'left' : 'right';
+    pet.wanderTimer = rand(4, 6);        // don't wander off immediately
+  }catch(e){}
+}
+
+/* ----------------------------------------------------------------------------
+   10) PLAY BALL  —  every so often a little ball rolls to a stop on the floor.
+   Tap it to toss it; she trots over and plays, delighted. Only one at a time,
+   and it clears itself, so nothing lingers on screen.
+   -------------------------------------------------------------------------- */
+(function fxBall(){
+  try{
+    let ball = null;                     // {x,y,vx,r,spin,rot,ttl}
+    let timer = rand(40, 75);
+    const FLOOR = () => rand(H*0.70, H*0.80);
+
+    function spawn(){
+      ball = { x: rand(W*0.24, W*0.76), y: FLOOR(), vx: 0, r: 8, spin: 0, rot: 0, ttl: 16, playCd: 0 };
+    }
+    function toss(){
+      const dir = (Math.random() < 0.5 ? -1 : 1);
+      ball.vx = dir * rand(70, 120);
+      ball.spin = dir * rand(6, 10);
+      ball.ttl = 16;                     // refresh its patience when played with
+      fxWalkHerTo(ball.x + dir*40, ball.y);   // she heads toward where it's rolling
+      if (typeof sfx === 'function') sfx('tap');
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!ball){
+        timer -= dt;
+        if (timer <= 0){ timer = rand(55, 95); if (!(pet && pet.resting) && !(pet && pet.animLock>0)) spawn(); }
+        return;
+      }
+      const b = ball;
+      b.ttl -= dt;
+      if (Math.abs(b.vx) > 1){
+        b.x += b.vx * dt; b.vx *= 0.94; b.rot += b.spin * dt * (b.vx>=0?1:1);
+        if (b.x < W*0.12){ b.x = W*0.12; b.vx = Math.abs(b.vx)*0.5; }
+        if (b.x > W*0.88){ b.x = W*0.88; b.vx = -Math.abs(b.vx)*0.5; }
+        fxWalkHerTo(b.x, b.y);           // keep leading her to the ball
+      } else { b.vx = 0; }
+      // reached and settled? she plays.
+      if (b.vx === 0 && b.playCd <= 0){
+        const near = Math.hypot(pet.x - b.x, pet.y - b.y) < 30;
+        if (near){
+          b.playCd = 1;
+          try{ state.fun = clamp(state.fun + 6); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          if (typeof burstAt === 'function') burstAt(pick(['⚽','🎾','✨']), b.x, b.y-6);
+          if (typeof say === 'function') say(pick(['Wheee! ⚽','Again, again!','Got it! 🥰','So much fun! 🎾']));
+          if (typeof sfx === 'function') sfx('find');
+          ball = null;                   // she caught it; tidy up
+          timer = rand(45, 80);
+          return;
+        }
+      }
+      if (b.playCd > 0) b.playCd -= dt;
+      if (b.ttl <= 0) ball = null;       // ignored too long — it rolls away
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!ball) return;
+      const b = ball;
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.16)';
+      ctx.beginPath(); ctx.ellipse(b.x, b.y+ b.r*0.7, b.r*0.9, b.r*0.34, 0, 0, 7); ctx.fill();
+      ctx.translate(b.x, b.y); ctx.rotate(b.rot);
+      ctx.fillStyle = '#ff6b6b';
+      ctx.beginPath(); ctx.arc(0, 0, b.r, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(-b.r,0); ctx.lineTo(b.r,0); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,b.r*0.55, Math.PI*0.15, Math.PI*0.85); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(-b.r*0.35, -b.r*0.35, b.r*0.25, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!ball) return false;
+        if (Math.hypot(px - ball.x, py - ball.y) > ball.r + 10) return false;
+        toss();
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   11) SURPRISE GIFT  —  once in a while a little wrapped box waits on the floor.
+   Tap to open it: sometimes a keepsake trinket for her collection, sometimes a
+   sweet note. The box appears occasionally and vanishes once opened or ignored.
+   -------------------------------------------------------------------------- */
+(function fxGift(){
+  try{
+    let gift = null;                     // {x,y,ttl,hue,bob}
+    let timer = rand(60, 110);
+    const NOTES = ['You make ordinary days feel like gifts.','I still get butterflies, you know.','Happy birthday, my love. 💛','Every day with you is the present.','You are my favorite everything.'];
+
+    function spawn(){
+      gift = { x: rand(W*0.24, W*0.76), y: rand(H*0.72, H*0.80), ttl: 22, hue: pick(['#ff8fab','#8ad3ff','#ffd166','#c8a2ff']), bob: rand(0,Math.PI*2) };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!gift){
+        timer -= dt;
+        if (timer <= 0){ timer = rand(80, 150); if (!(pet && pet.resting)) spawn(); }
+        return;
+      }
+      gift.bob += dt; gift.ttl -= dt;
+      if (gift.ttl <= 0) gift = null;    // not opened — quietly taken away
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gift) return;
+      const g = gift;
+      const y = g.y + Math.sin(g.bob*2) * 1.5;
+      const s = 14;                      // box half-size
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.16)';
+      ctx.beginPath(); ctx.ellipse(g.x, g.y + s*0.9, s*0.9, s*0.3, 0, 0, 7); ctx.fill();
+      // box
+      if (typeof roundRect === 'function'){ ctx.fillStyle = g.hue; roundRect(g.x - s, y - s, s*2, s*2, 3); ctx.fill(); }
+      else { ctx.fillStyle = g.hue; ctx.fillRect(g.x - s, y - s, s*2, s*2); }
+      // ribbon
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.fillRect(g.x - 2, y - s, 4, s*2);
+      ctx.fillRect(g.x - s, y - 2, s*2, 4);
+      // bow
+      ctx.beginPath(); ctx.arc(g.x - 4, y - s - 2, 4, 0, 7); ctx.arc(g.x + 4, y - s - 2, 4, 0, 7); ctx.fill();
+      // sparkle hint
+      ctx.globalAlpha = 0.5 + 0.5*Math.sin(g.bob*3);
+      ctx.fillStyle = '#fff'; ctx.font = '10px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('✨', g.x + s, y - s);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gift) return false;
+        const s = 16;
+        if (px < gift.x - s || px > gift.x + s || py < gift.y - s*1.6 || py > gift.y + s) return false;
+        const gx = gift.x, gy = gift.y; gift = null;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof burstAt === 'function') burstAt(pick(['🎁','✨','💫']), gx, gy-6);
+        if (Math.random() < 0.6 && typeof collection === 'object'){
+          // a keepsake trinket for her collection
+          let pool = ['🌷','🐚','🍬','🎀','⭐'];
+          try{ if (typeof TRINKET_POOL === 'object' && typeof SCENES!=='undefined'){ pool = TRINKET_POOL[SCENES[currentScene]] || (typeof TRINKET_DEFAULT!=='undefined' ? TRINKET_DEFAULT : pool); } }catch(e){}
+          const t = pick(pool);
+          collection[t] = (collection[t]||0) + 1;
+          if (typeof saveCollection === 'function') saveCollection();
+          if (typeof say === 'function') say('A gift… a ' + t + '! 🥰');
+          if (typeof hearts === 'function') hearts();
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 4); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          // a sweet note instead
+          const note = pick(NOTES);
+          if (typeof showToast === 'function') showToast('💌','A little note', note);
+          else if (typeof say === 'function') say(note);
+          try{ state.love = clamp(state.love + 5); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        timer = rand(90, 160);
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   12) HEART SHOWER  —  double-tap an empty patch of sky to send a one-shot
+   shower of hearts drifting down. Cooldowned; not a persistent overlay. A single
+   sky tap still behaves normally (she looks over to the spot).
+   -------------------------------------------------------------------------- */
+(function fxHeartShower(){
+  try{
+    let lastT = 0, lastX = 0, lastY = 0, cd = 0;
+    const WINDOW = 0.36;
+
+    function nearHer(px, py){
+      try{
+        const h = (typeof SHEETS!=='undefined' && SHEETS.walk && SHEETS.walk.displayH) || 150;
+        return Math.hypot(px - pet.x, py - (pet.y - h*0.5)) < 90;
+      }catch(e){ return false; }
+    }
+
+    EXTRA_UPDATERS.push(function(dt){ if (cd > 0) cd -= dt; });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (py > H*0.42) return false;          // only the upper sky area
+        if (nearHer(px, py)) return false;       // leave the kiss zone alone
+        const now = fxNowSec();
+        const quick = (now - lastT) <= WINDOW;
+        const close = Math.hypot(px - lastX, py - lastY) < 70;
+        lastT = now; lastX = px; lastY = py;
+        if (!(quick && close)) return false;     // first tap: let default look-over happen
+        lastT = 0;
+        if (cd > 0) return true;                  // still consume the double-tap, just no re-shower
+        cd = 6;
+        if (typeof fxAt === 'function'){
+          for (let i=0;i<12;i++){
+            setTimeout(()=> fxAt(rand(W*0.1, W*0.9), rand(H*0.06, H*0.2), pick(['💛','💗','💖','✨','💕'])), i*70);
+          }
+        }
+        if (typeof sfx === 'function') sfx('day');
+        try{ state.love = clamp(state.love + 3); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        if (typeof say === 'function') say(pick(['A sky full of love 💗','For you, always 💛','It’s raining hearts! 🥰']));
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

@@ -45,6 +45,10 @@ const TRINKET_POOL = (()=>{
   g(['ferriswheel'], ['🎡','🎠','🎟️']);
   g(['mushroomglade'], ['🍄','🧚','🌿']);
   g(['hammam'], ['♨️','🧖','🫧']);
+  g(['farmersmarket'], ['🥕','🧺','🍅']);
+  g(['skilodge'], ['⛷️','☕','🔥']);
+  g(['crystalcave'], ['💎','🔮','🪩']);
+  g(['lanternfestival'], ['🏮','🎏','🕯️']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -187,7 +191,20 @@ const COMPLIMENTS = [
   'I love who I get to be when I\'m with you.',
   'You are my favorite plot twist.',
   'Being near you feels like coming up for air.',
-  'I\'d marry you again tomorrow, and every tomorrow after.'
+  'I\'d marry you again tomorrow, and every tomorrow after.',
+  'You make silence feel like a conversation.',
+  'I love the little world we\'ve built between us.',
+  'You are the warmth I reach for on cold days.',
+  'Your smile could end arguments and start summers.',
+  'I keep a photo of you in my head for the long days.',
+  'You make growing up feel like an adventure, not a loss.',
+  'I love how you dance in the kitchen when you think no one sees.',
+  'You are proof that gentle people are the strongest ones.',
+  'Every road feels shorter when you\'re in the passenger seat.',
+  'You make me want to keep every promise I ever made you.',
+  'Loving you is the one thing I\'ll never get tired of.',
+  'You are my good-morning and my thank-goodness-you\'re-home.',
+  'Of all my lucky days, the luckiest is the one I met you.'
 ];
 function dailyCompliment(){
   try{
@@ -543,6 +560,10 @@ const LOVE_NOTES = [
   {day:15, text:'Halfway to a month, and I\'m still counting my luck one visit at a time. 🍀'},
   {day:25, text:'Twenty-five days together. You keep proving that the small moments are the whole point. ✨'},
   {day:35, text:'Past a month now, and I\'d happily do a thousand more ordinary days with you. 🥰'},
+  {day:12, text:'Twelve days, and checking in on you is already the softest part of my day. 💛'},
+  {day:18, text:'You have a way of making even a tiny screen feel full of you. I adore that. 🥰'},
+  {day:45, text:'A month and a half of little visits. Loving you never once felt like effort. ✨'},
+  {day:80, text:'Almost three months in, and my heart still does the same happy thing it always has. 💗'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){
