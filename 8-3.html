@@ -2487,6 +2487,50 @@ function drawPottery(){
 }
 registerScene('pottery', drawPottery);
 
+/* ── LAVENDER FIELD (outdoor · summer) ── */
+function drawLavender(){
+  const t = sceneTime, horizon = H*0.42;
+
+  // sky + sun
+  const sky=ctx.createLinearGradient(0,0,0,horizon); sky.addColorStop(0,'#8fc0e8'); sky.addColorStop(1,'#f2e4c0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizon);
+  ctx.fillStyle='rgba(255,242,192,.3)'; ctx.beginPath(); ctx.arc(W*0.22,H*0.14,30,0,7); ctx.fill();
+  ctx.fillStyle='#fff2c0'; ctx.beginPath(); ctx.arc(W*0.22,H*0.14,20,0,7); ctx.fill();
+
+  // distant hills + lone tree
+  ctx.fillStyle='#b8c9a0'; ctx.beginPath(); ctx.moveTo(0,horizon); ctx.quadraticCurveTo(W*0.4,horizon-24,W*0.7,horizon-6); ctx.quadraticCurveTo(W*0.9,horizon-18,W,horizon-4); ctx.lineTo(W,horizon); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#5a3a22'; ctx.fillRect(W*0.8-2,horizon-24,4,20);
+  ctx.fillStyle='#4a7a3a'; ctx.beginPath(); ctx.arc(W*0.8,horizon-26,10,0,7); ctx.fill();
+
+  // field
+  const field=ctx.createLinearGradient(0,horizon,0,H); field.addColorStop(0,'#9a8fb5'); field.addColorStop(1,'#6a5a8a');
+  ctx.fillStyle=field; ctx.fillRect(0,horizon,W,H-horizon);
+
+  // rows of lavender receding in perspective
+  for (let r=0;r<12;r++){
+    const p=r/11, y=horizon + Math.pow(p,1.6)*(H-horizon), size=3+p*11, spacing=6+p*8;
+    for (let x=0;x<=W;x+=spacing){
+      ctx.strokeStyle=`rgb(${110+p*20},${100+p*10},${150+p*20})`; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y-size); ctx.stroke();
+      ctx.fillStyle=`rgb(${140-p*20},90,${180-p*10})`; ctx.fillRect(x-1.5,y-size-3,3,4);
+    }
+  }
+
+  // butterflies
+  const bcol=['#f2c14e','#e8628c','#ffffff','#f2a6b3'];
+  for (let i=0;i<4;i++){
+    const bx=(((W*0.2 + i*W*0.2 + Math.sin(t*0.8+i)*40 + t*10*(i%2?1:-1))%W)+W)%W;
+    const by=horizon+24 + Math.sin(t*1.5+i)*18 + i*8;
+    const flap=Math.abs(Math.sin(t*12+i))*3+1;
+    ctx.fillStyle=bcol[i];
+    ctx.save(); ctx.translate(bx,by);
+    ctx.beginPath(); ctx.ellipse(-3,0,3,flap,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(3,0,3,flap,0,0,7); ctx.fill();
+    ctx.restore();
+  }
+}
+registerScene('lavender', drawLavender);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
