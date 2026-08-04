@@ -6782,6 +6782,59 @@ function drawBayou(){
 }
 registerScene('bayou', drawBayou);
 
+/* ── ESCAPE ROOM (indoor · puzzle den with a countdown) ── */
+function drawEscapeRoom(){
+  const t=sceneTime, floorY=H*0.72;
+  // dim study-themed room
+  ctx.fillStyle='#26201a'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#3a2e22'; ctx.fillRect(0,floorY,W,H-floorY);
+  // patterned wallpaper hint
+  ctx.strokeStyle='rgba(90,70,50,.3)'; ctx.lineWidth=1; for(let y=0;y<floorY;y+=18) for(let x=0;x<W;x+=18){ ctx.strokeRect(x,y,9,9); }
+  ctx.fillStyle='#4a3a2a'; ctx.fillRect(0,H*0.1,W,3);
+  // a glowing red countdown timer on the wall
+  const tx=W*0.5, ty=H*0.14; ctx.fillStyle='#0a0a0a'; ctx.fillRect(tx-40,ty-16,80,32);
+  ctx.strokeStyle='#333'; ctx.lineWidth=2; ctx.strokeRect(tx-40,ty-16,80,32);
+  // seven-seg-ish digits "12:34" pulsing
+  const glow=0.7+0.3*Math.sin(t*4);
+  ctx.fillStyle=`rgba(255,40,40,${glow})`; ctx.font='bold 22px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  const secs=59-Math.floor((t*1)%60); ctx.fillText('04:'+String(secs).padStart(2,'0'), tx, ty); ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+  ctx.fillStyle=`rgba(255,40,40,${glow*0.15})`; ctx.fillRect(tx-40,ty-16,80,32);
+  // a locked chest/safe with a combination dial (center)
+  const sx=W*0.5, sy=floorY-4;
+  ctx.fillStyle='#3a3a44'; ctx.fillRect(sx-30,sy-46,60,46); ctx.fillStyle='#4a4a54'; ctx.fillRect(sx-30,sy-46,60,6);
+  ctx.fillStyle='#2a2a32'; ctx.fillRect(sx-24,sy-40,48,34);
+  // dial
+  ctx.fillStyle='#c8c8d0'; ctx.beginPath(); ctx.arc(sx,sy-22,10,0,7); ctx.fill();
+  ctx.strokeStyle='#333'; ctx.lineWidth=1; for(let i=0;i<12;i++){ const a=i/12*Math.PI*2; ctx.beginPath(); ctx.moveTo(sx+Math.cos(a)*7,sy-22+Math.sin(a)*7); ctx.lineTo(sx+Math.cos(a)*10,sy-22+Math.sin(a)*10); ctx.stroke(); }
+  const da=t*0.8; ctx.strokeStyle='#a02020'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(sx,sy-22); ctx.lineTo(sx+Math.cos(da)*8,sy-22+Math.sin(da)*8); ctx.stroke();
+  // handle
+  ctx.strokeStyle='#c8c8d0'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(sx+18,sy-30); ctx.lineTo(sx+18,sy-14); ctx.stroke();
+  // a corkboard of clues with red string connecting them (left)
+  const cbx=W*0.06, cby=H*0.16, cbw=W*0.26, cbh=H*0.34;
+  ctx.fillStyle='#8a6a44'; ctx.fillRect(cbx-4,cby-4,cbw+8,cbh+8); ctx.fillStyle='#c8b088'; ctx.fillRect(cbx,cby,cbw,cbh);
+  const notes=[[0.2,0.2],[0.65,0.15],[0.4,0.5],[0.75,0.6],[0.15,0.7]];
+  ctx.strokeStyle='#c02020'; ctx.lineWidth=1; ctx.beginPath();
+  for(let i=0;i<notes.length;i++){ const nx=cbx+notes[i][0]*cbw, ny=cby+notes[i][1]*cbh; if(i===0)ctx.moveTo(nx,ny); else ctx.lineTo(nx,ny); } ctx.stroke();
+  for(const [u,v] of notes){ const nx=cbx+u*cbw, ny=cby+v*cbh; ctx.fillStyle='#f0ead8'; ctx.save(); ctx.translate(nx,ny); ctx.rotate((u-0.5)*0.3); ctx.fillRect(-10,-8,20,16);
+    ctx.fillStyle='#555'; ctx.fillRect(-7,-4,14,2); ctx.fillRect(-7,0,10,2); ctx.restore();
+    ctx.fillStyle='#c02020'; ctx.beginPath(); ctx.arc(nx,ny,1.6,0,7); ctx.fill(); }
+  // a bookshelf with a suspicious tilted book (right)
+  const bshx=W*0.66; ctx.fillStyle='#4a3222'; ctx.fillRect(bshx,H*0.16,W*0.28,4); ctx.fillRect(bshx,H*0.3,W*0.28,4);
+  const bc=['#7a2a2a','#2a4a3a','#2a3a6a','#5a3a1a','#3a5a5a','#7a5a2a'];
+  for(let s=0;s<2;s++) for(let i=0;i<7;i++){ const bx=bshx+4+i*(W*0.28-8)/7; const tilt=(s===0&&i===4)?0.3:0;
+    ctx.save(); ctx.translate(bx,H*0.16+s*H*0.14); ctx.rotate(tilt); ctx.fillStyle=bc[(i+s)%bc.length]; ctx.fillRect(0,-24,W*0.03,24); ctx.restore(); }
+  // a UV blacklight flashlight on the table revealing a glowing clue on the wall
+  ctx.fillStyle='#222'; ctx.fillRect(W*0.36,floorY-8,20,6); ctx.fillStyle='#6a4ad0'; ctx.beginPath(); ctx.arc(W*0.36,floorY-5,3,0,7); ctx.fill();
+  // glowing UV number on the wall
+  ctx.fillStyle=`rgba(140,90,255,${0.4+0.3*Math.sin(t*3)})`; ctx.font='bold 14px monospace'; ctx.fillText('7 3 9', W*0.38, floorY-30);
+  ctx.font='10px sans-serif';
+  // hanging exposed bulb
+  ctx.strokeStyle='#555'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.85,0); ctx.lineTo(W*0.85,H*0.1); ctx.stroke();
+  ctx.fillStyle=`rgba(255,230,160,${0.6+0.1*Math.sin(t*5)})`; ctx.beginPath(); ctx.arc(W*0.85,H*0.11,5,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,230,160,.08)'; ctx.beginPath(); ctx.arc(W*0.85,H*0.11,40,0,7); ctx.fill();
+}
+registerScene('escaperoom', drawEscapeRoom);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
