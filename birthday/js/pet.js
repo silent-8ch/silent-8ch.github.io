@@ -291,6 +291,10 @@ const SCENE_INTERACT = (()=>{
   g(['candyfactory'], {lines:['So much candy! 🍭','Can I have one? 😋','It\'s a sweet dream 🍬'], emoji:'🍭', hunger:5});
   g(['moonbeach'], {lines:['Moonlight on the water 🌝','A midnight stroll? 🥰','So calm and lovely ✨'], emoji:'🌝', love:5});
   g(['papercraftstudio'], {lines:['Let\'s make something! ✂️','So many pretty papers 🎨','I\'ll fold you a heart 💗'], emoji:'✂️', fun:5});
+  g(['poppyfield'], {lines:['So many poppies! 🌺','Let\'s run through them 🥰','So bright and happy 🌼'], emoji:'🌺', fun:5});
+  g(['treehouse'], {lines:['Our own little hideaway 🌳','Cozy up here 🥰','Just the two of us 💛'], emoji:'🌳', love:5});
+  g(['desertoasis'], {lines:['Palm trees! 🌴','Cool water at last 💧','So peaceful here 😌'], emoji:'🌴', energy:5});
+  g(['dumplinghouse'], {lines:['Dumplings! 🥟','So warm and yummy 😋','Share a plate? 🥢'], emoji:'🥟', hunger:5});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];

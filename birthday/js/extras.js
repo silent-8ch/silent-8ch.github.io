@@ -1656,3 +1656,152 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 10). Two scene-gated, contained moments. No always-on
+   overlays; each lives only in its scenes and taps return false on misses.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   24) FEED THE KOI  —  by the koi pond (or at the aquarium) a few fish drift near
+   the surface. Tap the water to sprinkle a little food; the nearest fish glide
+   over to nibble it with a ripple, and she loves watching them. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxKoi(){
+  try{
+    const PONDS = new Set(['koipond','aquarium']);
+    let fish = null;                     // array of {x,y,tx,ty,phase,hue,speed}
+    let food = [];                       // {x,y,ttl,ripple}
+    let cd = 0;
+    function inPond(){ try{ return (typeof SCENES!=='undefined') && PONDS.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function seed(){
+      const hues = ['#ff8a5b','#ffffff','#ffb03a','#ff5b7a'];
+      fish = [];
+      for (let i=0;i<3;i++) fish.push({ x: rand(W*0.2,W*0.8), y: rand(H*0.44,H*0.6), tx: rand(W*0.2,W*0.8), ty: rand(H*0.44,H*0.6), phase: rand(0,Math.PI*2), hue: hues[i%hues.length], speed: rand(14,22), retarget: rand(2,4) });
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inPond()){ fish = null; food = []; return; }
+      if (!fish) seed();
+      if (cd > 0) cd -= dt;
+      // food pellets fade; ripple animates
+      for (let i=food.length-1;i>=0;i--){ const f=food[i]; f.ttl -= dt; if (f.ripple>0) f.ripple -= dt; if (f.ttl<=0) food.splice(i,1); }
+      for (const fs of fish){
+        fs.phase += dt;
+        // head to the nearest food if any, else wander
+        let tgt = null, bd = 1e9;
+        for (const f of food){ const d = Math.hypot(f.x-fs.x, f.y-fs.y); if (d<bd){ bd=d; tgt=f; } }
+        if (tgt){ fs.tx = tgt.x; fs.ty = tgt.y; if (bd < 8){ tgt.ttl = Math.min(tgt.ttl, 0.15); tgt.ripple = 0.5; } }
+        else { fs.retarget -= dt; if (fs.retarget<=0){ fs.retarget=rand(2,4); fs.tx=rand(W*0.16,W*0.84); fs.ty=rand(H*0.42,H*0.6); } }
+        const dx=fs.tx-fs.x, dy=fs.ty-fs.y, d=Math.hypot(dx,dy)||1, step=fs.speed*dt*(tgt?1.5:1);
+        fs.x += dx/d*step; fs.y += dy/d*step; fs.dir = dx>=0?1:-1;
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!fish || !inPond()) return;
+      ctx.save();
+      // food + ripples
+      for (const f of food){
+        if (f.ripple>0){ ctx.globalAlpha=Math.max(0,f.ripple/0.5)*0.6; ctx.strokeStyle='rgba(230,245,255,0.9)'; ctx.lineWidth=1; ctx.beginPath(); ctx.ellipse(f.x,f.y,10*(1-f.ripple/0.5)+3,4*(1-f.ripple/0.5)+1,0,0,7); ctx.stroke(); ctx.globalAlpha=1; }
+        ctx.fillStyle='rgba(190,150,90,0.9)'; ctx.beginPath(); ctx.arc(f.x,f.y,1.4,0,7); ctx.fill();
+      }
+      // koi (simple teardrop body + tail, drawn under a faint water sheen)
+      for (const fs of fish){
+        const dir = fs.dir||1, y = fs.y + Math.sin(fs.phase*2)*1.2;
+        ctx.save(); ctx.translate(fs.x, y); ctx.scale(dir,1);
+        ctx.fillStyle = fs.hue; ctx.globalAlpha = 0.9;
+        ctx.beginPath(); ctx.ellipse(0,0,7,3.4,0,0,7); ctx.fill();
+        const tw = Math.sin(fs.phase*6)*2;
+        ctx.beginPath(); ctx.moveTo(-6,0); ctx.lineTo(-11, -3+tw); ctx.lineTo(-11, 3+tw); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!fish || !inPond()) return false;
+        if (py < H*0.40 || py > H*0.64) return false;    // only the water band reacts
+        if (cd > 0) return true;
+        cd = 0.5;
+        for (let i=0;i<3;i++) food.push({ x: px+rand(-8,8), y: py+rand(-4,4), ttl: 5, ripple: 0.5 });
+        if (food.length > 12) food.splice(0, food.length-12);
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof say === 'function') say(pick(['Here, fishies! 🐟','They’re so pretty 🥰','Come and eat 🐠','Look at them go! ✨']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   25) MAKE A WISH (DANDELION)  —  in meadows a dandelion puff sways in the grass.
+   Tap it to blow the seeds away on the breeze and make a little wish together.
+   She gets a wishful, happy glow. Lives only in meadow scenes and regrows.
+   -------------------------------------------------------------------------- */
+(function fxDandelion(){
+  try{
+    const MEADOWS = new Set(['poppyfield','alpinemeadow','pasture']);
+    let dan = null;                      // {x,y,full,seeds:[],bob,regrow}
+    function inMeadow(){ try{ return (typeof SCENES!=='undefined') && MEADOWS.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function grow(){ dan = { x: Math.max(W*0.2, Math.min(W*0.8, rand(W*0.25,W*0.75))), y: rand(H*0.68,H*0.78), full:true, seeds:[], bob:rand(0,Math.PI*2), regrow:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inMeadow()){ dan = null; return; }
+      if (!dan) grow();
+      dan.bob += dt;
+      // drifting seeds
+      for (let i=dan.seeds.length-1;i>=0;i--){ const s=dan.seeds[i]; s.t+=dt; s.x+=s.vx*dt; s.y+=s.vy*dt; s.vy+= -2*dt; if (s.t>=s.life) dan.seeds.splice(i,1); }
+      if (!dan.full){ dan.regrow -= dt; if (dan.regrow<=0 && dan.seeds.length===0) grow(); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!dan || !inMeadow()) return;
+      const sway = Math.sin(dan.bob*1.5)*2;
+      const hx = dan.x + sway, hy = dan.y - 22;
+      ctx.save();
+      // stem
+      ctx.strokeStyle = '#5a8a3a'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(dan.x, dan.y); ctx.quadraticCurveTo(dan.x+sway*0.5, dan.y-12, hx, hy); ctx.stroke();
+      if (dan.full){
+        // fluffy seed head
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.beginPath(); ctx.arc(hx, hy, 7, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 0.6;
+        for (let a=0;a<12;a++){ const an=a/12*Math.PI*2; ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx+Math.cos(an)*9, hy+Math.sin(an)*9); ctx.stroke(); }
+      } else {
+        // bare head after blowing
+        ctx.fillStyle = '#cbd8a0'; ctx.beginPath(); ctx.arc(hx, hy, 2.4, 0, 7); ctx.fill();
+      }
+      // floating seeds
+      for (const s of dan.seeds){
+        ctx.globalAlpha = Math.max(0, 1 - s.t/s.life) * 0.85;
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.beginPath(); ctx.arc(s.x, s.y, 1.3, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y+3); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!dan || !inMeadow() || !dan.full) return false;
+        const hx = dan.x + Math.sin(dan.bob*1.5)*2, hy = dan.y - 22;
+        if (Math.hypot(px-hx, py-hy) > 16) return false;
+        dan.full = false; dan.regrow = rand(6, 10);
+        const dir = (px < W*0.5) ? 1 : -1;
+        for (let i=0;i<14;i++) dan.seeds.push({ x:hx, y:hy, vx: dir*rand(14,40)+rand(-6,6), vy: rand(-14,-4), t:0, life: rand(1.6,2.6) });
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') fxAt(hx, hy-6, pick(['✨','🌬️','💛']));
+        if (typeof say === 'function') say(pick(['Make a wish… ✨','I wished for us 💛','Off they float 🌬️','Did you wish too? 🥰']));
+        try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

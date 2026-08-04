@@ -54,6 +54,8 @@ const SCENE_LABELS = {
   papercraftstudio:'Papercraft Studio',
   poppyfield:'Poppy Field', treehouse:'Treehouse', desertoasis:'Desert Oasis',
   dumplinghouse:'Dumpling House',
+  sakuratunnel:'Sakura Tunnel', igloo:'Cozy Igloo', mistyforest:'Misty Forest',
+  planetlab:'Planetary Probe Lab',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

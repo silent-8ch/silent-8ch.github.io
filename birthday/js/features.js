@@ -69,6 +69,10 @@ const TRINKET_POOL = (()=>{
   g(['candyfactory'], ['🍭','🍬','🍫']);
   g(['moonbeach'], ['🌝','🐚','🌊']);
   g(['papercraftstudio'], ['📄','✂️','🎨']);
+  g(['poppyfield'], ['🌺','🌼','🐞']);
+  g(['treehouse'], ['🌳','🪵','🐿️']);
+  g(['desertoasis'], ['🌴','🐫','💧']);
+  g(['dumplinghouse'], ['🥟','🥢','🍜']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -155,6 +159,8 @@ const ACHIEVEMENTS = [
   {id:'days_500',    icon:'💫', name:'Five Hundred Days',  desc:'500 days together',        test:()=> (meta.totalDays||0) >= 500},
   {id:'draw_1000',   icon:'🌌', name:'Living Masterpiece', desc:'Draw together 1000 times', test:()=> (state.draws||0) >= 1000},
   {id:'rest_200',    icon:'🌜', name:'Sweetest Dreams',    desc:'Rest 200 times',           test:()=> (state.rests||0) >= 200},
+  {id:'streak_60',   icon:'☄️', name:'Two-Month Streak',   desc:'A 60-day streak',          test:()=> (meta.streak||0) >= 60},
+  {id:'days_730',    icon:'🎇', name:'Two Years Together',  desc:'730 days together',        test:()=> (meta.totalDays||0) >= 730},
 ];
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
@@ -657,6 +663,9 @@ const LOVE_NOTES = [
   {day:17, text:'Seventeen days in, and you\'re still the first thing I want to smile about each morning. 😊'},
   {day:85, text:'Nearly three months of us. You make the counting feel less like math and more like a love song. 🎶'},
   {day:210, text:'Whatever the number climbs to, it only ever means one thing: more time lucky enough to love you. 💛'},
+  {day:19, text:'Nineteen days, and you\'ve quietly become the best part of my little daily rhythm. 💛'},
+  {day:95, text:'Almost a hundred days of us. I keep thinking it can\'t get sweeter, and you keep proving me wrong. 🍯'},
+  {day:180, text:'Half a year together in here. Thank you for making the ordinary feel like a celebration. 🎈'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){

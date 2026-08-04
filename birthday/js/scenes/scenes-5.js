@@ -2011,3 +2011,205 @@ function drawDumplingHouse(){
   ctx.strokeStyle='#6a4326'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(W*0.5+12,counterY+24); ctx.lineTo(W*0.5+28,counterY+18); ctx.moveTo(W*0.5+12,counterY+27); ctx.lineTo(W*0.5+28,counterY+22); ctx.stroke();
 }
 registerScene('dumplinghouse', drawDumplingHouse);
+
+/* ── SAKURA TUNNEL (outdoor · archway of cherry blossoms) ── */
+function drawSakuraTunnel(){
+  const t = sceneTime, pathY = H*0.58;
+
+  // soft spring sky
+  const sky=ctx.createLinearGradient(0,0,0,pathY); sky.addColorStop(0,'#bfe0f0'); sky.addColorStop(1,'#f6e2ec');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,pathY);
+  ctx.fillStyle='rgba(255,246,200,.5)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.16,50,0,7); ctx.fill();
+
+  // path receding into the tunnel (kept center for pet)
+  const path=ctx.createLinearGradient(0,pathY,0,H); path.addColorStop(0,'#d8c6a6'); path.addColorStop(1,'#b49a70');
+  ctx.fillStyle=path; ctx.beginPath(); ctx.moveTo(W*0.42,pathY); ctx.lineTo(W*0.58,pathY); ctx.lineTo(W*0.84,H); ctx.lineTo(W*0.16,H); ctx.closePath(); ctx.fill();
+  // grass either side of the path
+  ctx.fillStyle='#8ab04a'; ctx.beginPath(); ctx.moveTo(0,pathY); ctx.lineTo(W*0.42,pathY); ctx.lineTo(W*0.16,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W,pathY); ctx.lineTo(W*0.58,pathY); ctx.lineTo(W*0.84,H); ctx.lineTo(W,H); ctx.closePath(); ctx.fill();
+  // fallen petals on the path
+  ctx.fillStyle='rgba(245,180,205,.7)'; for (let i=0;i<40;i++){ const px=W*0.2+((i*53)%(W*0.6)); const py=pathY+10+((i*37)%(H-pathY-10)); ctx.beginPath(); ctx.ellipse(px,py,2.2,1.4,i,0,7); ctx.fill(); }
+
+  // rows of cherry trees forming an arch — near trees big, arching branches meeting overhead
+  function blossomMass(cx,cy,r){ ctx.fillStyle='#f5b7cd'; for (let k=0;k<8;k++){ const a=k/8*6.28; ctx.beginPath(); ctx.arc(cx+Math.cos(a)*r*0.6,cy+Math.sin(a)*r*0.6,r*0.5,0,7); ctx.fill(); }
+    ctx.fillStyle='#f9cddd'; for (let k=0;k<6;k++){ const a=k/6*6.28+0.4; ctx.beginPath(); ctx.arc(cx+Math.cos(a)*r*0.4,cy+Math.sin(a)*r*0.4,r*0.35,0,7); ctx.fill(); } }
+  // overhead canopy arch across the top
+  blossomMass(W*0.5,-6,80);
+  blossomMass(W*0.18,H*0.06,56); blossomMass(W*0.82,H*0.06,58);
+  // trunks + arching branches on both sides
+  function tree(bx,dir){ ctx.strokeStyle='#6a4a30'; ctx.lineWidth=10; ctx.beginPath(); ctx.moveTo(bx,pathY+4); ctx.lineTo(bx,H*0.20); ctx.stroke();
+    ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(bx,H*0.24); ctx.quadraticCurveTo(bx+dir*30,H*0.10,bx+dir*70,H*0.04); ctx.stroke();
+    blossomMass(bx,H*0.18,30); blossomMass(bx+dir*44,H*0.08,34); }
+  tree(W*0.10,1); tree(W*0.90,-1); tree(W*0.30,1); tree(W*0.70,-1);
+
+  // drifting falling petals (animated)
+  for (let i=0;i<28;i++){ const px=(i*47 + t*10 + Math.sin(t*0.8+i)*20)%W; const py=(i*53 + t*24)%H; const rot=t*2+i;
+    ctx.fillStyle=`rgba(248,188,210,${0.6+0.3*Math.sin(t+i)})`; ctx.save(); ctx.translate(px,py); ctx.rotate(rot); ctx.beginPath(); ctx.ellipse(0,0,2.6,1.5,0,0,7); ctx.fill(); ctx.restore(); }
+
+  // a small wooden bench off to the side (left, low)
+  const bx=W*0.12, by=H*0.86;
+  ctx.fillStyle='#8a6038'; ctx.fillRect(bx-16,by,32,4); ctx.fillRect(bx-16,by-10,32,3); ctx.fillRect(bx-14,by+4,3,10); ctx.fillRect(bx+11,by+4,3,10);
+  // a stone lantern (right, low)
+  const lx=W*0.88, ly=H*0.88;
+  ctx.fillStyle='#9a9088'; ctx.fillRect(lx-3,ly,6,10); ctx.fillRect(lx-7,ly-8,14,8); ctx.beginPath(); ctx.moveTo(lx-8,ly-8); ctx.lineTo(lx,ly-16); ctx.lineTo(lx+8,ly-8); ctx.fill();
+  ctx.fillStyle='rgba(255,210,130,.6)'; ctx.fillRect(lx-2,ly-6,4,4);
+}
+registerScene('sakuratunnel', drawSakuraTunnel);
+
+/* ── IGLOO (indoor · cozy snow-dome shelter) ── */
+function drawIglooInterior(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // icy blue dome interior (fills canvas)
+  const dome=ctx.createRadialGradient(W*0.5,H*0.86,20,W*0.5,H*0.30,W*0.7);
+  dome.addColorStop(0,'#bfe0ee'); dome.addColorStop(0.6,'#8fbfe0'); dome.addColorStop(1,'#5f90c0');
+  ctx.fillStyle=dome; ctx.fillRect(0,0,W,H);
+
+  // curved snow-brick courses following the dome
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1.5;
+  for (let ring=1;ring<=6;ring++){ const ry=H*0.86 - ring*H*0.12; const rw=W*0.5*(1 - ring*0.10);
+    ctx.beginPath(); ctx.ellipse(W*0.5,H*0.86,rw*2,ry*0.0+ (H*0.86-ry),0,Math.PI,0); ctx.stroke(); }
+  // vertical brick seams between courses
+  ctx.strokeStyle='rgba(150,190,220,.4)'; ctx.lineWidth=1;
+  for (let ring=0;ring<6;ring++){ const y0=H*0.86-ring*H*0.12, y1=H*0.86-(ring+1)*H*0.12; const rw=W*0.5*(1-ring*0.10)*2;
+    for (let a=0.2; a<Math.PI; a+=0.5){ const off=(ring%2)*0.25; const x=W*0.5+Math.cos(a+off)*rw*0.5; ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(W*0.5+Math.cos(a+off)*rw*0.42,y1); ctx.stroke(); } }
+
+  // low entrance tunnel opening (back, showing dark night + stars)
+  const ex=W*0.5, ey=floorY-6;
+  ctx.fillStyle='#12203a'; ctx.beginPath(); ctx.moveTo(ex-26,ey); ctx.lineTo(ex-26,ey-30); ctx.arc(ex,ey-30,26,Math.PI,0); ctx.lineTo(ex+26,ey); ctx.closePath(); ctx.fill();
+  for (let i=0;i<8;i++){ ctx.fillStyle='rgba(230,240,255,.8)'; ctx.fillRect(ex-20+(i*47)%40, ey-44+(i*23)%26, 1.3,1.3); }
+  // a hint of aurora through the opening
+  ctx.fillStyle=`rgba(120,230,170,${0.15+0.1*Math.sin(t)})`; ctx.fillRect(ex-24,ey-40,48,10);
+
+  // little ice shelf niches with a glowing lantern
+  ctx.fillStyle='rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(W*0.20,H*0.44,14,0,Math.PI); ctx.fill();
+  ctx.fillStyle='rgba(255,220,140,.3)'; ctx.beginPath(); ctx.arc(W*0.20,H*0.44,10,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(255,205,120,${0.85+0.1*Math.sin(t*2.5)})`; roundRect(W*0.20-5,H*0.44-6,10,12,3); ctx.fill();
+  // string of tiny warm lights along a course
+  for (let i=0;i<7;i++){ const a=0.4+i*0.35; const x=W*0.5+Math.cos(a)*W*0.42, y=H*0.86-Math.sin(a)*H*0.34;
+    ctx.fillStyle=`rgba(255,220,150,${0.6+0.4*Math.sin(t*3+i)})`; ctx.beginPath(); ctx.arc(x,y,2,0,7); ctx.fill(); }
+
+  // packed snow floor with fur rug + a small fire bowl
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#dfeef6'); fl.addColorStop(1,'#c0d8e8');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(150,190,220,.3)'; ctx.lineWidth=1; for (let i=0;i<20;i++){ const gx=(i*67+9)%W, gy=floorY+6+((i*29)%(H-floorY-6)); ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx+4,gy); ctx.stroke(); }
+  // fur rug (center-low)
+  ctx.fillStyle='#c9a06a'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.90,90,18,0,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(160,120,70,.5)'; ctx.lineWidth=1; for (let i=0;i<30;i++){ const rx=W*0.5-84+i*6; ctx.beginPath(); ctx.moveTo(rx,H*0.90-14); ctx.lineTo(rx+2,H*0.90-18); ctx.stroke(); }
+  // small brazier/fire bowl (left, low)
+  const bx=W*0.16, by=H*0.90;
+  ctx.fillStyle='#3a2a24'; ctx.beginPath(); ctx.ellipse(bx,by,10,4,0,0,7); ctx.fill(); ctx.fillRect(bx-10,by-4,20,4);
+  for (let i=0;i<5;i++){ const fx=bx-6+i*3; const fh=6+4*Math.sin(t*6+i); ctx.fillStyle='#e0641a'; ctx.beginPath(); ctx.moveTo(fx-2,by-2); ctx.quadraticCurveTo(fx,by-2-fh,fx+2,by-2); ctx.fill();
+    ctx.fillStyle='#f2b02a'; ctx.beginPath(); ctx.moveTo(fx-1,by-2); ctx.quadraticCurveTo(fx,by-2-fh*0.6,fx+1,by-2); ctx.fill(); }
+  ctx.fillStyle=`rgba(255,150,60,${0.12+0.05*Math.sin(t*4)})`; ctx.beginPath(); ctx.arc(bx,by-6,26,0,7); ctx.fill();
+}
+registerScene('igloo', drawIglooInterior);
+
+/* ── MISTY FOREST (outdoor · foggy pine woods at dawn) ── */
+function drawMistyForest(){
+  const t = sceneTime, groundY = H*0.72;
+
+  // pale dawn sky/fog wash (fills canvas)
+  const bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#d8e2e0'); bg.addColorStop(0.5,'#c2d2ce'); bg.addColorStop(1,'#aebeb6');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  // faint sun disc glowing through fog
+  ctx.fillStyle='rgba(255,250,220,.4)'; ctx.beginPath(); ctx.arc(W*0.62,H*0.20,34,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,250,220,.2)'; ctx.beginPath(); ctx.arc(W*0.62,H*0.20,54,0,7); ctx.fill();
+
+  // layers of pine silhouettes receding into fog (far = pale, near = dark)
+  function pineRow(baseY,scale,alpha,tint){ ctx.fillStyle=`rgba(${tint},${alpha})`;
+    for (let x=-20;x<W+20;x+=Math.round(34*scale)){ const px=x+ (baseY*7)%20; const h=70*scale, w=22*scale;
+      ctx.beginPath(); ctx.moveTo(px,baseY);
+      for (let tri=0;tri<3;tri++){ const ty=baseY-tri*h*0.32; ctx.lineTo(px-w*(1-tri*0.22),ty); ctx.lineTo(px,ty-h*0.34); ctx.lineTo(px+w*(1-tri*0.22),ty); }
+      ctx.lineTo(px,baseY); ctx.closePath(); ctx.fill();
+      ctx.fillRect(px-1.5*scale,baseY,3*scale,6*scale); }
+  }
+  pineRow(H*0.44,0.7,0.28,'90,120,110');
+  pineRow(H*0.54,0.9,0.45,'60,95,85');
+  pineRow(H*0.66,1.2,0.7,'38,70,58');
+
+  // fog bands drifting between the layers
+  for (let i=0;i<4;i++){ const fy=H*0.36+i*H*0.11; const fx=(t*(6+i*3))%(W+120)-60;
+    ctx.fillStyle=`rgba(220,230,228,${0.30-i*0.03})`; ctx.beginPath(); ctx.ellipse(fx,fy,120,20,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(fx+160,fy+8,100,16,0,0,7); ctx.fill(); }
+
+  // mossy forest floor
+  const fl=ctx.createLinearGradient(0,groundY,0,H); fl.addColorStop(0,'#3a5238'); fl.addColorStop(1,'#243a24');
+  ctx.fillStyle=fl; ctx.fillRect(0,groundY,W,H-groundY);
+  // low ground fog over the floor
+  ctx.fillStyle='rgba(210,224,220,.35)'; ctx.beginPath(); ctx.ellipse(W*0.5,groundY+6,W*0.7,16,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(210,224,220,.2)'; ctx.beginPath(); ctx.ellipse((t*8)%W,groundY+20,90,12,0,0,7); ctx.fill();
+
+  // near foreground trunks (dark, framing sides) — trunks only, canopy off-screen
+  ctx.fillStyle='#1e2c1e'; ctx.fillRect(W*0.04,H*0.30,16,H); ctx.fillRect(W*0.90,H*0.24,18,H);
+  ctx.strokeStyle='rgba(10,20,10,.5)'; ctx.lineWidth=1; for (let y=H*0.34;y<H;y+=30){ ctx.beginPath(); ctx.moveTo(W*0.045,y); ctx.quadraticCurveTo(W*0.09,y+8,W*0.13,y+2); ctx.stroke(); }
+  // ferns at the base of the trunks
+  ctx.strokeStyle='#4a6a3a'; ctx.lineWidth=1.5; for (const gx of [W*0.10,W*0.90,W*0.16]){ for (let k=-2;k<=2;k++){ ctx.beginPath(); ctx.moveTo(gx,H*0.94); ctx.quadraticCurveTo(gx+k*6,H*0.86,gx+k*12,H*0.84); ctx.stroke(); } }
+  // a couple of glowing mushrooms + a small stone marker (sides, low)
+  ctx.fillStyle='#c85a4a'; ctx.beginPath(); ctx.ellipse(W*0.20,H*0.92,5,3,0,Math.PI,0); ctx.fill(); ctx.fillStyle='#e8e0d0'; ctx.fillRect(W*0.20-1.5,H*0.92,3,4);
+  ctx.fillStyle='#8a8a82'; ctx.beginPath(); ctx.moveTo(W*0.82,H*0.94); ctx.lineTo(W*0.82,H*0.86); ctx.arc(W*0.82,H*0.86,4,Math.PI,0); ctx.lineTo(W*0.86,H*0.94); ctx.closePath(); ctx.fill();
+  // soft light rays from the sun through the trees
+  ctx.fillStyle='rgba(255,250,220,.06)'; for (let i=0;i<3;i++){ ctx.save(); ctx.translate(W*0.62,H*0.20); ctx.rotate(0.5+i*0.25); ctx.fillRect(0,0,18,H*0.7); ctx.restore(); }
+}
+registerScene('mistyforest', drawMistyForest);
+
+/* ── PLANETARY PROBE LAB (indoor · space mission control) ── */
+function drawPlanetLab(){
+  const t = sceneTime, floorY = H*0.74;
+
+  // dark control-room wall
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#0e1424'); wall.addColorStop(1,'#182238');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+
+  // big observation viewport showing a planet + stars (center-back)
+  const vx=W*0.5, vy=H*0.30, vr=W*0.30;
+  ctx.fillStyle='#050814'; ctx.beginPath(); ctx.arc(vx,vy,vr,0,7); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(vx,vy,vr-2,0,7); ctx.clip();
+  // starfield
+  for (let i=0;i<60;i++){ const sx=vx-vr+((i*53)%(vr*2)); const sy=vy-vr+((i*89)%(vr*2)); ctx.fillStyle=`rgba(230,240,255,${0.3+0.5*Math.abs(Math.sin(t*1.5+i))})`; ctx.fillRect(sx,sy,1.2,1.2); }
+  // the planet (banded gas giant) slowly rotating shading
+  const pr=vr*0.5, pcx=vx+vr*0.25, pcy=vy+vr*0.2;
+  const pg=ctx.createLinearGradient(pcx-pr,pcy,pcx+pr,pcy); pg.addColorStop(0,'#c88a4a'); pg.addColorStop(0.5,'#e0b070'); pg.addColorStop(1,'#8a5a2a');
+  ctx.fillStyle=pg; ctx.beginPath(); ctx.arc(pcx,pcy,pr,0,7); ctx.fill();
+  // bands
+  ctx.save(); ctx.beginPath(); ctx.arc(pcx,pcy,pr,0,7); ctx.clip();
+  for (let b=-3;b<=3;b++){ ctx.fillStyle=`rgba(120,70,30,${0.2+0.1*(b%2?1:0)})`; ctx.fillRect(pcx-pr, pcy+b*6 + Math.sin(t*0.5+b)*2, pr*2, 4); }
+  // a great red spot
+  ctx.fillStyle='rgba(200,80,50,.6)'; ctx.beginPath(); ctx.ellipse(pcx+ (t*6)%(pr*2)-pr, pcy+4, 7,4,0,0,7); ctx.fill();
+  ctx.restore();
+  // thin ring
+  ctx.strokeStyle='rgba(220,220,255,.4)'; ctx.lineWidth=2; ctx.save(); ctx.translate(pcx,pcy); ctx.scale(1,0.3); ctx.beginPath(); ctx.arc(0,0,pr*1.5,0,7); ctx.stroke(); ctx.restore();
+  // a tiny probe drifting across the viewport
+  const qx=vx-vr+ ((t*20)%(vr*2)); ctx.fillStyle='#cfd6e0'; ctx.fillRect(qx,vy-vr*0.5,4,2); ctx.fillStyle='#5ab0e0'; ctx.fillRect(qx-3,vy-vr*0.5,2,2); ctx.fillRect(qx+4,vy-vr*0.5,2,2);
+  ctx.restore();
+  // viewport frame
+  ctx.strokeStyle='#3a4a64'; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(vx,vy,vr,0,7); ctx.stroke();
+  ctx.strokeStyle='rgba(120,180,240,.3)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(vx,vy,vr-4,0,7); ctx.stroke();
+
+  // side monitor banks with blinking readouts
+  function monitor(mx,my,mw,mh){ ctx.fillStyle='#0a1020'; ctx.fillRect(mx,my,mw,mh); ctx.strokeStyle='#2a3a54'; ctx.lineWidth=2; ctx.strokeRect(mx,my,mw,mh);
+    // graph line
+    ctx.strokeStyle='#4ae0a0'; ctx.lineWidth=1; ctx.beginPath(); for (let x=0;x<=mw-6;x+=3){ const yy=my+mh*0.5+Math.sin(x*0.3+t*3+mx)*mh*0.22; x===0?ctx.moveTo(mx+3,yy):ctx.lineTo(mx+3+x,yy);} ctx.stroke();
+    // blinking status dots
+    for (let i=0;i<3;i++){ ctx.fillStyle=`rgba(${i===0?'240,90,80':'90,220,120'},${0.4+0.5*Math.abs(Math.sin(t*2+i+mx))})`; ctx.beginPath(); ctx.arc(mx+6+i*8,my+6,2,0,7); ctx.fill(); }
+    // text bars
+    ctx.fillStyle='rgba(120,180,240,.5)'; for (let k=0;k<3;k++){ ctx.fillRect(mx+4,my+mh-4-k*5, mw*(0.4+0.4*Math.abs(Math.sin(k+t))),2); } }
+  monitor(W*0.03,H*0.16,W*0.20,H*0.16); monitor(W*0.03,H*0.36,W*0.20,H*0.16);
+  monitor(W*0.77,H*0.16,W*0.20,H*0.16); monitor(W*0.77,H*0.36,W*0.20,H*0.16);
+
+  // control desk with keyboards + a rotating hologram of a small planet
+  const desk=ctx.createLinearGradient(0,floorY,0,H); desk.addColorStop(0,'#243044'); desk.addColorStop(1,'#161e2c');
+  ctx.fillStyle=desk; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='rgba(120,180,240,.10)'; ctx.fillRect(0,floorY,W,4);
+  // console panels along the desk
+  for (let i=0;i<6;i++){ const cx=W*0.10+i*W*0.16; ctx.fillStyle='#1a2438'; roundRect(cx-14,floorY+8,28,10,2); ctx.fill();
+    for (let k=0;k<6;k++){ ctx.fillStyle=`rgba(${k%2?'90,220,120':'240,200,80'},${0.5+0.4*Math.sin(t*4+k+i)})`; ctx.fillRect(cx-11+k*4,floorY+11,2,2); } }
+  // holographic planet projected above the desk (center, high so pet floor clear)
+  const hx=W*0.5, hy=floorY+2;
+  ctx.fillStyle=`rgba(90,200,240,${0.12})`; ctx.beginPath(); ctx.moveTo(hx-10,hy+6); ctx.lineTo(hx+10,hy+6); ctx.lineTo(hx+4,hy-4); ctx.lineTo(hx-4,hy-4); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.translate(hx,hy-20); ctx.strokeStyle=`rgba(90,210,240,${0.6+0.2*Math.sin(t*3)})`; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(0,0,12,0,7); ctx.stroke();
+  ctx.save(); ctx.rotate(t*0.8); ctx.scale(1,0.35); ctx.beginPath(); ctx.arc(0,0,16,0,7); ctx.stroke(); ctx.restore();
+  ctx.fillStyle=`rgba(90,200,240,0.2)`; ctx.beginPath(); ctx.arc(0,0,12,0,7); ctx.fill();
+  ctx.restore();
+}
+registerScene('planetlab', drawPlanetLab);
