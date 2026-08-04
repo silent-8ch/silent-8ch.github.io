@@ -3112,3 +3112,197 @@ function drawHarvestBarn(){
   for (let k=0;k<5;k++){ ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.arc(abx-10+k*5,aby-3-(k%2)*3,4,0,7); ctx.fill(); }
 }
 registerScene('harvestbarn', drawHarvestBarn);
+
+/* ── PEONY GARDEN (outdoor · lush spring peony beds) ── */
+function drawPeonyGarden(){
+  const t = sceneTime, groundY = H*0.58;
+
+  // gentle spring sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#8fcdea'); sky.addColorStop(1,'#f0e4ec');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='rgba(255,246,200,.5)'; ctx.beginPath(); ctx.arc(W*0.78,H*0.13,24,0,7); ctx.fill();
+  drawCloud(W*0.22+Math.sin(t*0.1)*8,H*0.10,0.6); drawCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.16,0.45);
+
+  // manicured hedge + a white lattice arch at back
+  ctx.fillStyle='#3a7a3a'; ctx.fillRect(0,groundY-26,W,30);
+  ctx.fillStyle='#4a8f42'; for (let x=0;x<W;x+=14){ ctx.beginPath(); ctx.arc(x,groundY-26,8,Math.PI,0); ctx.fill(); }
+  // lattice arch (center-back)
+  ctx.strokeStyle='#eae4d6'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(W*0.40,groundY); ctx.lineTo(W*0.40,H*0.30); ctx.arc(W*0.5,H*0.30,W*0.10,Math.PI,0); ctx.lineTo(W*0.60,groundY); ctx.stroke();
+  ctx.lineWidth=1; for (let y=H*0.30;y<groundY;y+=10){ ctx.beginPath(); ctx.moveTo(W*0.40,y); ctx.lineTo(W*0.60,y); ctx.stroke(); }
+  // climbing roses on the arch
+  ctx.fillStyle='#e58bb0'; for (let i=0;i<10;i++){ const a=Math.PI+ (i/9)*Math.PI; ctx.beginPath(); ctx.arc(W*0.5+Math.cos(a)*W*0.10, H*0.30+Math.sin(a)*W*0.10, 3,0,7); ctx.fill(); }
+
+  // garden bed ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#5a9e3a'); gr.addColorStop(1,'#3f7a26'); ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  // a curved stone path down the middle (kept for pet)
+  ctx.fillStyle='#c9c2b2'; ctx.beginPath(); ctx.moveTo(W*0.5-14,groundY); ctx.lineTo(W*0.5+14,groundY); ctx.lineTo(W*0.5+40,H); ctx.lineTo(W*0.5-40,H); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='rgba(150,140,120,.5)'; ctx.lineWidth=1; for (let y=groundY+14;y<H;y+=16){ ctx.beginPath(); ctx.moveTo(W*0.5-14-(y-groundY)*0.24,y); ctx.lineTo(W*0.5+14+(y-groundY)*0.24,y); ctx.stroke(); }
+
+  // big lush peony bushes flanking the beds (sides, layered pom-pom blooms)
+  function peony(px,py,sc,col){ ctx.save(); ctx.translate(px,py); ctx.scale(sc,sc);
+    // leafy bush base
+    ctx.fillStyle='#3a7a34'; for (let k=0;k<5;k++){ const a=k/5*6.28; ctx.beginPath(); ctx.ellipse(Math.cos(a)*10,6+Math.sin(a)*5,7,4,a,0,7); ctx.fill(); }
+    // several ruffled blooms
+    const spots=[[-9,-4],[8,-6],[0,-12],[-4,2],[10,4]];
+    for (const [bx,by] of spots){ const sway=Math.sin(t*1.2+px+bx)*1.2; ctx.save(); ctx.translate(bx+sway,by);
+      ctx.fillStyle=col; for (let r=0;r<8;r++){ const a=r/8*6.28; ctx.beginPath(); ctx.ellipse(Math.cos(a)*3.5,Math.sin(a)*3.5,3,2.2,a,0,7); ctx.fill(); }
+      ctx.fillStyle='rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(0,0,2.4,0,7); ctx.fill();
+      ctx.fillStyle=col; ctx.beginPath(); ctx.arc(0,0,1.6,0,7); ctx.fill(); ctx.restore(); }
+    ctx.restore(); }
+  peony(W*0.14,H*0.78,1.5,'#e26f9a'); peony(W*0.26,H*0.70,1.1,'#f2c0d2'); peony(W*0.86,H*0.80,1.6,'#e05a7a'); peony(W*0.74,H*0.70,1.1,'#f0a8c0'); peony(W*0.5,H*0.66,0.8,'#f2d0dc');
+  // low tufts near the front sides
+  peony(W*0.08,H*0.92,1.0,'#e8a0b8'); peony(W*0.92,H*0.92,1.0,'#e07a98');
+
+  // drifting petals + a couple butterflies
+  for (let i=0;i<14;i++){ const px=(i*47 + t*8 + Math.sin(t*0.7+i)*20)%W; const py=(i*53 + t*16)%H; ctx.fillStyle=`rgba(245,190,212,${0.5+0.3*Math.sin(t+i)})`; ctx.save(); ctx.translate(px,py); ctx.rotate(t*2+i); ctx.beginPath(); ctx.ellipse(0,0,2.4,1.4,0,0,7); ctx.fill(); ctx.restore(); }
+  for (let i=0;i<2;i++){ const bx=W*0.35+i*W*0.3+Math.sin(t*1.4+i)*16; const by=groundY-10+Math.cos(t*1.7+i)*12; const flap=Math.abs(Math.sin(t*9+i))*0.6+0.2; ctx.fillStyle=i? '#e0902a':'#c05a90'; ctx.save(); ctx.translate(bx,by); ctx.beginPath(); ctx.ellipse(-2,0,3,flap*4,0.4,0,7); ctx.ellipse(2,0,3,flap*4,-0.4,0,7); ctx.fill(); ctx.fillStyle='#333'; ctx.fillRect(-0.5,-3,1,6); ctx.restore(); }
+}
+registerScene('peonygarden', drawPeonyGarden);
+
+/* ── ROOFTOP POOL (outdoor · city infinity pool by day) ── */
+function drawRooftopPool(){
+  const t = sceneTime, deckY = H*0.52, poolFar = H*0.54;
+
+  // clear summer sky
+  const sky=ctx.createLinearGradient(0,0,0,deckY); sky.addColorStop(0,'#4a9ae0'); sky.addColorStop(1,'#bfe4f4');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,deckY);
+  ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.18,H*0.12,18,0,7); ctx.fill();
+  drawCloud(W*0.6+Math.sin(t*0.09)*8,H*0.10,0.6); drawCloud(W*0.85+Math.sin(t*0.11+2)*6,H*0.18,0.45);
+
+  // city skyline behind an infinity edge (buildings rising to the deck line)
+  let seed=5; const rnd=()=>{ seed=(seed*9301+49297)%233280; return seed/233280; };
+  let bx=0; while (bx<W){ const bw=22+Math.floor(rnd()*26), bh=30+Math.floor(rnd()*70), bTop=deckY-bh;
+    ctx.fillStyle=`rgb(${150+rnd()*40|0},${170+rnd()*30|0},${190+rnd()*30|0})`; ctx.fillRect(bx,bTop,bw,bh);
+    // windows
+    for (let wy=bTop+5; wy<deckY-4; wy+=8) for (let wx=bx+3; wx<bx+bw-3; wx+=7){ ctx.fillStyle= rnd()>0.5?'rgba(255,255,255,.5)':'rgba(120,150,180,.4)'; ctx.fillRect(wx,wy,3,4); }
+    bx+=bw+3; }
+  // hazy distance overlay
+  ctx.fillStyle='rgba(200,225,240,.25)'; ctx.fillRect(0,deckY-30,W,30);
+
+  // the infinity pool — water meets the sky at the far edge
+  const pool=ctx.createLinearGradient(0,poolFar,0,H*0.80); pool.addColorStop(0,'#3ab0d8'); pool.addColorStop(1,'#2a8ab8');
+  ctx.fillStyle=pool; ctx.fillRect(0,poolFar,W,H*0.80-poolFar);
+  // infinity edge shimmer
+  ctx.fillStyle='rgba(255,255,255,.4)'; ctx.fillRect(0,poolFar,W,2);
+  // caustic ripple net
+  ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=1;
+  for (let y=poolFar+8;y<H*0.80;y+=8){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.08+t*1.6+y)*2; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+  for (let x=10;x<W;x+=18){ ctx.beginPath(); for (let y=poolFar+6;y<H*0.80;y+=6){ const xx=x+Math.sin(y*0.1+t*1.4)*3; ctx.lineTo(xx,y);} ctx.stroke(); }
+  // a floating ring + beach ball drifting
+  const rx=W*0.30+Math.sin(t*0.6)*20, ry=H*0.66+Math.cos(t*0.8)*4; ctx.fillStyle='#f2e2a0'; ctx.beginPath(); ctx.arc(rx,ry,10,0,7); ctx.fill(); ctx.fillStyle=pool; ctx.beginPath(); ctx.arc(rx,ry,5,0,7); ctx.fill();
+  const ba=W*0.7+Math.sin(t*0.5+2)*16; ctx.fillStyle='#e05a5a'; ctx.beginPath(); ctx.arc(ba,H*0.62,7,0,7); ctx.fill(); ctx.fillStyle='#f2f2f2'; ctx.beginPath(); ctx.arc(ba,H*0.62,7,-0.4,0.4); ctx.fill();
+
+  // wood/stone deck in the foreground
+  const deck=ctx.createLinearGradient(0,H*0.80,0,H); deck.addColorStop(0,'#d8cbb0'); deck.addColorStop(1,'#bcae90'); ctx.fillStyle=deck; ctx.fillRect(0,H*0.80,W,H*0.20);
+  ctx.strokeStyle='rgba(0,0,0,.12)'; ctx.lineWidth=1; for (let x=0;x<W;x+=26){ ctx.beginPath(); ctx.moveTo(x,H*0.80); ctx.lineTo(x-6,H); ctx.stroke(); }
+  ctx.fillStyle='rgba(255,255,255,.15)'; ctx.fillRect(0,H*0.80,W,3);
+  // pool coping edge
+  ctx.fillStyle='#e8e2d4'; ctx.fillRect(0,H*0.80-4,W,5);
+
+  // a lounge chair + palm in a planter (sides, low)
+  ctx.save(); ctx.translate(W*0.14,H*0.90); ctx.rotate(-0.05); ctx.fillStyle='#e8e2d4'; roundRect(-22,-4,44,6,2); ctx.fill(); ctx.fillStyle='#c0d0d8'; roundRect(-22,-16,14,14,2); ctx.fill(); ctx.fillStyle='#8a8a92'; ctx.fillRect(-20,2,3,10); ctx.fillRect(16,2,3,10); ctx.restore();
+  // striped towel on it
+  ctx.fillStyle='rgba(220,90,110,.5)'; ctx.save(); ctx.translate(W*0.14,H*0.87); ctx.rotate(-0.05); roundRect(-16,-3,32,5,1); ctx.fill(); ctx.restore();
+  // planter palm (right)
+  ctx.fillStyle='#7a5a3a'; ctx.fillRect(W*0.86,H*0.86,18,H*0.14); ctx.strokeStyle='#3a8a4a'; ctx.lineWidth=3; for (let k=0;k<6;k++){ const a=Math.PI+ k/5*Math.PI; const sway=Math.sin(t*1.2+k)*4; ctx.beginPath(); ctx.moveTo(W*0.86+9,H*0.86); ctx.quadraticCurveTo(W*0.86+9+Math.cos(a)*16,H*0.86-14+Math.sin(a)*10,W*0.86+9+Math.cos(a)*30+sway,H*0.86-8+Math.sin(a)*16); ctx.stroke(); }
+}
+registerScene('rooftoppool', drawRooftopPool);
+
+/* ── SUGAR SHACK (indoor · maple syrup boiling cabin) ── */
+function drawSugarShack(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // warm log-cabin wall
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#7a5636'); wall.addColorStop(1,'#5e4228');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  // round-log courses
+  ctx.strokeStyle='rgba(0,0,0,.22)'; ctx.lineWidth=1; for (let y=16;y<floorY;y+=18){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); ctx.fillStyle='rgba(255,240,210,.06)'; ctx.fillRect(0,y,W,2); }
+
+  // snowy window (left) — it's sugaring season, late winter
+  const wx=W*0.10, wy=H*0.14, ww=W*0.28, wh=H*0.30;
+  ctx.fillStyle='#bcd8ea'; ctx.fillRect(wx,wy,ww,wh);
+  // maple trees with taps outside
+  ctx.fillStyle='#6a4a2e'; ctx.fillRect(wx+ww*0.3,wy+wh*0.3,5,wh*0.7); ctx.fillRect(wx+ww*0.7,wy+wh*0.35,5,wh*0.65);
+  ctx.fillStyle='#e8eef6'; ctx.fillRect(wx,wy+wh-10,ww,10);
+  ctx.fillStyle='#c0c0c0'; ctx.fillRect(wx+ww*0.3+5,wy+wh*0.5,4,2); ctx.fillRect(wx+ww*0.7+5,wy+wh*0.55,4,2); // buckets/taps
+  ctx.strokeStyle='#3a2818'; ctx.lineWidth=4; ctx.strokeRect(wx,wy,ww,wh); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.moveTo(wx,wy+wh/2); ctx.lineTo(wx+ww,wy+wh/2); ctx.stroke();
+
+  // hanging maple-leaf sign + strings of drying herbs
+  ctx.fillStyle='#c0402a'; ctx.save(); ctx.translate(W*0.5,H*0.10); for (let k=0;k<5;k++){ ctx.rotate(6.28/5); ctx.beginPath(); ctx.moveTo(0,-10); ctx.lineTo(3,-3); ctx.lineTo(9,-2); ctx.lineTo(4,2); ctx.lineTo(0,0); ctx.closePath(); ctx.fill(); } ctx.restore();
+
+  // the big evaporator pan on a brick firebox (right of center) with rising steam
+  const ex=W*0.66, ey=floorY-6;
+  // firebox
+  ctx.fillStyle='#7a4a3a'; ctx.fillRect(ex-40,ey-22,80,22); ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let y=ey-22;y<ey;y+=7){ for (let x=ex-40+((y/7|0)%2)*10; x<ex+40; x+=20){ ctx.strokeRect(x,y,20,7); } }
+  // fire door glow
+  ctx.fillStyle=`rgba(255,140,50,${0.5+0.3*Math.sin(t*6)})`; ctx.fillRect(ex-10,ey-16,20,12);
+  ctx.fillStyle='#2a1a10'; ctx.strokeRect(ex-10,ey-16,20,12);
+  // steel evaporator pan
+  ctx.fillStyle='#b8bcc4'; ctx.fillRect(ex-44,ey-34,88,14); ctx.fillStyle='#8a8e96'; ctx.fillRect(ex-44,ey-22,88,4);
+  // boiling amber sap in the pan
+  ctx.fillStyle='#c98a2a'; ctx.fillRect(ex-42,ey-32,84,9);
+  for (let i=0;i<7;i++){ const bx=ex-38+i*11; const by=ey-24-((t*16+i*9)%8); ctx.fillStyle='rgba(240,200,120,.8)'; ctx.beginPath(); ctx.arc(bx,by,1.4,0,7); ctx.fill(); }
+  // billowing steam
+  ctx.fillStyle='rgba(240,235,225,.14)'; for (let i=0;i<5;i++){ const px=ex-30+i*15; const py=ey-40-((t*12+i*24)%90); ctx.beginPath(); ctx.arc(px+Math.sin(t+i)*5,py,10+i*2,0,7); ctx.fill(); }
+
+  // shelf of syrup jars/bottles (left)
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(W*0.06,H*0.50,W*0.28,5);
+  for (let i=0;i<5;i++){ const jx=W*0.09+i*W*0.055; ctx.fillStyle='rgba(210,140,50,.85)'; roundRect(jx-4,H*0.50-16,8,16,2); ctx.fill(); ctx.fillStyle='#e8b060'; ctx.fillRect(jx-4,H*0.50-14,8,4); ctx.fillStyle='#5a3a1a'; ctx.fillRect(jx-2.5,H*0.50-20,5,4); }
+
+  // plank floor + a sap bucket & firewood (sides, low)
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#6a4a2e'); fl.addColorStop(1,'#4a3320'); ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let x=0;x<W;x+=26){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x-6,H); ctx.stroke(); }
+  // metal sap bucket (left, low)
+  ctx.fillStyle='#c0c4cc'; ctx.beginPath(); ctx.moveTo(W*0.14-12,H*0.88); ctx.lineTo(W*0.14+12,H*0.88); ctx.lineTo(W*0.14+9,H*0.88+18); ctx.lineTo(W*0.14-9,H*0.88+18); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#8a8e96'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(W*0.14,H*0.88,12,Math.PI,0); ctx.stroke();
+  ctx.fillStyle='#d8a840'; ctx.beginPath(); ctx.ellipse(W*0.14,H*0.90,9,3,0,0,7); ctx.fill();
+  // firewood stack (right, low)
+  ctx.fillStyle='#8a5a34'; for (let i=0;i<4;i++){ ctx.beginPath(); ctx.arc(W*0.88+ (i%2)*10, H*0.94-(i>1?8:0), 5,0,7); ctx.fill(); ctx.fillStyle='#c9a878'; ctx.beginPath(); ctx.arc(W*0.88+ (i%2)*10, H*0.94-(i>1?8:0), 2,0,7); ctx.fill(); ctx.fillStyle='#8a5a34'; }
+}
+registerScene('sugarshack', drawSugarShack);
+
+/* ── SUNROOM (indoor · bright plant-filled conservatory nook) ── */
+function drawSunroom(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // walls are mostly glass — bright garden view beyond
+  const outside=ctx.createLinearGradient(0,0,0,floorY); outside.addColorStop(0,'#9ed8f0'); outside.addColorStop(0.6,'#cfe8d8'); outside.addColorStop(1,'#bcdcc0');
+  ctx.fillStyle=outside; ctx.fillRect(0,0,W,floorY);
+  // soft garden shapes outside (blurred bushes)
+  ctx.fillStyle='rgba(110,170,110,.5)'; for (let i=0;i<5;i++){ ctx.beginPath(); ctx.arc(i*W*0.24, floorY-20, 30,0,7); ctx.fill(); }
+  ctx.fillStyle='rgba(255,246,190,.3)'; ctx.beginPath(); ctx.arc(W*0.80,H*0.12,26,0,7); ctx.fill();
+  // window mullions (white frame grid)
+  ctx.fillStyle='#f4f0e6'; ctx.fillRect(0,0,W,10);
+  for (let x=0;x<=W;x+=W/4){ ctx.fillRect(x-3,0,6,floorY); }
+  ctx.fillRect(0,H*0.30,W,6);
+  // gentle sunbeams
+  ctx.fillStyle='rgba(255,250,210,.10)'; for (let i=0;i<3;i++){ ctx.save(); ctx.translate(W*0.7,0); ctx.rotate(0.3); ctx.fillRect(-i*30,0,20,floorY); ctx.restore(); }
+  // dust motes floating in the light
+  for (let i=0;i<14;i++){ const mx=(i*61+t*4)%W; const my=(i*47+Math.sin(t*0.6+i)*20)%floorY; ctx.fillStyle=`rgba(255,255,230,${0.12+0.12*Math.sin(t+i)})`; ctx.beginPath(); ctx.arc(mx,my,1.4,0,7); ctx.fill(); }
+
+  // hanging trailing plants from the top (sides)
+  function hangingPlant(hx){ ctx.fillStyle='#6a4a2a'; roundRect(hx-10,H*0.10,20,10,2); ctx.fill(); ctx.strokeStyle='#3a8a4a'; ctx.lineWidth=2;
+    for (const dx of [-7,-2,3,8]){ ctx.beginPath(); ctx.moveTo(hx+dx,H*0.20); ctx.quadraticCurveTo(hx+dx+Math.sin(t+dx)*4,H*0.30,hx+dx*1.4,H*0.40); ctx.stroke();
+      ctx.fillStyle='#4a9a44'; for (let k=1;k<4;k++){ ctx.beginPath(); ctx.ellipse(hx+dx+Math.sin(t+dx)*2, H*0.20+k*7, 3,1.6,0.5,0,7); ctx.fill(); } } }
+  hangingPlant(W*0.14); hangingPlant(W*0.88);
+
+  // a shelf of potted plants (center-back, high)
+  ctx.fillStyle='#c9a878'; ctx.fillRect(W*0.30,H*0.44,W*0.40,6);
+  function pot(px,col,leaf){ ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(px-7,H*0.44); ctx.lineTo(px+7,H*0.44); ctx.lineTo(px+5,H*0.44-11); ctx.lineTo(px-5,H*0.44-11); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=leaf; if (leaf){ for (const a of [-0.6,-0.2,0.2,0.6]){ ctx.save(); ctx.translate(px,H*0.44-11); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,-10,4,11,0,0,7); ctx.fill(); ctx.restore(); } } }
+  pot(W*0.36,'#c0603a','#3a8a4a'); pot(W*0.46,'#d88a4a','#4a9a44'); pot(W*0.56,'#b56a44','#5aa04a'); pot(W*0.64,'#c0603a','#3a8a4a');
+  // a small succulent in a white pot
+  ctx.fillStyle='#eee'; roundRect(W*0.40,H*0.44-9,9,9,1); ctx.fill(); ctx.fillStyle='#6ab06a'; for (let k=0;k<5;k++){ const a=k/5*6.28; ctx.beginPath(); ctx.ellipse(W*0.405+Math.cos(a)*2,H*0.44-9+Math.sin(a)*2,2,3.4,a,0,7); ctx.fill(); }
+
+  // terracotta tile floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#d8a878'); fl.addColorStop(1,'#b8875a'); ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  for (let y=floorY;y<H;y+=16){ for (let x=((y/16|0)%2)*16; x<W; x+=32){ ctx.fillStyle='rgba(150,90,50,.15)'; ctx.fillRect(x,y,15,15); } }
+  ctx.strokeStyle='rgba(120,70,40,.25)'; ctx.lineWidth=1; for (let y=floorY;y<H;y+=16){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // a comfy wicker chair + big floor plant (sides, low)
+  ctx.fillStyle='#c9a86a'; ctx.beginPath(); ctx.arc(W*0.16,H*0.86,20,Math.PI,0); ctx.fill(); ctx.fillRect(W*0.16-20,H*0.86,40,14);
+  ctx.strokeStyle='rgba(120,90,50,.4)'; ctx.lineWidth=1; for (let a=0.2;a<Math.PI;a+=0.4){ ctx.beginPath(); ctx.moveTo(W*0.16,H*0.86); ctx.lineTo(W*0.16+Math.cos(a+Math.PI)*20,H*0.86-Math.sin(a)*20); ctx.stroke(); }
+  ctx.fillStyle='#efe0c8'; ctx.beginPath(); ctx.ellipse(W*0.16,H*0.84,14,6,0,0,7); ctx.fill();
+  // big monstera-ish floor plant (right, low)
+  ctx.fillStyle='#b56a44'; ctx.fillRect(W*0.84,H*0.90,20,H*0.10); ctx.fillStyle='#3a8a44'; for (const a of [-0.7,-0.2,0.3,0.8]){ ctx.save(); ctx.translate(W*0.84+10,H*0.90); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,-22,9,16,0,0,7); ctx.fill(); ctx.restore(); }
+}
+registerScene('sunroom', drawSunroom);

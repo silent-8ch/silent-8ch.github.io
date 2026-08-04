@@ -2378,3 +2378,134 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 15). Two scene-gated, contained rides. No always-on
+   overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   34) FERRIS WHEEL RIDE  —  at the fair, a little ferris wheel turns in the sky.
+   Tap it to send it spinning; the gondolas swing gently on their pivots as it
+   goes, and she rides along with a delighted "wheee". Only at the ferris wheel.
+   -------------------------------------------------------------------------- */
+(function fxFerris(){
+  try{
+    let fw = null;                       // {x,y,r,ang,spin,cd,hue[]}
+    function atFair(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'ferriswheel'; }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!atFair()){ fw = null; return; }
+      if (!fw){ fw = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.68)), y: rand(H*0.30,H*0.38), r: 30, ang: 0, spin: 0.15, cd: 0,
+                       hue: ['#ff8fab','#ffd166','#8ad3ff','#c8a2ff','#9be59b','#ff9e7a'] }; }
+      fw.ang += fw.spin * dt;
+      fw.spin += (0.15 - fw.spin) * Math.min(1, dt*0.6);       // ease back toward a gentle idle turn
+      if (fw.cd > 0) fw.cd -= dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!fw || !atFair()) return;
+      const x = fw.x, y = fw.y, R = fw.r, spokes = 6;
+      ctx.save();
+      // support legs to the ground
+      ctx.strokeStyle = '#6b6b7a'; ctx.lineWidth = 2.4; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x-14, y+R+18); ctx.moveTo(x, y); ctx.lineTo(x+14, y+R+18); ctx.stroke();
+      // rim
+      ctx.strokeStyle = '#d8d8e0'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x, y, R, 0, 7); ctx.stroke();
+      // spokes + gondolas
+      for (let i=0;i<spokes;i++){
+        const a = fw.ang + i*(Math.PI*2/spokes);
+        const gx = x + Math.cos(a)*R, gy = y + Math.sin(a)*R;
+        ctx.strokeStyle = 'rgba(210,210,225,0.8)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(gx, gy); ctx.stroke();
+        // gondola hangs straight down from its pivot with a slight swing
+        const sway = Math.sin(fw.ang*2 + i) * 0.12;
+        ctx.save(); ctx.translate(gx, gy); ctx.rotate(sway);
+        ctx.fillStyle = fw.hue[i % fw.hue.length];
+        if (typeof roundRect === 'function'){ roundRect(-4.5, 1, 9, 7, 2); ctx.fill(); }
+        else ctx.fillRect(-4.5, 1, 9, 7);
+        ctx.strokeStyle = 'rgba(80,80,90,0.6)'; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(-4.5,1); ctx.lineTo(0,-1); ctx.lineTo(4.5,1); ctx.stroke();
+        ctx.restore();
+      }
+      // hub
+      ctx.fillStyle = '#b0b0be'; ctx.beginPath(); ctx.arc(x, y, 3.4, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!fw || !atFair()) return false;
+        if (Math.hypot(px - fw.x, py - fw.y) > fw.r + 12) return false;
+        if (fw.cd > 0){ fw.spin = Math.min(2.6, fw.spin + 0.5); return true; }
+        fw.cd = 1; fw.spin = Math.min(2.8, fw.spin + 1.6);
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') fxAt(fw.x, fw.y - fw.r - 8, pick(['🎡','✨','🥰']));
+        if (typeof say === 'function') say(pick(['Wheee! 🎡','To the top with you! 🥰','What a view! ✨','Round and round we go 💛']));
+        try{ state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   35) PINWHEEL  —  in breezy, open scenes a paper pinwheel is planted in the
+   ground. Tap it (as if to blow) and it whirs around in bright blurring colour,
+   slowing gently back to an idle turn. A simple, cheerful fidget. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxPinwheel(){
+  try{
+    const BREEZY = new Set(['windmill','kitehill','backyard','flowerfield','hilltop','pasture','alpinemeadow','poppyfield','sunflowers','tulipfield']);
+    let pw = null;                       // {x,y,ang,spin,cd,hue[]}
+    function inBreeze(){ try{ return (typeof SCENES!=='undefined') && BREEZY.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inBreeze()){ pw = null; return; }
+      if (!pw){ pw = { x: Math.max(W*0.16, Math.min(W*0.84, rand(W*0.2,W*0.4))), y: rand(H*0.66,H*0.74), ang:0, spin:0.6, cd:0,
+                       hue: ['#ff6b8a','#ffd166','#6bb6ff','#9be59b'] }; }
+      pw.ang += pw.spin * dt;
+      pw.spin += (0.6 - pw.spin) * Math.min(1, dt*0.5);        // ease back to a soft idle whirl
+      if (pw.cd > 0) pw.cd -= dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pw || !inBreeze()) return;
+      const x = pw.x, base = pw.y;
+      ctx.save();
+      // stick
+      ctx.strokeStyle = '#9c6b3f'; ctx.lineWidth = 2; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(x, base); ctx.lineTo(x, base-26); ctx.stroke();
+      const cy = base - 28;
+      // motion blur when spinning fast
+      const fast = pw.spin > 1.6;
+      ctx.translate(x, cy); ctx.rotate(pw.ang);
+      for (let i=0;i<4;i++){
+        ctx.rotate(Math.PI/2);
+        ctx.globalAlpha = fast ? 0.6 : 0.95;
+        ctx.fillStyle = pw.hue[i];
+        // a pinwheel vane: triangle folded from the hub
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(9, -3); ctx.lineTo(9, 0); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(3, 9); ctx.lineTo(0, 9); ctx.closePath();
+        ctx.fillStyle = pw.hue[i]; ctx.globalAlpha = fast ? 0.4 : 0.75; ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, 1.8, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pw || !inBreeze()) return false;
+        if (Math.hypot(px - pw.x, py - (pw.y - 28)) > 16) return false;
+        if (pw.cd > 0){ pw.spin = Math.min(9, pw.spin + 1.5); return true; }
+        pw.cd = 0.5; pw.spin = Math.min(10, pw.spin + 5);
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof fxAt === 'function') fxAt(pw.x, pw.y - 34, pick(['💨','✨','🌈']));
+        if (typeof say === 'function') say(pick(['Whirrr! 💨','Faster! 😄','Round it goes ✨','Catch the breeze 🌈']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

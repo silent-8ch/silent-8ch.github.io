@@ -64,6 +64,8 @@ const SCENE_LABELS = {
   trainstation:'Vintage Train Station',
   birchgrove:'Birch Grove', balloonride:'Balloon Ride', bonsaigarden:'Bonsai Garden',
   harvestbarn:'Harvest Barn',
+  peonygarden:'Peony Garden', rooftoppool:'Rooftop Pool', sugarshack:'Sugar Shack',
+  sunroom:'Sunroom',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){
