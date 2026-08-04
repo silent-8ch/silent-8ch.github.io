@@ -2944,6 +2944,36 @@ function drawFlorist(){
 }
 registerScene('florist', drawFlorist);
 
+/* ── HOT AIR BALLOONS (outdoor · meadow) ── */
+function drawBalloons(){
+  const t = sceneTime, groundY = H*0.66;
+
+  // sky + clouds
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#7ec0ef'); sky.addColorStop(1,'#cdeaf7');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  drawCloud(W*0.2+Math.sin(t*0.1)*10,H*0.12,0.8); drawCloud(W*0.7+Math.sin(t*0.08+2)*12,H*0.20,0.6);
+
+  // balloons
+  function balloon(x,y,col,s){
+    ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y,16*s,0,7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x-11*s,y+11*s); ctx.lineTo(x+11*s,y+11*s); ctx.lineTo(x+4*s,y+22*s); ctx.lineTo(x-4*s,y+22*s); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.25)'; ctx.beginPath(); ctx.ellipse(x,y,4*s,16*s,0,0,7); ctx.fill();
+    ctx.strokeStyle='#7a5a3a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x-4*s,y+22*s); ctx.lineTo(x-4*s,y+28*s); ctx.moveTo(x+4*s,y+22*s); ctx.lineTo(x+4*s,y+28*s); ctx.stroke();
+    ctx.fillStyle='#8a5a3a'; ctx.fillRect(x-5*s,y+28*s,10*s,6*s);
+  }
+  balloon(W*0.30, H*0.28+Math.sin(t*0.5)*8, '#e0504a',1.1);
+  balloon(W*0.62, H*0.17+Math.sin(t*0.4+1)*8, '#f2b03a',0.9);
+  balloon(W*0.82, H*0.34+Math.sin(t*0.6+2)*8, '#5a9ee0',0.8);
+  balloon(W*0.12, H*0.44+Math.sin(t*0.45+3)*8,'#7ac05a',0.7);
+
+  // meadow + flowers
+  const g=ctx.createLinearGradient(0,groundY,0,H); g.addColorStop(0,'#8bc34a'); g.addColorStop(1,'#6fae35');
+  ctx.fillStyle=g; ctx.fillRect(0,groundY,W,H-groundY);
+  const fc=['#e8628c','#f2c14e','#ffffff','#c05fd0'];
+  for (let i=0;i<30;i++){ const fx=(i*53+11)%W, fy=groundY+10+((i*37+5)%(H-groundY-10)); ctx.fillStyle=fc[i%4]; ctx.beginPath(); ctx.arc(fx,fy,2.5,0,7); ctx.fill(); ctx.fillStyle='#3a7a22'; ctx.fillRect(fx-0.5,fy,1,5); }
+}
+registerScene('balloons', drawBalloons);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
