@@ -2509,3 +2509,137 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 16). Two scene-gated, contained moments — one musical,
+   one breezy. No always-on overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   36) JUKEBOX  —  in the diner, café or record shop a little jukebox glows in the
+   corner. Tap it to drop a record: it spins, coloured lights chase around the
+   arch, notes float out and she sways to the tune. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxJukebox(){
+  try{
+    const SPOTS = new Set(['diner','cafe','recordshop','jazzclub','malt shop','icecreamparlor']);
+    let jb = null;                       // {x,y,spin,glow,cd,noteT}
+    function inSpot(){ try{ return (typeof SCENES!=='undefined') && SPOTS.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inSpot()){ jb = null; return; }
+      if (!jb){ jb = { x: Math.max(W*0.16, Math.min(W*0.86, W*0.82)), y: rand(H*0.6,H*0.68), spin: 0, glow: 0, cd: 0, noteT: 0 }; }
+      if (jb.glow > 0){
+        jb.glow -= dt; jb.spin += dt * 5;
+        jb.noteT -= dt;
+        if (jb.noteT <= 0){ jb.noteT = 0.5; const h=(typeof SHEETS!=='undefined'&&SHEETS.walk&&SHEETS.walk.displayH)||150; if (typeof fxAt==='function') fxAt(jb.x - rand(4,14), jb.y - rand(20,30), pick(['♪','♫','🎵','🎶'])); }
+      }
+      if (jb.cd > 0) jb.cd -= dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!jb || !inSpot()) return;
+      const x = jb.x, y = jb.y, playing = jb.glow > 0;
+      ctx.save();
+      // cabinet
+      ctx.fillStyle = '#7a3b2a';
+      if (typeof roundRect === 'function'){ roundRect(x-16, y-30, 32, 42, 6); ctx.fill(); }
+      else ctx.fillRect(x-16, y-30, 32, 42);
+      // glowing arch top
+      const arcCol = playing ? 'hsl(' + ((jb.spin*40)%360).toFixed(0) + ',80%,60%)' : '#c98a3a';
+      ctx.strokeStyle = arcCol; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(x, y-22, 12, Math.PI, 0); ctx.stroke();
+      // chasing lights
+      for (let i=0;i<6;i++){ const a = Math.PI + i*(Math.PI/5); const lx = x+Math.cos(a)*12, ly = y-22+Math.sin(a)*12; ctx.fillStyle = playing ? 'hsl(' + ((jb.spin*60 + i*50)%360).toFixed(0) + ',85%,65%)' : 'rgba(200,180,120,0.5)'; ctx.beginPath(); ctx.arc(lx, ly, 1.6, 0, 7); ctx.fill(); }
+      // speaker grille / window with a spinning record
+      ctx.fillStyle = '#2a1a14'; if (typeof roundRect==='function'){ roundRect(x-11, y-18, 22, 16, 3); ctx.fill(); } else ctx.fillRect(x-11,y-18,22,16);
+      ctx.save(); ctx.translate(x, y-10); ctx.rotate(jb.spin);
+      ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(0,0,6,0,7); ctx.fill();
+      ctx.fillStyle = '#e0556a'; ctx.beginPath(); ctx.arc(0,0,2,0,7); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(5.4, 0); ctx.stroke();
+      ctx.restore();
+      // buttons
+      ctx.fillStyle = '#e8c46a'; ctx.fillRect(x-10, y+2, 20, 3);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!jb || !inSpot()) return false;
+        if (px < jb.x - 18 || px > jb.x + 18 || py < jb.y - 36 || py > jb.y + 14) return false;
+        if (jb.cd > 0) return true;
+        jb.cd = 1.2; jb.glow = 3.4;
+        if (typeof sfx === 'function') sfx('day');
+        if (typeof say === 'function') say(pick(['Our song! 🎶','Dance with me? 💃','Turn it up 🥰','I love this one 🎵']));
+        try{ state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   37) TREE SWING  —  in the backyard or up by the treehouse a rope swing hangs
+   from a branch. Give it a push and it sways back and forth like a real pendulum,
+   easing to rest. A quiet, nostalgic little joy. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxSwing(){
+  try{
+    const YARDS = new Set(['backyard','treehouse','orchard','park','playground','gardenmaze']);
+    let sw = null;                       // {ax,ay,len,ang,vel,cd}
+    function inYard(){ try{ return (typeof SCENES!=='undefined') && YARDS.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inYard()){ sw = null; return; }
+      if (!sw){ sw = { ax: Math.max(W*0.18, Math.min(W*0.82, W*0.24)), ay: H*0.30, len: 42, ang: 0.05, vel: 0, cd: 0 }; }
+      // pendulum: angular accel = -(g/L) sin(ang), with light damping
+      const g = 40;
+      sw.vel += -(g/sw.len) * Math.sin(sw.ang) * dt;
+      sw.vel *= 0.995;
+      sw.ang += sw.vel * dt;
+      if (sw.cd > 0) sw.cd -= dt;
+    });
+
+    function seatPos(){ return { sx: sw.ax + Math.sin(sw.ang)*sw.len, sy: sw.ay + Math.cos(sw.ang)*sw.len }; }
+
+    EXTRA_DRAWERS.push(function(){
+      if (!sw || !inYard()) return;
+      const { sx, sy } = seatPos();
+      ctx.save();
+      // branch anchor
+      ctx.strokeStyle = '#5a3f28'; ctx.lineWidth = 5; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(sw.ax-22, sw.ay-3); ctx.lineTo(sw.ax+22, sw.ay+1); ctx.stroke();
+      // ropes
+      ctx.strokeStyle = '#b8895a'; ctx.lineWidth = 1.4;
+      const perp = sw.ang;
+      const seatHalf = 7;
+      const lx = sx - Math.cos(perp)*seatHalf, ly = sy + Math.sin(perp)*seatHalf;
+      const rx = sx + Math.cos(perp)*seatHalf, ry = sy - Math.sin(perp)*seatHalf;
+      ctx.beginPath(); ctx.moveTo(sw.ax-2, sw.ay); ctx.lineTo(lx, ly);
+                       ctx.moveTo(sw.ax+2, sw.ay); ctx.lineTo(rx, ry); ctx.stroke();
+      // seat plank
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(-sw.ang);
+      ctx.fillStyle = '#8a5a34'; ctx.fillRect(-8, -2, 16, 4);
+      ctx.restore();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!sw || !inYard()) return false;
+        const { sx, sy } = seatPos();
+        if (Math.hypot(px - sx, py - sy) > 18) return false;
+        if (sw.cd > 0){ sw.vel += (sw.ang >= 0 ? 0.5 : -0.5); return true; }
+        sw.cd = 0.5;
+        // push in the direction it's already headed for a satisfying build-up
+        const dir = (sw.vel >= 0) ? 1 : -1;
+        sw.vel += dir * 1.4;
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof fxAt === 'function') fxAt(sx, sy - 12, pick(['🌳','✨','😄']));
+        if (typeof say === 'function') say(pick(['Higher! 😄','Wheee, push me! 🥰','Just like being a kid 💛','Back and forth ✨']));
+        try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

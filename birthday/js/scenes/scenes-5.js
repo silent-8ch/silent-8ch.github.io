@@ -3306,3 +3306,200 @@ function drawSunroom(){
   ctx.fillStyle='#b56a44'; ctx.fillRect(W*0.84,H*0.90,20,H*0.10); ctx.fillStyle='#3a8a44'; for (const a of [-0.7,-0.2,0.3,0.8]){ ctx.save(); ctx.translate(W*0.84+10,H*0.90); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,-22,9,16,0,0,7); ctx.fill(); ctx.restore(); }
 }
 registerScene('sunroom', drawSunroom);
+
+/* ── DUCK POND (outdoor · park pond with ducks) ── */
+function drawDuckPond(){
+  const t = sceneTime, waterY = H*0.44;
+
+  // pleasant sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#7ab8e6'); sky.addColorStop(1,'#d8ecd8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.80,H*0.12,18,0,7); ctx.fill();
+  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.09,0.6); drawCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.15,0.45);
+
+  // grassy far bank with a weeping willow (left)
+  ctx.fillStyle='#5a9a3a'; ctx.fillRect(0,waterY-18,W,22);
+  ctx.fillStyle='#4a8a2e'; for (let x=0;x<W;x+=12){ ctx.beginPath(); ctx.arc(x,waterY-18,7,Math.PI,0); ctx.fill(); }
+  // willow trunk + drooping fronds
+  ctx.fillStyle='#5a3a20'; ctx.fillRect(W*0.14-4,waterY-70,8,54);
+  ctx.strokeStyle='#4a8a3a'; ctx.lineWidth=1.5; for (let k=-5;k<=5;k++){ const fx=W*0.14+k*5; ctx.beginPath(); ctx.moveTo(fx,waterY-64); ctx.quadraticCurveTo(fx+Math.sin(t*1.2+k)*3,waterY-40,fx+k*1.4+Math.sin(t*1.5+k)*4,waterY-14); ctx.stroke(); }
+  ctx.fillStyle='#3a8a3a'; ctx.beginPath(); ctx.arc(W*0.14,waterY-70,20,0,7); ctx.fill();
+  // cattails (right bank)
+  for (const cx of [W*0.86,W*0.92,W*0.80]){ ctx.strokeStyle='#4a7a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx,waterY); ctx.lineTo(cx+Math.sin(t*1.2+cx)*2,waterY-30); ctx.stroke(); ctx.fillStyle='#7a4a2a'; roundRect(cx-2,waterY-38,4,10,2); ctx.fill(); }
+
+  // pond water
+  const wat=ctx.createLinearGradient(0,waterY,0,H); wat.addColorStop(0,'#5a9ab0'); wat.addColorStop(1,'#3a7288'); ctx.fillStyle=wat; ctx.fillRect(0,waterY,W,H-waterY);
+  // reflections + ripples
+  ctx.fillStyle='rgba(255,255,255,.1)'; ctx.fillRect(0,waterY,W,8);
+  ctx.strokeStyle='rgba(210,235,235,.14)'; ctx.lineWidth=1; for (let y=waterY+8;y<H;y+=9){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.05+t*1.3+y)*1.5; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+  // lily pads
+  ctx.fillStyle='#2e7a4a'; for (const [px,py] of [[W*0.3,waterY+40],[W*0.72,waterY+60]]){ ctx.beginPath(); ctx.ellipse(px,py,10,4,0,0.5,6.5); ctx.fill(); }
+
+  // ducks paddling (each leaves a V-wake)
+  function duck(dx,dy,dir,mallard){ ctx.save(); ctx.translate(dx,dy); ctx.scale(dir,1);
+    // wake
+    ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(-14,4); ctx.lineTo(-30,10); ctx.moveTo(-14,4); ctx.lineTo(-28,-2); ctx.stroke();
+    // body
+    ctx.fillStyle= mallard?'#8a7a5a':'#efe8d8'; ctx.beginPath(); ctx.ellipse(0,0,11,6,0,0,7); ctx.fill();
+    // tail tip
+    ctx.beginPath(); ctx.moveTo(-9,-1); ctx.lineTo(-15,-4); ctx.lineTo(-10,1); ctx.fill();
+    // neck + head
+    ctx.fillStyle= mallard?'#2f7a4a':'#efe8d8'; ctx.beginPath(); ctx.ellipse(9,-6,4,5,0.2,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(11,-9,4,0,7); ctx.fill();
+    // bill
+    ctx.fillStyle='#e0a030'; ctx.beginPath(); ctx.moveTo(14,-9); ctx.lineTo(20,-8); ctx.lineTo(14,-6); ctx.fill();
+    // eye
+    ctx.fillStyle='#222'; ctx.beginPath(); ctx.arc(12,-10,1,0,7); ctx.fill();
+    ctx.restore(); }
+  duck(W*0.35+Math.sin(t*0.4)*30, waterY+30, 1, true);
+  duck(W*0.62+Math.sin(t*0.3+2)*26, waterY+52, -1, false);
+  duck(W*0.5+Math.sin(t*0.5+1)*20, waterY+70, 1, true);
+  // three ducklings following the first
+  for (let i=0;i<3;i++){ const lx=W*0.35+Math.sin(t*0.4-0.3-i*0.25)*30 - (i+1)*10; ctx.fillStyle='#e8d86a'; ctx.beginPath(); ctx.ellipse(lx,waterY+34+i*2,4,3,0,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(lx+3,waterY+31+i*2,2.2,0,7); ctx.fill(); ctx.fillStyle='#e0a030'; ctx.fillRect(lx+5,waterY+30+i*2,2,1.4); }
+
+  // a park bench + breadcrumbs area on the near shore (left, low) — small
+  const bx=W*0.14, by=H*0.90; ctx.fillStyle='#6a8a4a'; ctx.fillRect(bx-20,by,40,4); ctx.fillRect(bx-20,by-10,40,3); ctx.fillStyle='#4a6a34'; ctx.fillRect(bx-18,by+4,3,8); ctx.fillRect(bx+15,by+4,3,8);
+  ctx.fillStyle='rgba(230,210,160,.7)'; for (let i=0;i<6;i++){ ctx.fillRect(W*0.3+i*4+Math.sin(i)*3, H*0.93+ (i%2)*3, 2,2); }
+}
+registerScene('duckpond', drawDuckPond);
+
+/* ── BEEKEEPER'S GARDEN (outdoor · hives & wildflower meadow) ── */
+function drawBeekeeperGarden(){
+  const t = sceneTime, groundY = H*0.58;
+
+  // warm summer sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#79c0ea'); sky.addColorStop(1,'#eae6c8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='#fff2a8'; ctx.beginPath(); ctx.arc(W*0.5,H*0.13,22,0,7); ctx.fill(); ctx.fillStyle='rgba(255,242,168,.3)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.13,34,0,7); ctx.fill();
+  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.10,0.55); drawCloud(W*0.82+Math.sin(t*0.09+2)*6,H*0.17,0.45);
+
+  // green hills + a hedgerow
+  ctx.fillStyle='#6aa84a'; ctx.beginPath(); ctx.moveTo(0,groundY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,groundY-22-14*Math.sin(x*0.016+1)); } ctx.lineTo(W,groundY); ctx.fill();
+  ctx.fillStyle='#5a9a3e'; ctx.beginPath(); ctx.moveTo(0,groundY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,groundY-8-10*Math.sin(x*0.03+3)); } ctx.lineTo(W,groundY); ctx.fill();
+
+  // meadow ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#6aae42'); gr.addColorStop(1,'#4a8a2e'); ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  // grass texture
+  ctx.strokeStyle='rgba(40,90,20,.3)'; ctx.lineWidth=1; for (let i=0;i<50;i++){ const gx=(i*67+9)%W; const gy=groundY+8+((i*37+7)%(H-groundY-8)); ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx+Math.sin(t+i)*2,gy-6); ctx.stroke(); }
+
+  // white box beehives (Langstroth stacks) — sides so center stays clear
+  function hive(hx,baseY){ ctx.fillStyle='#efe8d8'; for (let b=0;b<3;b++){ ctx.fillRect(hx-18,baseY-16-b*16,36,16); ctx.strokeStyle='rgba(150,140,120,.5)'; ctx.lineWidth=1; ctx.strokeRect(hx-18,baseY-16-b*16,36,16);
+    // entrance slot on lowest box
+    if (b===0){ ctx.fillStyle='#3a2a1a'; ctx.fillRect(hx-10,baseY-4,20,3); ctx.fillStyle='#efe8d8'; } }
+    // gabled roof
+    ctx.fillStyle='#8a5a3a'; ctx.beginPath(); ctx.moveTo(hx-22,baseY-48); ctx.lineTo(hx,baseY-60); ctx.lineTo(hx+22,baseY-48); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#efe8d8'; ctx.fillRect(hx-20,baseY-50,40,4); }
+  hive(W*0.16,groundY+40); hive(W*0.86,groundY+44);
+  // a small stone birdbath/water dish (right-back)
+  ctx.fillStyle='#9a9088'; ctx.fillRect(W*0.66-3,groundY+6,6,18); ctx.beginPath(); ctx.ellipse(W*0.66,groundY+6,12,4,0,0,7); ctx.fill(); ctx.fillStyle='#7ab0c0'; ctx.beginPath(); ctx.ellipse(W*0.66,groundY+5,9,2.6,0,0,7); ctx.fill();
+
+  // wildflowers all over the meadow (bee-friendly) — kept along sides/low
+  function wf(fx,fy,col){ ctx.strokeStyle='#3a7a2a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(fx,fy+8); ctx.lineTo(fx,fy); ctx.stroke(); ctx.fillStyle=col; for (let k=0;k<5;k++){ const a=k/5*6.28; ctx.beginPath(); ctx.ellipse(fx+Math.cos(a)*3,fy+Math.sin(a)*3,2.4,1.4,a,0,7); ctx.fill(); } ctx.fillStyle='#e0b040'; ctx.beginPath(); ctx.arc(fx,fy,1.6,0,7); ctx.fill(); }
+  const wfc=['#e26f9a','#e0b040','#a06fe0','#ffffff','#e0602a'];
+  for (let i=0;i<18;i++){ const fx=(i*53+8)%W; if (fx>W*0.36 && fx<W*0.64) continue; const fy=H*0.72+ (i*29)%(H*0.24); wf(fx,fy,wfc[i%5]); }
+  // tall lavender/clover spikes (sides)
+  for (const lx of [W*0.28,W*0.72]){ ctx.strokeStyle='#3a7a2a'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(lx,H*0.86); ctx.lineTo(lx,H*0.72); ctx.stroke(); ctx.fillStyle='#9a6fd0'; for (let k=0;k<5;k++){ ctx.beginPath(); ctx.arc(lx,H*0.72+k*3,2.4,0,7); ctx.fill(); } }
+
+  // bees flying between hives and flowers (little figure-8 paths)
+  for (let i=0;i<6;i++){ const bx=W*0.5+Math.sin(t*1.5+i*1.1)*W*0.42; const by=groundY-4+Math.sin(t*2.4+i*2)*18; ctx.fillStyle='#e0a020'; ctx.beginPath(); ctx.ellipse(bx,by,2.4,1.7,0,0,7); ctx.fill(); ctx.fillStyle='#2a2018'; ctx.fillRect(bx-0.8,by-1.4,0.9,2.8); ctx.fillStyle='rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(bx,by-2,2,1,0,0,7); ctx.fill(); }
+  // a honey jar on a little stump (left, low)
+  ctx.fillStyle='#6a4a2e'; ctx.fillRect(W*0.10-6,H*0.90,12,10); ctx.fillStyle='#e0a828'; roundRect(W*0.10-5,H*0.90-12,10,12,2); ctx.fill(); ctx.fillStyle='#c98a1a'; ctx.fillRect(W*0.10-5,H*0.90-12,10,3); ctx.fillStyle='#fff'; ctx.fillRect(W*0.10-3,H*0.90-8,6,4);
+}
+registerScene('beekeepergarden', drawBeekeeperGarden);
+
+/* ── KELP FOREST (underwater · sea otters & swaying kelp) ── */
+function drawKelpForest(){
+  const t = sceneTime, floorY = H*0.86;
+
+  // deep ocean water column (fills canvas), lighter near surface
+  const water=ctx.createLinearGradient(0,0,0,H); water.addColorStop(0,'#2a7a9a'); water.addColorStop(0.5,'#186078'); water.addColorStop(1,'#0c3a4c');
+  ctx.fillStyle=water; ctx.fillRect(0,0,W,H);
+  // dappled sunlight from the surface
+  ctx.fillStyle='rgba(200,240,255,.10)'; for (let i=0;i<5;i++){ ctx.save(); ctx.translate(W*0.1+i*W*0.2,0); ctx.rotate(0.14); ctx.fillRect(0,0,18,H*0.7); ctx.restore(); }
+  ctx.strokeStyle='rgba(180,235,255,.10)'; ctx.lineWidth=2; for (let i=0;i<5;i++){ ctx.beginPath(); for (let x=0;x<=W;x+=8){ const y=10+i*12+Math.sin(x*0.05+t*1.2+i)*4; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke(); }
+
+  // towering kelp fronds swaying (rooted at the floor, reaching to surface)
+  function kelp(bx,sway,thick,leaves){ ctx.strokeStyle='#3a6a2a'; ctx.lineWidth=thick; ctx.beginPath(); ctx.moveTo(bx,floorY);
+    for (let s=0;s<=10;s++){ const y=floorY-(floorY)*s/10; const x=bx+Math.sin(t*0.8+s*0.5+sway)*(s*1.6); s===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+    // blade leaves
+    ctx.fillStyle='#4a8a3a'; for (let s=1;s<=9;s+=1){ const y=floorY-(floorY)*s/10; const x=bx+Math.sin(t*0.8+s*0.5+sway)*(s*1.6); ctx.save(); ctx.translate(x,y); ctx.rotate(Math.sin(t+s)*0.3+ (leaves?0.6:-0.6)); ctx.beginPath(); ctx.ellipse(leaves?7:-7,0,8,2.4,0,0,7); ctx.fill(); ctx.restore(); }
+    // gas bladders (little floats)
+    ctx.fillStyle='#6a9a4a'; for (let s=2;s<=8;s+=2){ const y=floorY-(floorY)*s/10; const x=bx+Math.sin(t*0.8+s*0.5+sway)*(s*1.6); ctx.beginPath(); ctx.arc(x+(leaves?4:-4),y-2,2,0,7); ctx.fill(); } }
+  kelp(W*0.10,0,4,true); kelp(W*0.24,1.2,3,false); kelp(W*0.90,0.6,4,false); kelp(W*0.78,2.0,3,true); kelp(W*0.5,1.6,3,true);
+
+  // rising bubbles
+  for (let i=0;i<20;i++){ const bx=(i*61+9)%W; const by=(H-((t*16+i*33)%H)); ctx.fillStyle='rgba(210,245,255,.2)'; ctx.beginPath(); ctx.arc(bx,by,1+(i%3),0,7); ctx.fill(); }
+
+  // a couple of fish schooling through
+  for (let i=0;i<5;i++){ const fx=((t*22+i*30)%(W+50))-25; const fy=H*0.30+i*8+Math.sin(t*2+i)*6; ctx.save(); ctx.translate(fx,fy); ctx.fillStyle='#c8b060'; ctx.beginPath(); ctx.ellipse(0,0,7,3,0,0,7); ctx.fill(); ctx.beginPath(); ctx.moveTo(-6,0); ctx.lineTo(-11,-3); ctx.lineTo(-11,3); ctx.fill(); ctx.restore(); }
+
+  // sea otter floating near the surface (on its back, paws up)
+  const ox=W*0.4+Math.sin(t*0.4)*30, oy=H*0.16+Math.sin(t*0.8)*4;
+  ctx.fillStyle='#6a4a30'; ctx.beginPath(); ctx.ellipse(ox,oy,18,8,0,0,7); ctx.fill(); // body floating
+  ctx.beginPath(); ctx.arc(ox+16,oy-2,6,0,7); ctx.fill(); // head
+  ctx.fillStyle='#8a6a4a'; ctx.beginPath(); ctx.arc(ox+16,oy-1,4,0,7); ctx.fill(); // face
+  ctx.fillStyle='#2a1a10'; ctx.beginPath(); ctx.arc(ox+18,oy-3,1,0,7); ctx.arc(ox+14,oy-3,1,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(ox+19,oy-1,1,0,7); ctx.fill();
+  // paws on belly (holding a shell)
+  ctx.fillStyle='#5a3a24'; ctx.beginPath(); ctx.arc(ox-2,oy-5,3,0,7); ctx.arc(ox+4,oy-6,3,0,7); ctx.fill();
+  ctx.fillStyle='#c9b0a0'; ctx.beginPath(); ctx.arc(ox+1,oy-8,3,Math.PI,0); ctx.fill();
+  // a second otter pup nearby
+  const px=ox-30+Math.sin(t*0.5+1)*10, py=oy+6; ctx.fillStyle='#7a5a3a'; ctx.beginPath(); ctx.ellipse(px,py,10,5,0,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(px+9,py-1,4,0,7); ctx.fill(); ctx.fillStyle='#2a1a10'; ctx.beginPath(); ctx.arc(px+10,py-2,0.8,0,7); ctx.fill();
+
+  // rocky seabed with anemones/urchins
+  const bed=ctx.createLinearGradient(0,floorY,0,H); bed.addColorStop(0,'#3a4a4a'); bed.addColorStop(1,'#243434'); ctx.fillStyle=bed; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='#2e3e3e'; for (let i=0;i<6;i++){ ctx.beginPath(); ctx.arc((i*67+20)%W,floorY+ (i%2)*4,8+ (i%3)*3,Math.PI,0); ctx.fill(); }
+  // purple urchins
+  for (const ux of [W*0.2,W*0.8,W*0.55]){ ctx.fillStyle='#7a3a8a'; ctx.beginPath(); ctx.arc(ux,floorY+4,4,0,7); ctx.fill(); ctx.strokeStyle='#7a3a8a'; ctx.lineWidth=1; for (let k=0;k<8;k++){ const a=k/8*6.28; ctx.beginPath(); ctx.moveTo(ux,floorY+4); ctx.lineTo(ux+Math.cos(a)*7,floorY+4+Math.sin(a)*7); ctx.stroke(); } }
+  // anemone
+  ctx.fillStyle='#e07a8a'; for (let k=0;k<9;k++){ const a=Math.PI+ k/8*Math.PI; ctx.beginPath(); ctx.moveTo(W*0.35,floorY+4); ctx.lineTo(W*0.35+Math.cos(a)*8,floorY+4+Math.sin(a)*8+Math.sin(t*2+k)*2); ctx.lineWidth=2; ctx.strokeStyle='#e07a8a'; ctx.stroke(); }
+}
+registerScene('kelpforest', drawKelpForest);
+
+/* ── CHEESE CAVE (indoor · aging cellar with wheels of cheese) ── */
+function drawCheeseCave(){
+  const t = sceneTime, floorY = H*0.74;
+
+  // cool stone cellar (fills canvas), dim
+  const bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#3a352e'); bg.addColorStop(0.6,'#4a4238'); bg.addColorStop(1,'#2e2822');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // vaulted brick ceiling arch
+  ctx.fillStyle='#2e2820'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,H*0.14); ctx.quadraticCurveTo(W*0.5,H*0.02,0,H*0.14); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1; for (let i=0;i<7;i++){ const a=i/6; ctx.beginPath(); ctx.moveTo(a*W,H*0.14 - Math.sin(a*Math.PI)*H*0.10); ctx.lineTo(a*W,0); ctx.stroke(); }
+  // stone-block back wall
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let y=H*0.16;y<floorY;y+=18){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); for (let x=((y/18|0)%2)*24; x<W; x+=48){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+18); ctx.stroke(); } }
+
+  // warm lantern glow
+  const glow=ctx.createRadialGradient(W*0.5,H*0.20,10,W*0.5,H*0.20,160); glow.addColorStop(0,'rgba(240,200,120,.14)'); glow.addColorStop(1,'rgba(240,200,120,0)'); ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
+  // hanging bulb
+  ctx.strokeStyle='#2a2018'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.5,H*0.10); ctx.lineTo(W*0.5,H*0.16); ctx.stroke();
+  ctx.fillStyle=`rgba(255,210,130,${0.85+0.08*Math.sin(t*2)})`; ctx.beginPath(); ctx.arc(W*0.5,H*0.18,5,0,7); ctx.fill(); ctx.fillStyle='rgba(255,210,130,.2)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.18,14,0,7); ctx.fill();
+
+  // wooden shelving stacked with cheese wheels (both sides + back)
+  function cheeseShelf(sx,sw,rows){ for (let r=0;r<rows;r++){ const sy=H*0.24+r*H*0.16;
+    ctx.fillStyle='#4a3420'; ctx.fillRect(sx,sy+22,sw,5);
+    // wheels resting on the plank
+    const n=Math.floor(sw/26);
+    for (let i=0;i<n;i++){ const wx=sx+14+i*26; const rind=['#e6c878','#d8a84a','#e8d090','#c89a58'][(i+r)%4];
+      ctx.fillStyle=rind; ctx.beginPath(); ctx.arc(wx,sy+12,12,0,7); ctx.fill();
+      ctx.fillStyle='rgba(0,0,0,.12)'; ctx.beginPath(); ctx.arc(wx,sy+12,12,0.4,2.4); ctx.fill();
+      ctx.strokeStyle='rgba(120,90,40,.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(wx,sy+12,12,0,7); ctx.stroke();
+      // wax stamp
+      ctx.fillStyle='#a03030'; ctx.beginPath(); ctx.arc(wx,sy+12,3,0,7); ctx.fill(); } } }
+  cheeseShelf(W*0.02,W*0.30,3); cheeseShelf(W*0.68,W*0.30,3);
+
+  // a cut wedge display + a couple of stacked wheels center-back (high)
+  ctx.fillStyle='#4a3420'; ctx.fillRect(W*0.40,H*0.30,W*0.20,5);
+  ctx.fillStyle='#e8d090'; ctx.beginPath(); ctx.arc(W*0.5,H*0.30-10,14,0,7); ctx.fill(); // wheel
+  ctx.fillStyle='#f2e2a8'; ctx.beginPath(); ctx.moveTo(W*0.5,H*0.30-10); ctx.arc(W*0.5,H*0.30-10,14,-0.4,0.8); ctx.closePath(); ctx.fill(); // cut wedge lighter
+  ctx.fillStyle='rgba(255,255,255,.5)'; for (let k=0;k<5;k++){ ctx.beginPath(); ctx.arc(W*0.5+2+k*1.5,H*0.30-12+k*1.2,0.8,0,7); ctx.fill(); } // holes
+
+  // stone floor + a barrel and a crate (sides, low)
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#3a3228'); fl.addColorStop(1,'#26201a'); ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.22)'; ctx.lineWidth=1; for (let y=floorY+10;y<H;y+=14){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // oak barrel (left, low)
+  const bxx=W*0.14, byy=H*0.90; ctx.fillStyle='#6a4326'; roundRect(bxx-16,byy-20,32,30,6); ctx.fill(); ctx.strokeStyle='#3a2414'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(bxx-16,byy-12); ctx.lineTo(bxx+16,byy-12); ctx.moveTo(bxx-16,byy+2); ctx.lineTo(bxx+16,byy+2); ctx.stroke(); ctx.fillStyle='#8a6038'; roundRect(bxx-16,byy-22,32,4,2); ctx.fill();
+  // wooden crate with small cheeses (right, low)
+  const cxx=W*0.86, cyy=H*0.92; ctx.fillStyle='#8a6038'; ctx.fillRect(cxx-16,cyy-14,32,20); ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=1; ctx.strokeRect(cxx-16,cyy-14,32,20); ctx.beginPath(); ctx.moveTo(cxx-16,cyy-4); ctx.lineTo(cxx+16,cyy-4); ctx.stroke();
+  ctx.fillStyle='#e8d090'; ctx.beginPath(); ctx.arc(cxx-7,cyy-16,5,0,7); ctx.arc(cxx+6,cyy-16,5,0,7); ctx.fill();
+}
+registerScene('cheesecave', drawCheeseCave);
