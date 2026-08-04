@@ -95,6 +95,8 @@ stagewrap.addEventListener('pointerdown', (e)=>{
     else doAction('hug');                  // tapping her body -> a hug
     return;
   }
+  // add-on tap handlers (js/extras.js) get first refusal; return true to consume the tap
+  for (const f of EXTRA_TAPS){ try{ if (f(px, py)) return; }catch(e){} }
   // tapping elsewhere: she looks over, walks to the spot, and reacts to the place
   tapScene(px, py);
 });

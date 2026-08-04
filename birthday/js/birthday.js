@@ -359,6 +359,7 @@ function render(){
     applyDayNight(scene);                        // global time-of-day tint over scene + pet
     applyNightVignette(scene);                   // cozy edge-darkening after dark
     drawShootingStar();                          // rare bright streak across the night sky
+    for (const f of EXTRA_DRAWERS){ try{ f(); }catch(e){} }   // add-on overlays (js/extras.js)
   }
   // sleep sequence: black wash over everything as she drifts off and wakes
   if (restFade > 0){ ctx.fillStyle = `rgba(0,0,0,${restFade})`; ctx.fillRect(0,0,W,H); }

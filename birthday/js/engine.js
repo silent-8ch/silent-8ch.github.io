@@ -53,6 +53,13 @@ const pet = {
   blush: 0,
 };
 
+/* ---------- extension hooks (for add-on features in js/extras.js) ----------
+   Push functions here to run every frame or handle taps, without editing the
+   core loop/render. EXTRA_UPDATERS: fn(dt) each frame. EXTRA_DRAWERS: fn() draws
+   over the scene each frame. EXTRA_TAPS: fn(px,py) on a stage tap — return true
+   to consume the tap (skip the default walk-to-spot). All are wrapped in try/catch. */
+const EXTRA_UPDATERS = [], EXTRA_DRAWERS = [], EXTRA_TAPS = [];
+
 /* ---------- save / load ---------- */
 function load(){
   if (CONFIG.save){
