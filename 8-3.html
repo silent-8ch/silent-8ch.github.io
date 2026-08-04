@@ -6672,6 +6672,61 @@ function drawSandDunes(){
 }
 registerScene('sanddunes', drawSandDunes);
 
+/* ── CARTOGRAPHER'S STUDY (indoor · map-maker's room) ── */
+function drawCartographer(){
+  const t=sceneTime, floorY=H*0.7;
+  // warm study, aged-paper walls
+  ctx.fillStyle='#c8b488'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#6a4a30'; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='#b8a478'; ctx.fillRect(0,H*0.1,W,2);
+  // a large old world map pinned to the wall
+  const mx=W*0.08, my=H*0.12, mw=W*0.56, mh=H*0.4;
+  ctx.fillStyle='#e8dcb8'; ctx.fillRect(mx,my,mw,mh);
+  ctx.strokeStyle='#8a6a44'; ctx.lineWidth=3; ctx.strokeRect(mx,my,mw,mh);
+  // ocean tint + latitude/longitude grid
+  ctx.fillStyle='rgba(150,180,190,.3)'; ctx.fillRect(mx+2,my+2,mw-4,mh-4);
+  ctx.strokeStyle='rgba(120,90,50,.3)'; ctx.lineWidth=0.6;
+  for(let i=1;i<8;i++){ ctx.beginPath(); ctx.moveTo(mx+i*mw/8,my); ctx.lineTo(mx+i*mw/8,my+mh); ctx.stroke(); }
+  for(let i=1;i<5;i++){ ctx.beginPath(); ctx.moveTo(mx,my+i*mh/5); ctx.lineTo(mx+mw,my+i*mh/5); ctx.stroke(); }
+  // stylized landmasses
+  ctx.fillStyle='#c8a860';
+  ctx.beginPath(); ctx.moveTo(mx+mw*0.15,my+mh*0.3); ctx.bezierCurveTo(mx+mw*0.28,my+mh*0.15, mx+mw*0.34,my+mh*0.5, mx+mw*0.22,my+mh*0.7); ctx.bezierCurveTo(mx+mw*0.12,my+mh*0.6, mx+mw*0.1,my+mh*0.45, mx+mw*0.15,my+mh*0.3); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(mx+mw*0.55,my+mh*0.25); ctx.bezierCurveTo(mx+mw*0.75,my+mh*0.2, mx+mw*0.82,my+mh*0.55, mx+mw*0.66,my+mh*0.72); ctx.bezierCurveTo(mx+mw*0.5,my+mh*0.6, mx+mw*0.48,my+mh*0.4, mx+mw*0.55,my+mh*0.25); ctx.fill();
+  // a compass rose on the map
+  const crx=mx+mw*0.85, cry=my+mh*0.82; ctx.strokeStyle='#8a5a2a'; ctx.lineWidth=1;
+  for(let i=0;i<8;i++){ const a=i/8*Math.PI*2; ctx.beginPath(); ctx.moveTo(crx,cry); ctx.lineTo(crx+Math.cos(a)*(i%2?5:9),cry+Math.sin(a)*(i%2?5:9)); ctx.stroke(); }
+  // dotted voyage route across the map
+  ctx.strokeStyle='#a03030'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(mx+mw*0.2,my+mh*0.5); ctx.quadraticCurveTo(mx+mw*0.5,my+mh*0.3,mx+mw*0.7,my+mh*0.5); ctx.stroke(); ctx.setLineDash([]);
+  // the desk
+  const dy=floorY-4; ctx.fillStyle='#5a3e26'; ctx.fillRect(W*0.04,dy-6,W*0.92,6+(H-dy));
+  ctx.fillStyle='#6a4a30'; ctx.fillRect(W*0.04,dy-6,W*0.92,4);
+  ctx.fillStyle='#4a3220'; ctx.fillRect(W*0.1,dy+H*0.14,10,H*0.14); ctx.fillRect(W*0.84,dy+H*0.14,10,H*0.14);
+  // a globe on a wooden stand, slowly rotating (shifting continents)
+  const gx=W*0.24, gy=dy-24, gr=20;
+  ctx.fillStyle='#7a5030'; ctx.fillRect(gx-2,gy+gr,4,10); ctx.beginPath(); ctx.ellipse(gx,gy+gr+10,10,3,0,0,7); ctx.fill();
+  ctx.strokeStyle='#8a6a44'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(gx,gy,gr+3,-0.4,Math.PI+0.4); ctx.stroke(); // meridian ring
+  ctx.fillStyle='#9ac0d0'; ctx.beginPath(); ctx.arc(gx,gy,gr,0,7); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(gx,gy,gr,0,7); ctx.clip();
+  ctx.fillStyle='#c8a860'; for(let i=0;i<3;i++){ const cx=gx-gr + ((t*8 + i*30)%(gr*3)) - gr; ctx.beginPath(); ctx.ellipse(cx, gy-6+i*8, 7,5,0.3,0,7); ctx.fill(); }
+  ctx.restore();
+  ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(gx-5,gy-6,gr*0.4,0,7); ctx.stroke();
+  // rolled-up charts leaning + an open scroll being drawn on
+  for(let i=0;i<3;i++){ ctx.fillStyle='#d8c8a0'; ctx.fillRect(W*0.44+i*8,dy-40,5,36); ctx.fillStyle='#a03030'; ctx.fillRect(W*0.44+i*8,dy-40,5,3); }
+  ctx.fillStyle='#efe6c8'; ctx.beginPath(); ctx.moveTo(W*0.56,dy-4); ctx.lineTo(W*0.8,dy-4); ctx.lineTo(W*0.8,dy-24); ctx.lineTo(W*0.56,dy-24); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#8a6a44'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(W*0.555,dy-14,4,-Math.PI/2,Math.PI/2); ctx.stroke(); ctx.beginPath(); ctx.arc(W*0.805,dy-14,4,Math.PI/2,-Math.PI/2); ctx.stroke();
+  // brass dividers + a quill drawing on the scroll (nib moves)
+  ctx.strokeStyle='#c9a24a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.62,dy-22); ctx.lineTo(W*0.6,dy-8); ctx.moveTo(W*0.62,dy-22); ctx.lineTo(W*0.66,dy-8); ctx.stroke();
+  const qx=W*0.72+Math.sin(t*2)*3; ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(qx,dy-10); ctx.lineTo(qx+8,dy-26); ctx.stroke();
+  ctx.fillStyle='#e8e0d0'; ctx.beginPath(); ctx.moveTo(qx+8,dy-26); ctx.lineTo(qx+14,dy-34); ctx.lineTo(qx+11,dy-24); ctx.closePath(); ctx.fill();
+  // a brass oil lamp glowing warm on the right of the desk
+  const lx=W*0.88, ly=dy-6; ctx.fillStyle='#b8892e'; ctx.beginPath(); ctx.ellipse(lx,ly,10,4,0,0,7); ctx.fill(); ctx.fillRect(lx-3,ly-10,6,8);
+  const fl=1+0.2*Math.sin(t*8); ctx.fillStyle='rgba(255,180,60,.6)'; ctx.beginPath(); ctx.ellipse(lx,ly-16,4*fl,7*fl,0,0,7); ctx.fill();
+  ctx.fillStyle='#ffe08a'; ctx.beginPath(); ctx.ellipse(lx,ly-15,2*fl,4*fl,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,190,90,.12)'; ctx.beginPath(); ctx.arc(lx,ly-14,26,0,7); ctx.fill();
+}
+registerScene('cartographer', drawCartographer);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
