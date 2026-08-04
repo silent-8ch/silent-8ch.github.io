@@ -3127,6 +3127,47 @@ function drawPumpkinPatch(){
 }
 registerScene('pumpkinpatch', drawPumpkinPatch);
 
+/* ── TOY SHOP (indoor · toys) ── */
+function drawToyShop(){
+  const t = sceneTime, floorY = H*0.62;
+
+  ctx.fillStyle='#f2e0c0'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='rgba(230,150,120,.12)'; for (let x=0;x<W;x+=24) ctx.fillRect(x,0,12,floorY);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#c99a5a'); fl.addColorStop(1,'#b5883f');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(90,60,20,.2)'; ctx.lineWidth=1; for (let i=1;i<5;i++){ const y=floorY+i/5*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  ctx.fillStyle='#e0504a'; ctx.font='bold 15px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('★ TOYS ★', W*0.5, H*0.08); ctx.textAlign='left';
+
+  // shelves of toys
+  for (let s=0;s<2;s++){
+    const sy=H*0.16+s*H*0.16;
+    ctx.fillStyle='#9a6b3f'; ctx.fillRect(W*0.06,sy+26,W*0.6,5);
+    const blc=['#e0504a','#5a9ee0','#7ac05a','#f2b03a']; for (let i=0;i<3;i++){ ctx.fillStyle=blc[(i+s)%4]; ctx.fillRect(W*0.08+i*14,sy+14,12,12); }
+    const bx=W*0.3; ctx.fillStyle='#b5875a'; ctx.beginPath(); ctx.arc(bx,sy+18,8,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(bx-6,sy+10,3,0,7); ctx.arc(bx+6,sy+10,3,0,7); ctx.fill(); ctx.fillStyle='#8a5a3a'; ctx.beginPath(); ctx.arc(bx,sy+18,4,0,7); ctx.fill(); ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(bx-3,sy+15,1,0,7); ctx.arc(bx+3,sy+15,1,0,7); ctx.fill();
+    ctx.fillStyle='#e0504a'; ctx.beginPath(); ctx.arc(W*0.44,sy+18,8,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.fillRect(W*0.44-8,sy+16,16,3);
+    const rx=W*0.56; ctx.fillStyle='#9aa2b0'; ctx.fillRect(rx-7,sy+8,14,18); ctx.fillStyle='#5a9ee0'; ctx.fillRect(rx-4,sy+11,8,5); ctx.strokeStyle='#9aa2b0'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(rx,sy+8); ctx.lineTo(rx,sy+3); ctx.stroke(); ctx.fillStyle='#e0504a'; ctx.beginPath(); ctx.arc(rx,sy+3,2,0,7); ctx.fill();
+  }
+
+  // hanging kite
+  const kX=W*0.82, kY=H*0.16;
+  ctx.save(); ctx.translate(kX,kY); ctx.rotate(0.3+Math.sin(t)*0.05);
+  ctx.fillStyle='#e0504a'; ctx.beginPath(); ctx.moveTo(0,-16); ctx.lineTo(12,0); ctx.lineTo(0,16); ctx.lineTo(-12,0); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#f2c14e'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,-16); ctx.lineTo(0,16); ctx.moveTo(-12,0); ctx.lineTo(12,0); ctx.stroke();
+  ctx.strokeStyle='#5a9ee0'; ctx.beginPath(); ctx.moveTo(0,16); ctx.quadraticCurveTo(6,26,0,34); ctx.stroke(); ctx.restore();
+
+  // rocking horse
+  const hX=W*0.3, hB=floorY+30;
+  ctx.strokeStyle='#a06a3a'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(hX,hB-2,20,Math.PI*1.15,Math.PI*1.85); ctx.stroke();
+  ctx.fillStyle='#d8a860'; ctx.beginPath(); ctx.ellipse(hX,hB-16,18,7,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(hX+16,hB-22,6,5,0.4,0,7); ctx.fill();
+  ctx.strokeStyle='#8a5a3a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(hX-8,hB-12); ctx.lineTo(hX-8,hB-2); ctx.moveTo(hX+8,hB-12); ctx.lineTo(hX+8,hB-2); ctx.stroke();
+  ctx.strokeStyle='#c04a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(hX+18,hB-26); ctx.quadraticCurveTo(hX+24,hB-20,hX+20,hB-14); ctx.stroke();
+
+  // stacked blocks on floor
+  const sbX=W*0.72; ctx.fillStyle='#e0504a'; ctx.fillRect(sbX,floorY-14,14,14); ctx.fillStyle='#5a9ee0'; ctx.fillRect(sbX+2,floorY-28,14,14); ctx.fillStyle='#7ac05a'; ctx.fillRect(sbX-2,floorY-42,14,14);
+}
+registerScene('toyshop', drawToyShop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
