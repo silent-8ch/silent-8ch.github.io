@@ -5186,6 +5186,59 @@ function drawKoiPond(){
 }
 registerScene('koipond', drawKoiPond);
 
+/* ── GLASSBLOWING STUDIO (indoor · shaping molten glass) ── */
+function drawGlassblowing(){
+  const t=sceneTime, floorY=H*0.66;
+  // dim hot shop
+  ctx.fillStyle='#26201c'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#3a322a'; ctx.fillRect(0,floorY,W,H-floorY);
+  for(let i=0;i<12;i++){ ctx.fillStyle='rgba(0,0,0,.2)'; ctx.fillRect(0,floorY+i*((H-floorY)/12),W,1); }
+  // furnace (glory hole) on the right glowing orange
+  const fx=W*0.8, fy=floorY-8;
+  const flick=0.7+0.3*Math.sin(t*6)+0.1*Math.sin(t*11);
+  const wash=ctx.createRadialGradient(fx,fy-24,8,fx,fy-24,W*0.8);
+  wash.addColorStop(0,`rgba(255,150,50,${0.28*flick})`); wash.addColorStop(1,'rgba(255,150,50,0)');
+  ctx.fillStyle=wash; ctx.fillRect(0,0,W,H);
+  // furnace body
+  ctx.fillStyle='#4a3a2e'; ctx.fillRect(fx-40,fy-56,80,56+(H-fy));
+  ctx.fillStyle='#5a4636'; ctx.fillRect(fx-40,fy-56,80,6);
+  // round glowing mouth
+  const mg=ctx.createRadialGradient(fx,fy-26,2,fx,fy-26,26);
+  mg.addColorStop(0,`rgba(255,245,200,${flick})`); mg.addColorStop(0.5,'#ff7a1a'); mg.addColorStop(1,'#7a2408');
+  ctx.fillStyle=mg; ctx.beginPath(); ctx.arc(fx,fy-26,22,0,7); ctx.fill();
+  ctx.strokeStyle='#2a1a12'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(fx,fy-26,22,0,7); ctx.stroke();
+  // heat shimmer above the furnace
+  for(let i=0;i<4;i++){ ctx.strokeStyle=`rgba(255,180,90,${0.1+0.05*Math.sin(t*3+i)})`; ctx.lineWidth=3;
+    const hx=fx-14+i*9; ctx.beginPath(); ctx.moveTo(hx,fy-48); for(let k=1;k<=3;k++) ctx.lineTo(hx+Math.sin(t*2+i+k)*5, fy-48-k*14); ctx.stroke(); }
+  // the glassblower's bench (center) with rails
+  const bx=W*0.16, by=floorY-6, bw=W*0.5;
+  ctx.fillStyle='#3a2a1e'; ctx.fillRect(bx,by-4,bw,10+(H-by));
+  ctx.strokeStyle='#8a7a5a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(bx+8,by-8); ctx.lineTo(bx+bw-8,by-8); ctx.stroke(); // rail
+  ctx.beginPath(); ctx.moveTo(bx+8,by-14); ctx.lineTo(bx+bw-8,by-14); ctx.stroke();
+  // blowpipe resting across the rails with a glowing molten gather rotating at the tip
+  const pipeY=by-11;
+  ctx.strokeStyle='#9a9aa2'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(bx+6,pipeY); ctx.lineTo(bx+bw+40,pipeY); ctx.stroke();
+  const gx=bx+bw+44, gy=pipeY;
+  const wob=1+0.08*Math.sin(t*8); // rotating gather pulses
+  const gg=ctx.createRadialGradient(gx,gy,1,gx,gy,14);
+  gg.addColorStop(0,'#fff4c8'); gg.addColorStop(0.5,'#ffb028'); gg.addColorStop(1,'#e0601a');
+  ctx.fillStyle=gg; ctx.beginPath(); ctx.ellipse(gx,gy,13*wob,10,0,0,7); ctx.fill();
+  // little glow trail dripping
+  ctx.globalAlpha=0.5; ctx.fillStyle='#ffcf6a'; ctx.beginPath(); ctx.ellipse(gx,gy+10,3,5+Math.sin(t*4)*2,0,0,7); ctx.fill(); ctx.globalAlpha=1;
+  // finished colored vessels cooling on a shelf (left wall)
+  ctx.fillStyle='#5a4636'; ctx.fillRect(W*0.04,H*0.2,W*0.22,4);
+  const vc=['#3aa0c0','#c04a6a','#4fa564','#d0a030'];
+  for(let i=0;i<4;i++){ const vx=W*0.07+i*W*0.05; ctx.globalAlpha=0.85; ctx.fillStyle=vc[i];
+    ctx.beginPath(); ctx.moveTo(vx-5,H*0.2); ctx.quadraticCurveTo(vx-8,H*0.16,vx,H*0.13); ctx.quadraticCurveTo(vx+8,H*0.16,vx+5,H*0.2); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle='rgba(255,255,255,.3)'; ctx.fillRect(vx-3,H*0.15,1.5,4); }
+  // jacks and shears hanging on the bench end
+  ctx.strokeStyle='#aab'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(bx+bw-20,by-4); ctx.lineTo(bx+bw-24,by+14); ctx.moveTo(bx+bw-14,by-4); ctx.lineTo(bx+bw-10,by+14); ctx.stroke();
+  // a bucket of water by the bench, steaming faintly
+  ctx.fillStyle='#2a2420'; ctx.beginPath(); ctx.moveTo(bx+10,H-4); ctx.lineTo(bx+30,H-4); ctx.lineTo(bx+27,H-22); ctx.lineTo(bx+13,H-22); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#3a5a6a'; ctx.beginPath(); ctx.ellipse(bx+20,H-22,7,2.5,0,0,7); ctx.fill();
+}
+registerScene('glassblowing', drawGlassblowing);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
