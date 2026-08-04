@@ -4225,6 +4225,64 @@ function drawPerfumery(){
 }
 registerScene('perfumery', drawPerfumery);
 
+/* ── STAINED GLASS STUDIO (indoor · making leaded-glass windows) ── */
+function drawStainedGlass(){
+  const t=sceneTime, floorY=H*0.62;
+  // warm workshop walls + wood floor
+  ctx.fillStyle='#3a3140'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#6b4a30'; ctx.fillRect(0,floorY,W,H-floorY);
+  for(let i=0;i<8;i++){ ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(0,floorY+i*((H-floorY)/8),W,1); }
+  // big stained-glass window on left, sun streaming colored light through it
+  const wx=W*0.06, wy=H*0.08, ww=W*0.34, wh=H*0.46;
+  const glass=['#e0455a','#e88a3a','#f2c94c','#4fa564','#4a86c0','#8a5fc0','#e07aa8'];
+  ctx.fillStyle='#2a2028'; ctx.fillRect(wx-4,wy-4,ww+8,wh+8);
+  const cols=4, rows=6, cw=ww/cols, ch=wh/rows;
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+    const shimmer=0.75+0.25*Math.sin(t*1.5+r*0.7+c*1.1);
+    ctx.globalAlpha=shimmer; ctx.fillStyle=glass[(r*cols+c+((r%2)?2:0))%glass.length];
+    ctx.fillRect(wx+c*cw+1,wy+r*ch+1,cw-2,ch-2); ctx.globalAlpha=1;
+  }
+  // lead came grid
+  ctx.strokeStyle='#1a141c'; ctx.lineWidth=2;
+  for(let c=0;c<=cols;c++){ ctx.beginPath(); ctx.moveTo(wx+c*cw,wy); ctx.lineTo(wx+c*cw,wy+wh); ctx.stroke(); }
+  for(let r=0;r<=rows;r++){ ctx.beginPath(); ctx.moveTo(wx,wy+r*ch); ctx.lineTo(wx+ww,wy+r*ch); ctx.stroke(); }
+  // colored light pools cast on the floor
+  for(let i=0;i<5;i++){ ctx.globalAlpha=0.18; ctx.fillStyle=glass[i%glass.length];
+    ctx.beginPath(); ctx.ellipse(wx+ww+20+i*26, floorY+18+ (i%2)*10, 22,9,0,0,7); ctx.fill(); ctx.globalAlpha=1; }
+  // workbench on the right
+  const bx=W*0.5, bw=W*0.44, by=floorY-4;
+  ctx.fillStyle='#7a5638'; ctx.fillRect(bx,by-6,bw,H-by+6);
+  ctx.fillStyle='#8a6444'; ctx.fillRect(bx,by-6,bw,5);
+  // a small stained panel in progress on the bench (butterfly-ish)
+  const px=bx+W*0.06, py=by-40;
+  ctx.fillStyle='#2a2028'; ctx.fillRect(px-2,py-2,54,38);
+  const pcol=['#e0455a','#f2c94c','#4a86c0','#8a5fc0','#4fa564'];
+  for(let i=0;i<10;i++){ ctx.fillStyle=pcol[i%pcol.length];
+    ctx.fillRect(px+ (i%5)*10, py+ (i<5?0:18), 9,17); }
+  ctx.strokeStyle='#1a141c'; ctx.lineWidth=1.5; ctx.strokeRect(px-2,py-2,54,38);
+  // tools: soldering iron with a glowing tip + spools
+  const ix=bx+W*0.3, iy=by-8;
+  ctx.strokeStyle='#555'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(ix,iy); ctx.lineTo(ix+22,iy-16); ctx.stroke();
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(ix+18,iy-20,10,6);
+  const glow=0.5+0.5*Math.abs(Math.sin(t*3));
+  ctx.globalAlpha=glow; ctx.fillStyle='#ff8a3a'; ctx.beginPath(); ctx.arc(ix,iy,3.5,0,7); ctx.fill();
+  ctx.globalAlpha=glow*0.4; ctx.beginPath(); ctx.arc(ix,iy,7,0,7); ctx.fill(); ctx.globalAlpha=1;
+  // solder spool
+  ctx.fillStyle='#b8b8c0'; ctx.beginPath(); ctx.arc(bx+W*0.38,by-10,7,0,7); ctx.fill();
+  ctx.fillStyle='#7a5638'; ctx.beginPath(); ctx.arc(bx+W*0.38,by-10,2.5,0,7); ctx.fill();
+  // glass sheets leaning against the bench
+  for(let i=0;i<4;i++){ ctx.globalAlpha=0.55; ctx.fillStyle=glass[(i*2)%glass.length];
+    ctx.beginPath(); ctx.moveTo(bx+6+i*7,by-6); ctx.lineTo(bx+18+i*7,by-6); ctx.lineTo(bx+22+i*7,by-52); ctx.lineTo(bx+10+i*7,by-52); ctx.closePath(); ctx.fill(); ctx.globalAlpha=1; }
+  // hanging finished sun-catcher, gently swaying
+  const sway=Math.sin(t*1.1)*6;
+  const scx=W*0.5+sway, scy=H*0.16;
+  ctx.strokeStyle='#666'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.5,H*0.05); ctx.lineTo(scx,scy); ctx.stroke();
+  for(let k=0;k<6;k++){ const a=k/6*Math.PI*2; ctx.globalAlpha=0.85; ctx.fillStyle=glass[k];
+    ctx.beginPath(); ctx.arc(scx+Math.cos(a)*8, scy+Math.sin(a)*8, 5,0,7); ctx.fill(); ctx.globalAlpha=1; }
+  ctx.fillStyle='#f2c94c'; ctx.beginPath(); ctx.arc(scx,scy,4,0,7); ctx.fill();
+}
+registerScene('stainedglass', drawStainedGlass);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
