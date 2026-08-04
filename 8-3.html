@@ -4187,6 +4187,44 @@ function drawPasture(){
 }
 registerScene('pasture', drawPasture);
 
+/* ── PERFUMERY (indoor · perfume) ── */
+function drawPerfumery(){
+  const floorY = H*0.62;
+
+  ctx.fillStyle='#f4dce0'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#d4af37'; ctx.fillRect(0,floorY-26,W,3); ctx.fillRect(0,H*0.1,W,2);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#d8c0b0'); fl.addColorStop(1,'#c0a898');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  for (let r=0;r<5;r++) for (let c=0;c<10;c++){ if ((r+c)%2){ ctx.fillStyle='rgba(180,140,120,.15)'; ctx.fillRect(c*W/10,floorY+r/5*(H-floorY),W/10,(H-floorY)/5); } }
+
+  ctx.fillStyle='#b0708a'; ctx.font='italic bold 14px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('Parfum', W*0.5, H*0.08); ctx.textAlign='left';
+
+  function bottle(x,y,col,shape){
+    ctx.fillStyle=col;
+    if (shape===0){ ctx.fillRect(x-5,y-14,10,14); }
+    else if (shape===1){ ctx.beginPath(); ctx.moveTo(x-6,y); ctx.lineTo(x+6,y); ctx.lineTo(x+4,y-12); ctx.lineTo(x-4,y-12); ctx.closePath(); ctx.fill(); }
+    else { ctx.beginPath(); ctx.arc(x,y-8,7,0,7); ctx.fill(); }
+    ctx.fillStyle='#d4af37'; ctx.fillRect(x-2,y-20,4,6);
+    ctx.fillStyle='rgba(200,120,150,.6)'; ctx.beginPath(); ctx.arc(x+6,y-18,3,0,7); ctx.fill();
+  }
+  for (let s=0;s<2;s++){ const sy=H*0.16+s*H*0.16; ctx.fillStyle='#c9a24a'; ctx.fillRect(W*0.06,sy+2,W*0.5,3);
+    const cols=['#e86a9a','#f2c14e','#9a5fd0','#5a9ee0','#7ac05a','#ff8a5a']; for (let i=0;i<6;i++) bottle(W*0.1+i*W*0.075, sy, cols[(i+s)%6], (i+s)%3); }
+
+  // vanity mirror
+  const vX=W*0.82, vTop=H*0.14;
+  ctx.fillStyle='#d4af37'; ctx.beginPath(); ctx.ellipse(vX,vTop+30,22,34,0,0,7); ctx.fill();
+  ctx.fillStyle='#cfe0e8'; ctx.beginPath(); ctx.ellipse(vX,vTop+30,18,30,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.moveTo(vX-10,vTop+16); ctx.lineTo(vX-2,vTop+16); ctx.lineTo(vX-12,vTop+40); ctx.closePath(); ctx.fill();
+
+  // counter + flowers + display bottle
+  const cY=floorY-6; ctx.fillStyle='#c9a88a'; ctx.fillRect(W*0.1,cY-8,W*0.8,8+(H-cY)); ctx.fillStyle='#b0906a'; ctx.fillRect(W*0.1,cY-8,W*0.8,4);
+  const flX=W*0.4, flY=cY-8;
+  ctx.fillStyle='#cfe0e8'; ctx.fillRect(flX-6,flY-14,12,14);
+  for (let i=-1;i<=1;i++){ ctx.strokeStyle='#3a7a3a'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(flX,flY-14); ctx.lineTo(flX+i*8,flY-30); ctx.stroke(); ctx.fillStyle=['#e86a9a','#f2c14e','#ff8a5a'][i+1]; ctx.beginPath(); ctx.arc(flX+i*8,flY-32,5,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(flX+i*8,flY-32,1.5,0,7); ctx.fill(); }
+  bottle(W*0.62, cY-8, '#e86a9a', 2);
+}
+registerScene('perfumery', drawPerfumery);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
