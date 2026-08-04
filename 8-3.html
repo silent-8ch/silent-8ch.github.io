@@ -2862,6 +2862,43 @@ function drawBalletStudio(){
 }
 registerScene('balletstudio', drawBalletStudio);
 
+/* ── VINEYARD AT DUSK (outdoor · evening) ── */
+function drawVineyard(){
+  const horizon = H*0.40;
+
+  // dusk sky + low sun
+  const sky=ctx.createLinearGradient(0,0,0,horizon); sky.addColorStop(0,'#6a4a8a'); sky.addColorStop(0.5,'#e08a5a'); sky.addColorStop(1,'#f2c28a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizon);
+  ctx.fillStyle='rgba(255,220,150,.5)'; ctx.beginPath(); ctx.arc(W*0.7,horizon-6,26,0,7); ctx.fill();
+  ctx.fillStyle='#ffe8b0'; ctx.beginPath(); ctx.arc(W*0.7,horizon-6,16,0,7); ctx.fill();
+
+  // hills + villa
+  ctx.fillStyle='#8a7a5a'; ctx.beginPath(); ctx.moveTo(0,horizon); ctx.quadraticCurveTo(W*0.3,horizon-20,W*0.6,horizon-4); ctx.quadraticCurveTo(W*0.85,horizon-16,W,horizon-2); ctx.lineTo(W,horizon); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#d8c0a0'; ctx.fillRect(W*0.16,horizon-18,20,14);
+  ctx.fillStyle='#9a4a3a'; ctx.beginPath(); ctx.moveTo(W*0.16-2,horizon-18); ctx.lineTo(W*0.16+10,horizon-26); ctx.lineTo(W*0.16+22,horizon-18); ctx.closePath(); ctx.fill();
+
+  // field
+  const fld=ctx.createLinearGradient(0,horizon,0,H); fld.addColorStop(0,'#7a6a3a'); fld.addColorStop(1,'#5a4e2a');
+  ctx.fillStyle=fld; ctx.fillRect(0,horizon,W,H-horizon);
+
+  // vine rows in perspective
+  for (let r=0;r<9;r++){
+    const p=r/8, y=horizon+Math.pow(p,1.5)*(H-horizon), postH=6+p*22;
+    ctx.strokeStyle=`rgb(${60+p*20},${80+p*20},${40+p*10})`; ctx.lineWidth=2+p*3; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    ctx.fillStyle=`rgb(${90-p*20},40,${110-p*10})`; for (let x=10;x<W;x+=30+p*20){ ctx.beginPath(); ctx.arc(x,y-postH*0.4,2+p*3,0,7); ctx.fill(); }
+    ctx.strokeStyle=`rgba(80,60,30,${0.4+p*0.4})`; ctx.lineWidth=1+p*2; for (let x=20;x<W;x+=60+p*30){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y-postH); ctx.stroke(); }
+  }
+
+  // foreground barrels
+  function barrel(x,y){
+    ctx.fillStyle='#8a5a2a'; roundRect(x-14,y-20,28,24,6); ctx.fill();
+    ctx.strokeStyle='#5a3a18'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x-14,y-14); ctx.lineTo(x+14,y-14); ctx.moveTo(x-14,y-2); ctx.lineTo(x+14,y-2); ctx.stroke();
+    ctx.fillStyle='#7a4a22'; ctx.beginPath(); ctx.ellipse(x,y-20,14,4,0,0,7); ctx.fill();
+  }
+  barrel(W*0.85,H*0.90); barrel(W*0.12,H*0.86);
+}
+registerScene('vineyard', drawVineyard);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
