@@ -82,6 +82,11 @@ const TRINKET_POOL = (()=>{
   g(['runecircle'], ['🌙','✨','📜']);
   g(['arcanelibrary'], ['📜','🕯️','🦉']);
   g(['fairyring'], ['🧚','🍄','⭐']);
+  g(['alchemylab'], ['⚗️','🧪','📜']);
+  g(['witchcottage'], ['🧹','🐈‍⬛','🕯️']);
+  g(['moontemple'], ['🌙','⛩️','✨']);
+  g(['willowispmarsh'], ['🔥','🌫️','🐸']);
+  g(['enchantedmirrorhall'], ['🪞','✨','🕯️']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -685,6 +690,9 @@ const LOVE_NOTES = [
   {day:22, text:'Twenty-two days, and you\'ve made a habit out of being the nicest thing about mine. 💛'},
   {day:105, text:'Past a hundred days now, and honestly? I\'m just getting warmed up loving you. 🔥'},
   {day:190, text:'Some love is loud. Ours is the quiet, steady kind I\'d never trade for anything. 🕊️'},
+  {day:24, text:'Almost a month of little visits, and you still feel like the best surprise I ever got. 🎁'},
+  {day:115, text:'The days keep adding up, and every one of them just makes me more sure it\'s you. 💛'},
+  {day:220, text:'If I could bottle one feeling forever, it\'d be this — knowing I get to keep choosing you. 🫙💗'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){

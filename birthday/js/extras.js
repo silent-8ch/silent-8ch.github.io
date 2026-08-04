@@ -2086,3 +2086,161 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 13). Two scene-gated, contained moments — one calm,
+   one playful. No always-on overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   30) WIND CHIME  —  in the zen garden or tea house a chime hangs from above. Tap
+   it to set the tubes swaying with a soft, peaceful ring; a few notes drift off
+   and she breathes easy. Restores a touch of calm energy. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxWindChime(){
+  try{
+    const CALM = new Set(['zengarden','teahouse','teagarden','bamboo','hotspring','spa','bonsaigarden']);
+    let chime = null;                    // {x,topY,swing,phase,cd}
+    function inCalm(){ try{ return (typeof SCENES!=='undefined') && CALM.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inCalm()){ chime = null; return; }
+      if (!chime){ chime = { x: Math.max(W*0.18, Math.min(W*0.86, W*0.80)), topY: H*0.10, swing: 0.04, phase: rand(0,Math.PI*2), cd:0 }; }
+      chime.phase += dt * 3;
+      chime.swing = Math.max(0.04, chime.swing - dt*0.12);    // a gentle breeze idle + decay after a ring
+      if (chime.cd > 0) chime.cd -= dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!chime || !inCalm()) return;
+      const x = chime.x, top = chime.topY;
+      const ang = Math.sin(chime.phase) * chime.swing;
+      ctx.save();
+      // support cord to the top of the frame
+      ctx.strokeStyle = 'rgba(120,100,80,0.7)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, top); ctx.stroke();
+      // top cap
+      ctx.fillStyle = '#8a6a45';
+      ctx.beginPath(); ctx.ellipse(x, top, 10, 4, 0, 0, 7); ctx.fill();
+      // tubes hanging, swaying together
+      const tubes = 5, spread = 16, len = 26;
+      for (let i=0;i<tubes;i++){
+        const ox = (i - (tubes-1)/2) * (spread/(tubes-1)) * 2;
+        const tl = len - Math.abs(i-(tubes-1)/2)*3;
+        const bx = x + ox + Math.sin(chime.phase + i*0.4) * chime.swing * 40;
+        const by = top + 4;
+        ctx.strokeStyle = 'rgba(150,120,90,0.5)'; ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.moveTo(x + ox*0.3, top); ctx.lineTo(bx, by); ctx.stroke();
+        ctx.strokeStyle = '#c9b06a'; ctx.lineWidth = 2.4; ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + tl*Math.sin(ang), by + tl*Math.cos(ang)); ctx.stroke();
+      }
+      // clapper + wind sail
+      const cy = top + 4 + (len+8);
+      const sailX = x + Math.sin(chime.phase*1.1) * chime.swing * 55;
+      ctx.strokeStyle = 'rgba(150,120,90,0.5)'; ctx.lineWidth = 0.6;
+      ctx.beginPath(); ctx.moveTo(x, top+4); ctx.lineTo(sailX, cy); ctx.stroke();
+      ctx.fillStyle = '#d98c4a';
+      ctx.beginPath(); ctx.ellipse(sailX, cy, 5, 6, ang, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!chime || !inCalm()) return false;
+        // generous column around the hanging tubes
+        if (px < chime.x - 26 || px > chime.x + 26 || py < chime.topY - 4 || py > chime.topY + 60) return false;
+        if (chime.cd > 0){ chime.swing = Math.min(0.5, chime.swing + 0.1); return true; }
+        chime.cd = 0.8; chime.swing = Math.min(0.55, chime.swing + 0.42);
+        if (typeof sfx === 'function'){ sfx('draw'); }
+        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(chime.x+rand(-16,16), chime.topY+rand(20,40), pick(['♪','🎐','✨'])), i*100);
+        if (typeof say === 'function') say(pick(['So peaceful 🎐','Mmm, listen… 😌','Like a soft breeze 💛','Ahhh 🍃']));
+        try{ state.energy = clamp(state.energy + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   31) BUILD A SANDCASTLE  —  on the beach, tap the little mound of sand to shape
+   it, tap by tap, into a castle with towers, a door and a flag (plus a shell or
+   two). She helps and cheers when it's finished. Only on sandy scenes.
+   -------------------------------------------------------------------------- */
+(function fxSandcastle(){
+  try{
+    const SANDY = new Set(['beach','moonbeach','sanddunes','desertoasis']);
+    let sc = null;                       // {x,y,stage,cd,doneT,flag}
+    function onSand(){ try{ return (typeof SCENES!=='undefined') && SANDY.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!onSand()){ sc = null; return; }
+      if (!sc){ sc = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.26)), y: rand(H*0.76,H*0.82), stage:0, cd:0, doneT:0, flag:rand(0,Math.PI*2) }; }
+      if (sc.cd > 0) sc.cd -= dt; if (sc.doneT > 0) sc.doneT -= dt; sc.flag += dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!sc || !onSand()) return;
+      const x = sc.x, base = sc.y, sand = '#e6c896', sand2 = '#d8b579';
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.beginPath(); ctx.ellipse(x, base+3, 24, 5, 0, 0, 7); ctx.fill();
+      if (sc.stage === 0){
+        ctx.fillStyle = sand; ctx.beginPath(); ctx.ellipse(x, base, 16, 8, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.beginPath(); ctx.ellipse(x-4, base-2, 5, 2.5, 0, 0, 7); ctx.fill();
+      } else {
+        // main keep (stage>=1)
+        ctx.fillStyle = sand; ctx.fillRect(x-14, base-16, 28, 16);
+        if (sc.stage >= 2){
+          // corner towers
+          ctx.fillRect(x-20, base-22, 8, 22);
+          ctx.fillRect(x+12, base-22, 8, 22);
+          // crenellations
+          ctx.fillStyle = sand2;
+          for (const tx of [x-20, x+12]){ ctx.fillRect(tx, base-25, 2.5, 3); ctx.fillRect(tx+3, base-25, 2.5, 3); ctx.fillRect(tx+6, base-25, 2, 3); }
+        }
+        if (sc.stage >= 3){
+          // door
+          ctx.fillStyle = sand2; ctx.beginPath(); ctx.moveTo(x-4, base); ctx.lineTo(x-4, base-7); ctx.arc(x, base-7, 4, Math.PI, 0); ctx.lineTo(x+4, base); ctx.closePath(); ctx.fill();
+          // central tower + flag
+          ctx.fillStyle = sand; ctx.fillRect(x-5, base-26, 10, 12);
+          ctx.strokeStyle = '#7a5a35'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, base-26); ctx.lineTo(x, base-36); ctx.stroke();
+          const wave = Math.sin(sc.flag*5)*2;
+          ctx.fillStyle = '#e0556a'; ctx.beginPath(); ctx.moveTo(x, base-36); ctx.lineTo(x+9+wave, base-33.5); ctx.lineTo(x, base-31); ctx.closePath(); ctx.fill();
+          // a shell and a starfish at the base
+          ctx.font = '10px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText('🐚', x-24, base+2); ctx.fillText('⭐', x+24, base+1);
+        }
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!sc || !onSand()) return false;
+        if (Math.hypot(px - sc.x, py - (sc.y - 14)) > 30) return false;
+        if (sc.cd > 0) return true;
+        sc.cd = 0.4;
+        if (typeof fxAt === 'function') fxAt(sc.x, sc.y - sc.stage*8 - 8, '✨');
+        if (typeof sfx === 'function') sfx('tap');
+        if (sc.stage < 3){
+          sc.stage++;
+          if (sc.stage === 3){
+            sc.doneT = 3;
+            if (typeof burstAt === 'function') burstAt(pick(['🏰','⭐','🐚']), sc.x, sc.y - 30);
+            if (typeof hearts === 'function') hearts();
+            if (typeof sfx === 'function') sfx('day');
+            if (typeof say === 'function') say(pick(['Our castle! 🏰','It’s beautiful 🥰','Ta-daa! ⭐','King and queen of the beach 👑']));
+            try{ state.fun = clamp(state.fun + 8); state.love = clamp(state.love + 4); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          } else {
+            if (typeof say === 'function') say(pick(['Pat, pat… 🏖️','Add a tower! 🏰','Almost there!']));
+            try{ state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          }
+        } else {
+          if (typeof say === 'function') say(pick(['So proud of it 🏰','Don’t let the tide get it! 🌊','Perfect 🥰']));
+          if (sc.doneT <= 0) sc.stage = 0;                     // a friendly boop starts a fresh one
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

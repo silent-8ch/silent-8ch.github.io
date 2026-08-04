@@ -60,6 +60,8 @@ const SCENE_LABELS = {
   arcanelibrary:'Arcane Library', fairyring:'Fairy Ring',
   alchemylab:'Alchemy Lab', witchcottage:"Witch's Cottage", moontemple:'Moon Temple',
   willowispmarsh:"Will-o'-Wisp Marsh", enchantedmirrorhall:'Enchanted Mirror Hall',
+  hummingbirdgarden:'Hummingbird Garden', gelateria:'Gelateria', lotuspond:'Lotus Pond',
+  trainstation:'Vintage Train Station',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

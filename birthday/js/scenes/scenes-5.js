@@ -2719,3 +2719,214 @@ function drawMirrorHall(){
   for (const cx of [W*0.08,W*0.92]){ const cy=floorY-10+Math.sin(t*1.2+cx)*3; ctx.fillStyle='#3a2a4a'; ctx.fillRect(cx-2,cy,4,H-cy-4); ctx.fillStyle=`rgba(255,200,120,.2)`; ctx.beginPath(); ctx.arc(cx,cy-4,10,0,7); ctx.fill(); ctx.fillStyle=`rgba(242,176,42,${0.85+0.1*Math.sin(t*3+cx)})`; ctx.beginPath(); ctx.ellipse(cx,cy-4,2.4,5,0,0,7); ctx.fill(); }
 }
 registerScene('enchantedmirrorhall', drawMirrorHall);
+
+/* ── HUMMINGBIRD GARDEN (outdoor · flowers & darting hummingbirds) ── */
+function drawHummingbirdGarden(){
+  const t = sceneTime, groundY = H*0.62;
+
+  // bright sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#6fbce8'); sky.addColorStop(1,'#dbeecf');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.82,H*0.12,18,0,7); ctx.fill();
+  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.10,0.6); drawCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.16,0.45);
+
+  // leafy hedge backdrop
+  ctx.fillStyle='#3a7a3a'; ctx.fillRect(0,groundY-30,W,34);
+  ctx.fillStyle='#4a8f42'; for (let x=0;x<W;x+=16){ ctx.beginPath(); ctx.arc(x,groundY-30,10,Math.PI,0); ctx.fill(); }
+  // a climbing trellis with vines (left)
+  ctx.strokeStyle='#8a6038'; ctx.lineWidth=2; for (let x=W*0.06;x<W*0.24;x+=8){ ctx.beginPath(); ctx.moveTo(x,H*0.14); ctx.lineTo(x,groundY); ctx.stroke(); }
+  for (let y=H*0.16;y<groundY;y+=10){ ctx.beginPath(); ctx.moveTo(W*0.06,y); ctx.lineTo(W*0.24,y); ctx.stroke(); }
+  ctx.fillStyle='#c05a8a'; for (let i=0;i<8;i++){ const vx=W*0.06+ (i*13)%(W*0.18); const vy=H*0.16+ (i*29)%(groundY-H*0.16); ctx.beginPath(); ctx.arc(vx,vy,3,0,7); ctx.fill(); }
+
+  // garden bed ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#5a9e3a'); gr.addColorStop(1,'#3f7a26'); ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+
+  // tall tubular flowers (trumpet/fuchsia) that hummingbirds love — sides
+  function trumpetFlower(fx,baseY,h,col){ ctx.strokeStyle='#3a7a2a'; ctx.lineWidth=2; const sway=Math.sin(t*1.4+fx*0.05)*3;
+    ctx.beginPath(); ctx.moveTo(fx,baseY); ctx.quadraticCurveTo(fx+sway,baseY-h*0.6,fx+sway,baseY-h); ctx.stroke();
+    // hanging trumpet blossoms
+    for (let k=0;k<3;k++){ const bx=fx+sway+ (k-1)*7, by=baseY-h+6+k*4; ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx-4,by+10); ctx.lineTo(bx+4,by+10); ctx.closePath(); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.ellipse(bx,by+10,4,1.6,0,0,7); ctx.fill(); }
+    // leaves
+    ctx.fillStyle='#4a8a2e'; ctx.beginPath(); ctx.ellipse(fx-4,baseY-h*0.4,8,4,-0.4,0,7); ctx.fill(); }
+  trumpetFlower(W*0.10,H*0.90,70,'#e2482e'); trumpetFlower(W*0.20,H*0.86,54,'#e26fb0'); trumpetFlower(W*0.90,H*0.90,72,'#a06fe0'); trumpetFlower(W*0.80,H*0.86,52,'#e2a02e');
+  // low daisy clumps (sides)
+  for (const [dx,dy] of [[W*0.16,H*0.80],[W*0.86,H*0.82]]){ for (let d=0;d<3;d++){ const cx2=dx+d*8-8, cy2=dy+ (d%2)*4; ctx.fillStyle='#fff'; for (let k=0;k<7;k++){ const a=k/7*6.28; ctx.beginPath(); ctx.ellipse(cx2+Math.cos(a)*4,cy2+Math.sin(a)*4,2.2,1.2,a,0,7); ctx.fill(); } ctx.fillStyle='#e0b040'; ctx.beginPath(); ctx.arc(cx2,cy2,1.8,0,7); ctx.fill(); } }
+
+  // hummingbirds darting (fast wing blur, hovering near flowers)
+  function hummingbird(hx,hy,dir,col){ ctx.save(); ctx.translate(hx,hy); ctx.scale(dir,1);
+    // wing blur
+    const wingSpread=4+Math.abs(Math.sin(t*20))*4; ctx.fillStyle='rgba(200,220,230,.35)'; ctx.beginPath(); ctx.ellipse(-1,-1,9,wingSpread,0.5,0,7); ctx.fill();
+    // body
+    ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(0,0,7,3.4,0.1,0,7); ctx.fill();
+    // iridescent throat
+    ctx.fillStyle='#d43a5a'; ctx.beginPath(); ctx.arc(4,1,2,0,7); ctx.fill();
+    // head + long beak
+    ctx.fillStyle=col; ctx.beginPath(); ctx.arc(5,-1,2.6,0,7); ctx.fill();
+    ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(7,-1); ctx.lineTo(15,-2); ctx.stroke();
+    // tail
+    ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(-6,0); ctx.lineTo(-12,-3); ctx.lineTo(-12,3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(5.6,-1.4,0.7,0,7); ctx.fill();
+    ctx.restore(); }
+  hummingbird(W*0.28+Math.sin(t*1.5)*10, H*0.34+Math.cos(t*1.2)*8, 1, '#2f9a6a');
+  hummingbird(W*0.68+Math.sin(t*1.1+2)*14, H*0.44+Math.cos(t*1.6)*10, -1, '#3a7ad0');
+  hummingbird(W*0.5+Math.sin(t*0.9+1)*20, H*0.26+Math.cos(t*1.3)*6, 1, '#7a9a2a');
+  // a hanging nectar feeder (center-back, high)
+  const nfx=W*0.5, nfy=H*0.16;
+  ctx.strokeStyle='#8a6038'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(nfx,0); ctx.lineTo(nfx,nfy); ctx.stroke();
+  ctx.fillStyle='rgba(230,90,90,.7)'; roundRect(nfx-8,nfy,16,16,4); ctx.fill(); ctx.fillStyle='#d43a5a'; for (let k=0;k<3;k++){ ctx.beginPath(); ctx.arc(nfx-5+k*5,nfy+16,2,0,7); ctx.fill(); }
+}
+registerScene('hummingbirdgarden', drawHummingbirdGarden);
+
+/* ── GELATERIA (indoor · Italian gelato parlor) ── */
+function drawGelateria(){
+  const t = sceneTime, counterY = H*0.60;
+
+  // sunny mint-and-cream wall
+  const wall=ctx.createLinearGradient(0,0,0,counterY); wall.addColorStop(0,'#f2ead6'); wall.addColorStop(1,'#e6dcc2');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,counterY);
+  // pistachio wainscot
+  ctx.fillStyle='#a8ce8a'; ctx.fillRect(0,counterY-22,W,22);
+  ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,counterY-22); ctx.lineTo(W,counterY-22); ctx.stroke();
+
+  // striped awning across the top (café style)
+  for (let i=0;i<12;i++){ ctx.fillStyle= i%2?'#f2ece0':'#4aa060'; ctx.beginPath(); ctx.moveTo(i*(W/12),0); ctx.lineTo((i+1)*(W/12),0); ctx.lineTo((i+1)*(W/12),16); ctx.lineTo((i+0.5)*(W/12),22); ctx.lineTo(i*(W/12),16); ctx.closePath(); ctx.fill(); }
+
+  // chalkboard menu (left)
+  ctx.fillStyle='#2a2a24'; ctx.fillRect(W*0.06,H*0.14,W*0.22,H*0.22); ctx.strokeStyle='#8a6038'; ctx.lineWidth=3; ctx.strokeRect(W*0.06,H*0.14,W*0.22,H*0.22);
+  ctx.fillStyle='rgba(240,230,210,.8)'; ctx.font='9px sans-serif';
+  ctx.strokeStyle='rgba(240,230,210,.7)'; ctx.lineWidth=1; for (let k=0;k<5;k++){ ctx.beginPath(); ctx.moveTo(W*0.09,H*0.18+k*8); ctx.lineTo(W*0.24,H*0.18+k*8); ctx.stroke(); }
+  ctx.fillStyle='#e0b0c0'; ctx.beginPath(); ctx.arc(W*0.10,H*0.16,3,0,7); ctx.fill();
+
+  // hanging pendant lights
+  for (const lx of [W*0.5,W*0.78]){ ctx.strokeStyle='#8a7a5a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lx,22); ctx.lineTo(lx,H*0.12); ctx.stroke();
+    ctx.fillStyle='rgba(255,220,150,.2)'; ctx.beginPath(); ctx.arc(lx,H*0.15,14,0,7); ctx.fill();
+    ctx.fillStyle='#e8c060'; ctx.beginPath(); ctx.moveTo(lx-8,H*0.12); ctx.lineTo(lx+8,H*0.12); ctx.lineTo(lx+5,H*0.16); ctx.lineTo(lx-5,H*0.16); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=`rgba(255,220,140,${0.85+0.1*Math.sin(t*2+lx)})`; ctx.beginPath(); ctx.arc(lx,H*0.16,3,0,7); ctx.fill(); }
+
+  // gelato display case (glass front) with mounded tubs of colorful gelato
+  const caseY=counterY, caseH=H*0.16;
+  ctx.fillStyle='#d8cdb8'; ctx.fillRect(0,caseY,W,caseH+ (H-caseY-caseH));
+  // glass case
+  ctx.fillStyle='rgba(200,230,240,.2)'; ctx.fillRect(0,caseY-4,W,caseH);
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1; ctx.strokeRect(2,caseY-4,W-4,caseH);
+  // tubs of gelato with rounded mounds + a scoop/label sign in each
+  const flav=[['#f2c0a0','choc'],['#a8ce8a','pist'],['#f2a0b8','strw'],['#f2e2a0','mango'],['#c0a0e0','grape'],['#8a5a3a','coff']];
+  for (let i=0;i<6;i++){ const tx=W*0.08+i*W*0.155; const ty=caseY+caseH*0.55;
+    ctx.fillStyle='#c9c9d0'; roundRect(tx-16,ty,32,caseH*0.4,2); ctx.fill(); // metal tub
+    ctx.fillStyle=flav[i][0]; ctx.beginPath(); ctx.moveTo(tx-16,ty+2); ctx.quadraticCurveTo(tx-8,ty-10,tx,ty-4); ctx.quadraticCurveTo(tx+8,ty-12,tx+16,ty+2); ctx.closePath(); ctx.fill();
+    // a little scoop-ball on top
+    ctx.beginPath(); ctx.arc(tx,ty-8,5,0,7); ctx.fill();
+    // paper flavor tag
+    ctx.fillStyle='#fff'; ctx.fillRect(tx-6,ty-2,12,5); ctx.fillStyle='#8a5a3a'; ctx.fillRect(tx-4,ty,8,1); }
+
+  // a display cone stack + a served cone on the counter (sides, low)
+  const cx=W*0.9, cy=H-8;
+  for (let k=0;k<3;k++){ ctx.fillStyle='#d8a86a'; ctx.beginPath(); ctx.moveTo(cx-8,cy-30-k*6); ctx.lineTo(cx,cy-10-k*6); ctx.lineTo(cx+8,cy-30-k*6); ctx.closePath(); ctx.fill(); }
+  // served cone (left, low)
+  const sx=W*0.12, sy=H-10;
+  ctx.fillStyle='#d8a86a'; ctx.beginPath(); ctx.moveTo(sx-7,sy-20); ctx.lineTo(sx,sy); ctx.lineTo(sx+7,sy-20); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='rgba(150,100,50,.5)'; ctx.lineWidth=0.7; ctx.beginPath(); ctx.moveTo(sx-5,sy-16); ctx.lineTo(sx+3,sy-6); ctx.moveTo(sx+5,sy-16); ctx.lineTo(sx-3,sy-6); ctx.stroke();
+  ctx.fillStyle='#f2a0b8'; ctx.beginPath(); ctx.arc(sx-3,sy-22,5,0,7); ctx.fill(); ctx.fillStyle='#a8ce8a'; ctx.beginPath(); ctx.arc(sx+3,sy-24,5,0,7); ctx.fill(); ctx.fillStyle='#f2e2a0'; ctx.beginPath(); ctx.arc(sx,sy-30,5,0,7); ctx.fill();
+  ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.arc(sx,sy-34,1.6,0,7); ctx.fill();
+}
+registerScene('gelateria', drawGelateria);
+
+/* ── LOTUS POND (outdoor · serene lotus water garden) ── */
+function drawLotusPond(){
+  const t = sceneTime, waterY = H*0.34;
+
+  // soft warm sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#bfe0ee'); sky.addColorStop(1,'#f2e6d6');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  ctx.fillStyle='rgba(255,240,200,.5)'; ctx.beginPath(); ctx.arc(W*0.24,H*0.12,26,0,7); ctx.fill();
+  drawCloud(W*0.7+Math.sin(t*0.08)*8,H*0.09,0.6);
+
+  // distant reeds/bank at horizon
+  ctx.fillStyle='#4a6a3a'; ctx.fillRect(0,waterY-14,W,18);
+  ctx.strokeStyle='#5a7a3a'; ctx.lineWidth=2; for (let x=6;x<W;x+=12){ ctx.beginPath(); ctx.moveTo(x,waterY-14); ctx.lineTo(x+Math.sin(t*1.2+x)*2,waterY-30); ctx.stroke(); }
+
+  // pond water (fills lower canvas)
+  const wat=ctx.createLinearGradient(0,waterY,0,H); wat.addColorStop(0,'#5a9aa8'); wat.addColorStop(0.5,'#3a7a8a'); wat.addColorStop(1,'#2a5a6a');
+  ctx.fillStyle=wat; ctx.fillRect(0,waterY,W,H-waterY);
+  // sky reflection shimmer + ripple lines
+  ctx.fillStyle='rgba(240,230,200,.10)'; ctx.fillRect(0,waterY,W,10);
+  ctx.strokeStyle='rgba(200,230,235,.14)'; ctx.lineWidth=1; for (let y=waterY+10;y<H;y+=10){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.05+t*1.3+y)*1.6; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+  // expanding ripple rings where dew drops fall
+  for (let i=0;i<3;i++){ const rp=((t*0.5+i*0.7)%1); const rr=8+rp*40; const rx=W*(0.3+i*0.25), ry=waterY+40+i*30; ctx.strokeStyle=`rgba(220,240,240,${0.3*(1-rp)})`; ctx.lineWidth=1; ctx.beginPath(); ctx.ellipse(rx,ry,rr,rr*0.35,0,0,7); ctx.stroke(); }
+
+  // lily pads scattered (varied sizes, sides + back)
+  function pad(px,py,r){ ctx.fillStyle='#2e7a4a'; ctx.beginPath(); ctx.ellipse(px,py,r,r*0.4,0,0.5,6.5); ctx.closePath(); ctx.fill(); ctx.fillStyle='#3a8a54'; ctx.beginPath(); ctx.ellipse(px,py,r*0.7,r*0.28,0,0.5,6.4); ctx.fill(); ctx.strokeStyle='rgba(20,60,30,.4)'; ctx.lineWidth=0.6; for (let k=0;k<4;k++){ ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px+Math.cos(k*1.4)*r*0.8,py+Math.sin(k*1.4)*r*0.35); ctx.stroke(); } }
+  pad(W*0.2,waterY+30,20); pad(W*0.8,waterY+40,22); pad(W*0.5,waterY+18,16); pad(W*0.12,H*0.80,26); pad(W*0.9,H*0.84,24);
+
+  // lotus blooms (pink layered petals) — sides + back, keeping center-lower clear
+  function lotus(px,py,sc){ ctx.save(); ctx.translate(px,py); ctx.scale(sc,sc);
+    // outer petals
+    ctx.fillStyle='#e589b0'; for (let k=0;k<7;k++){ const a=k/7*6.28; ctx.save(); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,-9,4,10,0,0,7); ctx.fill(); ctx.restore(); }
+    // inner petals
+    ctx.fillStyle='#f2b8d2'; for (let k=0;k<5;k++){ const a=k/5*6.28+0.4; ctx.save(); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,-5,3,7,0,0,7); ctx.fill(); ctx.restore(); }
+    // seed pod center
+    ctx.fillStyle='#e0c04a'; ctx.beginPath(); ctx.arc(0,0,3,0,7); ctx.fill(); ctx.fillStyle='#8a7a2a'; for (let k=0;k<5;k++){ const a=k/5*6.28; ctx.beginPath(); ctx.arc(Math.cos(a)*1.4,Math.sin(a)*1.4,0.6,0,7); ctx.fill(); }
+    ctx.restore(); }
+  lotus(W*0.24,waterY+28,1.2); lotus(W*0.82,waterY+38,1.3); lotus(W*0.5,waterY+14,0.8);
+  // a couple of buds on stems
+  for (const [bx,by] of [[W*0.14,waterY+50],[W*0.9,waterY+56]]){ ctx.strokeStyle='#3a7a4a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(bx,by+14); ctx.lineTo(bx,by); ctx.stroke(); ctx.fillStyle='#e589b0'; ctx.beginPath(); ctx.ellipse(bx,by-4,4,8,0,0,7); ctx.fill(); ctx.fillStyle='#3a7a4a'; ctx.beginPath(); ctx.ellipse(bx,by-2,3,4,0,0,7); ctx.fill(); }
+
+  // a dragonfly hovering
+  const dx=W*0.4+Math.sin(t*1.2)*40, dy=waterY-4+Math.cos(t*1.6)*8;
+  ctx.fillStyle='#3aa0c0'; ctx.fillRect(dx-1,dy-1,10,2); const wf=Math.abs(Math.sin(t*16))*2+2; ctx.fillStyle='rgba(200,230,240,.5)'; ctx.beginPath(); ctx.ellipse(dx+2,dy,6,wf,0.4,0,7); ctx.ellipse(dx+2,dy,6,wf,-0.4,0,7); ctx.fill();
+}
+registerScene('lotuspond', drawLotusPond);
+
+/* ── VINTAGE TRAIN STATION (indoor · covered platform, steam era) ── */
+function drawTrainStation(){
+  const t = sceneTime, platformY = H*0.72;
+
+  // iron-and-glass roof + morning light
+  const roof=ctx.createLinearGradient(0,0,0,H*0.20); roof.addColorStop(0,'#3a4048'); roof.addColorStop(1,'#5a6068');
+  ctx.fillStyle=roof; ctx.fillRect(0,0,W,H*0.14);
+  // glazed roof panels with sky glow between girders
+  ctx.fillStyle='#cfe0ea'; ctx.fillRect(0,H*0.14,W,H*0.10);
+  ctx.strokeStyle='#2a3038'; ctx.lineWidth=3; for (let x=0;x<=W;x+=W/8){ ctx.beginPath(); ctx.moveTo(x,H*0.14); ctx.lineTo(x,H*0.24); ctx.stroke(); }
+  // arched girder trusses
+  ctx.strokeStyle='#2a3038'; ctx.lineWidth=2; ctx.beginPath(); for (let x=0;x<=W;x+=8){ const y=H*0.14+Math.abs(Math.sin(x/W*Math.PI*4))*6; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+
+  // back wall with a big station clock + departure board
+  const wall=ctx.createLinearGradient(0,H*0.24,0,platformY); wall.addColorStop(0,'#8a7258'); wall.addColorStop(1,'#6e5842');
+  ctx.fillStyle=wall; ctx.fillRect(0,H*0.24,W,platformY-H*0.24);
+  ctx.strokeStyle='rgba(0,0,0,.12)'; ctx.lineWidth=1; for (let y=H*0.24;y<platformY;y+=16){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // station clock (center-high)
+  const clx=W*0.5, cly=H*0.34;
+  ctx.fillStyle='#1a1a1a'; ctx.beginPath(); ctx.arc(clx,cly,20,0,7); ctx.fill(); ctx.fillStyle='#f2ead2'; ctx.beginPath(); ctx.arc(clx,cly,17,0,7); ctx.fill();
+  ctx.strokeStyle='#2a2a2a'; ctx.lineWidth=1; for (let k=0;k<12;k++){ const a=k/12*6.28; ctx.beginPath(); ctx.moveTo(clx+Math.cos(a)*14,cly+Math.sin(a)*14); ctx.lineTo(clx+Math.cos(a)*16,cly+Math.sin(a)*16); ctx.stroke(); }
+  const mm=t*0.5; ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(clx,cly); ctx.lineTo(clx+Math.cos(mm-1.57)*8,cly+Math.sin(mm-1.57)*8); ctx.stroke(); ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(clx,cly); ctx.lineTo(clx+Math.cos(mm*12-1.57)*13,cly+Math.sin(mm*12-1.57)*13); ctx.stroke();
+  // departure board (left)
+  ctx.fillStyle='#101a14'; ctx.fillRect(W*0.08,H*0.30,W*0.22,H*0.14); ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=2; ctx.strokeRect(W*0.08,H*0.30,W*0.22,H*0.14);
+  for (let k=0;k<4;k++){ ctx.fillStyle=`rgba(240,200,90,${0.6+0.2*Math.sin(t*3+k)})`; ctx.fillRect(W*0.10,H*0.32+k*8,W*0.10,3); ctx.fillStyle='rgba(120,230,150,.7)'; ctx.fillRect(W*0.22,H*0.32+k*8,W*0.05,3); }
+  // hanging lamp + arched window (right) with a lit platform-lamp glow
+  ctx.fillStyle='#b8d0dc'; ctx.beginPath(); ctx.moveTo(W*0.72,H*0.30); ctx.lineTo(W*0.72,H*0.44); ctx.lineTo(W*0.90,H*0.44); ctx.lineTo(W*0.90,H*0.30); ctx.arc(W*0.81,H*0.30,W*0.09,0,Math.PI,true); ctx.fill();
+  ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.81,H*0.21); ctx.lineTo(W*0.81,H*0.44); ctx.moveTo(W*0.72,H*0.34); ctx.lineTo(W*0.90,H*0.34); ctx.stroke();
+
+  // the steam train at the platform edge (right side, drifting steam)
+  const trY=platformY-6;
+  ctx.fillStyle='#3a2a2a'; ctx.fillRect(W*0.42,trY-46,W*0.6,46); // body extends off right
+  ctx.fillStyle='#5a3030'; ctx.fillRect(W*0.42,trY-46,W*0.6,6);
+  // windows
+  ctx.fillStyle='#c9dbe4'; for (let x=W*0.46;x<W;x+=W*0.12){ ctx.fillRect(x,trY-38,W*0.07,14); ctx.strokeStyle='#e0b060'; ctx.lineWidth=1; ctx.strokeRect(x,trY-38,W*0.07,14); }
+  // gold trim line
+  ctx.fillStyle='#e0b060'; ctx.fillRect(W*0.42,trY-20,W*0.6,2);
+  // wheels
+  ctx.fillStyle='#1a1a1a'; for (let x=W*0.5;x<W;x+=W*0.14){ ctx.beginPath(); ctx.arc(x,trY-2,7,0,7); ctx.fill(); ctx.fillStyle='#5a5a5a'; ctx.beginPath(); ctx.arc(x,trY-2,3,0,7); ctx.fill(); ctx.fillStyle='#1a1a1a'; }
+  // steam/smoke drifting up from the front
+  for (let i=0;i<6;i++){ const px=W*0.44 - i*4; const py=trY-46-((t*14+i*20)%80); const r=6+i*2; ctx.fillStyle=`rgba(230,230,235,${0.18-i*0.02})`; ctx.beginPath(); ctx.arc(px + Math.sin(t+i)*4, py, r,0,7); ctx.fill(); }
+
+  // platform floor (paved) with a bench + luggage (left, low)
+  const fl=ctx.createLinearGradient(0,platformY,0,H); fl.addColorStop(0,'#9a8a76'); fl.addColorStop(1,'#7a6a56'); ctx.fillStyle=fl; ctx.fillRect(0,platformY,W,H-platformY);
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1; for (let y=platformY+10;y<H;y+=12){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // yellow platform edge line
+  ctx.fillStyle='#e0b040'; ctx.fillRect(0,platformY,W,3);
+  // bench
+  const bx=W*0.16, by=H*0.86; ctx.fillStyle='#3a6a4a'; ctx.fillRect(bx-22,by,44,4); ctx.fillRect(bx-22,by-12,44,3); ctx.fillStyle='#2a4a34'; ctx.fillRect(bx-20,by+4,4,10); ctx.fillRect(bx+16,by+4,4,10);
+  // vintage suitcases
+  ctx.fillStyle='#8a5a34'; roundRect(W*0.30,H*0.90,22,14,2); ctx.fill(); ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=1; ctx.strokeRect(W*0.30,H*0.90,22,14); ctx.fillStyle='#6a4326'; roundRect(W*0.33,H*0.86,16,10,2); ctx.fill();
+}
+registerScene('trainstation', drawTrainStation);
