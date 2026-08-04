@@ -5705,6 +5705,50 @@ function drawCoveredBridge(){
 }
 registerScene('coveredbridge', drawCoveredBridge);
 
+/* ── CHEESE SHOP (indoor · artisan aging room & counter) ── */
+function drawCheeseShop(){
+  const t=sceneTime, floorY=H*0.66;
+  // creamy walls, terracotta floor
+  ctx.fillStyle='#efe4c8'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#a5623c'; ctx.fillRect(0,floorY,W,H-floorY);
+  for(let y=0;y*15<H-floorY;y++) for(let x=0;x<W/26+1;x++){ ctx.fillStyle=((x+y)%2)?'#9a5a36':'#b06a42'; ctx.fillRect(x*26,floorY+y*15,26,15); }
+  ctx.fillStyle='#c9a24a'; ctx.fillRect(0,H*0.1,W,2);
+  // "FROMAGERIE" sign
+  ctx.fillStyle='#7a5a2a'; ctx.font='italic bold 13px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('Fromagerie', W*0.5, H*0.075); ctx.textAlign='left';
+  // wall of aging shelves stacked with cheese wheels
+  function wheel(x,y,r,rind){ ctx.fillStyle=rind; ctx.beginPath(); ctx.ellipse(x,y,r,r*0.42,0,0,7); ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.12)'; ctx.beginPath(); ctx.ellipse(x,y,r,r*0.42,0,0,Math.PI); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.15)'; ctx.beginPath(); ctx.ellipse(x-r*0.3,y-r*0.15,r*0.3,r*0.12,0,0,7); ctx.fill(); }
+  const rinds=['#e8d18a','#d8b060','#e0c878','#c8a44a','#ecdca0'];
+  for(let s=0;s<3;s++){ const sy=H*0.16+s*H*0.13;
+    ctx.fillStyle='#8a6a40'; ctx.fillRect(W*0.04,sy+8,W*0.44,4);
+    for(let i=0;i<5;i++){ const wx=W*0.09+i*W*0.09; wheel(wx,sy,15,rinds[(i+s)%rinds.length]);
+      if(s<2) wheel(wx,sy-10,15,rinds[(i+s+2)%rinds.length]); } // stacked pair
+  }
+  // hanging provolone/cured cheeses (teardrop) on the right, gently swaying
+  for(let i=0;i<4;i++){ const hx=W*0.62+i*W*0.09; const sway=Math.sin(t*1.1+i)*3;
+    ctx.strokeStyle='#8a7a5a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(hx,H*0.12); ctx.lineTo(hx+sway,H*0.2); ctx.stroke();
+    ctx.fillStyle='#e8c878'; ctx.beginPath(); ctx.moveTo(hx+sway,H*0.2); ctx.quadraticCurveTo(hx+sway-10,H*0.28,hx+sway,H*0.36); ctx.quadraticCurveTo(hx+sway+10,H*0.28,hx+sway,H*0.2); ctx.fill(); }
+  // the deli counter with a glass case
+  const cy=floorY-4; ctx.fillStyle='#6a4a30'; ctx.fillRect(W*0.06,cy-30,W*0.88,30+(H-cy));
+  ctx.fillStyle='#7a5636'; ctx.fillRect(W*0.06,cy-30,W*0.88,5);
+  ctx.fillStyle='rgba(210,235,240,.35)'; ctx.fillRect(W*0.08,cy-28,W*0.84,22);
+  // wedges of cheese in the case (varied)
+  const wedge=['#f2e3a0','#e8c060','#ecd888','#f0eecc','#e0b070'];
+  for(let i=0;i<7;i++){ const wx=W*0.12+i*W*0.11; ctx.fillStyle=wedge[i%wedge.length];
+    ctx.beginPath(); ctx.moveTo(wx,cy-8); ctx.lineTo(wx+16,cy-8); ctx.lineTo(wx+16,cy-22); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#c8a44a'; ctx.fillRect(wx,cy-9,16,2); // rind edge
+    // blue-cheese veins on one
+    if(i===3){ ctx.strokeStyle='#5a6a7a'; ctx.lineWidth=0.6; for(let v=0;v<4;v++){ ctx.beginPath(); ctx.moveTo(wx+4+v*3,cy-10); ctx.lineTo(wx+6+v*3,cy-18); ctx.stroke(); } }
+  }
+  // a cutting board on the counter with a wire cutter + a wedge, a grape cluster
+  ctx.fillStyle='#8a6a44'; ctx.fillRect(W*0.4,cy-40,W*0.2,6);
+  ctx.fillStyle='#f2e3a0'; ctx.beginPath(); ctx.moveTo(W*0.43,cy-40); ctx.lineTo(W*0.5,cy-40); ctx.lineTo(W*0.43,cy-52); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#cfcfd6'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.52,cy-52); ctx.lineTo(W*0.56,cy-40); ctx.stroke();
+  ctx.fillStyle='#5a7a3a'; for(let i=0;i<5;i++){ ctx.beginPath(); ctx.arc(W*0.56+ (i%2)*4, cy-42+Math.floor(i/2)*4, 2.4,0,7); ctx.fill(); }
+}
+registerScene('cheeseshop', drawCheeseShop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
