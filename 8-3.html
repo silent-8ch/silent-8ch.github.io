@@ -5996,6 +5996,58 @@ function drawWheatField(){
 }
 registerScene('wheatfield', drawWheatField);
 
+/* ── WEAVING STUDIO (indoor · a floor loom & tapestry) ── */
+function drawWeaving(){
+  const t=sceneTime, floorY=H*0.68;
+  // soft natural-light studio
+  ctx.fillStyle='#e6ddc8'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#a5895f'; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='#c9bda0'; ctx.fillRect(0,H*0.12,W,2);
+  // window casting warm light
+  ctx.fillStyle='#f4ecd0'; ctx.fillRect(W*0.04,H*0.08,W*0.2,H*0.24); ctx.strokeStyle='#8a7452'; ctx.lineWidth=2; ctx.strokeRect(W*0.04,H*0.08,W*0.2,H*0.24);
+  ctx.beginPath(); ctx.moveTo(W*0.14,H*0.08); ctx.lineTo(W*0.14,H*0.32); ctx.moveTo(W*0.04,H*0.2); ctx.lineTo(W*0.24,H*0.2); ctx.stroke();
+  // hanging skeins of yarn on the wall (colorful)
+  const yarn=['#c0503a','#4a86c0','#d0a030','#5f9a44','#8a4ac0','#e0709a'];
+  for(let i=0;i<6;i++){ const yx=W*0.3+i*W*0.06; ctx.strokeStyle=yarn[i]; ctx.lineWidth=6; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(yx,H*0.1); ctx.lineTo(yx,H*0.2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(yx,H*0.22,5,0,Math.PI); ctx.stroke(); }
+  ctx.lineCap='butt';
+  // finished tapestry hanging on the right wall
+  const tx=W*0.72, ty=H*0.1, tw=W*0.22, th=H*0.34;
+  ctx.fillStyle='#5a3e26'; ctx.fillRect(tx-3,ty-3,tw+6,6);
+  for(let r=0;r<10;r++){ ctx.fillStyle=yarn[r%yarn.length]; ctx.fillRect(tx,ty+r*(th/10),tw,th/10*0.9); }
+  // a woven zigzag motif overlaid
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for(let r=0;r<5;r++){ ctx.beginPath(); for(let x=0;x<=tw;x+=8){ ctx.lineTo(tx+x, ty+ th*0.2 + r*th*0.15 + (x%16<8?0:6)); } ctx.stroke(); }
+  // the big wooden floor loom (center)
+  const lx=W*0.5, lb=floorY+8;
+  // frame uprights
+  ctx.fillStyle='#7a5636'; ctx.fillRect(lx-60,lb-70,8,70+(H-lb)); ctx.fillRect(lx+52,lb-70,8,70+(H-lb));
+  ctx.fillRect(lx-60,lb-70,120,8); // top beam
+  ctx.fillStyle='#8a6444'; ctx.fillRect(lx-52,lb-8,104,6); // breast beam
+  // the warp threads stretched from top beam down to the cloth
+  const shed=Math.sin(t*3); // heddles lift alternate threads
+  for(let i=0;i<24;i++){ const wxp=lx-48+i*(96/23); const lift=(i%2? shed:-shed)*4;
+    ctx.strokeStyle='#e8dcc0'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(wxp,lb-62); ctx.lineTo(wxp+lift,lb-24); ctx.stroke(); }
+  // the harness/heddle bar that lifts (moves up & down)
+  ctx.fillStyle='#5a3e26'; ctx.fillRect(lx-50,lb-44+shed*4,100,4);
+  ctx.fillRect(lx-50,lb-36-shed*4,100,4);
+  // the woven cloth building up at the bottom (rows of colored weft)
+  ctx.fillStyle='#cbbf9a'; ctx.fillRect(lx-48,lb-24,96,20);
+  for(let r=0;r<6;r++){ ctx.fillStyle=yarn[r%yarn.length]; ctx.globalAlpha=0.8; ctx.fillRect(lx-48,lb-22+r*3,96,2.4); ctx.globalAlpha=1; }
+  // the shuttle sliding across the shed (animated left-right)
+  const sh=Math.sin(t*1.6); const shx=lx + sh*44;
+  ctx.fillStyle='#8a5a30'; ctx.beginPath(); ctx.ellipse(shx,lb-32,9,4,0,0,7); ctx.fill();
+  ctx.fillStyle='#d0a030'; ctx.fillRect(shx-4,lb-33,8,3); // yarn on the shuttle
+  // trailing weft thread from the shuttle back to the selvedge
+  ctx.strokeStyle='#d0a030'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(shx,lb-32); ctx.lineTo(lx-48,lb-30); ctx.stroke();
+  // the weaver's bench in front
+  ctx.fillStyle='#6a4a30'; ctx.fillRect(lx-30,floorY+30,60,8); ctx.fillRect(lx-26,floorY+38,6,H-floorY-38); ctx.fillRect(lx+20,floorY+38,6,H-floorY-38);
+  // a basket of yarn balls on the floor
+  ctx.fillStyle='#a5723c'; ctx.beginPath(); ctx.moveTo(W*0.14,H*0.92); ctx.lineTo(W*0.24,H*0.92); ctx.lineTo(W*0.22,H); ctx.lineTo(W*0.16,H); ctx.closePath(); ctx.fill();
+  for(let i=0;i<3;i++){ ctx.fillStyle=yarn[i+1]; ctx.beginPath(); ctx.arc(W*0.16+i*W*0.03,H*0.92,4,0,7); ctx.fill(); }
+}
+registerScene('weaving', drawWeaving);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
