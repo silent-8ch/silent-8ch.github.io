@@ -6567,6 +6567,62 @@ function drawBioBay(){
 }
 registerScene('biobay', drawBioBay);
 
+/* ── NATURAL HISTORY MUSEUM (indoor · dinosaur hall) ── */
+function drawNaturalHistory(){
+  const t=sceneTime, floorY=H*0.74;
+  // grand marble hall
+  ctx.fillStyle='#3a3a48'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#c8c2b8'; ctx.fillRect(0,floorY,W,H-floorY); // marble floor
+  // floor tile sheen
+  for(let i=0;i<6;i++){ ctx.fillStyle='rgba(255,255,255,.05)'; ctx.fillRect(0,floorY+i*((H-floorY)/6),W,1); }
+  ctx.fillStyle='rgba(255,255,255,.08)'; ctx.beginPath(); ctx.moveTo(W*0.4,floorY); ctx.lineTo(W*0.6,floorY); ctx.lineTo(W*0.7,H); ctx.lineTo(W*0.3,H); ctx.closePath(); ctx.fill();
+  // tall arched window at the back letting cool light in
+  ctx.fillStyle='#5a6a80'; ctx.beginPath(); ctx.arc(W*0.5,H*0.2,W*0.16,Math.PI,0); ctx.fill(); ctx.fillRect(W*0.34,H*0.2,W*0.32,H*0.18);
+  ctx.strokeStyle='#2a2a34'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(W*0.5,H*0.2,W*0.16,Math.PI,0); ctx.stroke();
+  ctx.strokeRect(W*0.34,H*0.2,W*0.32,H*0.18); ctx.beginPath(); ctx.moveTo(W*0.5,H*0.04); ctx.lineTo(W*0.5,H*0.38); ctx.moveTo(W*0.34,H*0.28); ctx.lineTo(W*0.66,H*0.28); ctx.stroke();
+  // columns flanking the hall
+  for(const cx of [W*0.08,W*0.92]){ ctx.fillStyle='#5a5a68'; ctx.fillRect(cx-8,H*0.1,16,floorY-H*0.1);
+    ctx.fillStyle='#6a6a78'; ctx.fillRect(cx-11,H*0.1,22,6); ctx.fillRect(cx-11,floorY-6,22,6);
+    ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1; for(let f=-2;f<=2;f++){ ctx.beginPath(); ctx.moveTo(cx+f*3,H*0.12); ctx.lineTo(cx+f*3,floorY-6); ctx.stroke(); } }
+  // a big banner
+  ctx.fillStyle='#8a2f3a'; ctx.fillRect(W*0.36,H*0.06,W*0.28,H*0.05);
+  ctx.fillStyle='#e8d8b0'; ctx.font='bold 9px Georgia, serif'; ctx.textAlign='center'; ctx.fillText('DINOSAURS', W*0.5, H*0.095); ctx.textAlign='left';
+  // the mounted sauropod / T-rex skeleton (center) — bone segments
+  const bx=W*0.5, bfoot=floorY+4;
+  ctx.strokeStyle='#e8e0cc'; ctx.fillStyle='#e8e0cc'; ctx.lineWidth=6;
+  // long neck arching up and tail sweeping down (brontosaur-like)
+  ctx.lineCap='round';
+  // spine curve
+  ctx.beginPath(); ctx.moveTo(bx-90,bfoot-30); // tail tip
+  ctx.quadraticCurveTo(bx-40,bfoot-60, bx,bfoot-70); // hips->back
+  ctx.quadraticCurveTo(bx+40,bfoot-78, bx+64,bfoot-120); // shoulder->neck
+  ctx.quadraticCurveTo(bx+78,bfoot-150, bx+96,bfoot-150); // head up
+  ctx.stroke();
+  // ribs
+  ctx.lineWidth=2; for(let i=0;i<8;i++){ const u=i/8; const rx=bx-30+u*50, ry=bfoot-64+Math.sin(u*3)*4;
+    ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx-4,ry+26); ctx.stroke(); }
+  // legs
+  ctx.lineWidth=5; for(const lx of [bx-24,bx+8,bx+30,bx-8]){ ctx.beginPath(); ctx.moveTo(lx,bfoot-58); ctx.lineTo(lx+ (lx>bx?6:-6),bfoot); ctx.stroke(); }
+  // skull
+  ctx.beginPath(); ctx.ellipse(bx+98,bfoot-150,8,5,0.3,0,7); ctx.fill();
+  ctx.lineCap='butt';
+  // support armature (thin dark rods)
+  ctx.strokeStyle='#333'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(bx,bfoot-70); ctx.lineTo(bx,bfoot); ctx.moveTo(bx+64,bfoot-120); ctx.lineTo(bx+64,bfoot); ctx.stroke();
+  // a glass display case on the left with a small fossil/gem, softly lit
+  ctx.fillStyle='rgba(200,225,235,.25)'; ctx.fillRect(W*0.12,floorY-40,W*0.14,40);
+  ctx.strokeStyle='#8a8a98'; ctx.lineWidth=1; ctx.strokeRect(W*0.12,floorY-40,W*0.14,40);
+  ctx.fillStyle='#5a9ac0'; ctx.beginPath(); ctx.moveTo(W*0.17,floorY-6); ctx.lineTo(W*0.19,floorY-22); ctx.lineTo(W*0.21,floorY-6); ctx.closePath(); ctx.fill(); // crystal
+  const gl=0.4+0.3*Math.sin(t*3); ctx.fillStyle=`rgba(150,220,255,${gl})`; ctx.beginPath(); ctx.arc(W*0.19,floorY-14,3,0,7); ctx.fill();
+  // a wall-mounted pterosaur skeleton "flying" on the right
+  ctx.strokeStyle='#e8e0cc'; ctx.lineWidth=2;
+  const pwx=W*0.84, pwy=H*0.3; const flap=Math.sin(t*1.2)*6;
+  ctx.beginPath(); ctx.moveTo(pwx-30,pwy+flap); ctx.lineTo(pwx,pwy); ctx.lineTo(pwx+30,pwy+flap); ctx.stroke(); // wings
+  ctx.beginPath(); ctx.moveTo(pwx,pwy); ctx.lineTo(pwx+10,pwy-8); ctx.stroke(); // head crest
+  // two tiny visitor silhouettes for scale
+  for(let i=0;i<2;i++){ const vx=W*0.32+i*W*0.1; ctx.fillStyle='#1e1e26'; ctx.fillRect(vx-2,floorY-24,4,24); ctx.beginPath(); ctx.arc(vx,floorY-27,3,0,7); ctx.fill(); }
+}
+registerScene('naturalhistory', drawNaturalHistory);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
