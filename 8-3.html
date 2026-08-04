@@ -1147,6 +1147,44 @@ const ACHIEVEMENTS = [
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
 let toastQueue = [], toastBusy = false;
+/* ---- a little daily compliment from Paul (same one all day, new each day) ---- */
+const COMPLIMENTS = [
+  'Your laugh is my favorite sound in the world.',
+  'You make ordinary days feel like gifts.',
+  'I\'d choose you again, every single time.',
+  'The world is softer because you\'re in it.',
+  'Your kindness is the bravest thing I know.',
+  'I still get butterflies when you smile.',
+  'You\'re my favorite hello and hardest goodbye.',
+  'Everything is better with your hand in mine.',
+  'You draw beauty into everything you touch.',
+  'Home isn\'t a place — it\'s you.',
+  'You\'re proof that some things are just meant to be.',
+  'I love the way your eyes light up when you\'re happy.',
+  'You make me want to be gentler with the world.',
+  'Loving you is the easiest thing I do.',
+  'Your heart is the biggest, warmest place I know.',
+  'You\'re the best part of every single day.',
+  'I\'d cross any distance just to sit beside you.',
+  'You make even Mondays feel like ours.',
+  'Your hugs fix things nothing else can.',
+  'I fall for you a little more each morning.',
+  'You are enough, exactly as you are.',
+  'My favorite adventure is the quiet one with you.',
+  'You\'re the wish I\'d make on every star.',
+  'Being loved by you is my luckiest thing.'
+];
+function dailyCompliment(){
+  try{
+    const t = todayStr();
+    if (localStorage.getItem('bpet_fortune') === t) return;   // already shown today
+    localStorage.setItem('bpet_fortune', t);
+    // deterministic pick so it stays the same all day
+    const dayNum = Math.floor(new Date(t+'T00:00').getTime() / 86400000);
+    const msg = COMPLIMENTS[((dayNum % COMPLIMENTS.length) + COMPLIMENTS.length) % COMPLIMENTS.length];
+    setTimeout(()=>{ showToast('💛','A little truth for today', msg); }, 3200);
+  }catch(e){}
+}
 function showToast(icon, title, sub){
   toastQueue.push([icon,title,sub]);
   if (toastBusy) return;
@@ -8593,6 +8631,7 @@ offerTreat = pick(TREATS); updateFeedBtn();   // start with a random treat on of
 if (!state.favTreat){ state.favTreat = pick(TREATS).e; save(); }   // she secretly has a favorite
 initDaysTogether();   // greets her, counts the day, updates the 💛 chip
 welcomeBack();        // if you've been away a while, she happily greets you back
+dailyCompliment();    // a sweet little truth from Paul, once a day
 requestAnimationFrame(loop);
 window.addEventListener('beforeunload', save);
 </script>
