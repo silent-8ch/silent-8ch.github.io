@@ -692,6 +692,16 @@ function stepScene(dir){
   let i = currentScene;
   for (let k=0;k<SCENES.length;k++){ i=(i+dir+SCENES.length)%SCENES.length; if (sceneEnabled(SCENES[i])){ currentScene=i; return; } }
 }
+// list of currently-enabled scene indices
+function enabledIndices(){ const out=[]; for (let i=0;i<SCENES.length;i++){ if (sceneEnabled(SCENES[i])) out.push(i); } return out; }
+// jump to a random enabled scene, avoiding an immediate repeat when possible
+function randomScene(){
+  const en = enabledIndices();
+  if (!en.length) return;
+  if (en.length === 1) { currentScene = en[0]; return; }
+  let pick; do { pick = en[Math.floor(Math.random()*en.length)]; } while (pick === currentScene);
+  currentScene = pick;
+}
 
 /* Scene registry — to add a scene, write a draw function and call
    registerScene('name', drawFn[, selfPet]). It's appended to the rotation and
@@ -713,8 +723,8 @@ document.addEventListener('keydown', e => {
   if (e.key === '1') { currentScene = 0; sceneChangeTimer = 60; }
   if (e.key === '2') { currentScene = 1; sceneChangeTimer = 60; }
   if (e.key === '3') { currentScene = 2; sceneChangeTimer = 60; }
-  if (e.key === 'n' || e.key === 'N') { stepScene(1); sceneChangeTimer = 60; }
-  if (e.key === 'p' || e.key === 'P') { stepScene(-1); sceneChangeTimer = 60; }
+  if (e.key === 'n' || e.key === 'N') { randomScene(); sceneChangeTimer = 60; }
+  if (e.key === 'p' || e.key === 'P') { randomScene(); sceneChangeTimer = 60; }
   if (e.key === 'm' || e.key === 'M') { toggleMap(); }
   if (e.key === 'c' || e.key === 'C') {
     debugCry = !debugCry;
@@ -726,7 +736,7 @@ document.addEventListener('keydown', e => {
 
 function updateScene(dt) {
   sceneChangeTimer -= dt;
-  if (sceneChangeTimer <= 0) { stepScene(1); sceneChangeTimer = 60; }
+  if (sceneChangeTimer <= 0) { randomScene(); sceneChangeTimer = 60; }
 }
 
 /* ---------- map / locations panel ---------- */
@@ -7696,7 +7706,8 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   say('Hi! 💛');
   save();
 });
-currentScene = SCENES.length - 1;   // on load, show the newest scene first
+// on load, drop into a random enabled location (then every change is random too)
+(function(){ const en = enabledIndices(); if (en.length) currentScene = en[Math.floor(Math.random()*en.length)]; })();
 resize();
 refreshHUD();
 requestAnimationFrame(loop);
