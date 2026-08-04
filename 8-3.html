@@ -7081,6 +7081,55 @@ function drawIcebergBay(){
 }
 registerScene('icebergbay', drawIcebergBay);
 
+/* ── CANDY SHOP (indoor · penny-candy sweet shop) ── */
+function drawCandyShop(){
+  const t=sceneTime, floorY=H*0.66;
+  // cheerful pastel shop
+  ctx.fillStyle='#f4e0ea'; ctx.fillRect(0,0,W,floorY);
+  // vertical candy stripes on the walls
+  for(let i=0;i<W;i+=24){ ctx.fillStyle=(i/24%2)?'rgba(230,120,150,.25)':'rgba(120,190,220,.2)'; ctx.fillRect(i,0,12,floorY); }
+  // black-white checker floor
+  for(let y=0;y*16<H-floorY;y++) for(let x=0;x<W/22+1;x++){ ctx.fillStyle=((x+y)%2)?'#e8e4dc':'#3a3436'; ctx.fillRect(x*22,floorY+y*16,22,16); }
+  // scalloped candy-stripe awning across the top
+  for(let i=0;i<W/22+1;i++){ ctx.fillStyle=(i%2)?'#e0506a':'#fbeef2'; ctx.beginPath(); ctx.moveTo(i*22,0); ctx.lineTo(i*22+22,0); ctx.lineTo(i*22+11,16); ctx.closePath(); ctx.fill(); }
+  // "SWEETS" sign
+  ctx.fillStyle='#c0304a'; ctx.font='bold 13px Georgia, serif'; ctx.textAlign='center'; ctx.fillText('SWEETS', W*0.5, H*0.1); ctx.textAlign='left';
+  // wall shelves of glass candy jars filled with colorful candies
+  const cc=['#e0402a','#f2c14a','#3aa05a','#4a86c0','#c04a9a','#e08030'];
+  for(let s=0;s<2;s++){ const sy=H*0.16+s*H*0.16; ctx.fillStyle='#b58a5a'; ctx.fillRect(W*0.05,sy+16,W*0.6,4);
+    for(let i=0;i<6;i++){ const jx=W*0.09+i*W*0.1;
+      // jar
+      ctx.fillStyle='rgba(220,235,240,.4)'; ctx.beginPath(); ctx.moveTo(jx-8,sy+16); ctx.lineTo(jx+8,sy+16); ctx.lineTo(jx+7,sy-2); ctx.quadraticCurveTo(jx,sy-6,jx-7,sy-2); ctx.closePath(); ctx.fill();
+      // candies inside
+      for(let k=0;k<7;k++){ ctx.fillStyle=cc[(i+k)%cc.length]; ctx.beginPath(); ctx.arc(jx-5+ (k%3)*5, sy+12-Math.floor(k/3)*4, 2.2,0,7); ctx.fill(); }
+      // lid
+      ctx.fillStyle='#c9a24a'; ctx.fillRect(jx-8,sy-8,16,4); ctx.beginPath(); ctx.arc(jx,sy-8,2,0,7); ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(jx-5,sy+12); ctx.lineTo(jx-5,sy-2); ctx.stroke(); }
+  }
+  // a gumball machine on the counter (globe of colored balls)
+  const gx=W*0.16, gy=floorY-4;
+  ctx.fillStyle='#c02030'; ctx.fillRect(gx-10,gy-6,20,10); ctx.beginPath(); ctx.moveTo(gx-10,gy-6); ctx.lineTo(gx+10,gy-6); ctx.lineTo(gx+7,gy-14); ctx.lineTo(gx-7,gy-14); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(220,235,240,.5)'; ctx.beginPath(); ctx.arc(gx,gy-28,14,0,7); ctx.fill();
+  for(let k=0;k<14;k++){ ctx.fillStyle=cc[k%cc.length]; ctx.beginPath(); ctx.arc(gx-8+ (k%5)*4, gy-34+Math.floor(k/5)*5 + Math.sin(t*3+k)*0.5, 2.4,0,7); ctx.fill(); }
+  ctx.fillStyle='#c9a24a'; ctx.beginPath(); ctx.arc(gx,gy-14,3,0,7); ctx.fill(); // dispenser knob
+  // the counter/display case
+  const cy=floorY-4; ctx.fillStyle='#8a5a34'; ctx.fillRect(W*0.3,cy-24,W*0.64,24+(H-cy)); ctx.fillStyle='#9a6a44'; ctx.fillRect(W*0.3,cy-24,W*0.64,5);
+  ctx.fillStyle='rgba(220,235,240,.35)'; ctx.fillRect(W*0.32,cy-22,W*0.6,18);
+  // trays of assorted candies in the case
+  for(let i=0;i<6;i++){ const tx=W*0.36+i*W*0.095; ctx.fillStyle='#efe6d8'; ctx.fillRect(tx-9,cy-10,18,7);
+    for(let k=0;k<5;k++){ ctx.fillStyle=cc[(i+k+2)%cc.length]; ctx.beginPath(); ctx.arc(tx-6+k*3,cy-6,1.8,0,7); ctx.fill(); } }
+  // a jar of spiral lollipops on the counter
+  const lx=W*0.72; ctx.fillStyle='rgba(220,235,240,.4)'; ctx.fillRect(lx-10,cy-40,20,16);
+  for(let i=0;i<5;i++){ const spx=lx-6+i*3; ctx.strokeStyle='#efe6d8'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(spx,cy-24); ctx.lineTo(spx,cy-40); ctx.stroke();
+    ctx.fillStyle=cc[i%cc.length]; ctx.beginPath(); ctx.arc(spx,cy-42,4,0,7); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.arc(spx,cy-42,2.2,t,t+3); ctx.stroke(); }
+  // a brass scale on the counter
+  const scx=W*0.9; ctx.fillStyle='#c9a24a'; ctx.fillRect(scx-2,cy-20,4,16); ctx.beginPath(); ctx.moveTo(scx-12,cy-20); ctx.lineTo(scx+12,cy-20); ctx.stroke?.();
+  ctx.strokeStyle='#c9a24a'; ctx.lineWidth=1.5; const tilt=Math.sin(t)*2; ctx.beginPath(); ctx.moveTo(scx-12,cy-20+tilt); ctx.lineTo(scx+12,cy-20-tilt); ctx.stroke();
+  ctx.beginPath(); ctx.arc(scx-12,cy-14+tilt,4,0,Math.PI); ctx.arc(scx+12,cy-14-tilt,4,0,Math.PI); ctx.stroke();
+}
+registerScene('candyshop', drawCandyShop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
