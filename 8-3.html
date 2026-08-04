@@ -2730,6 +2730,55 @@ function drawZenGarden(){
 }
 registerScene('zengarden', drawZenGarden);
 
+/* ── SCIENCE LAB (indoor · chemistry) ── */
+function drawScienceLab(){
+  const t = sceneTime, floorY = H*0.62, benchY = H*0.55;
+
+  // wall + tiled floor
+  ctx.fillStyle='#dfe6e8'; ctx.fillRect(0,0,W,floorY);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#b8c0c4'); fl.addColorStop(1,'#a4acb0');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.lineWidth=1;
+  for (let i=1;i<5;i++){ const y=floorY+i/5*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  for (let x=0;x<W;x+=W/8){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x,H); ctx.stroke(); }
+
+  // periodic-table poster
+  const ptX=W*0.06, ptY=H*0.10, cell=8, pc=['#e07a8b','#f2c14e','#7fd0ff','#9ad57f','#c79be0'];
+  ctx.fillStyle='#fff'; ctx.fillRect(ptX-3,ptY-3,cell*9+6,cell*5+6);
+  for (let r=0;r<5;r++) for (let c=0;c<9;c++){ if (r<1 || c<2 || c>1){ ctx.fillStyle=pc[(r+c)%5]; ctx.globalAlpha=0.85; ctx.fillRect(ptX+c*cell,ptY+r*cell,cell-1,cell-1); } }
+  ctx.globalAlpha=1;
+
+  // reagent shelf
+  ctx.fillStyle='#9aa2a6'; ctx.fillRect(W*0.5,H*0.12,W*0.44,4);
+  const bc=['#7fd0ff','#9ad57f','#f2a6b3','#f2c14e','#c79be0'];
+  for (let i=0;i<7;i++){ const bx=W*0.52+i*W*0.06; ctx.fillStyle='#cfe0e8'; ctx.fillRect(bx-4,H*0.12-16,8,16); ctx.fillStyle=bc[i%5]; ctx.fillRect(bx-4,H*0.12-8,8,8); ctx.fillStyle='#888'; ctx.fillRect(bx-2,H*0.12-20,4,4); }
+
+  // lab bench
+  ctx.fillStyle='#3a464c'; ctx.fillRect(W*0.16,benchY+8,5,floorY-(benchY+8)); ctx.fillRect(W*0.84-5,benchY+8,5,floorY-(benchY+8));
+  ctx.fillStyle='#5a6a70'; ctx.fillRect(W*0.14,benchY,W*0.72,10);
+
+  // flasks with bubbling liquid
+  function flask(x,col){
+    ctx.fillStyle='rgba(220,235,240,.5)';
+    ctx.beginPath(); ctx.moveTo(x-3,benchY-24); ctx.lineTo(x-3,benchY-14); ctx.lineTo(x-10,benchY); ctx.lineTo(x+10,benchY); ctx.lineTo(x+3,benchY-14); ctx.lineTo(x+3,benchY-24); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(x-8,benchY-3); ctx.lineTo(x+8,benchY-3); ctx.lineTo(x+5,benchY-9); ctx.lineTo(x-5,benchY-9); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.6)'; for (let k=0;k<3;k++){ const bb=(t*20+k*8)%12; ctx.beginPath(); ctx.arc(x-3+k*3, benchY-4-bb, 1.2,0,7); ctx.fill(); }
+  }
+  flask(W*0.30,'#9ad57f'); flask(W*0.44,'#7fd0ff');
+
+  // bunsen burner + flame
+  const buX=W*0.58, flh=8+Math.sin(t*12)*2;
+  ctx.fillStyle='#555'; ctx.fillRect(buX-3,benchY-14,6,14);
+  ctx.fillStyle='#5a9eff'; ctx.beginPath(); ctx.moveTo(buX-4,benchY-14); ctx.quadraticCurveTo(buX,benchY-14-flh,buX+4,benchY-14); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#ffb84d'; ctx.beginPath(); ctx.moveTo(buX-2,benchY-14); ctx.quadraticCurveTo(buX,benchY-14-flh*0.6,buX+2,benchY-14); ctx.closePath(); ctx.fill();
+
+  // test-tube rack
+  const rkX=W*0.72, tc=['#f2a6b3','#9ad57f','#f2c14e'];
+  ctx.fillStyle='#7a5a3a'; ctx.fillRect(rkX-16,benchY-6,32,6);
+  for (let i=0;i<3;i++){ ctx.fillStyle='#cfe0e8'; ctx.fillRect(rkX-12+i*10,benchY-22,6,22); ctx.fillStyle=tc[i]; ctx.fillRect(rkX-12+i*10,benchY-12,6,12); }
+}
+registerScene('sciencelab', drawScienceLab);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
