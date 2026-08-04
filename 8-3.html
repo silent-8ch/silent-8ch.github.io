@@ -116,6 +116,19 @@
     background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 6px 20px rgba(224,122,139,.5);
   }
   #banner.hide{display:none;}
+  /* map / locations */
+  #mapBtn{cursor:pointer;font-size:18px;line-height:1;user-select:none;}
+  #mapPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
+  #mapPanel.hide{display:none;}
+  #mapHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  #mapClose{cursor:pointer;font-size:18px;padding:0 4px;}
+  #mapHint{color:rgba(255,255,255,.6);font-size:11px;font-weight:500;margin-bottom:8px;}
+  #mapList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding-right:4px;}
+  .mapRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:8px 10px;}
+  .mapRow input{width:16px;height:16px;flex:none;accent-color:var(--accent);}
+  .mapRow .mn{color:#fff;flex:1;cursor:pointer;font-size:14px;}
+  .mapRow .mn:hover{text-decoration:underline;}
+  .mapRow.current{background:rgba(224,122,139,.4);}
 </style>
 </head>
 <body>
@@ -123,7 +136,10 @@
   <div id="hud">
     <div id="titlebar">
       <span id="petname">Loading…</span>
-      <span id="mood">🙂 okay</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="mapBtn" title="Locations">🗺️</span>
+        <span id="mood">🙂 okay</span>
+      </div>
     </div>
     <div class="meters">
       <div class="meter"><span class="lbl">🍪 Hunger</span><div class="bar"><div class="fill" id="f-hunger"></div></div></div>
@@ -141,6 +157,12 @@
     <button class="btn" data-action="feed"><span class="ic">🍪</span>Cookie</button>
     <button class="btn" data-action="draw"><span class="ic">🎨</span>Draw</button>
     <button class="btn" data-action="hug"><span class="ic">🤗</span>Hug</button>
+  </div>
+
+  <div id="mapPanel" class="hide">
+    <div id="mapHead"><span>🗺️ Locations</span><span id="mapClose">✕</span></div>
+    <div id="mapHint">Tap a name to go there · check the box to keep it in the rotation</div>
+    <div id="mapList"></div>
   </div>
 
   <div id="banner">
@@ -660,6 +682,17 @@ const SCENES = ['beach', 'backyard', 'river'];
 let currentScene = 0;
 let sceneChangeTimer = 60; // seconds
 
+// Scenes hidden from the rotation (persisted). Absent = enabled, so scenes
+// added later default to on.
+let disabledScenes = (function(){ try{ const r=localStorage.getItem('bpet_disabled'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
+function saveDisabled(){ try{ localStorage.setItem('bpet_disabled', JSON.stringify([...disabledScenes])); }catch(e){} }
+function sceneEnabled(n){ return !disabledScenes.has(n); }
+// advance currentScene to the next/prev enabled scene, skipping hidden ones
+function stepScene(dir){
+  let i = currentScene;
+  for (let k=0;k<SCENES.length;k++){ i=(i+dir+SCENES.length)%SCENES.length; if (sceneEnabled(SCENES[i])){ currentScene=i; return; } }
+}
+
 /* Scene registry — to add a scene, write a draw function and call
    registerScene('name', drawFn[, selfPet]). It's appended to the rotation and
    rendered automatically. Scenes in SCENE_SELF_PET draw Krystal themselves
@@ -680,8 +713,9 @@ document.addEventListener('keydown', e => {
   if (e.key === '1') { currentScene = 0; sceneChangeTimer = 60; }
   if (e.key === '2') { currentScene = 1; sceneChangeTimer = 60; }
   if (e.key === '3') { currentScene = 2; sceneChangeTimer = 60; }
-  if (e.key === 'n' || e.key === 'N') { currentScene = (currentScene + 1) % SCENES.length; sceneChangeTimer = 60; }
-  if (e.key === 'p' || e.key === 'P') { currentScene = (currentScene - 1 + SCENES.length) % SCENES.length; sceneChangeTimer = 60; }
+  if (e.key === 'n' || e.key === 'N') { stepScene(1); sceneChangeTimer = 60; }
+  if (e.key === 'p' || e.key === 'P') { stepScene(-1); sceneChangeTimer = 60; }
+  if (e.key === 'm' || e.key === 'M') { toggleMap(); }
   if (e.key === 'c' || e.key === 'C') {
     debugCry = !debugCry;
     say(debugCry ? '(debug: crying on)' : '(debug: crying off)');
@@ -692,11 +726,43 @@ document.addEventListener('keydown', e => {
 
 function updateScene(dt) {
   sceneChangeTimer -= dt;
-  if (sceneChangeTimer <= 0) {
-    currentScene = (currentScene + 1) % SCENES.length;
-    sceneChangeTimer = 60;
-  }
+  if (sceneChangeTimer <= 0) { stepScene(1); sceneChangeTimer = 60; }
 }
+
+/* ---------- map / locations panel ---------- */
+const SCENE_LABELS = {
+  beach:'Beach', backyard:'Backyard', river:'River', artstudio:'Art Studio',
+  campsite:'Starry Campsite', bakery:'Bakery', library:'Cozy Library',
+  cherryblossom:'Cherry Blossoms', aquarium:'Aquarium Hall', greenhouse:'Greenhouse',
+  planetarium:'Planetarium', autumnforest:'Autumn Forest', musicroom:'Music Room',
+  aurora:'Aurora Tundra', pottery:'Pottery Studio', lavender:'Lavender Field',
+  arcade:'Arcade', rooftop:'Rooftop Garden', teahouse:'Tea House', zengarden:'Zen Garden',
+  sciencelab:'Science Lab', tidepools:'Tide Pools', balletstudio:'Ballet Studio',
+  vineyard:'Vineyard', florist:'Florist Shop', balloons:'Hot Air Balloons',
+  recordshop:'Record Shop', waterfall:'Waterfall', sewingstudio:'Sewing Studio',
+  pumpkinpatch:'Pumpkin Patch', toyshop:'Toy Shop', snowycabin:'Snowy Cabin',
+  spa:'Spa', desert:'Desert Sunset', observatory:'Observatory', fireflies:'Firefly Meadow',
+  cafe:'Coffee Shop', rainystreet:'Rainy Street', darkroom:'Darkroom', lighthouse:'Lighthouse',
+  winecellar:'Wine Cellar', bamboo:'Bamboo Forest', clockmaker:"Clockmaker's Shop",
+  carnival:'Carnival', chocolateshop:'Chocolate Shop', tulipfield:'Tulip Field',
+};
+function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
+function buildMapList(){
+  const list=document.getElementById('mapList'); list.innerHTML='';
+  SCENES.forEach((name,idx)=>{
+    const row=document.createElement('div'); row.className='mapRow'+(idx===currentScene?' current':'');
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=sceneEnabled(name);
+    cb.addEventListener('change',()=>{ if(cb.checked) disabledScenes.delete(name); else disabledScenes.add(name); saveDisabled(); });
+    const nm=document.createElement('span'); nm.className='mn'; nm.textContent=sceneLabel(name);
+    nm.addEventListener('click',()=>{ currentScene=idx; sceneChangeTimer=60; closeMap(); });
+    row.appendChild(cb); row.appendChild(nm); list.appendChild(row);
+  });
+}
+function openMap(){ buildMapList(); document.getElementById('mapPanel').classList.remove('hide'); }
+function closeMap(){ document.getElementById('mapPanel').classList.add('hide'); }
+function toggleMap(){ document.getElementById('mapPanel').classList.contains('hide') ? openMap() : closeMap(); }
+document.getElementById('mapBtn').addEventListener('click', openMap);
+document.getElementById('mapClose').addEventListener('click', closeMap);
 
 /* ============================================================================
    BIRTHDAY SONG SCENE
