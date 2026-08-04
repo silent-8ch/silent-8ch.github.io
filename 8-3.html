@@ -123,6 +123,10 @@
   #mapHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
   #mapClose{cursor:pointer;font-size:18px;padding:0 4px;}
   #mapHint{color:rgba(255,255,255,.6);font-size:11px;font-weight:500;margin-bottom:8px;}
+  #mapTools{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .mapLink{color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;user-select:none;}
+  .mapLink:hover{text-decoration:underline;}
+  .mapSep{color:rgba(255,255,255,.35);font-size:12px;}
   #mapList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding-right:4px;}
   .mapRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:8px 10px;}
   .mapRow input{width:16px;height:16px;flex:none;accent-color:var(--accent);}
@@ -162,6 +166,7 @@
   <div id="mapPanel" class="hide">
     <div id="mapHead"><span>🗺️ Locations</span><span id="mapClose">✕</span></div>
     <div id="mapHint">Tap a name to go there · check the box to keep it in the rotation</div>
+    <div id="mapTools"><span id="mapAll" class="mapLink">Select all</span><span class="mapSep">·</span><span id="mapNone" class="mapLink">Select none</span></div>
     <div id="mapList"></div>
   </div>
 
@@ -768,6 +773,8 @@ function closeMap(){ document.getElementById('mapPanel').classList.add('hide'); 
 function toggleMap(){ document.getElementById('mapPanel').classList.contains('hide') ? openMap() : closeMap(); }
 document.getElementById('mapBtn').addEventListener('click', openMap);
 document.getElementById('mapClose').addEventListener('click', closeMap);
+document.getElementById('mapAll').addEventListener('click', ()=>{ disabledScenes.clear(); saveDisabled(); buildMapList(); });
+document.getElementById('mapNone').addEventListener('click', ()=>{ disabledScenes = new Set(SCENES); saveDisabled(); buildMapList(); });
 
 /* ============================================================================
    BIRTHDAY SONG SCENE
