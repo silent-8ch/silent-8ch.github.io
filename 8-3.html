@@ -900,6 +900,21 @@ function idleThoughts(dt){
   fxAt(pet.x + rand(-6,6), pet.y - SHEETS.walk.displayH*0.9, '💭'+e);
 }
 
+/* ---- when she's really happy, tiny hearts drift up as she walks ---- */
+let trailTimer = 2;
+function happyTrail(dt){
+  trailTimer -= dt;
+  if (trailTimer > 0) return;
+  // only bubble up when content, moving, and not busy
+  if (pet.animLock > 0 || pet.resting || isCrying() || !pet.moving){ trailTimer = 0.6; return; }
+  const joy = (state.love + state.fun) / 2;
+  if (joy < 82){ trailTimer = 1.2; return; }
+  trailTimer = rand(0.9, 1.8);
+  // higher joy → a little more often & the warmer hearts
+  fxAt(pet.x + rand(-10,10), pet.y - SHEETS.walk.displayH*rand(0.55,0.75),
+       pick(joy>92 ? ['💛','💗','💖','✨'] : ['💛','💗']));
+}
+
 /* ---------- main loop ---------- */
 let last = 0, started = true;   // no splash — the game runs immediately on load
 function loop(ts){
@@ -932,6 +947,7 @@ function loop(ts){
     if (petCd>0) petCd -= dt;
     maybeNag(dt);
     idleThoughts(dt);
+    happyTrail(dt);
     findTrinket(dt);
     updateWish(dt);
     updateStar(dt);
