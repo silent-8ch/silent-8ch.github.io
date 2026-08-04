@@ -299,6 +299,11 @@ const SCENE_INTERACT = (()=>{
   g(['igloo'], {lines:['So cozy inside! 🧊','Snuggle to keep warm? 🥰','Brrr, but pretty ❄️'], emoji:'🧊', energy:5});
   g(['mistyforest'], {lines:['So mysterious 🌫️','Stay close to me 🥰','It\'s so quiet here 🌲'], emoji:'🌫️', fun:5});
   g(['planetlab'], {lines:['Look at the planets! 🪐','So many stars 🌠','Let\'s explore space 🚀'], emoji:'🪐', fun:5});
+  g(['wizardtower'], {lines:['So much magic in the air 🪄','Teach me a spell? ✨','The potions are bubbling 🔮'], emoji:'🪄', fun:5});
+  g(['fortuneteller'], {lines:['What does our future hold? 🔮','I see love in the cards 🃏','So mysterious… 🕯️'], emoji:'🔮', love:5});
+  g(['runecircle'], {lines:['The runes are glowing ✨','Can you feel the magic? 🌙','Make a wish with me 🥰'], emoji:'✨', love:5});
+  g(['arcanelibrary'], {lines:['So many ancient books 📜','What secrets are here? 🦉','Read to me? 🕯️'], emoji:'📜', fun:5});
+  g(['fairyring'], {lines:['Fairies live here! 🧚','So enchanted ✨','Careful, it\'s magic 🍄'], emoji:'🧚', fun:5});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];

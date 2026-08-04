@@ -1933,3 +1933,156 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 12). Two scene-gated, contained moments — one mystic,
+   one starry. No always-on overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   28) TAROT CARD  —  in the fortune teller's parlour (or the wizard's tower) a
+   card lies face-down on the cloth. Tap to flip it: a gentle, always-kind reading
+   appears with a little sparkle. Tap again to draw another. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxTarot(){
+  try{
+    const PARLORS = new Set(['fortuneteller','wizardtower','tarotparlor','tarotstudy','runecircle','apothecary']);
+    let card = null;                     // {x,y,flip,face,cd,bob}
+    const READINGS = [
+      { icon:'☀️', name:'The Sun',   note:'Joy is coming your way 💛' },
+      { icon:'⭐', name:'The Star',   note:'Hope, and a wish that comes true ✨' },
+      { icon:'💗', name:'The Lovers', note:'A love that only grows 🥰' },
+      { icon:'🌙', name:'The Moon',   note:'Sweet dreams tonight 🌙' },
+      { icon:'🍀', name:'Fortune',    note:'Luck smiles on you today 🍀' },
+      { icon:'🕊️', name:'Peace',      note:'Calm hearts and easy days 🕊️' },
+    ];
+    function inParlor(){ try{ return (typeof SCENES!=='undefined') && PARLORS.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inParlor()){ card = null; return; }
+      if (!card){ card = { x: Math.max(W*0.24, Math.min(W*0.76, W*0.5)), y: rand(H*0.6,H*0.68), flip:0, face:null, cd:0, bob:rand(0,Math.PI*2) }; }
+      card.bob += dt; if (card.cd > 0) card.cd -= dt;
+      if (card.flip > 0){ card.flip = Math.min(1, card.flip + dt*2.2); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!card || !inParlor()) return;
+      const cw = 34, ch = 50;
+      const x = card.x, y = card.y + Math.sin(card.bob*2)*1.2;
+      // flip: scaleX goes 1 -> 0 (halfway) -> 1, swapping to the face at the midpoint
+      const showFace = card.flip >= 0.5 || (card.flip === 0 ? false : false);
+      const sx = card.flip === 0 ? 1 : Math.abs(Math.cos(Math.min(card.flip,1)*Math.PI));
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.16)';
+      ctx.beginPath(); ctx.ellipse(x, y + ch/2 + 4, cw*0.5, 4, 0, 0, 7); ctx.fill();
+      ctx.translate(x, y); ctx.scale(Math.max(0.04, sx), 1);
+      if (typeof roundRect === 'function'){ ctx.fillStyle = showFace ? '#fbf3e0' : '#3a2a6a'; roundRect(-cw/2, -ch/2, cw, ch, 4); ctx.fill(); }
+      else { ctx.fillStyle = showFace ? '#fbf3e0' : '#3a2a6a'; ctx.fillRect(-cw/2, -ch/2, cw, ch); }
+      // border
+      ctx.strokeStyle = showFace ? '#caa24a' : '#8a7ad0'; ctx.lineWidth = 1.5;
+      if (typeof roundRect === 'function'){ roundRect(-cw/2+2, -ch/2+2, cw-4, ch-4, 3); ctx.stroke(); }
+      if (showFace && card.face){
+        ctx.font = '18px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle = '#3a2a20'; ctx.fillText(card.face.icon, 0, -6);
+        ctx.font = '6px system-ui,sans-serif'; ctx.fillStyle = '#6b4a34';
+        ctx.fillText(card.face.name, 0, 14);
+      } else {
+        // back pattern
+        ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.font = '16px serif'; ctx.fillText('✦', 0, 0);
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!card || !inParlor()) return false;
+        if (px < card.x - 22 || px > card.x + 22 || py < card.y - 30 || py > card.y + 30) return false;
+        if (card.cd > 0) return true;
+        card.cd = 1.2;
+        card.face = pick(READINGS); card.flip = 0.001;         // start the flip
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(card.x+rand(-14,14), card.y-20, pick(['✨','🔮','🌟'])), i*90);
+        setTimeout(()=>{ try{ if (typeof showToast==='function') showToast(card.face.icon, card.face.name, card.face.note); else if (typeof say==='function') say(card.face.note); }catch(e){} }, 500);
+        try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   29) STARGAZE  —  in starry night spots a little telescope stands ready. Tap it
+   to peek through: a soft vignette iris shows a twinkling constellation for a few
+   seconds while she names it, then fades. Only appears in those scenes.
+   -------------------------------------------------------------------------- */
+(function fxTelescope(){
+  try{
+    const SKIES = new Set(['starrymeadow','observatory','planetarium','moonlitjetty','campsite','starrycampsite']);
+    let scope = null;                    // {x,y,cd,view,viewT,stars,name}
+    function inSky(){ try{ return (typeof SCENES!=='undefined') && SKIES.has(SCENES[currentScene]); }catch(e){ return false; } }
+    const NAMED = ['the Little Bear 🐻','the Swan 🦢','the Two Hearts 💞','the Wishing Star ⭐','the Lovers’ Knot 💗'];
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inSky()){ scope = null; return; }
+      if (!scope){ scope = { x: Math.max(W*0.18, Math.min(W*0.82, W*0.72)), y: rand(H*0.66,H*0.74), cd:0, view:0, viewT:0, stars:null, name:'' }; }
+      if (scope.cd > 0) scope.cd -= dt;
+      if (scope.view > 0){ scope.viewT += dt; if (scope.viewT >= 4) { scope.view = 0; scope.viewT = 0; } }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!scope || !inSky()) return;
+      const x = scope.x, base = scope.y;
+      ctx.save();
+      // tripod + tube
+      ctx.strokeStyle = '#4a4a55'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x, base-6); ctx.lineTo(x-7, base+8); ctx.moveTo(x, base-6); ctx.lineTo(x+7, base+8); ctx.moveTo(x, base-6); ctx.lineTo(x, base+9); ctx.stroke();
+      ctx.strokeStyle = '#6b6b7a'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(x-5, base-2); ctx.lineTo(x+11, base-14); ctx.stroke();
+      ctx.fillStyle = '#8a8a9a'; ctx.beginPath(); ctx.arc(x+12, base-15, 3.4, 0, 7); ctx.fill();
+
+      // the "look through" vision — a soft iris in the upper sky
+      if (scope.view > 0 && scope.stars){
+        const a = Math.min(1, scope.viewT < 0.4 ? scope.viewT/0.4 : (4 - scope.viewT)/0.6);
+        const vx = W*0.5, vy = H*0.2, vr = 58;
+        ctx.globalAlpha = Math.max(0, a);
+        // dark disc
+        ctx.fillStyle = 'rgba(10,12,30,0.92)';
+        ctx.beginPath(); ctx.arc(vx, vy, vr, 0, 7); ctx.fill();
+        // stars inside
+        for (const s of scope.stars){
+          const tw = 0.5 + 0.5*Math.sin(scope.viewT*4 + s.p);
+          ctx.fillStyle = 'rgba(255,255,240,' + (0.4+0.6*tw).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(vx + s.dx, vy + s.dy, s.r, 0, 7); ctx.fill();
+        }
+        // connecting lines
+        ctx.strokeStyle = 'rgba(190,210,255,0.5)'; ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        for (let i=0;i<scope.stars.length;i++){ const s=scope.stars[i]; if (i===0) ctx.moveTo(vx+s.dx, vy+s.dy); else ctx.lineTo(vx+s.dx, vy+s.dy); }
+        ctx.stroke();
+        // iris ring
+        ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(vx, vy, vr+2, 0, 7); ctx.stroke();
+        ctx.strokeStyle = 'rgba(120,130,160,0.6)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(vx, vy, vr, 0, 7); ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!scope || !inSky()) return false;
+        if (Math.hypot(px - scope.x, py - (scope.y - 8)) > 22) return false;
+        if (scope.cd > 0) return true;
+        scope.cd = 1.5;
+        // compose a little constellation
+        const n = 5, stars = [];
+        for (let i=0;i<n;i++) stars.push({ dx: rand(-38,38), dy: rand(-34,34), r: rand(1.2,2.4), p: rand(0,Math.PI*2) });
+        scope.stars = stars; scope.view = 1; scope.viewT = 0; scope.name = pick(NAMED);
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof say === 'function') say('Look — ' + scope.name);
+        try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

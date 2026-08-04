@@ -16,11 +16,10 @@ ever both touch it, I rebase on your version first so your text always wins.
 
 ## Inbox
 <!-- add your requests below this line -->
-- Add 10 magic and mysticism related rooms/scenes
-  - _(in progress — Claude: routed to the scenes thread, ~5 per round; moving to Done once all 10 land)_
 
 
 ## Done
 <!-- I'll move handled items here, newest first, with a note + commit short-sha -->
+- ✅ **Add 10 magic and mysticism related rooms/scenes** — *Done:* added 10 new magic/mysticism scenes across two rounds — Wizard Tower, Fortune Teller Parlor, Rune Circle, Arcane Library, Fairy Ring, Alchemy Lab, Witch's Cottage, Moon Temple, Will-o'-Wisp Marsh, Enchanted Mirror Hall. Each has tap-interactions + themed collectibles, and there are new magic features too (spell orb, flip-a-tarot-card, stargaze telescope). That's 16 magic-themed scenes in all.
 - ✅ **Bug: rainbow shows on every scene** — *Fixed:* now daytime-only (gated on `!isNight()`), threshold raised `fun>=96` → `fun>=99` so a single draw rarely triggers it, and opacity cut roughly in half (`0.16` → `0.08` per band). It no longer appears at night/indoor-evening scenes and is barely-there when it does.
 - ✅ **Bug: fireflies show on every scene** — *Fixed:* summer fireflies are now night-only (they don't draw at all in daylight — so they're gone during the day in August) and drastically reduced (count `8`→`4`, alpha `0.7`→`0.26`). At night a few faint ones remain. Say the word if you'd rather remove them entirely.

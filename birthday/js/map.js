@@ -58,6 +58,8 @@ const SCENE_LABELS = {
   planetlab:'Planetary Probe Lab',
   wizardtower:'Wizard Tower', fortuneteller:'Fortune Teller Parlor', runecircle:'Rune Circle',
   arcanelibrary:'Arcane Library', fairyring:'Fairy Ring',
+  alchemylab:'Alchemy Lab', witchcottage:"Witch's Cottage", moontemple:'Moon Temple',
+  willowispmarsh:"Will-o'-Wisp Marsh", enchantedmirrorhall:'Enchanted Mirror Hall',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

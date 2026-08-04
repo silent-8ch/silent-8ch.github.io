@@ -77,6 +77,11 @@ const TRINKET_POOL = (()=>{
   g(['igloo'], ['🧊','🐧','❄️']);
   g(['mistyforest'], ['🌲','🌫️','🍄']);
   g(['planetlab'], ['🪐','🛰️','🌠']);
+  g(['wizardtower'], ['🧙','🪄','🔮']);
+  g(['fortuneteller'], ['🔮','🃏','🕯️']);
+  g(['runecircle'], ['🌙','✨','📜']);
+  g(['arcanelibrary'], ['📜','🕯️','🦉']);
+  g(['fairyring'], ['🧚','🍄','⭐']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -167,6 +172,8 @@ const ACHIEVEMENTS = [
   {id:'days_730',    icon:'🎇', name:'Two Years Together',  desc:'730 days together',        test:()=> (meta.totalDays||0) >= 730},
   {id:'streak_90',   icon:'🔆', name:'Season-Long Streak',  desc:'A 90-day streak',          test:()=> (meta.streak||0) >= 90},
   {id:'days_1000',   icon:'👑', name:'A Thousand Days',     desc:'1000 days together',       test:()=> (meta.totalDays||0) >= 1000},
+  {id:'hug_100',     icon:'💝', name:'Hundred Hugs',       desc:'100 hugs',                 test:()=> (state.hugs||0) >= 100},
+  {id:'visit_130',   icon:'🌍', name:'World Wanderer',     desc:'Visit 130 places',         test:()=> visited.size >= 130},
 ];
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
@@ -675,6 +682,9 @@ const LOVE_NOTES = [
   {day:20, text:'Twenty days in, and my favorite little ritual is still just getting to say hi to you. 👋💛'},
   {day:130, text:'Every time I open this, you remind me that love is mostly a lot of small, faithful showings-up. 🌷'},
   {day:240, text:'However far we wander in here, my heart always ends up in the same place — right beside yours. 💞'},
+  {day:22, text:'Twenty-two days, and you\'ve made a habit out of being the nicest thing about mine. 💛'},
+  {day:105, text:'Past a hundred days now, and honestly? I\'m just getting warmed up loving you. 🔥'},
+  {day:190, text:'Some love is loud. Ours is the quiet, steady kind I\'d never trade for anything. 🕊️'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){
