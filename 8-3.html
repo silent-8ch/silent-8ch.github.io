@@ -117,7 +117,18 @@
   }
   #banner.hide{display:none;}
   /* map / locations */
-  #mapBtn,#collectBtn,#outfitBtn{cursor:pointer;font-size:18px;line-height:1;user-select:none;}
+  #mapBtn,#collectBtn,#outfitBtn,#setBtn{cursor:pointer;font-size:17px;line-height:1;user-select:none;}
+  #titlebar > div{gap:8px !important;}
+  #setPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
+  #setPanel.hide{display:none;}
+  #setHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  #setClose{cursor:pointer;font-size:18px;padding:0 4px;}
+  #setList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+  .setRow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:11px 14px;color:#fff;font-size:14px;cursor:pointer;}
+  .setRow .sv{font-weight:700;color:var(--accent);font-size:13px;}
+  .setRow.danger{background:rgba(200,60,70,.25);}
+  .setRow.danger .sv{color:#ff9a9a;}
+  .setRow small{display:block;color:rgba(255,255,255,.5);font-weight:500;font-size:11px;margin-top:2px;}
   #outfitPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
   #outfitPanel.hide{display:none;}
   #outfitHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -170,6 +181,7 @@
         <span id="outfitBtn" title="Outfit">👒</span>
         <span id="collectBtn" title="Collection">🧺</span>
         <span id="mapBtn" title="Locations">🗺️</span>
+        <span id="setBtn" title="Settings">⚙️</span>
         <span id="mood">🙂 okay</span>
       </div>
     </div>
@@ -211,6 +223,11 @@
     <div id="outfitHead"><span>👒 Outfit</span><span id="outfitClose">✕</span></div>
     <div id="outfitHint">Pick what she wears — Auto suits it to the place</div>
     <div id="outfitList"></div>
+  </div>
+
+  <div id="setPanel" class="hide">
+    <div id="setHead"><span>⚙️ Settings</span><span id="setClose">✕</span></div>
+    <div id="setList"></div>
   </div>
 
 </div>
@@ -423,6 +440,7 @@ let cooldown = 0;
 function doAction(kind){
   if (cooldown > 0) return;
   cooldown = 0.6;
+  sfx(kind);
 
   if (kind === 'feed'){
     const wouldOverfeed = state.hunger + CONFIG.gains.feed > 100;
@@ -569,7 +587,7 @@ function tapScene(px, py){
   pet.dir = px < pet.x ? 'left' : 'right';
   const sp = SCENE_INTERACT[SCENES[currentScene]];
   if (sp){
-    say(pick(sp.lines)); burstAt(sp.emoji, px, py);
+    say(pick(sp.lines)); burstAt(sp.emoji, px, py); sfx('tap');
     if (sp.love)   state.love   = clamp(state.love   + sp.love);
     if (sp.fun)    state.fun    = clamp(state.fun    + sp.fun);
     if (sp.energy) state.energy = clamp(state.energy + sp.energy);
@@ -720,12 +738,13 @@ function loop(ts){
   }
 
   if (started){
-    // needs decay
-    state.hunger = clamp(state.hunger - CONFIG.decay.hunger*dt);
-    state.fun    = clamp(state.fun    - CONFIG.decay.fun*dt);
-    state.love   = clamp(state.love   - CONFIG.decay.love*dt);
+    // needs decay (relaxed mode halves the drain)
+    const dm = (settings && settings.relaxed) ? 0.5 : 1;
+    state.hunger = clamp(state.hunger - CONFIG.decay.hunger*dt*dm);
+    state.fun    = clamp(state.fun    - CONFIG.decay.fun*dt*dm);
+    state.love   = clamp(state.love   - CONFIG.decay.love*dt*dm);
     // energy drains ~2x faster at night unless she's resting
-    if (!pet.resting) state.energy = clamp(state.energy - CONFIG.decay.energy*dt*(isNight()?2:1));
+    if (!pet.resting) state.energy = clamp(state.energy - CONFIG.decay.energy*dt*(isNight()?2:1)*dm);
     else state.energy = clamp(state.energy + 9*dt);   // recover while resting
     // Reset overfed/overdraw only when stats drop significantly below full
     if (state.hunger < 80) state.overfed = 0;
@@ -873,7 +892,7 @@ function findTrinket(dt){
   const t = pick(pool);
   const first = !collection[t];
   collection[t] = (collection[t]||0) + 1; saveCollection();
-  say(`Found a ${t}!`); burstAt(t, pet.x + rand(-10,10), pet.y - 10);
+  say(`Found a ${t}!`); burstAt(t, pet.x + rand(-10,10), pet.y - 10); sfx('find');
   if (first) hearts();
   state.fun = clamp(state.fun + 3); refreshHUD();
 }
@@ -887,6 +906,43 @@ function buildCollection(){
     grid.appendChild(cell);
   });
 }
+/* ---- settings: gentle sound, relaxed mode, reset ---- */
+let settings = (function(){ try{ const r=localStorage.getItem('bpet_settings'); if(r) return {sound:false,relaxed:false,...JSON.parse(r)}; }catch(e){} return {sound:false, relaxed:false}; })();
+function saveSettings(){ try{ localStorage.setItem('bpet_settings', JSON.stringify(settings)); }catch(e){} }
+let sfxCtx = null;
+function ensureAudio(){ try{ if(!sfxCtx) sfxCtx = new (window.AudioContext||window.webkitAudioContext)(); if(sfxCtx.state==='suspended') sfxCtx.resume(); }catch(e){} }
+function tone(freq, dur, when, vol, type){ if(!settings.sound||!sfxCtx) return;
+  const t0=sfxCtx.currentTime+(when||0); const o=sfxCtx.createOscillator(), g=sfxCtx.createGain();
+  o.type=type||'sine'; o.frequency.value=freq; g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.12, t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  o.connect(g).connect(sfxCtx.destination); o.start(t0); o.stop(t0+dur+0.03);
+}
+const SFX = {
+  feed:[[523,0.12,0],[659,0.14,0.08]], draw:[[587,0.1,0],[784,0.16,0.06]],
+  hug:[[659,0.14,0],[880,0.2,0.08]], rest:[[392,0.35,0,0.09]],
+  find:[[784,0.08,0],[1047,0.14,0.05]], day:[[523,0.12,0],[659,0.12,0.09],[784,0.2,0.18]],
+  tap:[[880,0.06,0,0.07]],
+};
+function sfx(kind){ if(!settings.sound) return; ensureAudio(); (SFX[kind]||[]).forEach(n=> tone(n[0],n[1],n[2],n[3])); }
+
+function buildSettings(){
+  const list=document.getElementById('setList'); if(!list) return; list.innerHTML='';
+  const toggle=(label, key, sub)=>{
+    const row=document.createElement('div'); row.className='setRow';
+    row.innerHTML=`<span>${label}${sub?`<small>${sub}</small>`:''}</span><span class="sv">${settings[key]?'On':'Off'}</span>`;
+    row.addEventListener('click',()=>{ settings[key]=!settings[key]; saveSettings(); if(key==='sound'&&settings.sound){ ensureAudio(); sfx('find'); } buildSettings(); });
+    list.appendChild(row);
+  };
+  toggle('🔊 Sound', 'sound', 'Gentle chimes when you play with her');
+  toggle('🌿 Relaxed mode', 'relaxed', 'Her needs drain half as fast');
+  const reset=document.createElement('div'); reset.className='setRow danger';
+  reset.innerHTML=`<span>♻️ Reset progress<small>Clears stats, days, passport & collection</small></span><span class="sv">Reset</span>`;
+  reset.addEventListener('click',()=>{ if(confirm('Reset all progress? This can’t be undone.')){ ['bpet','bpet_disabled','bpet_visited','bpet_meta','bpet_collection','bpet_outfit','bpet_settings'].forEach(k=>{ try{localStorage.removeItem(k);}catch(e){} }); location.reload(); } });
+  list.appendChild(reset);
+}
+function openSettings(){ ensureAudio(); buildSettings(); document.getElementById('setPanel').classList.remove('hide'); }
+function closeSettings(){ document.getElementById('setPanel').classList.add('hide'); }
+
 function buildOutfitList(){
   const list=document.getElementById('outfitList'); if(!list) return; list.innerHTML='';
   OUTFITS.forEach(o=>{
@@ -978,7 +1034,7 @@ function initDaysTogether(){
     if (!firstEver){
       setTimeout(()=>{
         say(meta.streak>1 ? `Day ${meta.totalDays} together! 💛 (${meta.streak}-day streak)` : `Day ${meta.totalDays} together! 💛`);
-        hearts();
+        hearts(); sfx('day');
         state.hunger=clamp(state.hunger+10); state.fun=clamp(state.fun+10); state.love=clamp(state.love+10); state.energy=clamp(state.energy+10);
         refreshHUD();
       }, 1400);
@@ -1097,6 +1153,8 @@ document.getElementById('collectBtn').addEventListener('click', openCollect);
 document.getElementById('collectClose').addEventListener('click', closeCollect);
 document.getElementById('outfitBtn').addEventListener('click', openOutfit);
 document.getElementById('outfitClose').addEventListener('click', closeOutfit);
+document.getElementById('setBtn').addEventListener('click', openSettings);
+document.getElementById('setClose').addEventListener('click', closeSettings);
 document.getElementById('mapAll').addEventListener('click', ()=>{ disabledScenes.clear(); saveDisabled(); buildMapList(); });
 document.getElementById('mapNone').addEventListener('click', ()=>{ disabledScenes = new Set(SCENES); saveDisabled(); buildMapList(); });
 
