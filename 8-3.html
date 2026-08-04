@@ -5394,6 +5394,60 @@ function drawSaltFlats(){
 }
 registerScene('saltflats', drawSaltFlats);
 
+/* ── BOOKBINDERY (indoor · hand binding & gold tooling) ── */
+function drawBookbindery(){
+  const t=sceneTime, floorY=H*0.66;
+  // warm workshop
+  ctx.fillStyle='#c8a86a'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#7a5636'; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='#b89a5c'; ctx.fillRect(0,H*0.12,W,2);
+  // leather hides hanging on the back wall (colored)
+  const hides=['#8a3a2a','#2f5a3a','#3a4a7a','#7a5a20'];
+  for(let i=0;i<4;i++){ const hx=W*0.06+i*W*0.1; ctx.fillStyle=hides[i];
+    ctx.beginPath(); ctx.moveTo(hx,H*0.14); ctx.lineTo(hx+30,H*0.14); ctx.quadraticCurveTo(hx+34,H*0.28,hx+24,H*0.34); ctx.quadraticCurveTo(hx+15,H*0.3,hx+6,H*0.34); ctx.quadraticCurveTo(hx-4,H*0.26,hx,H*0.14); ctx.fill();
+    ctx.fillStyle='#3a2a1a'; ctx.fillRect(hx+12,H*0.13,2,3); }
+  // shelf of finished bound books (spines, gold bands)
+  ctx.fillStyle='#5a3e26'; ctx.fillRect(W*0.55,H*0.16,W*0.4,4);
+  const spineCols=['#7a2a2a','#2a4a3a','#2a3a6a','#5a3a6a','#7a5a2a','#3a5a5a'];
+  for(let i=0;i<9;i++){ const bx=W*0.56+i*W*0.043; ctx.fillStyle=spineCols[i%spineCols.length]; ctx.fillRect(bx,H*0.16-26,W*0.036,26);
+    ctx.fillStyle='#d4af37'; ctx.fillRect(bx,H*0.16-22,W*0.036,1.5); ctx.fillRect(bx,H*0.16-10,W*0.036,1.5); }
+  // the workbench
+  const by=floorY-4;
+  ctx.fillStyle='#6a4a30'; ctx.fillRect(0,by-8,W,8+(H-by));
+  ctx.fillStyle='#7a5638'; ctx.fillRect(0,by-8,W,4);
+  // cast-iron nipping press (center) with a book being pressed + spinning wheel
+  const px=W*0.5;
+  ctx.fillStyle='#3a3a42'; ctx.fillRect(px-26,by-18,52,10); // top plate
+  ctx.fillRect(px-26,by-54,6,44); ctx.fillRect(px+20,by-54,6,44); // side posts
+  ctx.fillStyle='#4a4a52'; ctx.fillRect(px-26,by-58,52,8); // top bar
+  // the pressed book
+  ctx.fillStyle='#e8dcc0'; ctx.fillRect(px-18,by-30,36,12);
+  ctx.fillStyle='#8a3a2a'; ctx.fillRect(px-18,by-30,4,12);
+  // the big turning wheel/handle on top
+  const wy=by-58, wr=12, rot=t*1.5;
+  ctx.strokeStyle='#2a2a30'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(px,wy-8,wr,0,7); ctx.stroke();
+  for(let s=0;s<4;s++){ const a=rot+s*Math.PI/2; ctx.beginPath(); ctx.moveTo(px,wy-8); ctx.lineTo(px+Math.cos(a)*wr,wy-8+Math.sin(a)*wr); ctx.stroke(); }
+  ctx.fillStyle='#5a5a62'; ctx.beginPath(); ctx.arc(px,wy-8,3,0,7); ctx.fill();
+  ctx.fillStyle='#3a3a42'; ctx.fillRect(px-2,wy-8,4,8); // screw shaft down to plate
+  // sewing frame on the left (threads under tension)
+  const sx=W*0.16;
+  ctx.fillStyle='#5a3e26'; ctx.fillRect(sx-24,by-46,4,42); ctx.fillRect(sx+20,by-46,4,42); ctx.fillRect(sx-24,by-46,48,4);
+  ctx.strokeStyle='#e8e0d0'; ctx.lineWidth=1; for(let i=0;i<5;i++){ ctx.beginPath(); ctx.moveTo(sx-16+i*8,by-44); ctx.lineTo(sx-16+i*8,by-8); ctx.stroke(); }
+  // signatures (folded pages) being sewn at the base of the frame
+  ctx.fillStyle='#f0e8d4'; ctx.fillRect(sx-18,by-12,36,8); ctx.strokeStyle='#c8b898'; ctx.strokeRect(sx-18,by-12,36,8);
+  // gold-tooling iron heating in a little brazier on the right, glowing tip
+  const gx=W*0.84;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(gx-10,by-8,20,8);
+  const glow=0.5+0.5*Math.abs(Math.sin(t*3));
+  ctx.strokeStyle='#6a5040'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(gx,by-6); ctx.lineTo(gx+16,by-22); ctx.stroke();
+  ctx.globalAlpha=glow; ctx.fillStyle='#ff9a3a'; ctx.beginPath(); ctx.arc(gx,by-6,3,0,7); ctx.fill(); ctx.globalAlpha=1;
+  // spools of thread + a bone folder on the bench foreground
+  for(let i=0;i<3;i++){ ctx.fillStyle=['#c04a6a','#4a86c0','#f2c14e'][i]; ctx.beginPath(); ctx.arc(W*0.34+i*W*0.06,by+6,5,0,7); ctx.fill();
+    ctx.fillStyle='#7a5638'; ctx.beginPath(); ctx.arc(W*0.34+i*W*0.06,by+6,1.6,0,7); ctx.fill(); }
+  ctx.fillStyle='#efe8d8'; ctx.save(); ctx.translate(W*0.62,by+8); ctx.rotate(0.3); ctx.fillRect(-12,-2,24,4); ctx.restore();
+}
+registerScene('bookbindery', drawBookbindery);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
