@@ -1972,6 +1972,77 @@ function drawCampsite(){
 }
 registerScene('campsite', drawCampsite);
 
+/* ── BAKERY (indoor · baking) ── */
+function drawBakery(){
+  const t = sceneTime, floorY = H*0.62, fh = H-floorY;
+
+  // wall + subtle stripes
+  ctx.fillStyle='#f6e7d3'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='rgba(211,170,120,.15)';
+  for (let x=0;x<W;x+=26) ctx.fillRect(x,0,13,floorY);
+
+  // checker-tiled floor
+  ctx.fillStyle='#e2ccac'; ctx.fillRect(0,floorY,W,fh);
+  for (let r=0;r<6;r++) for (let c=0;c<12;c++) if ((r+c)%2){ ctx.fillStyle='rgba(120,90,60,.15)'; ctx.fillRect(c*W/12, floorY+r/6*fh, W/12, fh/6); }
+  ctx.fillStyle='rgba(0,0,0,.05)'; ctx.fillRect(0,floorY-2,W,2);
+
+  // pendant lamps
+  for (const lx of [W*0.30,W*0.70]){
+    ctx.strokeStyle='#5a4632'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,H*0.09); ctx.stroke();
+    ctx.fillStyle='rgba(255,225,150,.20)'; ctx.beginPath(); ctx.arc(lx,H*0.13,18,0,7); ctx.fill();
+    ctx.fillStyle='#e8b84b'; ctx.beginPath(); ctx.moveTo(lx-10,H*0.09+9); ctx.lineTo(lx+10,H*0.09+9); ctx.lineTo(lx+6,H*0.09); ctx.lineTo(lx-6,H*0.09); ctx.closePath(); ctx.fill();
+  }
+
+  // chalkboard menu
+  ctx.fillStyle='#33352f'; roundRect(W*0.40,H*0.05,W*0.20,H*0.12,4); ctx.fill();
+  ctx.strokeStyle='#c9a06a'; ctx.lineWidth=3; roundRect(W*0.40,H*0.05,W*0.20,H*0.12,4); ctx.stroke();
+  ctx.textAlign='center'; ctx.fillStyle='#f5ede0'; ctx.font='bold 10px Segoe UI, sans-serif';
+  ctx.fillText('~ Bakery ~', W*0.5, H*0.085);
+  ctx.font='8px Segoe UI, sans-serif'; ctx.fillStyle='#e7d9c4';
+  ctx.fillText('cookies · cakes', W*0.5, H*0.115); ctx.fillText('fresh daily', W*0.5, H*0.14);
+  ctx.textAlign='left';
+
+  // bread shelf on the wall (right)
+  const shX=W*0.62, shY=H*0.30, shW=W*0.34;
+  ctx.fillStyle='#9a6b3f'; ctx.fillRect(shX,shY,shW,5); ctx.fillRect(shX,shY+26,shW,5);
+  const loaf=(x,y,c)=>{ ctx.fillStyle=c; ctx.beginPath(); ctx.ellipse(x,y,9,6,0,0,7); ctx.fill(); ctx.strokeStyle='rgba(90,50,20,.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x-4,y-3); ctx.lineTo(x-2,y+1); ctx.moveTo(x+2,y-4); ctx.lineTo(x+4,y); ctx.stroke(); };
+  for (let i=0;i<5;i++) loaf(shX+16+i*22, shY-2, i%2?'#d99a52':'#c98a4b');
+  for (let i=0;i<5;i++) loaf(shX+16+i*22, shY+24, i%2?'#c98a4b':'#d99a52');
+
+  // oven on the floor (right) with a warm glowing window
+  const ovX=W*0.74, ovW=W*0.22, ovTop=floorY-60;
+  ctx.fillStyle='#6f7178'; roundRect(ovX,ovTop,ovW,60,4); ctx.fill();
+  ctx.fillStyle='#4a4c52'; roundRect(ovX+6,ovTop+9,ovW-12,34,4); ctx.fill();
+  const og=ctx.createLinearGradient(0,ovTop+10,0,ovTop+42); og.addColorStop(0,'#ffb347'); og.addColorStop(1,'#ff7a1f');
+  ctx.fillStyle=og; roundRect(ovX+10,ovTop+13,ovW-20,26,3); ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.22)'; ctx.fillRect(ovX+ovW/2-1,ovTop+13,2,26);
+  ctx.fillStyle='#2f3136'; ctx.fillRect(ovX+9,ovTop+47,ovW-18,4);
+
+  // glass display case on the floor (left) full of pastries
+  const dcX=W*0.05, dcW=W*0.44, dcTop=floorY-54, dcGlassH=44;
+  ctx.fillStyle='rgba(200,225,235,.30)'; ctx.fillRect(dcX,dcTop,dcW,dcGlassH);
+  ctx.strokeStyle='#cfe0e8'; ctx.lineWidth=2; ctx.strokeRect(dcX,dcTop,dcW,dcGlassH);
+  ctx.fillStyle='#a06a3c'; ctx.fillRect(dcX,dcTop+dcGlassH,dcW,floorY-(dcTop+dcGlassH));
+  ctx.fillStyle='rgba(255,255,255,.45)'; ctx.fillRect(dcX+3,dcTop+dcGlassH/2,dcW-6,2);   // middle shelf
+  // pastries
+  const cookie=(x,y)=>{ ctx.fillStyle='#c98a4b'; ctx.beginPath(); ctx.arc(x,y,5,0,7); ctx.fill(); ctx.fillStyle='#5a3b22'; ctx.fillRect(x-2,y-1,1.4,1.4); ctx.fillRect(x+1,y+1,1.4,1.4); ctx.fillRect(x-1,y+2,1.4,1.4); };
+  const cupcake=(x,y,fc)=>{ ctx.fillStyle='#d9a066'; ctx.beginPath(); ctx.moveTo(x-5,y); ctx.lineTo(x+5,y); ctx.lineTo(x+3,y+8); ctx.lineTo(x-3,y+8); ctx.closePath(); ctx.fill(); ctx.fillStyle=fc; ctx.beginPath(); ctx.arc(x,y-1,5,Math.PI,0); ctx.fill(); ctx.fillStyle='#c0392b'; ctx.fillRect(x-0.7,y-6,1.4,1.4); };
+  const croissant=(x,y)=>{ ctx.fillStyle='#e0a94f'; ctx.beginPath(); ctx.arc(x,y+2,6,Math.PI*1.1,Math.PI*1.9); ctx.arc(x,y+2,3,Math.PI*1.9,Math.PI*1.1,true); ctx.closePath(); ctx.fill(); };
+  const shelfTopY=dcTop+dcGlassH/2-3, shelfMidY=dcTop+dcGlassH-6;
+  for (let i=0;i<5;i++) cookie(dcX+16+i*30, shelfTopY);
+  const fcs=['#f2a6b3','#f7d9e3','#b5e0c0','#f7d9e3','#f2a6b3'];
+  for (let i=0;i<5;i++) (i%2 ? cupcake(dcX+16+i*30, shelfMidY-6, fcs[i]) : croissant(dcX+16+i*30, shelfMidY));
+
+  // steam rising from the oven and case
+  ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=2;
+  for (const [sxx,syy] of [[ovX+ovW*0.5,ovTop],[dcX+dcW*0.5,dcTop]]){
+    ctx.beginPath();
+    for (let k=0;k<=10;k++){ const yy=syy-k*4; const xx=sxx+Math.sin(t*3+k*0.7)*4*(k/10); if(k===0)ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy); }
+    ctx.stroke();
+  }
+}
+registerScene('bakery', drawBakery);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
