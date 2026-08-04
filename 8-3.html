@@ -640,6 +640,36 @@ function maybeNag(dt){
   else if (state.fun < 25){ say(pick(LINES.bored)); }
 }
 
+/* ---------- idle thought bubbles (little floating emotes) ---------- */
+const THOUGHT_SCENE = (()=>{
+  const map = {}; const g=(names,arr)=>names.forEach(n=>map[n]=arr);
+  g(['florist','cherryblossom','lavender','tulipfield','sunflowers','greenhouse','topiary','hedgemaze','vineyard','orchard','pasture','alpinemeadow','teaplantation'], ['🌸','🌼','🌷']);
+  g(['musicroom','recordshop','ballroom','cinema','carnival','arcade'], ['🎵','🎶']);
+  g(['koipond','aquarium','tidepools','coralreef','marina','fishingdock','river','beach','waterlily'], ['🐟','🌊','🐚']);
+  g(['bakery','chocolateshop','candyshop','icecreamparlor','cafe','diner','cheeseshop','perfumery'], ['😋','🍪','🧁']);
+  g(['fireflies','meteorshower','observatory','planetarium','aurora','biobay','glowwormcave'], ['✨','🌟','🌙']);
+  g(['catcafe','petshop','butterflydome','aviary','savanna','backyard'], ['🐾','🥰','🦋']);
+  g(['snowycabin','icepond','frozenfalls','icebergbay'], ['❄️','☃️']);
+  g(['artstudio','pottery','sewingstudio','weaving','stainedglass','glassblowing','luthier','bookbindery','letterpress','cobbler'], ['🎨','✏️','💡']);
+  return map;
+})();
+let thoughtTimer = 7;
+function idleThoughts(dt){
+  thoughtTimer -= dt;
+  if (thoughtTimer > 0) return;
+  thoughtTimer = rand(7, 13);
+  // only think when she isn't busy or already speaking
+  if (pet.animLock > 0 || pet.resting || isCrying()) return;
+  if (speech.classList.contains('show')) return;
+  let e;
+  if (state.hunger < 40) e = '🍪';
+  else if (state.energy < 40) e = '😴';
+  else if (state.love < 40) e = '💗';
+  else if (state.fun  < 40) e = '🎨';
+  else { const list = THOUGHT_SCENE[SCENES[currentScene]] || ['💭','🙂','💛','✨','🎶']; e = pick(list); }
+  fxAt(pet.x + rand(-6,6), pet.y - SHEETS.walk.displayH*0.9, '💭'+e);
+}
+
 /* ---------- main loop ---------- */
 let last = 0, started = true;   // no splash — the game runs immediately on load
 function loop(ts){
@@ -669,6 +699,7 @@ function loop(ts){
     if (cooldown>0) cooldown -= dt;
     if (interactCd>0) interactCd -= dt;
     maybeNag(dt);
+    idleThoughts(dt);
     updatePet(dt);
     // refresh bars periodically (cheap)
     hudAccum += dt; if (hudAccum > 0.25){ refreshHUD(); hudAccum = 0; }
