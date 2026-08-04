@@ -4122,6 +4122,41 @@ function drawFishingDock(){
 }
 registerScene('fishingdock', drawFishingDock);
 
+/* ── BUTTERFLY CONSERVATORY (indoor · butterflies) ── */
+function drawButterflyDome(){
+  const t = sceneTime, floorY = H*0.66;
+
+  const bg=ctx.createLinearGradient(0,0,0,floorY); bg.addColorStop(0,'#d0eede'); bg.addColorStop(1,'#b8dcc0');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,floorY);
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=2;
+  for (let r=0.7;r>0.2;r-=0.14){ ctx.beginPath(); ctx.arc(W/2,floorY,W*r,Math.PI,0); ctx.stroke(); }
+  for (let a=0;a<=6;a++){ const an=Math.PI+a/6*Math.PI; ctx.beginPath(); ctx.moveTo(W/2,floorY); ctx.lineTo(W/2+Math.cos(an)*W*0.7,floorY+Math.sin(an)*W*0.7); ctx.stroke(); }
+
+  // plants + flowers along the floor line
+  ctx.fillStyle='#3a7a3a'; for (let i=0;i<10;i++){ const px=(i*40+10)%W; for (let k=-1;k<=1;k++){ ctx.beginPath(); ctx.ellipse(px+k*8,floorY-16,5,16,k*0.3,0,7); ctx.fill(); } }
+  const fc=['#e8628c','#f2c14e','#c05fd0','#ff8a5a']; for (let i=0;i<8;i++){ const fx=(i*47+20)%W; ctx.fillStyle=fc[i%4]; ctx.beginPath(); ctx.arc(fx,floorY-6,4,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(fx,floorY-6,1.5,0,7); ctx.fill(); }
+
+  // floor + path
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#7a9a5a'); fl.addColorStop(1,'#5a7a3a');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='#b0a894'; for (const s of [[W*0.5,H*0.8,16],[W*0.44,H*0.9,18]]){ ctx.beginPath(); ctx.ellipse(s[0],s[1],s[2],s[2]*0.4,0,0,7); ctx.fill(); }
+
+  // butterflies
+  const bc=['#f2c14e','#e8628c','#5a9ee0','#ff8a5a','#c05fd0','#7ac05a'];
+  for (let i=0;i<14;i++){
+    const seed=i*53.7;
+    const bx=(((seed*1.7 + Math.sin(t*0.6+i)*50 + t*(i%3-1)*8)%W)+W)%W;
+    const by=30 + ((seed*2.3 + Math.sin(t*0.8+i*1.3)*20) % (floorY-20));
+    const s=0.7+((i%3)*0.3), flap=Math.abs(Math.sin(t*10+i))*4+1;
+    ctx.save(); ctx.translate(bx,by); ctx.fillStyle=bc[i%6];
+    ctx.beginPath(); ctx.ellipse(-3*s,0,3*s,flap*s,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(3*s,0,3*s,flap*s,0,0,7); ctx.fill();
+    ctx.fillStyle='#3a2a1a'; ctx.fillRect(-0.5,-flap*s,1,flap*2*s);
+    ctx.restore();
+  }
+}
+registerScene('butterflydome', drawButterflyDome);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
