@@ -61,6 +61,10 @@ const TRINKET_POOL = (()=>{
   g(['starrymeadow'], ['🌟','🌾','🦗']);
   g(['harbornight'], ['⚓','🌃','🛟']);
   g(['giftwrapshop'], ['🎁','🎀','✂️']);
+  g(['gingerbreadkitchen'], ['🍪','🧑‍🍳','🍬']);
+  g(['sunflowermaze'], ['🌻','🐝','🌾']);
+  g(['jellyfishtank'], ['🎐','🪼','🫧']);
+  g(['cavehotspring'], ['♨️','🪨','💦']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -143,6 +147,8 @@ const ACHIEVEMENTS = [
   {id:'draw_500',    icon:'🏛️', name:'Gallery Legend',    desc:'Draw together 500 times',  test:()=> (state.draws||0) >= 500},
   {id:'hug_1000',    icon:'💘', name:'Infinite Hugs',     desc:'1000 hugs',                test:()=> (state.hugs||0) >= 1000},
   {id:'days_270',    icon:'🍂', name:'Three Seasons',     desc:'270 days together',        test:()=> (meta.totalDays||0) >= 270},
+  {id:'feed_1000',   icon:'🍰', name:'Cookie Royalty',    desc:'1000 cookies',             test:()=> (state.feeds||0) >= 1000},
+  {id:'days_500',    icon:'💫', name:'Five Hundred Days',  desc:'500 days together',        test:()=> (meta.totalDays||0) >= 500},
 ];
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
@@ -639,6 +645,9 @@ const LOVE_NOTES = [
   {day:11, text:'Eleven days already — you have a way of making time feel gentle and generous. 💛'},
   {day:65, text:'A couple of months in, and loving you has become as easy and natural as breathing. 🌿'},
   {day:140, text:'However many days it\'s been, my answer is always the same: I\'d do them all again with you. 💗'},
+  {day:16, text:'Sixteen days, and I already can\'t imagine my mornings without checking in on you. ☀️'},
+  {day:100, text:'A hundred days together. You made triple digits feel like a milestone worth celebrating. 🎉💛'},
+  {day:170, text:'The longer I love you, the more I understand how rare and good this really is. 🍀'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){

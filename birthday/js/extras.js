@@ -1349,3 +1349,169 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 8). Two scene-gated interactive builds. No always-on
+   overlays; both live only in their scenes and their taps return false on misses.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   20) BUILD A SNOWMAN  —  in wintery scenes, tap the little snow pile to build it
+   up, ball by ball, into a cheerful snowman (with a carrot nose and a scarf).
+   She helps and celebrates when it's finished. It only lives in winter scenes.
+   -------------------------------------------------------------------------- */
+(function fxSnowman(){
+  try{
+    const WINTER = new Set(['snowycabin','icepond','skilodge','gingerbreadkitchen','frozenfalls','icebergbay']);
+    let sm = null;                       // {x,y,stage,cd,doneT}
+    function inWinter(){ try{ return (typeof SCENES!=='undefined') && WINTER.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inWinter()){ sm = null; return; }
+      if (!sm){ sm = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.28)), y: rand(H*0.74, H*0.80), stage: 0, cd: 0, doneT: 0 }; }
+      if (sm.cd > 0) sm.cd -= dt;
+      if (sm.doneT > 0) sm.doneT -= dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!sm || !inWinter()) return;
+      const x = sm.x, base = sm.y;
+      ctx.save();
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.14)';
+      ctx.beginPath(); ctx.ellipse(x, base + 4, 18, 5, 0, 0, 7); ctx.fill();
+      if (sm.stage === 0){
+        // a small starter pile of snow
+        ctx.fillStyle = '#f2f7ff';
+        ctx.beginPath(); ctx.ellipse(x, base, 15, 8, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.beginPath(); ctx.ellipse(x-4, base-2, 5, 3, 0, 0, 7); ctx.fill();
+      } else {
+        // bottom ball (stage>=1)
+        ctx.fillStyle = '#f4f9ff';
+        ctx.beginPath(); ctx.arc(x, base - 11, 14, 0, 7); ctx.fill();
+        if (sm.stage >= 2){ ctx.beginPath(); ctx.arc(x, base - 30, 10, 0, 7); ctx.fill(); }   // middle ball
+        if (sm.stage >= 3){
+          ctx.beginPath(); ctx.arc(x, base - 45, 7.5, 0, 7); ctx.fill();                        // head
+          // face
+          ctx.fillStyle = '#333';
+          ctx.beginPath(); ctx.arc(x-2.6, base-47, 1, 0, 7); ctx.arc(x+2.6, base-47, 1, 0, 7); ctx.fill();
+          ctx.beginPath(); ctx.arc(x-3, base-41, 0.8, 0, 7); ctx.arc(x, base-40.5, 0.8, 0, 7); ctx.arc(x+3, base-41, 0.8, 0, 7); ctx.fill(); // smile of coal
+          // carrot nose
+          ctx.fillStyle = '#ff8c3a';
+          ctx.beginPath(); ctx.moveTo(x, base-45); ctx.lineTo(x+8, base-44); ctx.lineTo(x, base-43); ctx.closePath(); ctx.fill();
+          // buttons
+          ctx.fillStyle = '#333';
+          ctx.beginPath(); ctx.arc(x, base-32, 1.1, 0, 7); ctx.arc(x, base-28, 1.1, 0, 7); ctx.fill();
+          // scarf
+          ctx.fillStyle = '#e05a6a';
+          ctx.fillRect(x-8, base-38, 16, 3);
+          ctx.fillRect(x+4, base-38, 3, 8);
+          // twig arms
+          ctx.strokeStyle = '#7a5233'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(x-9, base-30); ctx.lineTo(x-18, base-34);
+                           ctx.moveTo(x+9, base-30); ctx.lineTo(x+18, base-34); ctx.stroke();
+        }
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!sm || !inWinter()) return false;
+        if (Math.hypot(px - sm.x, py - (sm.y - 20)) > 30) return false;   // generous around the whole build
+        if (sm.cd > 0) return true;                                        // consume, but pace the taps
+        sm.cd = 0.4;
+        if (typeof fxAt === 'function') fxAt(sm.x, sm.y - sm.stage*10 - 8, '❄️');
+        if (typeof sfx === 'function') sfx('tap');
+        if (sm.stage < 3){
+          sm.stage++;
+          if (sm.stage === 3){
+            // finished!
+            sm.doneT = 3;
+            if (typeof burstAt === 'function') burstAt('⛄', sm.x, sm.y - 40);
+            if (typeof hearts === 'function') hearts();
+            if (typeof sfx === 'function') sfx('day');
+            if (typeof say === 'function') say(pick(['Our snowman! ⛄','He’s perfect 🥰','Ta-daa! ❄️','I love him 💛']));
+            try{ state.fun = clamp(state.fun + 8); state.love = clamp(state.love + 4); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          } else {
+            if (typeof say === 'function') say(pick(['Roll another! ⛄','Pat, pat… ❄️','Almost there!']));
+            try{ state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          }
+        } else {
+          // already complete — a friendly boop resets to a fresh pile after a moment
+          if (typeof say === 'function') say(pick(['Hi, snowman! ☃️','Boop his nose 🥕','So jolly 🥰']));
+          if (sm.doneT <= 0){ sm.stage = 0; }
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   21) PUDDLE SPLASH  —  only on the rainy street, little puddles gather on the
+   ground. Tap one and she hops in with a splash and a giggle. Rain washes the
+   puddles fresh now and then. Contained entirely to that scene.
+   -------------------------------------------------------------------------- */
+(function fxPuddle(){
+  try{
+    let puddles = null;                  // array of {x,y,rx,cd}
+    let refreshT = 0;
+    function onRainy(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'rainystreet'; }catch(e){ return false; } }
+    function seed(){
+      const n = 3, arr = [];
+      for (let i=0;i<n;i++) arr.push({ x: rand(W*0.2, W*0.8), y: rand(H*0.74, H*0.82), rx: rand(12,18), cd: 0, ripple: 0 });
+      puddles = arr;
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!onRainy()){ puddles = null; return; }
+      if (!puddles){ seed(); refreshT = rand(18, 30); }
+      refreshT -= dt;
+      if (refreshT <= 0){ refreshT = rand(18, 30); seed(); }    // fresh puddles as the rain falls
+      for (const p of puddles){ if (p.cd > 0) p.cd -= dt; if (p.ripple > 0) p.ripple -= dt; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!puddles || !onRainy()) return;
+      ctx.save();
+      for (const p of puddles){
+        // puddle
+        ctx.fillStyle = 'rgba(150,185,210,0.35)';
+        ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.rx*0.34, 0, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba(220,235,245,0.35)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.rx*0.34, 0, 0, 7); ctx.stroke();
+        // expanding ripple after a splash
+        if (p.ripple > 0){
+          const k = 1 - (p.ripple / 0.6);
+          ctx.globalAlpha = Math.max(0, p.ripple / 0.6);
+          ctx.strokeStyle = 'rgba(230,245,255,0.8)'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx*(0.4+k*0.9), p.rx*0.34*(0.4+k*0.9), 0, 0, 7); ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!puddles || !onRainy()) return false;
+        for (const p of puddles){
+          const dx = (px - p.x) / (p.rx + 6), dy = (py - p.y) / (p.rx*0.34 + 8);
+          if (dx*dx + dy*dy > 1) continue;
+          if (p.cd > 0) return true;
+          p.cd = 0.8; p.ripple = 0.6;
+          // she skips over and splashes
+          if (typeof fxWalkHerTo === 'function') fxWalkHerTo(p.x, p.y);
+          if (typeof fxAt === 'function') for (let i=0;i<4;i++) setTimeout(()=> fxAt(p.x + rand(-p.rx,p.rx), p.y - rand(2,14), pick(['💧','💦'])), i*60);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['Splash! 💦','Wheee! 🌧️','Jump in the puddles! 💧','Muddy toes 😄']));
+          try{ state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          return true;
+        }
+        return false;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

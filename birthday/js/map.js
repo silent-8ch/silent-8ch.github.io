@@ -50,6 +50,8 @@ const SCENE_LABELS = {
   harbornight:'Harbor at Night', giftwrapshop:'Gift Wrap Shop',
   gingerbreadkitchen:'Gingerbread Kitchen', sunflowermaze:'Sunflower Maze',
   jellyfishtank:'Jellyfish Tank', cavehotspring:'Cave Hot Spring',
+  iceskatingrink:'Ice Skating Rink', candyfactory:'Candy Factory', moonbeach:'Moonlit Beach',
+  papercraftstudio:'Papercraft Studio',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

@@ -1583,3 +1583,220 @@ function drawCaveHotSpring(){
   ctx.fillStyle='#e8e2d4'; roundRect(W*0.84,poolY-10,22,8,2); ctx.fill(); ctx.fillStyle='#d8c8b8'; roundRect(W*0.85,poolY-16,20,7,2); ctx.fill();
 }
 registerScene('cavehotspring', drawCaveHotSpring);
+
+/* ── ICE SKATING RINK (outdoor · winter evening) ── */
+function drawIceRink(){
+  const t = sceneTime, iceY = H*0.50;
+
+  // twilight winter sky
+  const sky=ctx.createLinearGradient(0,0,0,iceY); sky.addColorStop(0,'#2a3a6a'); sky.addColorStop(0.6,'#5a5a8a'); sky.addColorStop(1,'#b090a0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,iceY);
+  // early stars + moon
+  for (let i=0;i<26;i++){ const sx=(i*71+7)%W, sy=(i*29+3)%(iceY*0.6); ctx.fillStyle=`rgba(255,255,235,${0.2+0.3*Math.abs(Math.sin(t*1.2+i))})`; ctx.fillRect(sx,sy,1.1,1.1); }
+  ctx.fillStyle='#f4eecf'; ctx.beginPath(); ctx.arc(W*0.82,H*0.12,14,0,7); ctx.fill();
+
+  // snowy evergreens behind the rink
+  function pine(px,py,sc){ ctx.save(); ctx.translate(px,py); ctx.scale(sc,sc);
+    ctx.fillStyle='#20402a'; for (let t2=0;t2<3;t2++){ const yy=-t2*14; ctx.beginPath(); ctx.moveTo(0,yy-22); ctx.lineTo(-14+t2*3,yy); ctx.lineTo(14-t2*3,yy); ctx.closePath(); ctx.fill(); }
+    ctx.fillStyle='rgba(255,255,255,.7)'; ctx.beginPath(); ctx.moveTo(0,-52); ctx.lineTo(-4,-46); ctx.lineTo(4,-46); ctx.fill();
+    ctx.fillStyle='#3a2a1a'; ctx.fillRect(-2,0,4,6); ctx.restore(); }
+  for (let i=0;i<7;i++){ pine(20+i*54, iceY-2, 0.8+ (i%3)*0.15); }
+  // snowbank strip at horizon
+  ctx.fillStyle='#e8eef6'; ctx.beginPath(); ctx.moveTo(0,iceY); for (let x=0;x<=W;x+=16){ ctx.lineTo(x,iceY-6-4*Math.sin(x*0.05)); } ctx.lineTo(W,iceY); ctx.fill();
+
+  // string of festival lights on posts around the rink
+  for (const px of [W*0.06,W*0.94]){ ctx.fillStyle='#4a3a2a'; ctx.fillRect(px-2,iceY-40,4,40); }
+  ctx.strokeStyle='rgba(120,90,60,.6)'; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=W*0.06;x<=W*0.94;x+=8){ const y=iceY-40+Math.sin(x*0.05)*6; x===W*0.06?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+  for (let x=W*0.10;x<W*0.94;x+=20){ const y=iceY-40+Math.sin(x*0.05)*6; ctx.fillStyle=['#e05a5a','#e0b040','#5ab0e0','#60c060'][(x/20|0)%4]; ctx.beginPath(); ctx.arc(x,y,2.4,0,7); ctx.fill(); }
+
+  // the ice surface
+  const ice=ctx.createLinearGradient(0,iceY,0,H); ice.addColorStop(0,'#cfe6f2'); ice.addColorStop(1,'#a8cbe0');
+  ctx.fillStyle=ice; ctx.fillRect(0,iceY,W,H-iceY);
+  // sheen bands
+  ctx.fillStyle='rgba(255,255,255,.18)'; ctx.beginPath(); ctx.ellipse(W*0.4,iceY+40,120,16,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.10)'; ctx.beginPath(); ctx.ellipse(W*0.7,iceY+90,140,20,0,0,7); ctx.fill();
+  // skate-mark arcs etched in the ice
+  ctx.strokeStyle='rgba(120,160,190,.4)'; ctx.lineWidth=1;
+  for (let i=0;i<7;i++){ const cx=(i*61+20)%W, cy=iceY+20+(i*23)%((H-iceY)-20); ctx.beginPath(); ctx.arc(cx,cy,10+ (i%4)*6, 0.2, 2.6); ctx.stroke(); }
+  // reflection of moon on ice
+  for (let y=iceY; y<H; y+=3){ const p=(y-iceY)/(H-iceY); const wob=Math.sin(y*0.4+t*1.5)*(2+p*6); ctx.fillStyle=`rgba(244,238,207,${0.10*(1-p)})`; ctx.fillRect(W*0.82-5+wob,y,10+p*4,2); }
+
+  // falling snow over everything
+  for (let i=0;i<40;i++){ const sx=(i*47 + t*8*(1+(i%3)))%W; const sy=(i*53 + t*22*(1+(i%2)*0.4))%H; ctx.fillStyle='rgba(255,255,255,.75)'; ctx.beginPath(); ctx.arc(sx,sy,1+(i%3)*0.5,0,7); ctx.fill(); }
+
+  // a snowman off to the side (right, low)
+  const mx=W*0.86, my=H*0.90;
+  ctx.fillStyle='#f4f8fc'; ctx.beginPath(); ctx.arc(mx,my,14,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(mx,my-16,10,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(mx,my-30,7,0,7); ctx.fill();
+  ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(mx-2,my-32,1,0,7); ctx.arc(mx+3,my-32,1,0,7); ctx.fill();
+  ctx.fillStyle='#e07a2a'; ctx.beginPath(); ctx.moveTo(mx+2,my-30); ctx.lineTo(mx+9,my-29); ctx.lineTo(mx+2,my-28); ctx.fill();
+  ctx.strokeStyle='#5a3a20'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(mx-10,my-16); ctx.lineTo(mx-20,my-22); ctx.moveTo(mx+10,my-16); ctx.lineTo(mx+20,my-22); ctx.stroke();
+}
+registerScene('iceskatingrink', drawIceRink);
+
+/* ── CANDY FACTORY (indoor · whimsical sweets machinery) ── */
+function drawCandyFactory(){
+  const t = sceneTime, floorY = H*0.74;
+
+  // pastel mint walls
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#cdeee0'); wall.addColorStop(1,'#b6e0d4');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  // candy-stripe wainscot
+  for (let x=0;x<W;x+=12){ ctx.fillStyle=(x/12|0)%2?'#f2b8c8':'#fff'; ctx.fillRect(x,floorY-20,12,20); }
+
+  // big glass vat of bubbling candy syrup (left-back)
+  const vx=W*0.24, vTop=H*0.16, vBot=floorY-6, vW=64;
+  ctx.fillStyle='rgba(255,255,255,.35)'; roundRect(vx-vW/2,vTop,vW,vBot-vTop,10); ctx.fill();
+  const syr=ctx.createLinearGradient(0,vTop+20,0,vBot); syr.addColorStop(0,'#f28ab0'); syr.addColorStop(1,'#e2607a');
+  ctx.save(); roundRect(vx-vW/2+3,vTop+3,vW-6,vBot-vTop-6,8); ctx.clip();
+  ctx.fillStyle=syr; ctx.fillRect(vx-vW/2, vTop+ (vBot-vTop)*0.34, vW, vBot-vTop);
+  // wobbly surface
+  ctx.fillStyle='#f7a0c0'; ctx.beginPath(); ctx.moveTo(vx-vW/2,vTop+(vBot-vTop)*0.34); for (let x=0;x<=vW;x+=6){ ctx.lineTo(vx-vW/2+x, vTop+(vBot-vTop)*0.34+Math.sin(x*0.2+t*3)*3);} ctx.lineTo(vx+vW/2,vBot); ctx.lineTo(vx-vW/2,vBot); ctx.fill();
+  // bubbles
+  for (let i=0;i<6;i++){ const bx=vx-vW/2+8+ (i*9); const by=vBot-((t*14+i*17)%((vBot-vTop)*0.6)); ctx.fillStyle='rgba(255,220,235,.7)'; ctx.beginPath(); ctx.arc(bx,by,1.6+ (i%2),0,7); ctx.fill(); }
+  ctx.restore();
+  ctx.strokeStyle='rgba(180,220,220,.4)'; ctx.lineWidth=3; roundRect(vx-vW/2,vTop,vW,vBot-vTop,10); ctx.stroke();
+  ctx.fillStyle='#c8a24a'; ctx.fillRect(vx-vW/2-4,vTop-6,vW+8,8);
+
+  // overhead pipe carrying candy + conveyor belt with candies
+  ctx.fillStyle='#a8c0d0'; ctx.fillRect(vx,vTop-2,W*0.5,10); ctx.fillRect(vx+W*0.5-10,vTop-2,10,H*0.16);
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1; for (let x=vx;x<vx+W*0.5;x+=10){ ctx.beginPath(); ctx.moveTo(x,vTop-2); ctx.lineTo(x,vTop+8); ctx.stroke(); }
+  // conveyor
+  const beltY=H*0.44, beltX=W*0.44, beltW=W*0.5;
+  ctx.fillStyle='#5a5a66'; ctx.fillRect(beltX,beltY,beltW,10);
+  ctx.fillStyle='#3a3a44'; ctx.beginPath(); ctx.arc(beltX,beltY+5,7,0,7); ctx.arc(beltX+beltW,beltY+5,7,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1; for (let x=0;x<beltW;x+=8){ const xx=beltX+((x+ t*20)%beltW); ctx.beginPath(); ctx.moveTo(xx,beltY); ctx.lineTo(xx,beltY+10); ctx.stroke(); }
+  // wrapped candies riding the belt
+  const cc=['#e05a5a','#e0b040','#5ab0e0','#a06fe0','#60c060'];
+  for (let i=0;i<6;i++){ const cx=beltX+8+((i*40 + t*20)%(beltW-16)); ctx.fillStyle=cc[i%cc.length]; ctx.beginPath(); ctx.ellipse(cx,beltY-4,5,3.4,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx-5,beltY-4); ctx.lineTo(cx-9,beltY-6); ctx.lineTo(cx-9,beltY-2); ctx.closePath(); ctx.moveTo(cx+5,beltY-4); ctx.lineTo(cx+9,beltY-6); ctx.lineTo(cx+9,beltY-2); ctx.closePath(); ctx.fill(); }
+
+  // giant lollipop machinery (right)
+  const lx=W*0.84, ly=H*0.30;
+  ctx.strokeStyle='#c9c9d0'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx,floorY-6); ctx.stroke();
+  ctx.save(); ctx.translate(lx,ly); ctx.rotate(t*0.6);
+  for (let k=0;k<6;k++){ ctx.fillStyle= k%2?'#f28ab0':'#fff'; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,16,k/6*6.28,(k+1)/6*6.28); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(lx,ly,16,0,7); ctx.stroke();
+
+  // gumball dispenser (center-back, high)
+  const gx=W*0.5, gy=H*0.30;
+  ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(gx,gy,16,0,7); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(gx,gy,15,0,7); ctx.clip();
+  for (let i=0;i<14;i++){ ctx.fillStyle=cc[i%cc.length]; ctx.beginPath(); ctx.arc(gx-10+ (i%5)*5, gy-10+((i/5)|0)*6, 3.4,0,7); ctx.fill(); } ctx.restore();
+  ctx.strokeStyle='rgba(180,200,210,.5)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(gx,gy,16,0,7); ctx.stroke();
+  ctx.fillStyle='#c0392b'; ctx.fillRect(gx-14,gy+14,28,10);
+
+  // checkerboard floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#e8e2d4'); fl.addColorStop(1,'#d0c8ba');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  for (let y=floorY;y<H;y+=14){ for (let x=((y/14|0)%2)*14; x<W; x+=28){ ctx.fillStyle='rgba(240,150,180,.25)'; ctx.fillRect(x,y,14,14); } }
+}
+registerScene('candyfactory', drawCandyFactory);
+
+/* ── MOON BEACH (outdoor · night tide under a full moon) ── */
+function drawMoonBeach(){
+  const t = sceneTime, seaTop = H*0.40, sandTop = H*0.62;
+
+  // night sky gradient
+  const sky=ctx.createLinearGradient(0,0,0,seaTop); sky.addColorStop(0,'#0c1230'); sky.addColorStop(0.6,'#1c2450'); sky.addColorStop(1,'#3a3a68');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,seaTop);
+  for (let i=0;i<50;i++){ const sx=(i*67+5)%W, sy=(i*37+3)%(seaTop*0.85); ctx.fillStyle=`rgba(230,238,255,${0.2+0.35*Math.abs(Math.sin(t*1.3+i))})`; ctx.fillRect(sx,sy,1.1,1.1); }
+  // big full moon with halo
+  const mX=W*0.5, mY=H*0.16;
+  ctx.fillStyle='rgba(240,244,220,.16)'; ctx.beginPath(); ctx.arc(mX,mY,44,0,7); ctx.fill();
+  ctx.fillStyle='#f2f0d8'; ctx.beginPath(); ctx.arc(mX,mY,28,0,7); ctx.fill();
+  ctx.fillStyle='rgba(210,214,190,.5)'; ctx.beginPath(); ctx.arc(mX-9,mY-6,5,0,7); ctx.arc(mX+8,mY+5,6,0,7); ctx.arc(mX+3,mY-10,3,0,7); ctx.fill();
+  // wispy cloud crossing the moon
+  ctx.fillStyle='rgba(200,205,225,.18)'; ctx.beginPath(); ctx.ellipse(mX+ Math.sin(t*0.15)*20, mY+6, 40,7,0,0,7); ctx.fill();
+
+  // sea
+  const sea=ctx.createLinearGradient(0,seaTop,0,sandTop); sea.addColorStop(0,'#16294a'); sea.addColorStop(1,'#22406a');
+  ctx.fillStyle=sea; ctx.fillRect(0,seaTop,W,sandTop-seaTop);
+  // moonlight glitter column on the sea
+  for (let y=seaTop; y<sandTop; y+=3){ const p=(y-seaTop)/(sandTop-seaTop); const wob=Math.sin(y*0.5+t*2)*(3+p*12); const w=8+p*26;
+    ctx.fillStyle=`rgba(240,242,215,${0.24*(1-p)})`; ctx.fillRect(mX-w/2+wob,y,w,2); }
+  // gentle swell lines
+  ctx.strokeStyle='rgba(150,180,220,.14)'; ctx.lineWidth=1; for (let y=seaTop+8;y<sandTop;y+=9){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.05+t*1.4+y)*1.6; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+
+  // wet sand with a foamy tide line that gently advances/recedes
+  const tide=sandTop + 8 + Math.sin(t*0.6)*6;
+  ctx.fillStyle='#4a4658'; ctx.fillRect(0,sandTop,W,H-sandTop);
+  // moist reflective band just below waterline
+  ctx.fillStyle='rgba(120,140,180,.25)'; ctx.fillRect(0,sandTop,W,tide-sandTop+6);
+  // foam edge
+  ctx.strokeStyle='rgba(230,240,255,.7)'; ctx.lineWidth=2; ctx.beginPath();
+  for (let x=0;x<=W;x+=5){ const yy=tide+Math.sin(x*0.08+t*2)*3; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.35)'; for (let i=0;i<24;i++){ const fx=(i*53+7)%W; const fy=tide+Math.sin(fx*0.08+t*2)*3 - Math.random()*3; ctx.beginPath(); ctx.arc(fx,fy,1.2,0,7); ctx.fill(); }
+  // dry sand lower
+  const sand=ctx.createLinearGradient(0,tide+6,0,H); sand.addColorStop(0,'#5a5468'); sand.addColorStop(1,'#48435a');
+  ctx.fillStyle=sand; ctx.fillRect(0,tide+6,W,H-tide-6);
+
+  // a couple of seashells + starfish on the sand (sides, low)
+  ctx.fillStyle='#e0c0c0'; ctx.beginPath(); ctx.arc(W*0.14,H*0.90,6,Math.PI,0); ctx.fill();
+  ctx.strokeStyle='#c0a0a0'; ctx.lineWidth=1; for (let k=-2;k<=2;k++){ ctx.beginPath(); ctx.moveTo(W*0.14,H*0.90); ctx.lineTo(W*0.14+k*2.4,H*0.90-6); ctx.stroke(); }
+  ctx.fillStyle='#d88a5a'; ctx.save(); ctx.translate(W*0.88,H*0.92); for (let k=0;k<5;k++){ ctx.rotate(6.28/5); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-8); ctx.lineTo(2.4,-3); ctx.closePath(); ctx.fill(); } ctx.restore();
+  // small tiki-style lantern on a stick (left, low)
+  const px=W*0.10, py=H*0.88;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(px-2,py-4,4,H*0.10);
+  ctx.fillStyle='rgba(255,180,90,.25)'; ctx.beginPath(); ctx.arc(px,py-10,14,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(255,190,110,${0.85+0.12*Math.sin(t*2.5)})`; roundRect(px-5,py-16,10,12,3); ctx.fill();
+}
+registerScene('moonbeach', drawMoonBeach);
+
+/* ── PAPERCRAFT STUDIO (indoor · origami & paper art) ── */
+function drawPapercraftStudio(){
+  const t = sceneTime, deskY = H*0.68;
+
+  // soft sage wall
+  const wall=ctx.createLinearGradient(0,0,0,deskY); wall.addColorStop(0,'#dfe6d4'); wall.addColorStop(1,'#cdd8c0');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,deskY);
+
+  // a window with soft daylight (left)
+  const wx=W*0.09, wy=H*0.12, ww=W*0.30, wh=H*0.34;
+  const wg=ctx.createLinearGradient(0,wy,0,wy+wh); wg.addColorStop(0,'#bfe0ee'); wg.addColorStop(1,'#e8f2ea');
+  ctx.fillStyle=wg; ctx.fillRect(wx,wy,ww,wh);
+  ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.ellipse(wx+ww*0.7,wy+wh*0.3,10,6,0,0,7); ctx.fill();
+  ctx.strokeStyle='#b8a888'; ctx.lineWidth=4; ctx.strokeRect(wx,wy,ww,wh); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wx+ww/2,wy); ctx.lineTo(wx+ww/2,wy+wh); ctx.moveTo(wx,wy+wh/2); ctx.lineTo(wx+ww,wy+wh/2); ctx.stroke();
+
+  // hanging origami mobile — cranes on threads, gently swaying
+  function crane(cx,cy,col,ph){ const sw=Math.sin(t*1.2+ph)*3; ctx.save(); ctx.translate(cx+sw,cy);
+    ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(-8,0); ctx.lineTo(0,-4); ctx.lineTo(8,0); ctx.lineTo(0,4); ctx.closePath(); ctx.fill(); // body
+    ctx.beginPath(); ctx.moveTo(-8,0); ctx.lineTo(-16,-6); ctx.lineTo(-6,-2); ctx.closePath(); ctx.fill(); // wing
+    ctx.beginPath(); ctx.moveTo(8,0); ctx.lineTo(16,-7); ctx.lineTo(6,-2); ctx.closePath(); ctx.fill(); // neck/head
+    ctx.fillStyle='rgba(0,0,0,.15)'; ctx.beginPath(); ctx.moveTo(0,4); ctx.lineTo(-3,9); ctx.lineTo(3,9); ctx.fill(); // tail hint
+    ctx.restore(); }
+  const cols=['#e2708a','#7ab0e0','#e0b850','#7ac86a','#b088e0'];
+  for (let i=0;i<5;i++){ const cx=W*0.5+ (i-2)*W*0.10; const thread=18+ (i%3)*14;
+    ctx.strokeStyle='rgba(120,120,120,.4)'; ctx.lineWidth=0.6; ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,thread); ctx.stroke();
+    crane(cx,thread+6,cols[i],i*1.3); }
+
+  // shelf with folded paper stacks + paper flowers (right)
+  ctx.fillStyle='#b8946a'; ctx.fillRect(W*0.66,H*0.20,W*0.30,6);
+  for (let i=0;i<5;i++){ const sx=W*0.68+i*W*0.055; ctx.fillStyle=cols[i%cols.length]; ctx.fillRect(sx,H*0.20-8-(i%3)*2,9,8+(i%3)*2); }
+  // paper flowers in a vase on the shelf
+  ctx.fillStyle='#cdd8c0'; roundRect(W*0.90,H*0.20-16,10,16,2); ctx.fill();
+  for (let k=0;k<4;k++){ const a=k/4*6.28; ctx.fillStyle=cols[k]; ctx.beginPath(); ctx.arc(W*0.905+Math.cos(a)*5,H*0.20-18+Math.sin(a)*5,2.4,0,7); ctx.fill(); }
+
+  // a wall garland of paper triangles
+  ctx.strokeStyle='rgba(150,140,120,.5)'; ctx.lineWidth=1; ctx.beginPath();
+  for (let x=0;x<=W;x+=8){ const y=H*0.09+Math.sin(x*0.05)*5; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+
+  // wooden desk
+  const desk=ctx.createLinearGradient(0,deskY,0,H); desk.addColorStop(0,'#c49a68'); desk.addColorStop(1,'#a2794c');
+  ctx.fillStyle=desk; ctx.fillRect(0,deskY,W,H-deskY);
+  ctx.fillStyle='rgba(255,245,225,.15)'; ctx.fillRect(0,deskY,W,4);
+
+  // scattered origami paper squares + finished pieces on the desk (sides, low)
+  const sq=['#e2708a','#7ab0e0','#e0b850','#7ac86a'];
+  for (let i=0;i<4;i++){ ctx.save(); ctx.translate(W*0.14+i*10,deskY+22+ (i%2)*6); ctx.rotate((i-1.5)*0.2); ctx.fillStyle=sq[i]; ctx.fillRect(-8,-8,16,16); ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.strokeRect(-8,-8,16,16); ctx.restore(); }
+  // a finished origami boat (center-back, high)
+  const bx=W*0.5, by=deskY+14;
+  ctx.fillStyle='#e08a5a'; ctx.beginPath(); ctx.moveTo(bx-14,by); ctx.lineTo(bx+14,by); ctx.lineTo(bx+8,by-6); ctx.lineTo(bx-8,by-6); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(bx-8,by-6); ctx.lineTo(bx,by-16); ctx.lineTo(bx+8,by-6); ctx.closePath(); ctx.fill();
+  // a folded crane displayed (right, low)
+  crane(W*0.84,deskY+20,'#7ab0e0',0);
+  // scissors + bone folder
+  ctx.strokeStyle='#8a8a92'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.72,deskY+24); ctx.lineTo(W*0.78,deskY+30); ctx.moveTo(W*0.72,deskY+30); ctx.lineTo(W*0.78,deskY+24); ctx.stroke();
+}
+registerScene('papercraftstudio', drawPapercraftStudio);
