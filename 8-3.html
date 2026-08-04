@@ -2819,6 +2819,49 @@ function drawTidePools(){
 }
 registerScene('tidepools', drawTidePools);
 
+/* ── BALLET STUDIO (indoor · dance) ── */
+function drawBalletStudio(){
+  const floorY = H*0.62;
+
+  // wall
+  ctx.fillStyle='#e6dce0'; ctx.fillRect(0,0,W,floorY);
+
+  // big mirror
+  const mX=W*0.06, mY=H*0.10, mW=W*0.5, mH=floorY-mY-6;
+  ctx.fillStyle='#c8d0d4'; ctx.fillRect(mX,mY,mW,mH);
+  const mg=ctx.createLinearGradient(mX,mY,mX,mY+mH); mg.addColorStop(0,'rgba(255,255,255,.4)'); mg.addColorStop(0.5,'rgba(200,210,220,.15)'); mg.addColorStop(1,'rgba(180,190,200,.3)');
+  ctx.fillStyle=mg; ctx.fillRect(mX,mY,mW,mH);
+  ctx.strokeStyle='rgba(140,110,80,.5)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(mX+6,mY+mH*0.62); ctx.lineTo(mX+mW-6,mY+mH*0.62); ctx.stroke();
+  ctx.strokeStyle='#b0a0b0'; ctx.lineWidth=4; ctx.strokeRect(mX,mY,mW,mH);
+  ctx.fillStyle='rgba(255,255,255,.25)'; ctx.beginPath(); ctx.moveTo(mX+8,mY+8); ctx.lineTo(mX+40,mY+8); ctx.lineTo(mX+8,mY+50); ctx.closePath(); ctx.fill();
+
+  // window with soft light
+  const wX=W*0.64, wY=H*0.12, wW=W*0.28, wH=H*0.30;
+  ctx.fillStyle='#eaf2f8'; ctx.fillRect(wX,wY,wW,wH);
+  ctx.strokeStyle='#fff'; ctx.lineWidth=5; ctx.strokeRect(wX,wY,wW,wH);
+  ctx.beginPath(); ctx.moveTo(wX+wW/2,wY); ctx.lineTo(wX+wW/2,wY+wH); ctx.moveTo(wX,wY+wH/2); ctx.lineTo(wX+wW,wY+wH/2); ctx.stroke();
+  ctx.fillStyle='rgba(255,250,220,.10)'; ctx.beginPath(); ctx.moveTo(wX,wY+wH); ctx.lineTo(wX+wW,wY+wH); ctx.lineTo(wX+wW+30,H); ctx.lineTo(wX-40,H); ctx.closePath(); ctx.fill();
+
+  // tutu + pointe shoes on the wall
+  const tuX=W*0.9;
+  ctx.fillStyle='#f4c6d6'; ctx.beginPath(); ctx.moveTo(tuX,H*0.14); ctx.lineTo(tuX-14,H*0.24); ctx.lineTo(tuX+14,H*0.24); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#f7d9e3'; ctx.beginPath(); ctx.ellipse(tuX,H*0.24,16,5,0,0,7); ctx.fill();
+  ctx.fillStyle='#f0b8c8'; ctx.beginPath(); ctx.ellipse(tuX-4,H*0.30,5,3,0.3,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(tuX+4,H*0.31,5,3,-0.3,0,7); ctx.fill();
+
+  // wood floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#c99a5a'); fl.addColorStop(1,'#b5883f');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(90,60,20,.2)'; ctx.lineWidth=1;
+  for (let x=0;x<W;x+=20){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let i=1;i<5;i++){ const y=floorY+i/5*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // freestanding barre
+  const brY=floorY-34;
+  ctx.strokeStyle='#7a4a26'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(W*0.14,brY); ctx.lineTo(W*0.14,floorY); ctx.moveTo(W*0.5,brY); ctx.lineTo(W*0.5,floorY); ctx.stroke();
+  ctx.strokeStyle='#a06a3a'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(W*0.10,brY); ctx.lineTo(W*0.54,brY); ctx.stroke(); ctx.lineCap='butt';
+}
+registerScene('balletstudio', drawBalletStudio);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
