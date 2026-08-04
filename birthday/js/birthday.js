@@ -360,5 +360,7 @@ function render(){
     applyNightVignette(scene);                   // cozy edge-darkening after dark
     drawShootingStar();                          // rare bright streak across the night sky
   }
+  // sleep sequence: black wash over everything as she drifts off and wakes
+  if (restFade > 0){ ctx.fillStyle = `rgba(0,0,0,${restFade})`; ctx.fillRect(0,0,W,H); }
 }
 

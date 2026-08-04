@@ -150,6 +150,9 @@ function loop(ts){
   requestAnimationFrame(loop);
 }
 let hudAccum = 0, saveAccum = 0;
+// sleep-sequence timing + the black-fade overlay level (0..1), read by render()
+const REST_LIE = 0.75, REST_TOBLACK = 0.7, REST_FROMBLACK = 0.7;
+let restFade = 0;
 
 function updatePet(dt){
   pet.bob += dt;
@@ -165,13 +168,42 @@ function updatePet(dt){
     return;
   }
 
-  // resting — she stays put, recovers energy, with floating Zzz
+  // resting — a little sleep sequence: she lies down, the screen fades to black,
+  // and when it's fully black she stands up again, refreshed, then it fades back in.
   if (pet.resting){
     pet.moving = false; pet.dir = 'down'; pet.frame = 0; pet.frameTime = 0;
-    pet.restTimer -= dt;
-    pet.zzzTimer -= dt;
-    if (pet.zzzTimer <= 0){ burst('💤'); pet.zzzTimer = 1.2; }
-    if (pet.restTimer <= 0 || state.energy >= 100) pet.resting = false;
+    pet.restT += dt;
+    const HALF_PI = Math.PI/2;
+    const smooth = p => p*p*(3-2*p);
+    if (pet.restPhase === 'lie'){                       // rotate toward horizontal
+      const p = Math.min(1, pet.restT / REST_LIE);
+      pet.restAngle = HALF_PI * smooth(p);
+      pet.zzzTimer -= dt; if (pet.zzzTimer <= 0){ burst('💤'); pet.zzzTimer = 1.4; }
+      if (p >= 1){ pet.restPhase = 'toblack'; pet.restT = 0; }
+      return;
+    }
+    if (pet.restPhase === 'toblack'){                   // screen fades to black
+      restFade = Math.min(1, pet.restT / REST_TOBLACK);
+      pet.zzzTimer -= dt; if (pet.zzzTimer <= 0){ burst('💤'); pet.zzzTimer = 1.4; }
+      if (restFade >= 1){                               // fully black — she wakes, standing & rested
+        restFade = 1; pet.restAngle = 0;
+        state.energy = clamp(state.energy + CONFIG.gains.rest);
+        state.love   = clamp(state.love + 4);
+        refreshHUD(); save();
+        pet.restPhase = 'fromblack'; pet.restT = 0;
+      }
+      return;
+    }
+    if (pet.restPhase === 'fromblack'){                 // black clears, she's standing again
+      restFade = Math.max(0, 1 - pet.restT / REST_FROMBLACK);
+      if (restFade <= 0){                               // done — resume normal life
+        restFade = 0; pet.resting = false; pet.restPhase = null; pet.restAngle = 0;
+        pet.wanderTimer = 1.0;
+      }
+      return;
+    }
+    // safety: unknown phase → end the nap cleanly
+    pet.resting = false; pet.restPhase = null; pet.restAngle = 0; restFade = 0;
     return;
   }
 

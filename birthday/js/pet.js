@@ -49,12 +49,15 @@ function doAction(kind){
     }
   }
   if (kind === 'rest'){
-    pet.resting = true; pet.restTimer = 5; pet.zzzTimer = 0.1;
-    state.energy = clamp(state.energy + CONFIG.gains.rest);
-    state.love = clamp(state.love + 4);
+    if (pet.resting) return;                 // already napping
+    // start the sleep sequence: lie down → screen fades to black → she stands up refreshed.
+    // The energy/love payoff is applied at the fully-black moment (see updatePet).
+    pet.resting = true;
+    pet.restPhase = 'lie'; pet.restT = 0; pet.restAngle = 0; pet.zzzTimer = 0.4;
+    restFade = 0;
     say(pick(isNight() ? LINES.sleepyNight : LINES.rest));
-    pet.wanderTimer = 5.2;   // don't wander off the moment she wakes
-    refreshHUD(); save(); return;
+    pet.wanderTimer = 6;     // don't wander off the moment she wakes
+    refreshHUD(); return;
   }
   if (kind === 'hug' ){
     state.love = clamp(state.love + CONFIG.gains.hug); state.fun = clamp(state.fun+8);

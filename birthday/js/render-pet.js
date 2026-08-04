@@ -43,20 +43,24 @@ function drawPet(){
   ctx.fillStyle = 'rgba(0,0,0,.16)';
   ctx.beginPath(); ctx.ellipse(pet.x, pet.y-4, dispW*0.32, dispH*0.05, 0, 0, 7); ctx.fill();
 
+  // while resting she rotates toward horizontal (lying down), pivoting at her feet
+  const lying = pet.restAngle > 0.001;
+  if (lying){ ctx.save(); ctx.translate(feetX, feetY); ctx.rotate(-pet.restAngle); ctx.translate(-feetX, -feetY); }
   ctx.drawImage(
     sh.canvas,
     frame*sh.fw, row*sh.fh, sh.fw, sh.fh,
     feetX - dispW/2, feetY - dispH - bob, dispW, dispH
   );
+  if (lying){ ctx.restore(); }
 
-  // accessory on her head (skip while she's crying so it doesn't clash)
-  if (!(isCrying())){
+  // accessory on her head (skip while she's crying or mid-nap so it doesn't clash)
+  if (!(isCrying()) && !pet.restPhase){
     const topY = (feetY - dispH - bob) + dispH*0.175;   // approx top of her head
     drawAccessory(activeAccessory(), feetX, topY, dispW/46);
   }
 
   // blushing cheeks after a nuzzle
-  if (pet.blush > 0 && !isCrying() && (!acting || pet.action!=='hug')){
+  if (pet.blush > 0 && !isCrying() && !pet.restPhase && (!acting || pet.action!=='hug')){
     const a = Math.min(0.5, pet.blush * 0.28);
     const faceY = (feetY - dispH - bob) + dispH*0.335;
     const cxo = dispW*0.10;

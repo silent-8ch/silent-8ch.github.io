@@ -49,6 +49,7 @@ const pet = {
   wanderTimer: 1.5,
   bob: 0,
   resting: false, restTimer: 0, zzzTimer: 0,
+  restPhase: null, restT: 0, restAngle: 0,   // sleep sequence: lie down → fade to black → stand up
   blush: 0,
 };
 
