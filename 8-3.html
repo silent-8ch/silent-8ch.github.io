@@ -3432,6 +3432,47 @@ function drawRainyStreet(){
 }
 registerScene('rainystreet', drawRainyStreet);
 
+/* ── DARKROOM (indoor · film photography) ── */
+function drawDarkroom(){
+  const t = sceneTime, floorY = H*0.64;
+
+  ctx.fillStyle='#2a1414'; ctx.fillRect(0,0,W,H);
+  const rg=ctx.createRadialGradient(W*0.5,H*0.2,10,W*0.5,H*0.5,W*0.8); rg.addColorStop(0,'rgba(180,30,30,.12)'); rg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=rg; ctx.fillRect(0,0,W,floorY);
+  // safelight
+  ctx.fillStyle='rgba(200,30,30,.10)'; ctx.beginPath(); ctx.arc(W*0.5,10,80,0,7); ctx.fill();
+  ctx.fillStyle='#3a1010'; ctx.fillRect(W*0.5-10,0,20,10);
+  ctx.fillStyle=`rgba(255,40,40,${0.5+0.1*Math.sin(t*2)})`; ctx.beginPath(); ctx.arc(W*0.5,10,6,0,7); ctx.fill();
+
+  // clothesline of drying prints
+  ctx.strokeStyle='#5a2020'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,H*0.14); ctx.lineTo(W,H*0.16); ctx.stroke();
+  for (let i=0;i<6;i++){
+    const px=W*0.08+i*W*0.16, py=H*0.14+(i%2)*6;
+    ctx.fillStyle='#c88888'; ctx.fillRect(px-1,py-2,2,4);
+    ctx.fillStyle='#3a2020'; ctx.fillRect(px-12,py+2,24,20);
+    ctx.fillStyle='rgba(200,80,80,.4)'; ctx.fillRect(px-10,py+4,20,16);
+    ctx.fillStyle='rgba(255,150,150,.3)'; ctx.fillRect(px-6,py+8,12,3);
+  }
+
+  // floor
+  ctx.fillStyle='#1a0e0e'; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(255,60,60,.06)'; ctx.lineWidth=1; for (let i=1;i<4;i++){ const y=floorY+i/4*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // developing trays on a counter
+  const cY=floorY-6;
+  ctx.fillStyle='#3a2020'; ctx.fillRect(W*0.04,cY-30,W*0.42,30);
+  ctx.fillStyle='#2a1616'; ctx.fillRect(W*0.04,cY-30,W*0.42,6);
+  const trays=['#6a2a2a','#7a3030','#5a2626']; for (let i=0;i<3;i++){ const tx=W*0.09+i*W*0.13; ctx.fillStyle=trays[i]; roundRect(tx-16,cY-24,32,14,2); ctx.fill(); ctx.fillStyle='rgba(255,80,80,.25)'; roundRect(tx-13,cY-21,26,8,1); ctx.fill(); }
+
+  // enlarger
+  const eX=W*0.78, eB=floorY;
+  ctx.fillStyle='#3a2222'; ctx.fillRect(eX-24,eB-6,48,6); ctx.fillRect(eX+18,eB-70,5,64);
+  ctx.fillStyle='#4a2828'; ctx.fillRect(eX-18,eB-64,30,12);
+  ctx.fillStyle='#2a1616'; ctx.fillRect(eX-14,eB-52,10,16);
+  ctx.fillStyle=`rgba(255,120,120,${0.3+0.1*Math.sin(t*3)})`; ctx.beginPath(); ctx.moveTo(eX-12,eB-36); ctx.lineTo(eX-4,eB-36); ctx.lineTo(eX,eB-8); ctx.lineTo(eX-16,eB-8); ctx.closePath(); ctx.fill();
+}
+registerScene('darkroom', drawDarkroom);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
