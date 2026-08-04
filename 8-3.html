@@ -117,8 +117,19 @@
   }
   #banner.hide{display:none;}
   /* map / locations */
-  #mapBtn{cursor:pointer;font-size:18px;line-height:1;user-select:none;}
+  #mapBtn,#collectBtn{cursor:pointer;font-size:18px;line-height:1;user-select:none;}
   #daysChip{font-size:12px;font-weight:700;color:var(--accent);background:#fff;padding:3px 8px;border-radius:20px;box-shadow:0 1px 3px var(--shadow);user-select:none;cursor:default;}
+  #collectPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
+  #collectPanel.hide{display:none;}
+  #collectHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  #collectClose{cursor:pointer;font-size:18px;padding:0 4px;}
+  #collectHint{color:rgba(255,255,255,.6);font-size:11px;font-weight:500;margin-bottom:10px;}
+  #collectGrid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:8px;align-content:start;padding-right:4px;}
+  .collectCell{background:rgba(255,255,255,.08);border-radius:12px;padding:9px 4px;text-align:center;}
+  .collectCell .ce{font-size:24px;display:block;line-height:1.1;}
+  .collectCell .cn{font-size:12px;font-weight:700;color:var(--accent);}
+  .collectCell.locked{opacity:.4;}
+  .collectCell.locked .ce{filter:grayscale(1);}
   #mapPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
   #mapPanel.hide{display:none;}
   #mapHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -147,6 +158,7 @@
       <span id="petname">Loading…</span>
       <div style="display:flex;align-items:center;gap:10px;">
         <span id="daysChip" title="Days together">💛 1</span>
+        <span id="collectBtn" title="Collection">🧺</span>
         <span id="mapBtn" title="Locations">🗺️</span>
         <span id="mood">🙂 okay</span>
       </div>
@@ -177,6 +189,12 @@
     <div id="mapTools"><span id="mapAll" class="mapLink">Select all</span><span class="mapSep">·</span><span id="mapNone" class="mapLink">Select none</span></div>
     <div id="mapPassport"></div>
     <div id="mapList"></div>
+  </div>
+
+  <div id="collectPanel" class="hide">
+    <div id="collectHead"><span>🧺 Collection</span><span id="collectClose">✕</span></div>
+    <div id="collectHint">Little treasures she finds as you explore together 💛</div>
+    <div id="collectGrid"></div>
   </div>
 
 </div>
@@ -700,6 +718,7 @@ function loop(ts){
     if (interactCd>0) interactCd -= dt;
     maybeNag(dt);
     idleThoughts(dt);
+    findTrinket(dt);
     updatePet(dt);
     // refresh bars periodically (cheap)
     hudAccum += dt; if (hudAccum > 0.25){ refreshHUD(); hudAccum = 0; }
@@ -806,6 +825,57 @@ const PASSPORT_BADGES = [
   {n:50, icon:'⭐', name:'Adventurer'}, {n:100, icon:'🏆', name:'Voyager'},
 ];
 function earnedBadges(){ return PASSPORT_BADGES.filter(b=>visited.size>=b.n); }
+
+/* ---- collectible trinkets she finds while exploring ---- */
+const TRINKET_POOL = (()=>{
+  const map={}; const g=(names,arr)=>names.forEach(n=>map[n]=arr);
+  g(['beach','tidepools','marina','fishingdock'], ['🐚','⭐','🦀','🌊']);
+  g(['autumnforest','orchard','pumpkinpatch','coveredbridge','cornmaze','wheatfield','redwoods'], ['🍁','🌰','🍄','🍂']);
+  g(['florist','cherryblossom','lavender','tulipfield','sunflowers','greenhouse','topiary','hedgemaze','vineyard','pasture','alpinemeadow','teaplantation','backyard'], ['🌸','🌼','🍀','🐝']);
+  g(['fireflies','meteorshower','observatory','planetarium','aurora','biobay','glowwormcave'], ['✨','🌙','☄️','🔭']);
+  g(['aquarium','koipond','coralreef','waterlily','river'], ['🐠','🐚','💧','🪸']);
+  g(['snowycabin','icepond','frozenfalls','icebergbay'], ['❄️','⛄','🧊']);
+  g(['bakery','chocolateshop','candyshop','icecreamparlor','cafe','diner','cheeseshop','perfumery'], ['🍪','🍬','🧁','🍫']);
+  g(['musicroom','recordshop','ballroom','cinema','carnival','arcade'], ['🎵','🎶','🎫']);
+  g(['artstudio','pottery','sewingstudio','weaving','stainedglass','glassblowing','luthier','bookbindery','letterpress','cobbler'], ['🎨','🖌️','🧵']);
+  g(['catcafe','petshop','butterflydome','aviary','savanna'], ['🐾','🦋','🪶']);
+  return map;
+})();
+const TRINKET_DEFAULT = ['💛','🍀','✨'];
+const TRINKETS_ALL = [...new Set([].concat(...Object.values(TRINKET_POOL), TRINKET_DEFAULT))];
+let collection = (function(){ try{ const r=localStorage.getItem('bpet_collection'); if(r) return JSON.parse(r); }catch(e){} return {}; })();
+function saveCollection(){ try{ localStorage.setItem('bpet_collection', JSON.stringify(collection)); }catch(e){} }
+function collectedKinds(){ return TRINKETS_ALL.filter(t=>collection[t]>0).length; }
+let trinketTimer = rand(18, 30);
+function findTrinket(dt){
+  trinketTimer -= dt;
+  if (trinketTimer > 0) return;
+  trinketTimer = rand(22, 42);
+  if (pet.animLock > 0 || pet.resting || isCrying() || speech.classList.contains('show')) return;
+  if (Math.random() > 0.6) return;                       // not every time — keep it special
+  const pool = TRINKET_POOL[SCENES[currentScene]] || TRINKET_DEFAULT;
+  const t = pick(pool);
+  const first = !collection[t];
+  collection[t] = (collection[t]||0) + 1; saveCollection();
+  say(`Found a ${t}!`); burstAt(t, pet.x + rand(-10,10), pet.y - 10);
+  if (first) hearts();
+  state.fun = clamp(state.fun + 3); refreshHUD();
+}
+function buildCollection(){
+  const grid=document.getElementById('collectGrid'); if(!grid) return;
+  grid.innerHTML='';
+  TRINKETS_ALL.forEach(t=>{
+    const n = collection[t]||0;
+    const cell=document.createElement('div'); cell.className='collectCell'+(n?'':' locked');
+    cell.innerHTML = `<span class="ce">${t}</span><span class="cn">${n?('×'+n):'?'}</span>`;
+    grid.appendChild(cell);
+  });
+}
+function openCollect(){ buildCollection();
+  const el=document.getElementById('collectHead').firstElementChild;
+  if(el) el.textContent=`🧺 Collection ${collectedKinds()}/${TRINKETS_ALL.length}`;
+  document.getElementById('collectPanel').classList.remove('hide'); }
+function closeCollect(){ document.getElementById('collectPanel').classList.add('hide'); }
 
 /* ---- "days together": distinct days visited + consecutive-day streak ---- */
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -943,6 +1013,8 @@ function closeMap(){ document.getElementById('mapPanel').classList.add('hide'); 
 function toggleMap(){ document.getElementById('mapPanel').classList.contains('hide') ? openMap() : closeMap(); }
 document.getElementById('mapBtn').addEventListener('click', openMap);
 document.getElementById('mapClose').addEventListener('click', closeMap);
+document.getElementById('collectBtn').addEventListener('click', openCollect);
+document.getElementById('collectClose').addEventListener('click', closeCollect);
 document.getElementById('mapAll').addEventListener('click', ()=>{ disabledScenes.clear(); saveDisabled(); buildMapList(); });
 document.getElementById('mapNone').addEventListener('click', ()=>{ disabledScenes = new Set(SCENES); saveDisabled(); buildMapList(); });
 
