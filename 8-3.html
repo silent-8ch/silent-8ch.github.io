@@ -5592,6 +5592,70 @@ function drawGlowwormCave(){
 }
 registerScene('glowwormcave', drawGlowwormCave);
 
+/* ── LUTHIER WORKSHOP (indoor · making violins) ── */
+function drawLuthier(){
+  const t=sceneTime, floorY=H*0.66;
+  // warm amber shop
+  ctx.fillStyle='#c9a468'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#7a5432'; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='#b8945a'; ctx.fillRect(0,H*0.12,W,2);
+  // warm window light
+  ctx.fillStyle='#f2e0a8'; ctx.fillRect(W*0.72,H*0.06,W*0.22,H*0.22);
+  ctx.strokeStyle='#8a6a40'; ctx.lineWidth=2; ctx.strokeRect(W*0.72,H*0.06,W*0.22,H*0.22);
+  ctx.beginPath(); ctx.moveTo(W*0.83,H*0.06); ctx.lineTo(W*0.83,H*0.28); ctx.moveTo(W*0.72,H*0.17); ctx.lineTo(W*0.94,H*0.17); ctx.stroke();
+  // a violin shape helper
+  function violin(x,y,s,ang,varnish){
+    ctx.save(); ctx.translate(x,y); ctx.rotate(ang);
+    // body (two bouts via arcs)
+    ctx.fillStyle=varnish;
+    ctx.beginPath();
+    ctx.moveTo(0,-26*s);
+    ctx.bezierCurveTo(14*s,-24*s, 13*s,-8*s, 7*s,-4*s); // upper bout right
+    ctx.bezierCurveTo(4*s,-2*s, 4*s,2*s, 7*s,4*s);      // waist right
+    ctx.bezierCurveTo(15*s,10*s, 15*s,30*s, 0,32*s);    // lower bout right
+    ctx.bezierCurveTo(-15*s,30*s, -15*s,10*s, -7*s,4*s);
+    ctx.bezierCurveTo(-4*s,2*s, -4*s,-2*s, -7*s,-4*s);
+    ctx.bezierCurveTo(-13*s,-8*s, -14*s,-24*s, 0,-26*s);
+    ctx.closePath(); ctx.fill();
+    // edge highlight
+    ctx.strokeStyle='rgba(255,240,200,.25)'; ctx.lineWidth=1; ctx.stroke();
+    // f-holes
+    ctx.strokeStyle='#3a2414'; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(-4*s,6*s); ctx.quadraticCurveTo(-6*s,14*s,-4*s,20*s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(4*s,6*s); ctx.quadraticCurveTo(6*s,14*s,4*s,20*s); ctx.stroke();
+    // neck + scroll
+    ctx.fillStyle='#5a3a1e'; ctx.fillRect(-2.5*s,-46*s,5*s,22*s);
+    ctx.fillStyle='#6a4626'; ctx.beginPath(); ctx.arc(0,-48*s,4*s,0,7); ctx.fill();
+    // strings
+    ctx.strokeStyle='rgba(240,235,220,.7)'; ctx.lineWidth=0.5;
+    for(let k=-1.5;k<=1.5;k++){ ctx.beginPath(); ctx.moveTo(k*1.6*s,-44*s); ctx.lineTo(k*1.6*s,28*s); ctx.stroke(); }
+    ctx.restore();
+  }
+  // three violins hanging from the ceiling by their scrolls, gently swaying
+  const varn=['#a5541f','#8a3e1a','#b5651f'];
+  for(let i=0;i<3;i++){ const hx=W*0.16+i*W*0.14; const sway=Math.sin(t*1.1+i)*0.05;
+    ctx.strokeStyle='#555'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(hx,H*0.02); ctx.lineTo(hx+Math.sin(sway)*30,H*0.06); ctx.stroke();
+    violin(hx, H*0.2, 0.85, sway, varn[i]); }
+  // the workbench
+  const by=floorY-4; ctx.fillStyle='#6a4a2e'; ctx.fillRect(0,by-8,W,8+(H-by)); ctx.fillStyle='#7a5636'; ctx.fillRect(0,by-8,W,4);
+  // a violin body in progress clamped on the bench (pale unvarnished spruce)
+  violin(W*0.4, by-26, 1.0, -1.57, '#e8d6a8'); // lying on side
+  // carving gouges + a plane + clamps around it
+  ctx.fillStyle='#8a8a92'; ctx.fillRect(W*0.5,by-16,16,7); ctx.fillStyle='#5a3a1e'; ctx.fillRect(W*0.5,by-16,4,7); // plane
+  for(let i=0;i<3;i++){ ctx.strokeStyle='#9a9aa2'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.58+i*10,by-6); ctx.lineTo(W*0.58+i*10,by-20); ctx.stroke();
+    ctx.fillStyle='#5a3a1e'; ctx.fillRect(W*0.58+i*10-2,by-24,4,6); } // gouges standing
+  // curled wood shavings on the bench
+  ctx.strokeStyle='#d8bd82'; ctx.lineWidth=1.5; for(let i=0;i<6;i++){ const sx=W*0.16+i*W*0.05; ctx.beginPath();
+    for(let a=0;a<6;a++){ const r=3+a*0.6, an=a*0.9; const px=sx+Math.cos(an)*r, py=by+6+Math.sin(an)*r*0.5; if(a===0)ctx.moveTo(px,py); else ctx.lineTo(px,py);} ctx.stroke(); }
+  // varnish pot + brush on the right of the bench
+  ctx.fillStyle='#7a3a1a'; ctx.fillRect(W*0.86,by-14,12,14); ctx.fillStyle='#a5541f'; ctx.beginPath(); ctx.ellipse(W*0.86+6,by-14,6,2.5,0,0,7); ctx.fill();
+  ctx.strokeStyle='#5a3a1e'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.9,by-14); ctx.lineTo(W*0.93,by-30); ctx.stroke(); ctx.fillStyle='#3a2414'; ctx.fillRect?.(W*0.925,by-32,3,4);
+  // a bow hanging on the wall (right)
+  ctx.strokeStyle='#3a2414'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.66,H*0.12); ctx.quadraticCurveTo(W*0.8,H*0.16,W*0.94,H*0.12); ctx.stroke();
+  ctx.strokeStyle='rgba(240,235,220,.6)'; ctx.lineWidth=0.6; ctx.beginPath(); ctx.moveTo(W*0.66,H*0.125); ctx.lineTo(W*0.94,H*0.125); ctx.stroke();
+}
+registerScene('luthier', drawLuthier);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
