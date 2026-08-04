@@ -3088,6 +3088,45 @@ function drawSewingStudio(){
 }
 registerScene('sewingstudio', drawSewingStudio);
 
+/* ── PUMPKIN PATCH (outdoor · autumn) ── */
+function drawPumpkinPatch(){
+  const t = sceneTime, groundY = H*0.50;
+
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#9ec8e0'); sky.addColorStop(1,'#f2d8b0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='#b0a878'; ctx.fillRect(0,groundY-14,W,14);
+  ctx.fillStyle='#a04a3a'; ctx.fillRect(W*0.7,groundY-40,40,26);
+  ctx.beginPath(); ctx.moveTo(W*0.7-3,groundY-40); ctx.lineTo(W*0.7+20,groundY-52); ctx.lineTo(W*0.7+43,groundY-40); ctx.closePath(); ctx.fill();
+
+  const g=ctx.createLinearGradient(0,groundY,0,H); g.addColorStop(0,'#8a9a4a'); g.addColorStop(1,'#6a7a34');
+  ctx.fillStyle=g; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.strokeStyle='#4a6a2a'; ctx.lineWidth=1.5; for (let i=0;i<6;i++){ const y=groundY+20+i*((H-groundY)/6); ctx.beginPath(); for (let x=0;x<=W;x+=10){ x===0?ctx.moveTo(x,y):ctx.lineTo(x,y+Math.sin(x*0.15+i)*3); } ctx.stroke(); }
+
+  // scarecrow
+  const scX=W*0.28, scB=groundY+72;
+  ctx.strokeStyle='#8a5a3a'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(scX,scB); ctx.lineTo(scX,scB-70); ctx.moveTo(scX-20,scB-50); ctx.lineTo(scX+20,scB-50); ctx.stroke();
+  ctx.fillStyle='#c04a3a'; ctx.fillRect(scX-14,scB-50,28,28);
+  ctx.fillStyle='#e8d090'; ctx.beginPath(); ctx.arc(scX,scB-58,9,0,7); ctx.fill();
+  ctx.fillStyle='#5a3a1a'; ctx.beginPath(); ctx.ellipse(scX,scB-64,12,3,0,0,7); ctx.fill(); ctx.fillRect(scX-6,scB-74,12,10);
+
+  // pumpkins
+  function pumpkin(x,y,s){
+    ctx.fillStyle='#e07a1a'; for (let k=-1;k<=1;k++){ ctx.beginPath(); ctx.ellipse(x+k*4*s,y,5*s,7*s,0,0,7); ctx.fill(); }
+    ctx.fillStyle='#f0902a'; ctx.beginPath(); ctx.ellipse(x,y,5*s,7*s,0,0,7); ctx.fill();
+    ctx.strokeStyle='#4a7a2a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,y-7*s); ctx.lineTo(x+3,y-10*s); ctx.stroke();
+  }
+  pumpkin(W*0.5,H*0.66,1.4); pumpkin(W*0.66,H*0.72,1.8); pumpkin(W*0.14,H*0.78,2.0); pumpkin(W*0.8,H*0.62,1.2); pumpkin(W*0.42,H*0.84,2.2); pumpkin(W*0.9,H*0.86,1.6);
+
+  // hay bale
+  ctx.fillStyle='#d8c060'; roundRect(W*0.6,H*0.87,44,22,4); ctx.fill();
+  ctx.strokeStyle='#b8a040'; ctx.lineWidth=1; for (let i=1;i<4;i++){ ctx.beginPath(); ctx.moveTo(W*0.6+i*11,H*0.87); ctx.lineTo(W*0.6+i*11,H*0.87+22); ctx.stroke(); }
+
+  // crow
+  ctx.strokeStyle='#222'; ctx.lineWidth=2; const cx=W*0.5+Math.sin(t*0.5)*40;
+  ctx.beginPath(); ctx.moveTo(cx-6,H*0.18); ctx.quadraticCurveTo(cx,H*0.155,cx,H*0.18); ctx.quadraticCurveTo(cx,H*0.155,cx+6,H*0.18); ctx.stroke();
+}
+registerScene('pumpkinpatch', drawPumpkinPatch);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
