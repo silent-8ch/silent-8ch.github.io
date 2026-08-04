@@ -136,6 +136,11 @@
   #toast .ti{font-size:24px;line-height:1;}
   #toast .tt{display:block;font-weight:800;font-size:13px;color:#3a2a2a;}
   #toast .ts{display:block;font-size:11px;color:#8a6a6a;}
+  #wishBar{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:18;background:#fff;border-radius:22px;box-shadow:0 4px 14px rgba(0,0,0,.28);padding:6px 6px 6px 14px;display:flex;align-items:center;gap:10px;max-width:92%;animation:toastPop .3s ease;}
+  #wishBar.hide{display:none;}
+  #wishBar .wt{font-size:12.5px;color:#4a3a34;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #wishBar button{border:none;background:var(--accent);color:#fff;font-weight:700;font-size:12px;padding:6px 12px;border-radius:16px;cursor:pointer;white-space:nowrap;flex:none;}
+  #wishBar .wx{cursor:pointer;color:#b0a0a0;font-weight:700;padding:0 4px;flex:none;}
   #setSection{color:#fff;font-weight:700;font-size:13px;margin:14px 2px 6px;}
   .achRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:13px;}
   .achRow .ai{font-size:18px;}
@@ -219,6 +224,7 @@
     <canvas id="cv"></canvas>
     <div id="speech"></div>
     <div id="toast" class="hide"></div>
+    <div id="wishBar" class="hide"></div>
   </div>
 
   <div id="actions">
@@ -625,6 +631,39 @@ function burst(ch){ for(let i=0;i<3;i++) setTimeout(()=> fxAt(pet.x + rand(-24,2
 function burstAt(ch, px, py){ for(let i=0;i<3;i++) setTimeout(()=> fxAt(px + rand(-14,14), py-8, ch), i*90); }
 function hearts(){ for(let i=0;i<5;i++) setTimeout(()=> fxAt(pet.x + rand(-30,30), pet.y-30, pick(['💗','💛','💖'])), i*80); }
 
+/* ---- she occasionally wishes to visit a place; take her there ---- */
+let wish = null, wishTimer = 45 + Math.random()*45, wishExpire = 0;
+function pickWish(){
+  const en = enabledIndices().filter(i => i !== currentScene);
+  if (!en.length) return;
+  const idx = en[Math.floor(Math.random()*en.length)];
+  wish = { idx, label: sceneLabel(SCENES[idx]) };
+  wishExpire = 32;
+  const bar = document.getElementById('wishBar');
+  bar.innerHTML = `<span class="wt">🥺 Can we visit the ${wish.label}?</span><button id="wishGo">Take me →</button><span class="wx" id="wishNo">✕</span>`;
+  bar.classList.remove('hide');
+  document.getElementById('wishGo').addEventListener('click', grantWish);
+  document.getElementById('wishNo').addEventListener('click', hideWish);
+  say(`I'd love to see the ${wish.label}…`);
+}
+function grantWish(){
+  if (!wish) return;
+  currentScene = wish.idx; sceneChangeTimer = 60;
+  state.love = clamp(state.love + 8); state.fun = clamp(state.fun + 6); refreshHUD();
+  say(pick(['Yay! Thank you 🥰','I love it here! 💛','This is perfect 😊'])); hearts(); if (typeof sfx==='function') sfx('find');
+  hideWish();
+}
+function hideWish(){ wish = null; const bar=document.getElementById('wishBar'); if(bar) bar.classList.add('hide'); }
+function updateWish(dt){
+  if (wish){ wishExpire -= dt; if (wishExpire <= 0) hideWish(); return; }
+  wishTimer -= dt;
+  if (wishTimer <= 0){ wishTimer = 90 + Math.random()*90;
+    if (pet.animLock>0 || pet.resting || isCrying() || speech.classList.contains('show')) return;
+    if (moodScore() < 35) return;   // don't ask when she's needy
+    pickWish();
+  }
+}
+
 /* ---------- tap the scene: she walks over & reacts to the place ---------- */
 const SCENE_INTERACT = (()=>{
   const map = {};
@@ -822,6 +861,7 @@ function loop(ts){
     maybeNag(dt);
     idleThoughts(dt);
     findTrinket(dt);
+    updateWish(dt);
     updatePet(dt);
     // refresh bars periodically (cheap)
     hudAccum += dt; if (hudAccum > 0.25){ refreshHUD(); checkAchievements(); hudAccum = 0; }
