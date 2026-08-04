@@ -117,7 +117,16 @@
   }
   #banner.hide{display:none;}
   /* map / locations */
-  #mapBtn,#collectBtn{cursor:pointer;font-size:18px;line-height:1;user-select:none;}
+  #mapBtn,#collectBtn,#outfitBtn{cursor:pointer;font-size:18px;line-height:1;user-select:none;}
+  #outfitPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
+  #outfitPanel.hide{display:none;}
+  #outfitHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  #outfitClose{cursor:pointer;font-size:18px;padding:0 4px;}
+  #outfitHint{color:rgba(255,255,255,.6);font-size:11px;font-weight:500;margin-bottom:10px;}
+  #outfitList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+  .outfitRow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:10px;padding:9px 12px;color:#fff;font-size:14px;cursor:pointer;}
+  .outfitRow .oi{font-size:18px;}
+  .outfitRow.sel{background:rgba(224,122,139,.45);font-weight:700;}
   #daysChip{font-size:12px;font-weight:700;color:var(--accent);background:#fff;padding:3px 8px;border-radius:20px;box-shadow:0 1px 3px var(--shadow);user-select:none;cursor:default;}
   #collectPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
   #collectPanel.hide{display:none;}
@@ -158,6 +167,7 @@
       <span id="petname">Loading…</span>
       <div style="display:flex;align-items:center;gap:10px;">
         <span id="daysChip" title="Days together">💛 1</span>
+        <span id="outfitBtn" title="Outfit">👒</span>
         <span id="collectBtn" title="Collection">🧺</span>
         <span id="mapBtn" title="Locations">🗺️</span>
         <span id="mood">🙂 okay</span>
@@ -195,6 +205,12 @@
     <div id="collectHead"><span>🧺 Collection</span><span id="collectClose">✕</span></div>
     <div id="collectHint">Little treasures she finds as you explore together 💛</div>
     <div id="collectGrid"></div>
+  </div>
+
+  <div id="outfitPanel" class="hide">
+    <div id="outfitHead"><span>👒 Outfit</span><span id="outfitClose">✕</span></div>
+    <div id="outfitHint">Pick what she wears — Auto suits it to the place</div>
+    <div id="outfitList"></div>
   </div>
 
 </div>
@@ -871,11 +887,75 @@ function buildCollection(){
     grid.appendChild(cell);
   });
 }
+function buildOutfitList(){
+  const list=document.getElementById('outfitList'); if(!list) return; list.innerHTML='';
+  OUTFITS.forEach(o=>{
+    const row=document.createElement('div'); row.className='outfitRow'+(o.id===outfit?' sel':'');
+    row.innerHTML=`<span class="oi">${o.icon}</span><span>${o.label}</span>`;
+    row.addEventListener('click',()=>{ outfit=o.id; saveOutfit(); buildOutfitList(); });
+    list.appendChild(row);
+  });
+}
+function openOutfit(){ buildOutfitList(); document.getElementById('outfitPanel').classList.remove('hide'); }
+function closeOutfit(){ document.getElementById('outfitPanel').classList.add('hide'); }
+
 function openCollect(){ buildCollection();
   const el=document.getElementById('collectHead').firstElementChild;
   if(el) el.textContent=`🧺 Collection ${collectedKinds()}/${TRINKETS_ALL.length}`;
   document.getElementById('collectPanel').classList.remove('hide'); }
 function closeCollect(){ document.getElementById('collectPanel').classList.add('hide'); }
+
+/* ---- outfits / accessories drawn over her ---- */
+const OUTFITS = [
+  {id:'auto',   label:'Auto (by place)', icon:'✨'},
+  {id:'none',   label:'None',            icon:'🚫'},
+  {id:'party',  label:'Party hat',       icon:'🎉'},
+  {id:'sun',    label:'Sun hat',         icon:'👒'},
+  {id:'beanie', label:'Beanie',          icon:'🧢'},
+  {id:'flower', label:'Flower crown',    icon:'🌸'},
+  {id:'bow',    label:'Ribbon bow',      icon:'🎀'},
+];
+let outfit = (function(){ try{ return localStorage.getItem('bpet_outfit') || 'auto'; }catch(e){ return 'auto'; } })();
+function saveOutfit(){ try{ localStorage.setItem('bpet_outfit', outfit); }catch(e){} }
+// which accessory to actually draw right now (resolves 'auto' from the scene)
+function activeAccessory(){
+  if (outfit !== 'auto') return outfit;
+  const s = SCENES[currentScene];
+  if (['beach','desert','sunflowers','tulipfield','marina','vineyard','saltflats','tidepools'].includes(s)) return 'sun';
+  if (['snowycabin','icepond','frozenfalls','icebergbay','aurora'].includes(s)) return 'beanie';
+  if (['florist','cherryblossom','lavender','greenhouse','topiary','hedgemaze','pasture','alpinemeadow','koipond','teahouse','zengarden'].includes(s)) return 'flower';
+  if (['carnival','arcade','balloons','ballroom','cinema','recordshop'].includes(s)) return 'party';
+  if (['balletstudio','perfumery','millinery','spa','candyshop','icecreamparlor'].includes(s)) return 'bow';
+  return 'none';
+}
+// cx = head center x, topY = top of head, s = pixel scale
+function drawAccessory(kind, cx, topY, s){
+  if (!kind || kind==='none') return;
+  ctx.save();
+  if (kind==='party'){
+    ctx.fillStyle='#e0556a'; ctx.beginPath(); ctx.moveTo(cx-9*s,topY+6*s); ctx.lineTo(cx+9*s,topY+6*s); ctx.lineTo(cx,topY-16*s); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.4; for(let i=1;i<=2;i++){ const w=9*s*(1-i*0.32), y=topY+6*s-i*6.5*s; ctx.beginPath(); ctx.moveTo(cx-w,y); ctx.lineTo(cx+w,y); ctx.stroke(); }
+    ctx.fillStyle='#f2c14e'; ctx.beginPath(); ctx.arc(cx,topY-16*s,2.4*s,0,7); ctx.fill();
+  } else if (kind==='sun'){
+    ctx.fillStyle='#e8c98a'; ctx.beginPath(); ctx.ellipse(cx,topY+7*s,17*s,5*s,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx,topY+2*s,9*s,7*s,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle='#c85a7a'; ctx.fillRect(cx-9*s,topY+4*s,18*s,2.4*s);
+    ctx.fillStyle='#e0709a'; ctx.beginPath(); ctx.arc(cx+7*s,topY+5*s,2.2*s,0,7); ctx.fill();
+  } else if (kind==='beanie'){
+    ctx.fillStyle='#4a86c0'; ctx.beginPath(); ctx.arc(cx,topY+6*s,10*s,Math.PI,0); ctx.fill(); ctx.fillRect(cx-10*s,topY+5*s,20*s,3.5*s);
+    ctx.fillStyle='#eaf2ff'; ctx.fillRect(cx-10*s,topY+7*s,20*s,2.5*s);
+    ctx.beginPath(); ctx.arc(cx,topY-5*s,2.8*s,0,7); ctx.fill();
+  } else if (kind==='flower'){
+    const cols=['#e0709a','#f2c14e','#8a5fd0','#5aa0e0','#e0709a'];
+    for(let i=-2;i<=2;i++){ ctx.fillStyle=cols[i+2]; ctx.beginPath(); ctx.arc(cx+i*5*s,topY+5*s+Math.abs(i)*1.4*s,3*s,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx+i*5*s,topY+5*s+Math.abs(i)*1.4*s,1.1*s,0,7); ctx.fill(); }
+  } else if (kind==='bow'){
+    const bx=cx+6*s, by=topY+5*s; ctx.fillStyle='#e0556a';
+    ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx-6*s,by-4*s); ctx.lineTo(bx-6*s,by+4*s); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx+6*s,by-4*s); ctx.lineTo(bx+6*s,by+4*s); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#c03a52'; ctx.beginPath(); ctx.arc(bx,by,2*s,0,7); ctx.fill();
+  }
+  ctx.restore();
+}
 
 /* ---- "days together": distinct days visited + consecutive-day streak ---- */
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1015,6 +1095,8 @@ document.getElementById('mapBtn').addEventListener('click', openMap);
 document.getElementById('mapClose').addEventListener('click', closeMap);
 document.getElementById('collectBtn').addEventListener('click', openCollect);
 document.getElementById('collectClose').addEventListener('click', closeCollect);
+document.getElementById('outfitBtn').addEventListener('click', openOutfit);
+document.getElementById('outfitClose').addEventListener('click', closeOutfit);
 document.getElementById('mapAll').addEventListener('click', ()=>{ disabledScenes.clear(); saveDisabled(); buildMapList(); });
 document.getElementById('mapNone').addEventListener('click', ()=>{ disabledScenes = new Set(SCENES); saveDisabled(); buildMapList(); });
 
@@ -7875,6 +7957,12 @@ function drawPet(){
     frame*sh.fw, row*sh.fh, sh.fw, sh.fh,
     feetX - dispW/2, feetY - dispH - bob, dispW, dispH
   );
+
+  // accessory on her head (skip while she's crying so it doesn't clash)
+  if (!(isCrying())){
+    const topY = (feetY - dispH - bob) + dispH*0.175;   // approx top of her head
+    drawAccessory(activeAccessory(), feetX, topY, dispW/46);
+  }
 
   // (fallback path while the hug sheets are still loading) float a heart
   if (acting && pet.action==='hug'){
