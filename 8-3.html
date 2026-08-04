@@ -5797,6 +5797,57 @@ function drawCanyon(){
 }
 registerScene('canyon', drawCanyon);
 
+/* ── COMIC SHOP (indoor · comics, spinner rack, posters) ── */
+function drawComicShop(){
+  const t=sceneTime, floorY=H*0.68;
+  // bold shop
+  ctx.fillStyle='#243a5a'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#4a3a2a'; ctx.fillRect(0,floorY,W,H-floorY); // wood floor
+  for(let i=0;i<7;i++){ ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(0,floorY+i*((H-floorY)/7),W,1); }
+  // pop-art halftone accent stripe
+  ctx.fillStyle='#e0c020'; ctx.fillRect(0,H*0.1,W,3);
+  ctx.fillStyle='rgba(255,255,255,.08)'; for(let i=0;i<W;i+=10) ctx.beginPath(),ctx.arc(i,H*0.05,3,0,7),ctx.fill();
+  // "COMICS" sign in a burst
+  ctx.fillStyle='#e02030'; ctx.save(); ctx.translate(W*0.5,H*0.06);
+  ctx.beginPath(); for(let i=0;i<16;i++){ const a=i/16*Math.PI*2, r=(i%2)?26:18; ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r*0.6);} ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='bold 11px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('COMICS', 0,4); ctx.restore(); ctx.textAlign='left';
+  // wall of framed cover art (colorful rectangles with simple "hero" marks)
+  const covers=['#e02030','#2060c0','#20a050','#e0a020','#8040c0','#e05090'];
+  for(let s=0;s<2;s++) for(let i=0;i<5;i++){ const cx=W*0.06+i*W*0.1, cy=H*0.16+s*H*0.16;
+    ctx.fillStyle='#111'; ctx.fillRect(cx-2,cy-2,W*0.08+4,H*0.12+4);
+    ctx.fillStyle=covers[(i+s*3)%covers.length]; ctx.fillRect(cx,cy,W*0.08,H*0.12);
+    // a lightning/star emblem
+    ctx.fillStyle='#fff'; ctx.save(); ctx.translate(cx+W*0.04,cy+H*0.06);
+    ctx.beginPath(); for(let k=0;k<10;k++){ const a=k/10*Math.PI*2 - Math.PI/2, r=(k%2)?8:3.5; ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);} ctx.closePath(); ctx.fill(); ctx.restore();
+    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(cx,cy,W*0.08,4); } // title bar
+  // the spinning wire rack (center) with comics fanned around it, slowly rotating
+  const rx=W*0.5, rBase=floorY+2;
+  ctx.fillStyle='#888'; ctx.fillRect(rx-2,rBase-70,4,70); // pole
+  ctx.beginPath(); ctx.ellipse(rx,rBase,20,6,0,0,7); ctx.fill();
+  for(let tier=0;tier<3;tier++){ const ty=rBase-56+tier*20;
+    const rot=t*0.6 + tier*0.5;
+    for(let i=0;i<6;i++){ const a=rot+i/6*Math.PI*2; const depth=(Math.sin(a)+1)/2; // front bigger
+      const px=rx+Math.cos(a)*22; const s=0.6+depth*0.5;
+      ctx.fillStyle=covers[(i+tier)%covers.length]; ctx.globalAlpha=0.5+depth*0.5;
+      ctx.fillRect(px-5*s, ty-8*s, 10*s, 16*s);
+      ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(px-5*s, ty-8*s, 10*s, 2*s);
+      ctx.globalAlpha=1; }
+  }
+  // long boxes of back-issues on the floor (left & right)
+  function longbox(x){ ctx.fillStyle='#d8cbb0'; ctx.fillRect(x,floorY+6,W*0.2,H*0.18);
+    ctx.fillStyle='#c0b090'; ctx.fillRect(x,floorY+6,W*0.2,4);
+    for(let i=0;i<12;i++){ ctx.fillStyle=covers[i%covers.length]; ctx.fillRect(x+4+i*(W*0.2-8)/12, floorY+8, 2, H*0.16); } // comic tops
+    ctx.fillStyle='#3a2a1a'; ctx.font='7px Segoe UI'; }
+  longbox(W*0.04); longbox(W*0.76);
+  // a cardboard standee of a hero by the counter
+  const sx=W*0.22;
+  ctx.fillStyle='#2060c0'; ctx.fillRect(sx-8,floorY-40,16,44);
+  ctx.fillStyle='#f0c090'; ctx.beginPath(); ctx.arc(sx,floorY-46,6,0,7); ctx.fill();
+  ctx.fillStyle='#e02030'; ctx.beginPath(); ctx.moveTo(sx-8,floorY-38); ctx.lineTo(sx-16,floorY-20); ctx.lineTo(sx-8,floorY-24); ctx.closePath(); ctx.fill(); // cape
+  ctx.fillStyle='#e0c020'; ctx.beginPath(); ctx.moveTo(sx,floorY-34); ctx.lineTo(sx-3,floorY-28); ctx.lineTo(sx+3,floorY-28); ctx.closePath(); ctx.fill(); // chest emblem
+}
+registerScene('comicshop', drawComicShop);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
