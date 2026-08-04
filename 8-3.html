@@ -2779,6 +2779,46 @@ function drawScienceLab(){
 }
 registerScene('sciencelab', drawScienceLab);
 
+/* ── TIDE POOLS (outdoor · rocky coast) ── */
+function drawTidePools(){
+  const t = sceneTime, seaY = H*0.36, rockY = H*0.50;
+
+  // sky + sea
+  const sky=ctx.createLinearGradient(0,0,0,seaY); sky.addColorStop(0,'#a8d8ef'); sky.addColorStop(1,'#daf0f5');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,seaY);
+  const sea=ctx.createLinearGradient(0,seaY,0,rockY); sea.addColorStop(0,'#3a8ea8'); sea.addColorStop(1,'#5aa8bc');
+  ctx.fillStyle=sea; ctx.fillRect(0,seaY,W,rockY-seaY);
+  ctx.strokeStyle='rgba(255,255,255,.22)'; ctx.lineWidth=1;
+  for (let i=0;i<10;i++){ const y=seaY+4+i*3; ctx.beginPath(); for (let x=0;x<=W;x+=8){ x===0?ctx.moveTo(x,y):ctx.lineTo(x, y+Math.sin(x*0.1+t*2+i)*1.4); } ctx.stroke(); }
+  ctx.strokeStyle='#5a5a5a'; ctx.lineWidth=2; const gx=W*0.7+Math.sin(t*0.3)*30;
+  ctx.beginPath(); ctx.moveTo(gx-6,seaY-20); ctx.quadraticCurveTo(gx,seaY-24,gx,seaY-20); ctx.quadraticCurveTo(gx,seaY-24,gx+6,seaY-20); ctx.stroke();
+
+  // rocky shore
+  const rock=ctx.createLinearGradient(0,rockY,0,H); rock.addColorStop(0,'#8a8278'); rock.addColorStop(1,'#6e675e');
+  ctx.fillStyle=rock; ctx.fillRect(0,rockY,W,H-rockY);
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1;
+  for (let i=0;i<14;i++){ const rx=(i*61+11)%W, ry=rockY+10+((i*47)%(H-rockY-10)); ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx+8+((i*13)%10), ry+4); ctx.stroke(); }
+  ctx.fillStyle='#7a7268'; for (const b of [[W*0.12,rockY+6,20],[W*0.9,rockY+2,26]]){ ctx.beginPath(); ctx.ellipse(b[0],b[1],b[2],b[2]*0.6,0,Math.PI,0); ctx.fill(); }
+
+  // tide pools with critters
+  function pool(px,py,pr){
+    ctx.fillStyle='#3a4a44'; ctx.beginPath(); ctx.ellipse(px,py,pr+2,pr*0.6+2,0,0,7); ctx.fill();
+    ctx.fillStyle='#4a8a90'; ctx.beginPath(); ctx.ellipse(px,py,pr,pr*0.6,0,0,7); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.2)'; ctx.beginPath(); ctx.ellipse(px-pr*0.3,py-pr*0.2,pr*0.4,pr*0.2,0,0,7); ctx.fill();
+    ctx.fillStyle='#e08a3a'; ctx.save(); ctx.translate(px+pr*0.2,py+2); for (let a=0;a<5;a++){ ctx.rotate(6.28/5); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(2,4); ctx.lineTo(0,7); ctx.lineTo(-2,4); ctx.closePath(); ctx.fill(); } ctx.restore();
+    ctx.fillStyle='#d05a7a'; ctx.beginPath(); ctx.arc(px-pr*0.4,py,3,0,7); ctx.fill();
+    ctx.strokeStyle='#e07a9a'; ctx.lineWidth=1; for (let a=0;a<6;a++){ const an=a/6*6.28; ctx.beginPath(); ctx.moveTo(px-pr*0.4,py); ctx.lineTo(px-pr*0.4+Math.cos(an)*5, py+Math.sin(an)*3-2); ctx.stroke(); }
+  }
+  pool(W*0.3,H*0.68,26); pool(W*0.7,H*0.82,30); pool(W*0.15,H*0.86,18);
+
+  // little crab
+  const crX=W*0.55+Math.sin(t*1.5)*10, crY=H*0.74;
+  ctx.fillStyle='#c0503a'; ctx.beginPath(); ctx.ellipse(crX,crY,7,5,0,0,7); ctx.fill();
+  ctx.strokeStyle='#c0503a'; ctx.lineWidth=2; for (let i=-1;i<=1;i+=2){ ctx.beginPath(); ctx.moveTo(crX+i*6,crY); ctx.lineTo(crX+i*11,crY-3); ctx.stroke(); }
+  ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(crX-2,crY-3,1,0,7); ctx.arc(crX+2,crY-3,1,0,7); ctx.fill();
+}
+registerScene('tidepools', drawTidePools);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
