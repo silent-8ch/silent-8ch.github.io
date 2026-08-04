@@ -5902,6 +5902,54 @@ function drawAlpineMeadow(){
 }
 registerScene('alpinemeadow', drawAlpineMeadow);
 
+/* ── COBBLER (indoor · shoemaker's workshop) ── */
+function drawCobbler(){
+  const t=sceneTime, floorY=H*0.66;
+  // warm leather-brown shop
+  ctx.fillStyle='#b89a70'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#6a4a30'; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.fillStyle='#a5885c'; ctx.fillRect(0,H*0.12,W,2);
+  // small window
+  ctx.fillStyle='#e0d2a8'; ctx.fillRect(W*0.72,H*0.06,W*0.2,H*0.2); ctx.strokeStyle='#5a3e26'; ctx.lineWidth=2; ctx.strokeRect(W*0.72,H*0.06,W*0.2,H*0.2);
+  ctx.beginPath(); ctx.moveTo(W*0.82,H*0.06); ctx.lineTo(W*0.82,H*0.26); ctx.moveTo(W*0.72,H*0.16); ctx.lineTo(W*0.92,H*0.16); ctx.stroke();
+  // "SHOES" sign
+  ctx.fillStyle='#5a3a22'; ctx.font='bold 12px Georgia, serif'; ctx.textAlign='center'; ctx.fillText('Cobbler', W*0.3, H*0.08); ctx.textAlign='left';
+  // shelves of finished shoes (pairs, various colors)
+  const sh=['#3a2a1a','#7a2a2a','#2a3a5a','#5a3a1a','#2a4a2a'];
+  for(let s=0;s<3;s++){ const sy=H*0.16+s*H*0.13; ctx.fillStyle='#8a6a44'; ctx.fillRect(W*0.04,sy+8,W*0.42,4);
+    for(let i=0;i<4;i++){ const bx=W*0.07+i*W*0.1; // a shoe silhouette
+      for(let p=0;p<2;p++){ ctx.fillStyle=sh[(i+s)%sh.length]; ctx.beginPath();
+        ctx.moveTo(bx+p*10,sy+8); ctx.quadraticCurveTo(bx+p*10-3,sy-2,bx+6+p*10,sy-2); ctx.lineTo(bx+16+p*10,sy+2); ctx.quadraticCurveTo(bx+18+p*10,sy+8,bx+16+p*10,sy+8); ctx.closePath(); ctx.fill(); } }
+  }
+  // the cobbler's bench with a cast-iron shoe last (foot form)
+  const by=floorY-4; ctx.fillStyle='#5a3e26'; ctx.fillRect(0,by-8,W,8+(H-by)); ctx.fillStyle='#6a4a30'; ctx.fillRect(0,by-8,W,4);
+  // the iron last stand (center) with a shoe being resoled
+  const lx=W*0.42, ly=by-8;
+  ctx.fillStyle='#3a3a42'; ctx.fillRect(lx-3,ly-40,6,40); ctx.beginPath(); ctx.ellipse(lx,ly,12,4,0,0,7); ctx.fill(); // stand
+  // the iron foot form (pointing up) with a shoe on it
+  ctx.fillStyle='#5a5a62'; ctx.save(); ctx.translate(lx,ly-40); ctx.rotate(-0.2);
+  ctx.beginPath(); ctx.moveTo(-4,0); ctx.lineTo(4,0); ctx.lineTo(3,-16); ctx.quadraticCurveTo(0,-22,-3,-16); ctx.closePath(); ctx.fill(); ctx.restore();
+  // shoe (upper) on the last + a fresh sole
+  ctx.fillStyle='#7a2a2a'; ctx.beginPath(); ctx.moveTo(lx-14,ly-40); ctx.quadraticCurveTo(lx-16,ly-54,lx-2,ly-56); ctx.lineTo(lx+10,ly-52); ctx.quadraticCurveTo(lx+14,ly-44,lx+10,ly-40); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#c9a86a'; ctx.fillRect(lx-16,ly-40,32,4); // new sole
+  // little hammer tapping tacks (animated)
+  const tap=Math.abs(Math.sin(t*5))*6;
+  ctx.save(); ctx.translate(lx+16,ly-52-tap); ctx.rotate(0.5);
+  ctx.strokeStyle='#7a5230'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(14,10); ctx.stroke();
+  ctx.fillStyle='#4a4a52'; ctx.fillRect(-4,-4,10,7); ctx.restore();
+  // tools on the wall pegboard (right)
+  ctx.fillStyle='#8a6a44'; ctx.fillRect(W*0.62,H*0.14,W*0.02,H*0.24);
+  const toolC=['#9aa','#c9a86a','#9aa'];
+  for(let i=0;i<3;i++){ ctx.strokeStyle=toolC[i]; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.66+i*W*0.06,H*0.16); ctx.lineTo(W*0.66+i*W*0.06,H*0.16+34+i*8); ctx.stroke();
+    ctx.fillStyle=toolC[i]; ctx.fillRect(W*0.66+i*W*0.06-3,H*0.16+34+i*8,6,6); }
+  // spools of waxed thread + an awl + leather scraps on the bench foreground
+  for(let i=0;i<3;i++){ ctx.fillStyle=['#3a2a1a','#7a4a2a','#2a2a30'][i]; ctx.beginPath(); ctx.arc(W*0.14+i*W*0.06,by+6,5,0,7); ctx.fill();
+    ctx.fillStyle='#8a6a44'; ctx.beginPath(); ctx.arc(W*0.14+i*W*0.06,by+6,1.6,0,7); ctx.fill(); }
+  ctx.fillStyle='#8a5a34'; ctx.beginPath(); ctx.moveTo(W*0.7,by+2); ctx.lineTo(W*0.86,by+4); ctx.lineTo(W*0.82,by+14); ctx.lineTo(W*0.7,by+12); ctx.closePath(); ctx.fill(); // leather scrap
+  ctx.strokeStyle='#5a3a22'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(W*0.6,by+2); ctx.lineTo(W*0.63,by-12); ctx.stroke(); ctx.fillStyle='#9aa'; ctx.fillRect(W*0.628,by-14,3,4); // awl
+}
+registerScene('cobbler', drawCobbler);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
