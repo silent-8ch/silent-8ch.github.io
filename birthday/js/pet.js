@@ -239,9 +239,15 @@ const SCENE_INTERACT = (()=>{
   g(['musicroom','recordshop','ballroom','cinema','carnival','arcade'], {lines:['I love this song 🎵','Dance with me!','La la la 🎶'], emoji:'🎵', fun:5});
   g(['petshop','butterflydome','aviary','savanna','backyard'], {lines:['Hi little ones! 🐾','So cute!','Animals 🥰'], emoji:'🐾', love:5});
   g(['spa','hotspring','zengarden','bamboo'], {lines:['So relaxing… 😌','Ahhh 💆','Peaceful.'], emoji:'💧', energy:5});
+  g(['autumnforest','orchard','pumpkinpatch','coveredbridge','cornmaze','wheatfield','redwoods'], {lines:['Crunchy leaves! 🍂','Cozy autumn 🍁','Look, a little pumpkin! 🎃'], emoji:'🍁', fun:5});
+  g(['artstudio','pottery','sewingstudio','weaving','stainedglass','luthier','bookbindery','letterpress','cobbler'], {lines:['So creative here 🎨','Can we make something?','I love handmade things ✨'], emoji:'🎨', fun:5});
+  g(['icepond','frozenfalls','icebergbay'], {lines:['So sparkly and cold! ❄️','Brrr — pretty though ⛄','Icy magic ✨'], emoji:'❄️', fun:5});
+  g(['perfumery','millinery','balletstudio'], {lines:['So elegant 💃','I feel fancy!','Twirl with me 🩰'], emoji:'💃', love:5});
+  g(['desert','saltflats'], {lines:['So wide and warm ☀️','Endless sky!','Careful, it\'s toasty 🌵'], emoji:'🌵', energy:4});
+  g(['teahouse'], {lines:['Tea time? 🍵','So peaceful here…','Mmm, warm and cozy 🍵'], emoji:'🍵', energy:5});
   return map;
 })();
-const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?'];
+const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰'];
 let interactCd = 0;
 function tapScene(px, py){
   if (interactCd > 0 || pet.animLock > 0) return;
