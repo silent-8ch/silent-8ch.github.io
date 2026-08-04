@@ -4658,6 +4658,68 @@ function drawMarina(){
 }
 registerScene('marina', drawMarina);
 
+/* ── PUPPET THEATER (indoor · marionette stage show) ── */
+function drawPuppetTheater(){
+  const t=sceneTime, floorY=H*0.72;
+  // dim playhouse
+  ctx.fillStyle='#241826'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#3a2a1e'; ctx.fillRect(0,floorY,W,H-floorY);
+  for(let i=0;i<8;i++){ ctx.fillStyle='rgba(0,0,0,.15)'; ctx.fillRect(0,floorY+i*((H-floorY)/8),W,1); }
+  // ornate proscenium arch (gold frame)
+  const px=W*0.1, py=H*0.1, pw=W*0.8, ph=H*0.5;
+  ctx.fillStyle='#8a2a3a'; ctx.fillRect(px-8,py-8,pw+16,ph+16); // red border box
+  ctx.fillStyle='#d4af37'; ctx.fillRect(px-8,py-8,pw+16,6); // gold top
+  for(let i=0;i<9;i++){ ctx.fillStyle='#d4af37'; ctx.beginPath(); ctx.arc(px-8+ (pw+16)*i/8, py-8, 5,0,7); ctx.fill(); }
+  // stage opening (the lit interior)
+  const bg=ctx.createLinearGradient(0,py,0,py+ph); bg.addColorStop(0,'#3a5a7a'); bg.addColorStop(1,'#6a4a6a');
+  ctx.fillStyle=bg; ctx.fillRect(px,py,pw,ph);
+  // painted backdrop: a little moon + hills
+  ctx.fillStyle='#f2e8b0'; ctx.beginPath(); ctx.arc(px+pw*0.78,py+ph*0.24,14,0,7); ctx.fill();
+  ctx.fillStyle='#2e4a3a'; ctx.beginPath(); ctx.moveTo(px,py+ph); for(let x=0;x<=pw;x+=14){ ctx.lineTo(px+x, py+ph*0.62+Math.sin(x*0.04)*10); } ctx.lineTo(px+pw,py+ph); ctx.closePath(); ctx.fill();
+  // stage floorboards
+  ctx.fillStyle='#7a5432'; ctx.fillRect(px,py+ph-14,pw,14);
+  // red velvet curtains, swagged at the top corners
+  ctx.fillStyle='#a52a3a';
+  ctx.beginPath(); ctx.moveTo(px,py); ctx.quadraticCurveTo(px+pw*0.18,py+ph*0.2,px+pw*0.1,py+ph*0.42); ctx.lineTo(px,py+ph*0.42); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(px+pw,py); ctx.quadraticCurveTo(px+pw*0.82,py+ph*0.2,px+pw*0.9,py+ph*0.42); ctx.lineTo(px+pw,py+ph*0.42); ctx.closePath(); ctx.fill();
+  // curtain folds
+  ctx.strokeStyle='#7a1e2a'; ctx.lineWidth=2;
+  for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(px+2+i*6,py); ctx.quadraticCurveTo(px+pw*0.14+i*4,py+ph*0.2,px+pw*0.07+i*4,py+ph*0.4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px+pw-2-i*6,py); ctx.quadraticCurveTo(px+pw*0.86-i*4,py+ph*0.2,px+pw*0.93-i*4,py+ph*0.4); ctx.stroke(); }
+  // footlights glow along the stage lip
+  for(let i=0;i<7;i++){ const lx=px+pw*0.08+i*pw*0.14; ctx.fillStyle=`rgba(255,210,120,${0.5+0.2*Math.sin(t*4+i)})`; ctx.beginPath(); ctx.arc(lx,py+ph-6,4,0,7); ctx.fill(); }
+  // two marionettes on strings, swaying/dancing
+  function puppet(x,base,col,phase){
+    const sway=Math.sin(t*2+phase)*10, lift=Math.abs(Math.sin(t*2+phase))*6;
+    const hx=x+sway, hy=base-lift;
+    // strings up to a control bar
+    ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.moveTo(hx-6,py+4); ctx.lineTo(hx-4,hy-14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(hx+6,py+4); ctx.lineTo(hx+4,hy-14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(hx,py+4); ctx.lineTo(hx+10,hy+4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(hx,py+4); ctx.lineTo(hx-10,hy+4); ctx.stroke();
+    // body
+    ctx.fillStyle=col; ctx.fillRect(hx-5,hy-8,10,16);
+    // head
+    ctx.fillStyle='#f0d0a8'; ctx.beginPath(); ctx.arc(hx,hy-14,6,0,7); ctx.fill();
+    // hat
+    ctx.fillStyle=col; ctx.fillRect(hx-6,hy-20,12,3); ctx.fillRect(hx-3,hy-25,6,5);
+    // limbs (swing opposite)
+    const s2=Math.sin(t*2+phase+1)*6;
+    ctx.strokeStyle=col; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(hx-4,hy-4); ctx.lineTo(hx-10,hy+4+s2*0.2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(hx+4,hy-4); ctx.lineTo(hx+10,hy+4-s2*0.2); ctx.stroke();
+    ctx.strokeStyle='#5a3a2a'; ctx.beginPath(); ctx.moveTo(hx-3,hy+8); ctx.lineTo(hx-5+s2*0.3,hy+18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(hx+3,hy+8); ctx.lineTo(hx+5-s2*0.3,hy+18); ctx.stroke();
+  }
+  puppet(px+pw*0.36, py+ph-24, '#d84a6a', 0);
+  puppet(px+pw*0.62, py+ph-24, '#4a86c0', 1.6);
+  // a few little audience-head silhouettes in the foreground
+  for(let i=0;i<6;i++){ ctx.fillStyle='#160e12'; ctx.beginPath(); ctx.arc(W*0.12+i*W*0.15, H*0.94, 12,Math.PI,0); ctx.fill();
+    ctx.beginPath(); ctx.arc(W*0.12+i*W*0.15, H*0.86, 6,0,7); ctx.fill(); }
+}
+registerScene('puppettheater', drawPuppetTheater);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
