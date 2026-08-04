@@ -4394,6 +4394,62 @@ function drawCandleShop(){
 }
 registerScene('candleshop', drawCandleShop);
 
+/* ── WINDMILL (outdoor · countryside, turning sails) ── */
+function drawWindmill(){
+  const t=sceneTime, groundY=H*0.66;
+  // breezy sky with drifting clouds
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#8fc4e8'); sky.addColorStop(1,'#d8ecf4');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  for(let i=0;i<3;i++){ const cx=((t*8+i*140)%(W+120))-60, cy=H*0.12+i*H*0.09;
+    ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.beginPath(); ctx.arc(cx,cy,14,0,7); ctx.arc(cx+16,cy+4,11,0,7); ctx.arc(cx-14,cy+4,10,0,7); ctx.arc(cx+4,cy-6,10,0,7); ctx.fill(); }
+  // green fields with a path
+  ctx.fillStyle='#7bb04a'; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.fillStyle='#6aa03e'; ctx.beginPath(); ctx.moveTo(0,groundY+20); ctx.quadraticCurveTo(W*0.5,groundY+6,W,groundY+24); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.fill();
+  // dirt path curving to the mill
+  ctx.fillStyle='#c8a86a'; ctx.beginPath(); ctx.moveTo(W*0.42,H); ctx.lineTo(W*0.5,H); ctx.lineTo(W*0.5,groundY+8); ctx.lineTo(W*0.47,groundY+8); ctx.closePath(); ctx.fill();
+  // tulip stripes in the field
+  const tc=['#e0455a','#f2c94c','#e88a3a','#d84a8a'];
+  for(let r=0;r<3;r++){ const ry=groundY+30+r*22; for(let i=0;i<9;i++){ ctx.fillStyle=tc[(i+r)%4];
+    ctx.fillRect(W*0.05+i*W*0.1, ry, 5,5); ctx.fillStyle='#3a7a3a'; ctx.fillRect(W*0.05+i*W*0.1+2, ry+5, 1,6); } }
+  // the mill body (tapered tower)
+  const mx=W*0.7, baseY=groundY+6, topY=H*0.2;
+  ctx.fillStyle='#e6e0d4'; ctx.beginPath(); ctx.moveTo(mx-30,baseY); ctx.lineTo(mx+30,baseY); ctx.lineTo(mx+18,topY); ctx.lineTo(mx-18,topY); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#d0c8b8'; ctx.fillRect(mx-30,baseY-4,60,4);
+  // brick stripes
+  ctx.strokeStyle='rgba(150,120,90,.4)'; ctx.lineWidth=1;
+  for(let i=1;i<5;i++){ const yy=topY+(baseY-topY)*i/5, hw=18+(30-18)*i/5; ctx.beginPath(); ctx.moveTo(mx-hw,yy); ctx.lineTo(mx+hw,yy); ctx.stroke(); }
+  // door + windows
+  ctx.fillStyle='#7a5230'; ctx.fillRect(mx-8,baseY-26,16,26);
+  ctx.fillStyle='#8fbcd8'; ctx.fillRect(mx-6,topY+18,12,12); ctx.strokeStyle='#5a4028'; ctx.lineWidth=1; ctx.strokeRect(mx-6,topY+18,12,12);
+  // conical cap
+  ctx.fillStyle='#8a4a30'; ctx.beginPath(); ctx.moveTo(mx-22,topY+2); ctx.lineTo(mx+22,topY+2); ctx.lineTo(mx,topY-24); ctx.closePath(); ctx.fill();
+  // rotating sails
+  const hubX=mx, hubY=topY+8, rot=t*0.9;
+  for(let b=0;b<4;b++){ const a=rot+b*Math.PI/2;
+    const ex=hubX+Math.cos(a)*52, ey=hubY+Math.sin(a)*52;
+    // arm
+    ctx.strokeStyle='#5a4028'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(hubX,hubY); ctx.lineTo(ex,ey); ctx.stroke();
+    // sail cloth (offset rectangle along the arm)
+    const px=-Math.sin(a), py=Math.cos(a);
+    ctx.fillStyle='rgba(245,240,225,.9)';
+    ctx.beginPath();
+    ctx.moveTo(hubX+Math.cos(a)*14, hubY+Math.sin(a)*14);
+    ctx.lineTo(ex, ey);
+    ctx.lineTo(ex+px*11, ey+py*11);
+    ctx.lineTo(hubX+Math.cos(a)*14+px*9, hubY+Math.sin(a)*14+py*9);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#c8b89a'; ctx.lineWidth=1; ctx.stroke();
+  }
+  ctx.fillStyle='#3a2a1a'; ctx.beginPath(); ctx.arc(hubX,hubY,5,0,7); ctx.fill();
+  // a couple of geese wandering the path
+  for(let i=0;i<2;i++){ const gx=W*0.46+Math.sin(t*0.6+i*2)*4, gy=H*0.9+i*14;
+    ctx.fillStyle='#f4f4f0'; ctx.beginPath(); ctx.ellipse(gx,gy,7,4,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(gx+6,gy-4,3,0,7); ctx.fill();
+    ctx.fillStyle='#e0902a'; ctx.beginPath(); ctx.moveTo(gx+8,gy-4); ctx.lineTo(gx+12,gy-3); ctx.lineTo(gx+8,gy-2); ctx.fill(); }
+}
+registerScene('windmill', drawWindmill);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
