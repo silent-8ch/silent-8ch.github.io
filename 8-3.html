@@ -3941,6 +3941,36 @@ function drawCatCafe(){
 }
 registerScene('catcafe', drawCatCafe);
 
+/* ── SAVANNA SUNSET (outdoor · evening) ── */
+function drawSavanna(){
+  const t = sceneTime, groundY = H*0.60;
+
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#8a3a5a'); sky.addColorStop(0.5,'#e0603a'); sky.addColorStop(1,'#f2b04a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='rgba(255,220,140,.4)'; ctx.beginPath(); ctx.arc(W*0.5,groundY-10,50,0,7); ctx.fill();
+  ctx.fillStyle='#ffd070'; ctx.beginPath(); ctx.arc(W*0.5,groundY-10,36,0,7); ctx.fill();
+
+  function acacia(x,baseY,s){
+    ctx.fillStyle='#2a1a10'; ctx.fillRect(x-2*s,baseY-30*s,4*s,30*s);
+    ctx.strokeStyle='#2a1a10'; ctx.lineWidth=2*s; ctx.beginPath(); ctx.moveTo(x,baseY-24*s); ctx.lineTo(x-14*s,baseY-34*s); ctx.moveTo(x,baseY-24*s); ctx.lineTo(x+14*s,baseY-34*s); ctx.stroke();
+    ctx.fillStyle='#1a1008'; ctx.beginPath(); ctx.ellipse(x,baseY-36*s,22*s,7*s,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x-16*s,baseY-34*s,10*s,5*s,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(x+16*s,baseY-34*s,10*s,5*s,0,0,7); ctx.fill();
+  }
+  acacia(W*0.16,groundY,1.2); acacia(W*0.86,groundY,0.9);
+
+  // giraffe silhouette
+  const gx=W*0.66, gb=groundY;
+  ctx.fillStyle='#3a2418'; ctx.fillRect(gx-8,gb-16,16,10); ctx.fillRect(gx-6,gb-6,3,6); ctx.fillRect(gx+3,gb-6,3,6);
+  ctx.save(); ctx.translate(gx+6,gb-14); ctx.rotate(-0.5); ctx.fillRect(0,-20,3,22); ctx.restore();
+  ctx.beginPath(); ctx.ellipse(gx+16,gb-30,4,3,0.3,0,7); ctx.fill();
+
+  const g=ctx.createLinearGradient(0,groundY,0,H); g.addColorStop(0,'#c89a4a'); g.addColorStop(1,'#a87a2a');
+  ctx.fillStyle=g; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.strokeStyle='#8a6a1a'; ctx.lineWidth=1; for (let i=0;i<50;i++){ const tx=(i*47+7)%W, ty=groundY+8+((i*31)%(H-groundY-8)); ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(tx+Math.sin(i)*2,ty-5-Math.abs(Math.cos(i))*4); ctx.stroke(); }
+
+  ctx.strokeStyle='#2a1a10'; ctx.lineWidth=1.5; for (let i=0;i<3;i++){ const bx=W*0.3+i*20+Math.sin(t*0.3+i)*10, by=H*0.2+i*8; ctx.beginPath(); ctx.moveTo(bx-5,by); ctx.quadraticCurveTo(bx,by-3,bx,by); ctx.quadraticCurveTo(bx,by-3,bx+5,by); ctx.stroke(); }
+}
+registerScene('savanna', drawSavanna);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
