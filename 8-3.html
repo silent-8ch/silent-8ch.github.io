@@ -5656,6 +5656,55 @@ function drawLuthier(){
 }
 registerScene('luthier', drawLuthier);
 
+/* ── COVERED BRIDGE (outdoor · red bridge over an autumn stream) ── */
+function drawCoveredBridge(){
+  const t=sceneTime, waterY=H*0.72;
+  // crisp autumn sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#a8d4ea'); sky.addColorStop(1,'#e8ecc8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  // autumn tree line behind
+  const foliage=['#d0602a','#e0902a','#c04a2a','#e0b83a','#a5642a'];
+  for(let i=0;i<10;i++){ const tx=i*W*0.11, ty=waterY-6, r=18+ (i%3)*8;
+    ctx.fillStyle=foliage[i%foliage.length]; ctx.beginPath(); ctx.arc(tx,ty-r*0.4,r,0,7); ctx.arc(tx+r*0.6,ty-r*0.2,r*0.7,0,7); ctx.arc(tx-r*0.6,ty-r*0.2,r*0.7,0,7); ctx.fill(); }
+  // grassy banks
+  ctx.fillStyle='#7a8a3a'; ctx.fillRect(0,waterY-8,W,14);
+  // stream
+  const water=ctx.createLinearGradient(0,waterY,0,H); water.addColorStop(0,'#4a7a8a'); water.addColorStop(1,'#2f5566');
+  ctx.fillStyle=water; ctx.fillRect(0,waterY,W,H-waterY);
+  // the covered bridge spanning the stream
+  const bx0=W*0.12, bx1=W*0.88, deckY=waterY-4;
+  // stone abutments
+  ctx.fillStyle='#8a8078'; ctx.fillRect(bx0-14,deckY-6,18,H-deckY+6); ctx.fillRect(bx1-4,deckY-6,18,H-deckY+6);
+  // red barn-board body
+  const bodyTop=deckY-58;
+  ctx.fillStyle='#a0341f'; ctx.fillRect(bx0,bodyTop,bx1-bx0,54);
+  // vertical plank shading
+  ctx.strokeStyle='rgba(0,0,0,.14)'; ctx.lineWidth=1; for(let x=bx0;x<bx1;x+=8){ ctx.beginPath(); ctx.moveTo(x,bodyTop); ctx.lineTo(x,deckY-4); ctx.stroke(); }
+  // white portal trim + dark entrance arch
+  ctx.fillStyle='#e8e0d0'; ctx.fillRect(bx0-2,bodyTop-4,bx1-bx0+4,6);
+  ctx.fillStyle='#2a1a14'; ctx.beginPath(); ctx.moveTo(bx0+10,deckY-4); ctx.lineTo(bx0+10,bodyTop+14); ctx.quadraticCurveTo((bx0+bx1)/2,bodyTop-2,bx1-10,bodyTop+14); ctx.lineTo(bx1-10,deckY-4); ctx.closePath(); ctx.fill();
+  // a little arched window glow midway
+  ctx.fillStyle='#3a2a1e'; ctx.fillRect((bx0+bx1)/2-6,bodyTop+18,12,10);
+  // gable roof
+  ctx.fillStyle='#5a3a24'; ctx.beginPath(); ctx.moveTo(bx0-8,bodyTop); ctx.lineTo(bx1+8,bodyTop); ctx.lineTo(bx1-6,bodyTop-16); ctx.lineTo(bx0+6,bodyTop-16); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#4a2e1c'; ctx.fillRect(bx0+6,bodyTop-18,bx1-bx0-12,3);
+  // reflection of the bridge in the stream (wavering)
+  ctx.save(); ctx.globalAlpha=0.3;
+  for(let i=0;i<6;i++){ const ry=waterY+4+i*4; const wob=Math.sin(t*1.6+i)*3;
+    ctx.fillStyle='#a0341f'; ctx.fillRect(bx0+wob,ry,bx1-bx0,3); }
+  ctx.restore();
+  // ripple lines
+  for(let i=0;i<5;i++){ const ry=waterY+16+i*((H-waterY)/6); ctx.strokeStyle='rgba(255,255,255,.1)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); for(let x=0;x<=W;x+=10){ const yy=ry+Math.sin(x*0.05+t*1.4+i)*2; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // fallen leaves drifting down the stream + a couple twirling in the air
+  const lc=['#d0602a','#e0b83a','#c04a2a'];
+  for(let i=0;i<6;i++){ const lx=(t*22+i*70)%(W+40)-20, ly=waterY+20+ (i%3)*14;
+    ctx.fillStyle=lc[i%3]; ctx.save(); ctx.translate(lx,ly); ctx.rotate(t+i); ctx.beginPath(); ctx.ellipse(0,0,4,2,0,0,7); ctx.fill(); ctx.restore(); }
+  for(let i=0;i<4;i++){ const lx=W*0.2+i*W*0.2+Math.sin(t*1.3+i)*20, ly=(t*30+i*60)%(waterY*0.9);
+    ctx.fillStyle=lc[i%3]; ctx.save(); ctx.translate(lx,ly); ctx.rotate(t*2+i); ctx.beginPath(); ctx.ellipse(0,0,4,2,0,0,7); ctx.fill(); ctx.restore(); }
+}
+registerScene('coveredbridge', drawCoveredBridge);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
