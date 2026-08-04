@@ -3322,6 +3322,32 @@ function drawObservatory(){
 }
 registerScene('observatory', drawObservatory);
 
+/* ── FIREFLY MEADOW (outdoor · dusk) ── */
+function drawFireflies(){
+  const t = sceneTime, groundY = H*0.60;
+
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#1a2a55'); sky.addColorStop(0.6,'#4a5a7a'); sky.addColorStop(1,'#d88a5a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='rgba(255,240,200,.3)'; ctx.beginPath(); ctx.arc(W*0.78,H*0.2,26,0,7); ctx.fill();
+  ctx.fillStyle='#fff0c8'; ctx.beginPath(); ctx.arc(W*0.78,H*0.2,18,0,7); ctx.fill();
+  for (let i=0;i<20;i++){ const sx=(i*79+5)%W, sy=(i*41+3)%(groundY*0.4); ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(sx,sy,1,1); }
+
+  ctx.fillStyle='#14201a'; ctx.beginPath(); ctx.moveTo(0,groundY); for (let x=0;x<=W;x+=20){ ctx.lineTo(x, groundY-14-Math.abs(Math.sin(x*0.3))*16); } ctx.lineTo(W,groundY); ctx.closePath(); ctx.fill();
+
+  const g=ctx.createLinearGradient(0,groundY,0,H); g.addColorStop(0,'#2a3a24'); g.addColorStop(1,'#1a2818');
+  ctx.fillStyle=g; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.strokeStyle='#1a2814'; ctx.lineWidth=1.5; for (let i=0;i<60;i++){ const gx=(i*23+7)%W, gh=10+((i*13)%18); ctx.beginPath(); ctx.moveTo(gx,H); ctx.quadraticCurveTo(gx+Math.sin(t+i)*3,H-gh*0.6,gx+Math.sin(t+i)*5,H-gh); ctx.stroke(); }
+
+  for (let i=0;i<24;i++){
+    const seed=i*97.3, fx=(((seed*1.3 + Math.sin(t*0.5+i)*40)%W)+W)%W;
+    const fy=groundY-30 + Math.sin(t*0.4+i*1.3)*40 + (i%5)*10;
+    const glow=0.4+0.6*Math.abs(Math.sin(t*3+i));
+    ctx.fillStyle=`rgba(210,255,120,${glow*0.25})`; ctx.beginPath(); ctx.arc(fx,fy,5,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(230,255,150,${glow})`; ctx.beginPath(); ctx.arc(fx,fy,1.6,0,7); ctx.fill();
+  }
+}
+registerScene('fireflies', drawFireflies);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
