@@ -6364,6 +6364,60 @@ function drawFireworks(){
 }
 registerScene('fireworks', drawFireworks);
 
+/* ── CHESS HALL (indoor · a grand club mid-game) ── */
+function drawChessHall(){
+  const t=sceneTime, floorY=H*0.72;
+  // dark-panelled club with green-shaded lamps
+  ctx.fillStyle='#2e2620'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#4a3a2a'; ctx.fillRect(0,floorY,W,H-floorY); // wood floor
+  for(let i=0;i<7;i++){ ctx.fillStyle='rgba(0,0,0,.1)'; ctx.fillRect(0,floorY+i*((H-floorY)/7),W,1); }
+  // wainscot panelling lines
+  ctx.strokeStyle='#3a2e22'; ctx.lineWidth=1; for(let i=0;i<6;i++){ ctx.strokeRect(W*0.05+i*W*0.15,H*0.14,W*0.12,H*0.3); }
+  ctx.fillStyle='#6a4a2a'; ctx.fillRect(0,H*0.1,W,3); // rail
+  // a shelf of trophies + old clocks in the back
+  ctx.fillStyle='#5a3e26'; ctx.fillRect(W*0.6,H*0.14,W*0.34,4);
+  for(let i=0;i<4;i++){ ctx.fillStyle='#d4af37'; ctx.beginPath(); ctx.moveTo(W*0.63+i*W*0.08-4,H*0.14); ctx.lineTo(W*0.63+i*W*0.08+4,H*0.14); ctx.lineTo(W*0.63+i*W*0.08+2,H*0.08); ctx.lineTo(W*0.63+i*W*0.08-2,H*0.08); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.arc(W*0.63+i*W*0.08,H*0.07,3,0,7); ctx.fill(); }
+  // green banker's lamp glow pool over the main table
+  const lampX=W*0.5, lampY=H*0.14;
+  ctx.strokeStyle='#8a7a4a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(lampX,0); ctx.lineTo(lampX,lampY); ctx.stroke();
+  ctx.fillStyle='#2a6a3a'; ctx.beginPath(); ctx.ellipse(lampX,lampY+6,20,8,0,Math.PI,0); ctx.fill();
+  const glow=ctx.createRadialGradient(lampX,floorY-10,10,lampX,floorY-10,W*0.4); glow.addColorStop(0,'rgba(255,235,150,.22)'); glow.addColorStop(1,'rgba(255,235,150,0)');
+  ctx.fillStyle=glow; ctx.fillRect(0,0,W,H);
+  // the main chess table (center)
+  const tx=W*0.5, ty=floorY-4;
+  ctx.fillStyle='#4a2f1c'; ctx.fillRect(tx-70,ty-6,140,10+(H-ty)); // table + legs implied
+  ctx.fillStyle='#3a2418'; ctx.fillRect(tx-60,ty+H*0.14,10,H*0.14); ctx.fillRect(tx+50,ty+H*0.14,10,H*0.14);
+  // the board (in slight perspective) with alternating squares
+  const bTop=ty-30, bw=110, bh=40;
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){ const sx=tx-bw/2 + c*(bw/8), sy=bTop + r*(bh/8);
+    ctx.fillStyle=((r+c)%2)?'#e8d8b0':'#7a5638'; ctx.fillRect(sx,sy,bw/8+1,bh/8+1); }
+  ctx.strokeStyle='#2a1a10'; ctx.lineWidth=2; ctx.strokeRect(tx-bw/2-2,bTop-2,bw+4,bh+4);
+  // chess pieces as little silhouettes (two colors)
+  function piece(c,r,dark){ const sx=tx-bw/2 + (c+0.5)*(bw/8), sy=bTop + (r+0.5)*(bh/8);
+    ctx.fillStyle=dark?'#1a1a1e':'#f0ead8'; ctx.beginPath(); ctx.ellipse(sx,sy+2,2.6,1.4,0,0,7); ctx.fill();
+    ctx.fillRect(sx-1.4,sy-4,2.8,6); ctx.beginPath(); ctx.arc(sx,sy-4,2,0,7); ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(sx+1.5,sy+3,3,1.2,0,0,7); ctx.fill(); }
+  // a partial mid-game arrangement
+  const layout=[[0,0,1],[2,1,1],[5,1,1],[7,0,1],[3,3,1],[4,4,0],[1,6,0],[6,6,0],[7,7,0],[0,7,0],[2,5,0]];
+  for(const [c,r,d] of layout) piece(c,r,d);
+  // a knight being moved — floats and slides between two squares
+  const mv=(Math.sin(t*1.2)+1)/2; const c0=4,r0=4,c1=5,r1=2;
+  const kc=c0+(c1-c0)*mv, kr=r0+(r1-r0)*mv; const lift=Math.sin(mv*Math.PI)*8;
+  const ksx=tx-bw/2 + (kc+0.5)*(bw/8), ksy=bTop + (kr+0.5)*(bh/8) - lift;
+  ctx.fillStyle='rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(tx-bw/2 + (kc+0.5)*(bw/8), bTop + (kr+0.5)*(bh/8)+2, 3,1.4,0,0,7); ctx.fill();
+  ctx.fillStyle='#1a1a1e'; ctx.save(); ctx.translate(ksx,ksy); ctx.beginPath(); ctx.moveTo(-2,4); ctx.lineTo(-2,-2); ctx.quadraticCurveTo(-3,-6,1,-6); ctx.lineTo(3,-3); ctx.lineTo(1,-2); ctx.lineTo(2,4); ctx.closePath(); ctx.fill(); ctx.restore();
+  // a chess clock beside the board with a ticking pendulum flag
+  const clx=tx+bw/2+16, cly=ty-14;
+  ctx.fillStyle='#6a4a2a'; ctx.fillRect(clx-10,cly-10,20,14);
+  ctx.fillStyle='#f0ead8'; ctx.beginPath(); ctx.arc(clx-4,cly-3,4,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(clx+4,cly-3,4,0,7); ctx.fill();
+  ctx.strokeStyle='#333'; ctx.lineWidth=1; const ha=t*3; ctx.beginPath(); ctx.moveTo(clx-4,cly-3); ctx.lineTo(clx-4+Math.cos(ha)*2.5,cly-3+Math.sin(ha)*2.5); ctx.stroke();
+  // a facing pair of players' hands/silhouettes hinted at edges
+  ctx.fillStyle='#241c16'; ctx.beginPath(); ctx.ellipse(tx-90,ty+30,16,20,0,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(tx+90,ty+30,16,20,0,0,7); ctx.fill();
+}
+registerScene('chesshall', drawChessHall);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
