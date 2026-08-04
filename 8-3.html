@@ -4511,6 +4511,56 @@ function drawForge(){
 }
 registerScene('forge', drawForge);
 
+/* ── HOT SPRING (outdoor · steaming onsen in snowy rocks, dusk) ── */
+function drawHotSpring(){
+  const t=sceneTime, waterY=H*0.5;
+  // dusk mountain sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#3a4a6a'); sky.addColorStop(1,'#c58a7a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  // a few early stars
+  for(let i=0;i<14;i++){ ctx.fillStyle=`rgba(255,255,255,${0.3+0.3*Math.sin(t*2+i)})`; ctx.fillRect((i*53+7)%W, (i*29)%(H*0.28), 1.5,1.5); }
+  // snowy mountains behind
+  ctx.fillStyle='#8a94b0'; ctx.beginPath(); ctx.moveTo(0,waterY); ctx.lineTo(W*0.22,H*0.2); ctx.lineTo(W*0.42,waterY); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#9aa4c0'; ctx.beginPath(); ctx.moveTo(W*0.3,waterY); ctx.lineTo(W*0.58,H*0.16); ctx.lineTo(W*0.86,waterY); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#eef2f8'; // snow caps
+  ctx.beginPath(); ctx.moveTo(W*0.22,H*0.2); ctx.lineTo(W*0.16,H*0.28); ctx.lineTo(W*0.28,H*0.28); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W*0.58,H*0.16); ctx.lineTo(W*0.5,H*0.25); ctx.lineTo(W*0.66,H*0.25); ctx.closePath(); ctx.fill();
+  // snowy far bank
+  ctx.fillStyle='#e8eef6'; ctx.fillRect(0,waterY-10,W,14);
+  // the hot spring pool (teal, warm)
+  const pool=ctx.createLinearGradient(0,waterY,0,H); pool.addColorStop(0,'#4fa9a8'); pool.addColorStop(1,'#2e6f74');
+  ctx.fillStyle=pool; ctx.fillRect(0,waterY,W,H-waterY);
+  // gentle ripples
+  for(let i=0;i<6;i++){ const ry=waterY+14+i*((H-waterY)/6); ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); for(let x=0;x<=W;x+=8){ const yy=ry+Math.sin(x*0.05+t*1.5+i)*2; if(x===0)ctx.moveTo(x,yy); else ctx.lineTo(x,yy);} ctx.stroke(); }
+  // snow-dusted rocks ringing the pool
+  function rock(x,y,w,h){ ctx.fillStyle='#565660'; ctx.beginPath(); ctx.ellipse(x,y,w,h,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle='#eef2f8'; ctx.beginPath(); ctx.ellipse(x,y-h*0.5,w*0.9,h*0.4,0,Math.PI,0); ctx.fill(); }
+  rock(W*0.12,waterY+4,26,16); rock(W*0.4,waterY+2,30,14); rock(W*0.72,waterY+5,28,16); rock(W*0.94,waterY+3,24,14);
+  // small stone lantern on the near bank
+  const lx=W*0.85, ly=waterY+2;
+  ctx.fillStyle='#6a6a6a'; ctx.fillRect(lx-3,ly-2,6,4); ctx.fillRect(lx-6,ly-14,12,10);
+  ctx.fillStyle='#ffd98a'; ctx.fillRect(lx-4,ly-13,8,8);
+  ctx.fillStyle='#555'; ctx.beginPath(); ctx.moveTo(lx-8,ly-14); ctx.lineTo(lx+8,ly-14); ctx.lineTo(lx,ly-22); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(255,210,120,.25)'; ctx.beginPath(); ctx.arc(lx,ly-9,14,0,7); ctx.fill();
+  // rising steam wisps off the water
+  for(let i=0;i<7;i++){ const sx=W*0.1+i*W*0.13, base=waterY+18+(i%2)*10;
+    ctx.strokeStyle=`rgba(255,255,255,${0.12+0.06*Math.sin(t+i)})`; ctx.lineWidth=6; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(sx,base);
+    for(let k=1;k<=4;k++){ const ph=t*1.2+i+k; ctx.lineTo(sx+Math.sin(ph)*10, base-k*22); }
+    ctx.stroke(); }
+  ctx.lineCap='butt';
+  // gentle snowfall
+  for(let i=0;i<24;i++){ const sxx=(i*47+ t*14)%W, syy=(i*31+ t*22)%waterY;
+    ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(sxx, syy, 2,2); }
+  // a floating wooden tray with a teacup
+  const trX=W*0.28+Math.sin(t*1.2)*4, trY=H*0.72;
+  ctx.fillStyle='#8a5a34'; ctx.fillRect(trX-12,trY,24,5);
+  ctx.fillStyle='#e8e0d0'; ctx.fillRect(trX-3,trY-6,6,6);
+  ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(trX,trY-6); ctx.quadraticCurveTo(trX+4,trY-14,trX,trY-20); ctx.stroke();
+}
+registerScene('hotspring', drawHotSpring);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
