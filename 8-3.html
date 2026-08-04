@@ -1037,6 +1037,30 @@ function drawConfetti(){
   }
 }
 
+/* ---- day / night lighting driven by the real clock ---- */
+// scenes that stage their own dramatic / night lighting — skip the global wash
+const SCENE_NO_DAYNIGHT = new Set(['aurora','meteorshower','fireworks','volcano','glowwormcave','biobay','observatory','planetarium','cinema','darkroom']);
+let dayNightForce = null;   // debug/override: null = use real clock, else 0..24
+// returns [r,g,b,a] overlay for the current time of day
+function dayNightWash(){
+  const d = new Date();
+  const h = dayNightForce!=null ? dayNightForce : d.getHours() + d.getMinutes()/60;
+  const mix=(c1,c2,t)=>c1.map((v,i)=>v+(c2[i]-v)*t);
+  const night=[18,26,64,0.42], dawn=[255,168,120,0.20], day=[255,240,210,0.0], dusk=[255,132,70,0.22];
+  if (h<5)  return night;
+  if (h<7)  return mix(night,dawn,(h-5)/2);    // pre-dawn → dawn
+  if (h<9)  return mix(dawn,day,(h-7)/2);      // dawn → morning
+  if (h<16) return day;                        // daylight
+  if (h<18) return mix(day,dusk,(h-16)/2);     // afternoon → golden hour
+  if (h<20) return mix(dusk,night,(h-18)/2);   // dusk → night
+  return night;                                // night
+}
+function applyDayNight(scene){
+  if (SCENE_NO_DAYNIGHT.has(scene)) return;
+  const c = dayNightWash();
+  if (c[3] > 0.001){ ctx.fillStyle=`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${c[3]})`; ctx.fillRect(0,0,W,H); }
+}
+
 function render(){
   ctx.clearRect(0,0,W,H);
   if (birthday){ drawBirthdayScene(); return; }
@@ -1045,6 +1069,7 @@ function render(){
   if (draw){
     draw();
     if (!SCENE_SELF_PET.has(scene)) drawPet();   // scenes that don't place her themselves
+    applyDayNight(scene);                        // global time-of-day tint over scene + pet
   }
 }
 
