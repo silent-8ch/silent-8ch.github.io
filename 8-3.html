@@ -6727,6 +6727,61 @@ function drawCartographer(){
 }
 registerScene('cartographer', drawCartographer);
 
+/* ── BAYOU (outdoor · misty cypress swamp at dusk) ── */
+function drawBayou(){
+  const t=sceneTime, waterY=H*0.56;
+  // muted dusk sky through mist
+  const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#c8a86a'); sky.addColorStop(1,'#e8d8a8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+  // low sun glow behind the trees
+  ctx.fillStyle='rgba(255,235,180,.7)'; ctx.beginPath(); ctx.arc(W*0.7,waterY-20,26,0,7); ctx.fill();
+  // layered mist bands
+  for(let i=0;i<3;i++){ ctx.fillStyle=`rgba(220,215,195,${0.35-i*0.08})`; ctx.fillRect(0,waterY-40+i*14+Math.sin(t*0.5+i)*3,W,16); }
+  // distant tree-line silhouette
+  ctx.fillStyle='#5a6a54'; ctx.beginPath(); ctx.moveTo(0,waterY); for(let x=0;x<=W;x+=16){ ctx.lineTo(x,waterY-16-Math.abs(Math.sin(x*0.1))*14); } ctx.lineTo(W,waterY); ctx.fill();
+  // still dark water
+  const water=ctx.createLinearGradient(0,waterY,0,H); water.addColorStop(0,'#3a4a3a'); water.addColorStop(1,'#22301f');
+  ctx.fillStyle=water; ctx.fillRect(0,waterY,W,H-waterY);
+  // sun's reflection column shimmering
+  for(let i=0;i<10;i++){ const gy=waterY+4+i*((H-waterY)/10); ctx.fillStyle='rgba(255,230,170,.10)'; ctx.fillRect(W*0.7-8+Math.sin(t*2+i)*5, gy, 16, 2); }
+  // duckweed / algae patches on the surface
+  for(let i=0;i<8;i++){ ctx.fillStyle='rgba(90,130,70,.4)'; ctx.beginPath(); ctx.ellipse((i*83+30)%W, waterY+20+ (i*37)%(H-waterY-20), 14,4,0,0,7); ctx.fill(); }
+  // cypress trees rising from the water with buttressed bases + Spanish moss
+  function cypress(x,topScale,trunkW){
+    const topY=H*0.06;
+    // trunk (reflected in water too)
+    ctx.fillStyle='#4a3a2a'; ctx.beginPath(); ctx.moveTo(x-trunkW,H); ctx.lineTo(x-trunkW*0.4,topY); ctx.lineTo(x+trunkW*0.4,topY); ctx.lineTo(x+trunkW,H); ctx.closePath(); ctx.fill();
+    // flared buttress base at waterline
+    ctx.beginPath(); ctx.moveTo(x-trunkW,waterY+6); ctx.lineTo(x-trunkW*2.2,waterY+18); ctx.lineTo(x+trunkW*2.2,waterY+18); ctx.lineTo(x+trunkW,waterY+6); ctx.closePath(); ctx.fill();
+    // canopy
+    ctx.fillStyle='#3f5a3a'; ctx.beginPath(); ctx.ellipse(x,topY+8,trunkW*4,20,0,0,7); ctx.fill();
+    // hanging Spanish moss, gently swaying
+    ctx.strokeStyle='rgba(150,160,120,.7)'; ctx.lineWidth=1.5;
+    for(let m=0;m<6;m++){ const mx=x-trunkW*3+m*trunkW; const sway=Math.sin(t*1.2+m+x)*3;
+      ctx.beginPath(); ctx.moveTo(mx,topY+16); ctx.quadraticCurveTo(mx+sway,topY+30,mx+sway*1.5,topY+46); ctx.stroke(); }
+    // reflection of the trunk
+    ctx.fillStyle='rgba(74,58,42,.3)'; ctx.fillRect(x-trunkW,waterY+18,trunkW*2,(H-waterY)*0.5);
+  }
+  cypress(W*0.16, 1, 8); cypress(W*0.5, 1, 6); cypress(W*0.86, 1, 9);
+  // knobby cypress "knees" poking out of the water
+  ctx.fillStyle='#4a3a2a'; for(let i=0;i<5;i++){ const kx=W*0.1+i*W*0.2; ctx.beginPath(); ctx.moveTo(kx-3,waterY+30); ctx.lineTo(kx+3,waterY+30); ctx.lineTo(kx,waterY+20); ctx.closePath(); ctx.fill(); }
+  // a small flat-bottom rowboat drifting with a lantern
+  const bx=W*0.36+Math.sin(t*0.6)*8, by=H*0.82;
+  ctx.fillStyle='#3a2a1a'; ctx.beginPath(); ctx.moveTo(bx-20,by); ctx.lineTo(bx+20,by); ctx.lineTo(bx+15,by+8); ctx.lineTo(bx-15,by+8); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#2a1c12'; ctx.fillRect(bx-1,by-16,2,16); // lantern pole
+  const fl=0.6+0.2*Math.sin(t*6); ctx.fillStyle=`rgba(255,190,90,${fl})`; ctx.beginPath(); ctx.arc(bx,by-18,4,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,190,90,.15)'; ctx.beginPath(); ctx.arc(bx,by-18,16,0,7); ctx.fill();
+  // its reflection on the water
+  ctx.globalAlpha=0.3; ctx.fillStyle='#ffbe5a'; ctx.beginPath(); ctx.ellipse(bx,by+14,3,8,0,0,7); ctx.fill(); ctx.globalAlpha=1;
+  // a heron standing in the shallows
+  const hx=W*0.7, hy=waterY+30; ctx.strokeStyle='#8a8a80'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx,hy+22); ctx.stroke(); // leg
+  ctx.fillStyle='#9a9a90'; ctx.beginPath(); ctx.ellipse(hx,hy-4,7,4,0,0,7); ctx.fill(); // body
+  ctx.beginPath(); ctx.moveTo(hx+2,hy-6); ctx.lineTo(hx+5,hy-18); ctx.lineTo(hx+7,hy-6); ctx.closePath(); ctx.fill(); // neck
+  ctx.strokeStyle='#d8a030'; ctx.beginPath(); ctx.moveTo(hx+5,hy-18); ctx.lineTo(hx+12,hy-16); ctx.stroke(); // beak
+}
+registerScene('bayou', drawBayou);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
