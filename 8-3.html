@@ -2348,6 +2348,60 @@ function drawAutumnForest(){
 }
 registerScene('autumnforest', drawAutumnForest);
 
+/* ── MUSIC ROOM (indoor · music) ── */
+function drawMusicRoom(){
+  const t = sceneTime, floorY = H*0.62;
+
+  // moody wall + wood floor
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#4a3a52'); wall.addColorStop(1,'#3a2e44');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#7a5230'); fl.addColorStop(1,'#5f3f24');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1;
+  for (let i=1;i<6;i++){ const y=floorY+i/6*(H-floorY); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // framed vinyl records on the wall
+  for (const rx of [W*0.14,W*0.31]){
+    ctx.fillStyle='#2a2230'; roundRect(rx-16,H*0.12,32,32,3); ctx.fill();
+    ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(rx,H*0.12+16,12,0,7); ctx.fill();
+    ctx.fillStyle='#c9944a'; ctx.beginPath(); ctx.arc(rx,H*0.12+16,4,0,7); ctx.fill();
+    ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(rx,H*0.12+16,1.4,0,7); ctx.fill();
+  }
+  ctx.fillStyle='rgba(255,210,140,.06)'; ctx.beginPath(); ctx.ellipse(W*0.5,floorY+10,W*0.45,26,0,0,7); ctx.fill();
+
+  // upright piano
+  const pX=W*0.62, pW=W*0.30, pTop=floorY-70;
+  ctx.fillStyle='#2b2029'; roundRect(pX-pW/2,pTop,pW,58,4); ctx.fill();
+  ctx.fillStyle='#1e1620'; ctx.fillRect(pX-pW/2+4,pTop+6,pW-8,16);
+  const kX=pX-pW/2+6, kY=pTop+34, kW=pW-12;
+  ctx.fillStyle='#f3efe4'; ctx.fillRect(kX,kY,kW,12);
+  ctx.fillStyle='#111'; const keys=Math.floor(kW/7);
+  for (let i=0;i<keys;i++){ if (i%7!==2 && i%7!==6) ctx.fillRect(kX+i*7+4,kY,4,7); }
+  ctx.fillStyle='#3a2c36'; ctx.fillRect(pX-pW/2,pTop+58,pW,10);
+  ctx.fillRect(pX-pW/2+6,pTop+68,6,Math.max(0,floorY-(pTop+68))); ctx.fillRect(pX+pW/2-12,pTop+68,6,Math.max(0,floorY-(pTop+68)));
+  ctx.fillStyle='#5a3a22'; ctx.fillRect(pX-18,floorY-14,36,6); ctx.fillRect(pX-16,floorY-8,4,8); ctx.fillRect(pX+12,floorY-8,4,8);
+
+  // cello on a stand
+  const cX=W*0.17, cBase=floorY-6;
+  ctx.strokeStyle='#8a5a2a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cX,cBase); ctx.lineTo(cX,cBase-70); ctx.stroke();
+  ctx.fillStyle='#7a3b1e'; ctx.beginPath(); ctx.ellipse(cX,cBase-30,16,26,0,0,7); ctx.fill();
+  ctx.fillStyle='#5a2a12'; ctx.beginPath(); ctx.ellipse(cX,cBase-30,9,17,0,0,7); ctx.fill();
+  ctx.strokeStyle='#e8d9b0'; ctx.lineWidth=1; for (let i=-1;i<=1;i++){ ctx.beginPath(); ctx.moveTo(cX+i*2,cBase-58); ctx.lineTo(cX+i*2,cBase-8); ctx.stroke(); }
+  ctx.fillStyle='#5a2a12'; ctx.beginPath(); ctx.arc(cX,cBase-64,4,0,7); ctx.fill();
+
+  // music stand with sheet
+  const mX=W*0.40, mB=floorY;
+  ctx.strokeStyle='#333'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(mX,mB); ctx.lineTo(mX,mB-50); ctx.stroke();
+  ctx.save(); ctx.translate(mX,mB-58); ctx.rotate(-0.15); ctx.fillStyle='#f3efe4'; ctx.fillRect(-14,-8,28,20); ctx.strokeStyle='#bbb'; for (let i=0;i<4;i++){ ctx.beginPath(); ctx.moveTo(-11,-4+i*4); ctx.lineTo(11,-4+i*4); ctx.stroke(); } ctx.restore();
+
+  // floating notes
+  ctx.fillStyle='rgba(255,230,180,.85)'; ctx.font='14px serif'; ctx.textAlign='center';
+  const span=floorY*0.7;
+  for (let i=0;i<8;i++){ const life=(t*18+i*30)%span, nx=(i*61+20)%W, ny=floorY-20-life; ctx.globalAlpha=Math.max(0,1-life/span); ctx.fillText(i%2?'♪':'♫', nx+Math.sin(t+i)*6, ny); }
+  ctx.globalAlpha=1; ctx.textAlign='left';
+}
+registerScene('musicroom', drawMusicRoom);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
