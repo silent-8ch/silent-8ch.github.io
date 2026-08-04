@@ -16,6 +16,7 @@ ever both touch it, I rebase on your version first so your text always wins.
 
 ## Inbox
 <!-- add your requests below this line -->
+- Add 10 magic and mysticism related rooms/scenes
 
 
 ## Done
