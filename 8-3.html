@@ -7175,6 +7175,65 @@ function drawPrairieStorm(){
 }
 registerScene('prairiestorm', drawPrairieStorm);
 
+/* ── MILLINERY (indoor · a hat shop) ── */
+function drawMillinery(){
+  const t=sceneTime, floorY=H*0.68;
+  // soft elegant boutique
+  ctx.fillStyle='#e8dce4'; ctx.fillRect(0,0,W,floorY);
+  // damask-ish wall pattern
+  ctx.fillStyle='rgba(180,150,175,.18)'; for(let y=10;y<floorY;y+=28) for(let x=10;x<W;x+=28){ ctx.beginPath(); ctx.arc(x,y,4,0,7); ctx.fill(); ctx.fillRect(x-1,y-8,2,16); ctx.fillRect(x-8,y-1,16,2); }
+  ctx.fillStyle='#c9a0b4'; ctx.fillRect(0,floorY-20,W,20); // pink wainscot
+  ctx.fillStyle='#8a6a54'; ctx.fillRect(0,floorY,W,H-floorY); // parquet
+  for(let i=0;i<7;i++){ ctx.fillStyle='rgba(0,0,0,.06)'; ctx.fillRect(0,floorY+i*((H-floorY)/7),W,1); }
+  ctx.fillStyle='#c9a24a'; ctx.fillRect(0,H*0.1,W,2);
+  // "Chapeaux" sign
+  ctx.fillStyle='#a06a84'; ctx.font='italic bold 14px Georgia, serif'; ctx.textAlign='center'; ctx.fillText('Chapeaux', W*0.5, H*0.08); ctx.textAlign='left';
+  // a hat helper (varied styles)
+  function hat(x,y,col,style){
+    if(style===0){ // wide-brim sun hat
+      ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(x,y,22,7,0,0,7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x,y-8,12,9,0,Math.PI,0); ctx.fill();
+      ctx.fillStyle='rgba(0,0,0,.15)'; ctx.fillRect(x-12,y-8,24,3); // band
+      // a flower
+      ctx.fillStyle='#e08aa8'; ctx.beginPath(); ctx.arc(x+10,y-8,4,0,7); ctx.fill();
+    } else if(style===1){ // cloche/bell hat
+      ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y-4,12,Math.PI,0); ctx.fill(); ctx.fillRect(x-12,y-4,24,8);
+      ctx.fillStyle='rgba(255,255,255,.2)'; ctx.fillRect(x-12,y-2,24,2);
+      // feather
+      ctx.strokeStyle='#c04a6a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x+8,y-6); ctx.quadraticCurveTo(x+16,y-20,x+12,y-26); ctx.stroke();
+    } else { // top hat / formal
+      ctx.fillStyle=col; ctx.fillRect(x-9,y-22,18,20); ctx.beginPath(); ctx.ellipse(x,y-2,15,5,0,0,7); ctx.fill();
+      ctx.fillStyle='rgba(200,160,60,.6)'; ctx.fillRect(x-9,y-8,18,3); // gold band
+    }
+  }
+  // wall shelves of hats on head-forms (stands)
+  for(let s=0;s<2;s++){ const sy=H*0.2+s*H*0.18; ctx.fillStyle='#a5885f'; ctx.fillRect(W*0.05,sy+14,W*0.6,4);
+    const cols=['#c04a6a','#4a6a9a','#d0a030','#3a8a6a','#8a5aa0'];
+    for(let i=0;i<5;i++){ const hx=W*0.1+i*W*0.12;
+      ctx.strokeStyle='#8a7a6a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(hx,sy+14); ctx.lineTo(hx,sy+2); ctx.stroke(); // stand
+      ctx.fillStyle='#e8d8c0'; ctx.beginPath(); ctx.arc(hx,sy,3,0,7); ctx.fill(); // form
+      hat(hx,sy,cols[i%cols.length],(i+s)%3); }
+  }
+  // a standing oval cheval mirror on the left
+  const mx=W*0.1, mtop=floorY-70;
+  ctx.fillStyle='#8a6a44'; ctx.beginPath(); ctx.ellipse(mx,mtop+34,20,34,0,0,7); ctx.fill();
+  ctx.fillStyle='#cfe0e8'; ctx.beginPath(); ctx.ellipse(mx,mtop+34,16,30,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.moveTo(mx-8,mtop+18); ctx.lineTo(mx-2,mtop+18); ctx.lineTo(mx-10,mtop+44); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#8a6a44'; ctx.fillRect(mx-4,mtop+68,8,H-mtop-68); ctx.beginPath(); ctx.ellipse(mx,H-4,14,4,0,0,7); ctx.fill();
+  // the counter with ribbon spools and a hat-in-progress
+  const cy=floorY-4; ctx.fillStyle='#9a7a54'; ctx.fillRect(W*0.5,cy-8,W*0.44,8+(H-cy)); ctx.fillStyle='#a5885f'; ctx.fillRect(W*0.5,cy-8,W*0.44,4);
+  // spools of ribbon
+  for(let i=0;i<4;i++){ const rx=W*0.56+i*W*0.05; ctx.fillStyle=['#c04a6a','#4a6a9a','#d0a030','#3a8a6a'][i]; ctx.fillRect(rx-4,cy-14,8,10);
+    ctx.strokeStyle=['#c04a6a','#4a6a9a','#d0a030','#3a8a6a'][i]; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(rx,cy-4); ctx.quadraticCurveTo(rx+Math.sin(t*2+i)*4,cy+6,rx,cy+14); ctx.stroke(); }
+  // a hat being trimmed on the counter with a plume that sways
+  hat(W*0.8,cy-8,'#8a5aa0',1);
+  const pl=Math.sin(t*1.5)*4; ctx.strokeStyle='#e0d040'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.8+8,cy-14); ctx.quadraticCurveTo(W*0.8+16+pl,cy-30,W*0.8+10+pl,cy-40); ctx.stroke();
+  // a pincushion + scissors
+  ctx.fillStyle='#c04a6a'; ctx.beginPath(); ctx.arc(W*0.68,cy+4,5,0,7); ctx.fill();
+  for(let i=0;i<5;i++){ ctx.strokeStyle='#ccc'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.68,cy+4); ctx.lineTo(W*0.68+Math.cos(i)*7,cy+4+Math.sin(i)*7); ctx.stroke(); }
+}
+registerScene('millinery', drawMillinery);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
