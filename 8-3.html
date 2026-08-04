@@ -4283,6 +4283,58 @@ function drawStainedGlass(){
 }
 registerScene('stainedglass', drawStainedGlass);
 
+/* ── APPLE ORCHARD (outdoor · autumn harvest) ── */
+function drawOrchard(){
+  const t=sceneTime, groundY=H*0.64;
+  // soft dawn sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#bfe0ea'); sky.addColorStop(1,'#eef6d8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  // low sun
+  ctx.fillStyle='rgba(255,240,190,.8)'; ctx.beginPath(); ctx.arc(W*0.82,H*0.16,26,0,7); ctx.fill();
+  // rolling grass
+  ctx.fillStyle='#7ba84a'; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.fillStyle='#6b9840'; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.quadraticCurveTo(W*0.5,groundY-14,W,groundY); ctx.lineTo(W,groundY+8); ctx.lineTo(0,groundY+8); ctx.fill();
+  // rows of apple trees, back row smaller/hazier
+  function tree(x,y,s,hazy){
+    ctx.save();
+    if(hazy) ctx.globalAlpha=0.7;
+    // trunk
+    ctx.fillStyle='#7a5230'; ctx.fillRect(x-3*s,y-26*s,6*s,26*s);
+    // canopy
+    ctx.fillStyle=hazy?'#5f8a3e':'#4f8a3a';
+    ctx.beginPath(); ctx.arc(x,y-34*s,20*s,0,7); ctx.fill();
+    ctx.fillStyle=hazy?'#6f9a48':'#5f9a44';
+    ctx.beginPath(); ctx.arc(x-10*s,y-30*s,13*s,0,7); ctx.arc(x+11*s,y-30*s,13*s,0,7); ctx.fill();
+    // apples
+    if(!hazy){ for(let i=0;i<7;i++){ const a=i*1.3+ x; ctx.fillStyle= i%3? '#e0402a':'#e88a2a';
+      ctx.beginPath(); ctx.arc(x+Math.cos(a)*15*s, y-34*s+Math.sin(a*1.7)*13*s, 2.6*s,0,7); ctx.fill(); } }
+    ctx.restore();
+  }
+  // back row
+  for(let i=0;i<5;i++) tree(W*0.1+i*W*0.2, groundY+6, 0.6, true);
+  // front row
+  for(let i=0;i<3;i++) tree(W*0.2+i*W*0.32, groundY+30, 1.0, false);
+  // wooden ladder leaning on the middle tree
+  const lx=W*0.2+1*W*0.32 - 26, ly=groundY+30;
+  ctx.strokeStyle='#b08a4a'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+14,ly-56); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(lx+8,ly); ctx.lineTo(lx+22,ly-56); ctx.stroke();
+  for(let r=0;r<5;r++){ const ry=ly-8-r*11; ctx.beginPath(); ctx.moveTo(lx+ (r*2.4),ry); ctx.lineTo(lx+8+(r*2.4),ry); ctx.stroke(); }
+  // baskets of apples in the foreground
+  function basket(x,y){
+    ctx.fillStyle='#a5723c'; ctx.beginPath(); ctx.moveTo(x-14,y); ctx.lineTo(x+14,y); ctx.lineTo(x+11,y+14); ctx.lineTo(x-11,y+14); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#7a5228'; ctx.lineWidth=1; for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.moveTo(x+i*6,y); ctx.lineTo(x+i*5,y+14); ctx.stroke(); }
+    for(let i=0;i<6;i++){ ctx.fillStyle= i%2?'#e0402a':'#e88a2a'; ctx.beginPath(); ctx.arc(x-9+i*3.6, y-2+ (i%2)*3, 4,0,7); ctx.fill(); }
+  }
+  basket(W*0.16, H*0.86); basket(W*0.86, H*0.9);
+  // a few apples fallen in the grass
+  for(let i=0;i<6;i++){ ctx.fillStyle='#d0381f'; ctx.beginPath(); ctx.arc(W*0.3+i*W*0.09, groundY+ (H-groundY)*0.5 + (i%2)*10, 3.2,0,7); ctx.fill(); }
+  // gentle falling leaf
+  const lf=(t*20)%(H*0.5); ctx.fillStyle='#d98a2a';
+  ctx.beginPath(); ctx.ellipse(W*0.5+Math.sin(t*2)*18, H*0.2+lf, 4,2, t, 0,7); ctx.fill();
+}
+registerScene('orchard', drawOrchard);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
