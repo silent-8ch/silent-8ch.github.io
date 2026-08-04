@@ -7283,6 +7283,51 @@ function drawHedgeMaze(){
 }
 registerScene('hedgemaze', drawHedgeMaze);
 
+/* ── OPTICIAN (indoor · eyewear shop & eye test) ── */
+function drawOptician(){
+  const t=sceneTime, floorY=H*0.7;
+  // clean bright shop
+  ctx.fillStyle='#eef2f4'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='#c8ccd0'; ctx.fillRect(0,floorY,W,H-floorY); // grey floor
+  for(let i=0;i<7;i++){ ctx.fillStyle='rgba(0,0,0,.04)'; ctx.fillRect(0,floorY+i*((H-floorY)/7),W,1); }
+  ctx.fillStyle='#3a86b0'; ctx.fillRect(0,H*0.1,W,3); // accent stripe
+  // "OPTIK" sign
+  ctx.fillStyle='#2a6a90'; ctx.font='bold 13px Segoe UI, sans-serif'; ctx.textAlign='center'; ctx.fillText('OPTIK', W*0.2, H*0.075); ctx.textAlign='left';
+  // wall display boards of eyeglasses (rows of frames)
+  function specs(x,y,col,shape){ ctx.strokeStyle=col; ctx.lineWidth=2;
+    if(shape===0){ ctx.beginPath(); ctx.arc(x-5,y,5,0,7); ctx.arc(x+5,y,5,0,7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x-1,y-1); ctx.lineTo(x+1,y-1); ctx.stroke(); }
+    else if(shape===1){ ctx.strokeRect(x-9,y-4,8,8); ctx.strokeRect(x+1,y-4,8,8); ctx.beginPath(); ctx.moveTo(x-1,y); ctx.lineTo(x+1,y); ctx.stroke(); }
+    else { ctx.beginPath(); ctx.ellipse(x-5,y,5,3.5,0,0,7); ctx.ellipse(x+5,y,5,3.5,0,0,7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x-1,y); ctx.lineTo(x+1,y); ctx.stroke(); }
+    // temple arms
+    ctx.beginPath(); ctx.moveTo(x-10,y); ctx.lineTo(x-13,y-2); ctx.moveTo(x+10,y); ctx.lineTo(x+13,y-2); ctx.stroke();
+  }
+  const fcol=['#2a2a30','#7a2a2a','#2a4a7a','#7a5a20','#5a2a6a','#2a6a5a'];
+  for(let s=0;s<3;s++){ const sy=H*0.16+s*H*0.13; ctx.fillStyle='#dfe4e8'; ctx.fillRect(W*0.04,sy-10,W*0.44,22); ctx.strokeStyle='#c0c6ca'; ctx.lineWidth=1; ctx.strokeRect(W*0.04,sy-10,W*0.44,22);
+    for(let i=0;i<5;i++) specs(W*0.09+i*W*0.09, sy, fcol[(i+s)%fcol.length], (i+s)%3); }
+  // an eye chart on the right wall (Snellen)
+  const ecx=W*0.82, ecy=H*0.16; ctx.fillStyle='#fff'; ctx.fillRect(ecx-30,ecy-4,60,H*0.34); ctx.strokeStyle='#ccc'; ctx.lineWidth=1; ctx.strokeRect(ecx-30,ecy-4,60,H*0.34);
+  ctx.fillStyle='#222'; ctx.textAlign='center';
+  const lines=[['E',18],['F P',12],['T O Z',9],['L P E D',7],['P E C F D',5]];
+  for(let i=0;i<lines.length;i++){ ctx.font='bold '+lines[i][1]+'px monospace'; ctx.fillText(lines[i][0], ecx, ecy+10+i*H*0.06); }
+  ctx.textAlign='left';
+  // the phoropter (eye-test refractor) on an arm over a chair
+  const px=W*0.5, py=floorY-4;
+  ctx.fillStyle='#4a4e56'; ctx.fillRect(px-4,H*0.3,8,py-H*0.3-30); // arm post
+  ctx.fillStyle='#5a5e66'; ctx.fillRect(px-22,py-58,44,26); // body
+  // two eyepieces with rotating lens dials
+  for(const ex of [px-11,px+11]){ ctx.fillStyle='#2a2c32'; ctx.beginPath(); ctx.arc(ex,py-45,9,0,7); ctx.fill();
+    ctx.strokeStyle='#8a8e96'; ctx.lineWidth=1; const da=t*0.8; for(let k=0;k<8;k++){ const a=da+k*Math.PI/4; ctx.beginPath(); ctx.moveTo(ex+Math.cos(a)*6,py-45+Math.sin(a)*6); ctx.lineTo(ex+Math.cos(a)*9,py-45+Math.sin(a)*9); ctx.stroke(); }
+    ctx.fillStyle='#9fd8e0'; ctx.beginPath(); ctx.arc(ex,py-45,3,0,7); ctx.fill(); }
+  // the patient's chair
+  ctx.fillStyle='#3a3e46'; ctx.fillRect(px-16,py-14,32,14); ctx.fillRect(px-16,py-40,6,26); ctx.fillStyle='#2a86c0'; ctx.fillRect(px-13,py-38,26,22);
+  ctx.fillStyle='#b0b4b8'; ctx.beginPath(); ctx.ellipse(px,H-4,20,5,0,0,7); ctx.fill(); ctx.fillStyle='#3a3e46'; ctx.fillRect(px-4,py,8,H-py-4);
+  // a lens-fitting counter with trial lenses on the left foreground
+  ctx.fillStyle='#8a949a'; ctx.fillRect(W*0.04,floorY-4,W*0.22,4+(H-floorY));
+  for(let i=0;i<4;i++){ ctx.strokeStyle='#7a8a90'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(W*0.07+i*W*0.05,floorY-10,5,0,7); ctx.stroke();
+    ctx.fillStyle='rgba(160,210,225,.4)'; ctx.beginPath(); ctx.arc(W*0.07+i*W*0.05,floorY-10,4,0,7); ctx.fill(); }
+}
+registerScene('optician', drawOptician);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
