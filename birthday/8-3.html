@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Happy Birthday 💛</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div id="titlebar">
+      <span id="petname">Loading…</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="daysChip" title="Days together">💛 1</span>
+        <span id="outfitBtn" title="Outfit">👒</span>
+        <span id="collectBtn" title="Collection">🧺</span>
+        <span id="mapBtn" title="Locations">🗺️</span>
+        <span id="setBtn" title="Settings">⚙️</span>
+        <span id="clockChip" title="Time of day">🌤️ —</span>
+        <span id="mood">🙂 okay</span>
+      </div>
+    </div>
+    <div class="meters">
+      <div class="meter"><span class="lbl">🍪 Hunger</span><div class="bar"><div class="fill" id="f-hunger"></div></div></div>
+      <div class="meter"><span class="lbl">🎨 Fun</span><div class="bar"><div class="fill" id="f-fun"></div></div></div>
+      <div class="meter"><span class="lbl">💗 Love</span><div class="bar"><div class="fill" id="f-love"></div></div></div>
+      <div class="meter"><span class="lbl">⚡ Energy</span><div class="bar"><div class="fill" id="f-energy"></div></div></div>
+    </div>
+  </div>
+
+  <div id="stagewrap">
+    <canvas id="cv"></canvas>
+    <div id="speech"></div>
+    <div id="toast" class="hide"></div>
+    <div id="wishBar" class="hide"></div>
+    <div id="placeLabel" class="hide"></div>
+    <div id="starWish" class="hide">⭐</div>
+  </div>
+
+  <div id="actions">
+    <button class="btn" data-action="feed"><span class="ic">🍪</span>Cookie</button>
+    <button class="btn" data-action="draw"><span class="ic">🎨</span>Draw</button>
+    <button class="btn" data-action="hug"><span class="ic">🤗</span>Hug</button>
+    <button class="btn" data-action="rest"><span class="ic">💤</span>Rest</button>
+  </div>
+
+  <div id="mapPanel" class="hide">
+    <div id="mapHead"><span>🗺️ Locations</span><span id="mapClose">✕</span></div>
+    <div id="mapHint">Tap a name to go there · check the box to keep it in the rotation</div>
+    <div id="mapTools"><span id="mapAll" class="mapLink">Select all</span><span class="mapSep">·</span><span id="mapNone" class="mapLink">Select none</span></div>
+    <div id="mapPassport"></div>
+    <div id="mapList"></div>
+  </div>
+
+  <div id="collectPanel" class="hide">
+    <div id="collectHead"><span>🧺 Collection</span><span id="collectClose">✕</span></div>
+    <div id="collectHint">Little treasures she finds as you explore together 💛</div>
+    <div id="collectGrid"></div>
+  </div>
+
+  <div id="outfitPanel" class="hide">
+    <div id="outfitHead"><span>👒 Outfit</span><span id="outfitClose">✕</span></div>
+    <div id="outfitHint">Pick what she wears — Auto suits it to the place</div>
+    <div id="outfitList"></div>
+  </div>
+
+  <div id="setPanel" class="hide">
+    <div id="setHead"><span>⚙️ Settings</span><span id="setClose">✕</span></div>
+    <div id="setList"></div>
+  </div>
+
+  <div id="notePanel" class="hide">
+    <div id="noteHead"><span>💌 Notes from Paul</span><span id="noteClose">✕</span></div>
+    <div id="noteHint">Little letters that unlock as your days together add up 💛</div>
+    <div id="noteList"></div>
+  </div>
+
+  <div id="padPanel" class="hide">
+    <div id="padHead"><span>✏️ Draw Together</span><span id="padClose">✕</span></div>
+    <div id="padTools">
+      <div id="padColors"></div>
+      <button id="padClear">Clear</button>
+      <button id="padSave">Save 💾</button>
+    </div>
+    <canvas id="padCanvas" width="280" height="190"></canvas>
+    <div id="padGalleryLbl">Saved drawings</div>
+    <div id="padGallery"></div>
+  </div>
+
+</div>
+
+
+<script src="js/config.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/pet.js"></script>
+<script src="js/loop.js"></script>
+<script src="js/features.js"></script>
+<script src="js/map.js"></script>
+<script src="js/birthday.js"></script>
+<script src="js/scenes/scenes-1.js"></script>
+<script src="js/scenes/scenes-2.js"></script>
+<script src="js/scenes/scenes-3.js"></script>
+<script src="js/scenes/scenes-4.js"></script>
+<script src="js/render-pet.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
