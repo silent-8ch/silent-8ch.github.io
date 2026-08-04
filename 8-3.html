@@ -407,6 +407,12 @@ stagewrap.addEventListener('pointerdown', (e)=>{
   const r = cv.getBoundingClientRect();
   const px = (e.clientX - r.left) / r.width * W;
   const py = (e.clientY - r.top)  / r.height * H;
+  // during the birthday scene, taps blow out candles (or return when finished)
+  if (birthday){
+    if (birthday.done) endBirthday();
+    else blowOutOne((px - (W/2 - W*0.34/2)) / (W*0.34));   // map tap x to a candle fraction
+    return;
+  }
   // sprite occupies roughly a box above the feet point (pet.x, pet.y)
   const h = SHEETS.walk.displayH;
   const halfW = h * 0.32;
@@ -518,7 +524,22 @@ function refreshHUD(){
   const mi = moodInfo();
   document.getElementById('mood').textContent = mi.emoji + ' ' + mi.label;
 }
-document.getElementById('petname').textContent = CONFIG.name;
+// Render her name; the first "o" is a secret trigger for the birthday scene.
+(function renderPetName(){
+  const el = document.getElementById('petname');
+  el.textContent = '';
+  let armed = false;
+  for (const ch of CONFIG.name){
+    if (!armed && (ch === 'o' || ch === 'O')){
+      const s = document.createElement('span');
+      s.textContent = ch;                       // looks identical — it's an easter egg
+      s.addEventListener('click', (ev)=>{ ev.stopPropagation(); startBirthday(); });
+      el.appendChild(s); armed = true;
+    } else {
+      el.appendChild(document.createTextNode(ch));
+    }
+  }
+})();
 
 /* ---------- nagging when a need gets low ---------- */
 let nagTimer = 0;
@@ -537,6 +558,14 @@ function loop(ts){
   if (!last) last = ts;
   let dt = (ts - last)/1000; last = ts;
   if (dt > 0.1) dt = 0.1;            // clamp big gaps (tab switch)
+
+  // birthday scene takes over the whole screen while it runs
+  if (birthday){
+    updateBirthday(dt);
+    render();
+    requestAnimationFrame(loop);
+    return;
+  }
 
   if (started){
     // needs decay
@@ -640,6 +669,8 @@ document.addEventListener('keydown', e => {
     debugCry = !debugCry;
     say(debugCry ? '(debug: crying on)' : '(debug: crying off)');
   }
+  if (e.key === 'b' || e.key === 'B') { if (!birthday) startBirthday(); }   // debug: birthday scene
+  if (e.key === 'Escape' && birthday) endBirthday();
 });
 
 function updateScene(dt) {
@@ -650,8 +681,231 @@ function updateScene(dt) {
   }
 }
 
+/* ============================================================================
+   BIRTHDAY SONG SCENE
+   ----------------------------------------------------------------------------
+   Secret trigger: click the "o" in her name (top bar). The whole gang gathers
+   to sing Happy Birthday around a cake; blow into the microphone to blow the
+   candles out. Mic needs https or localhost — if it's blocked, tap the candles.
+   ============================================================================ */
+const BIRTHDAY = {
+  candleCount: 5,
+  blowThreshold: 0.14,     // mic loudness (0..1) that counts as "blowing"
+  candleCost: 0.6,         // blow-energy needed to put out one candle
+};
+let birthday = null;                                   // active scene, or null
+let audioCtx = null, micAnalyser = null, micData = null, micStream = null;
+
+function ensureAudio(){
+  if (!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function startBirthday(){
+  if (birthday) return;
+  ensureAudio();                                       // must happen on the click gesture
+  const n = BIRTHDAY.candleCount, candles = [];
+  for (let i=0;i<n;i++) candles.push({ x:(i+0.5)/n, lit:true, flick:rand(0,6.28), smoke:0 });
+  birthday = { t:0, candles, energy:0, blow:0, done:false, doneT:0, confetti:[] };
+  hugGroup = [...HUG_POOL];                             // everyone gathers around Krystal
+  playHappyBirthday();
+  initMic();
+}
+
+function endBirthday(){
+  birthday = null;
+  if (micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream = null; }
+  micAnalyser = null; micData = null;
+}
+
+/* ---- Happy Birthday melody (public domain) via oscillator ---- */
+function playHappyBirthday(){
+  if (!audioCtx) return;
+  const F = { G4:392, A4:440, B4:493.88, C5:523.25, D5:587.33, E5:659.25, F5:698.46, G5:783.99 };
+  const song = [
+    ['G4',1],['G4',1],['A4',2],['G4',2],['C5',2],['B4',3],
+    ['G4',1],['G4',1],['A4',2],['G4',2],['D5',2],['C5',3],
+    ['G4',1],['G4',1],['G5',2],['E5',2],['C5',2],['B4',2],['A4',3],
+    ['F5',1],['F5',1],['E5',2],['C5',2],['D5',2],['C5',4],
+  ];
+  const beat = 0.34; let t = audioCtx.currentTime + 0.15;
+  for (const [note,d] of song){
+    const len = d*beat, osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = F[note];
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.16, t+0.03);
+    g.gain.setValueAtTime(0.16, t+len*0.75);
+    g.gain.linearRampToValueAtTime(0, t+len);
+    osc.connect(g).connect(audioCtx.destination);
+    osc.start(t); osc.stop(t+len+0.02);
+    t += len;
+  }
+}
+
+/* ---- microphone loudness ---- */
+async function initMic(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    if (!birthday){ stream.getTracks().forEach(t=>t.stop()); return; } // scene closed already
+    micStream = stream;
+    ensureAudio();
+    const src = audioCtx.createMediaStreamSource(stream);
+    micAnalyser = audioCtx.createAnalyser();
+    micAnalyser.fftSize = 512;
+    micData = new Uint8Array(micAnalyser.fftSize);
+    src.connect(micAnalyser);                          // NOT to destination (avoids feedback)
+  }catch(e){ /* denied/unavailable — tap-to-blow still works */ }
+}
+function micLevel(){
+  if (!micAnalyser) return 0;
+  micAnalyser.getByteTimeDomainData(micData);
+  let sum = 0;
+  for (let i=0;i<micData.length;i++){ const v = (micData[i]-128)/128; sum += v*v; }
+  return Math.sqrt(sum/micData.length);
+}
+
+/* ---- extinguish a candle (mic energy or a tap) ---- */
+function blowOutOne(preferX){
+  const b = birthday; if (!b) return;
+  const lit = b.candles.filter(c=>c.lit); if (!lit.length) return;
+  let target = lit[0];
+  if (preferX != null){                                // nearest lit candle to a tap
+    let best = 1e9;
+    for (const c of lit){ const d = Math.abs(c.x - preferX); if (d < best){ best = d; target = c; } }
+  }
+  target.lit = false; target.smoke = 1;
+  if (b.candles.every(c=>!c.lit) && !b.done){ b.done = true; b.doneT = 0; spawnConfetti(); }
+}
+
+function updateBirthday(dt){
+  const b = birthday; b.t += dt; pet.bob += dt;        // reuse bob for the group's gentle sway
+  b.blow = micLevel();
+  if (!b.done){
+    if (b.blow > BIRTHDAY.blowThreshold) b.energy += (b.blow - BIRTHDAY.blowThreshold) * dt * 5;
+    const targetOut = Math.floor(b.energy / BIRTHDAY.candleCost);
+    while (b.candles.filter(c=>!c.lit).length < targetOut && b.candles.some(c=>c.lit)) blowOutOne();
+  } else {
+    b.doneT += dt;
+  }
+  for (const c of b.candles) if (c.smoke>0) c.smoke = Math.max(0, c.smoke - dt*0.5);
+  updateConfetti(dt);
+}
+
+/* ---- confetti ---- */
+function spawnConfetti(){
+  const cols = ['#e07a8b','#f2c14e','#7fd0ff','#9ad57f','#c79be0','#ffffff'];
+  for (let i=0;i<90;i++) birthday.confetti.push({
+    x:rand(0,W), y:rand(-H,0), vx:rand(-16,16), vy:rand(35,95),
+    s:rand(3,6), c:pick(cols), rot:rand(0,6.28), vr:rand(-5,5) });
+}
+function updateConfetti(dt){
+  if (!birthday) return;
+  for (const p of birthday.confetti){
+    p.x += p.vx*dt; p.y += p.vy*dt; p.rot += p.vr*dt;
+    if (p.y > H+12){ p.y = rand(-40,-10); p.x = rand(0,W); }
+  }
+}
+
+/* ---- render the whole scene ---- */
+function drawBirthdayScene(){
+  const b = birthday;
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#3a2b4a'); g.addColorStop(0.6,'#4a3550'); g.addColorStop(1,'#2c2030');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  drawBunting();
+
+  // the singers (reuse the hug cluster, positioned in the scene)
+  pet.x = W/2; pet.y = H*0.56;
+  if (sheets.hugs1 && sheets.hugs1.ready) drawHugGroup();
+  else { ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.font='13px Segoe UI'; ctx.fillText('loading…', W/2, H*0.5); }
+
+  drawCake(b);
+  drawBirthdayText(b);
+  drawConfetti();
+}
+
+function drawBunting(){
+  const cols = ['#e07a8b','#f2c14e','#7fd0ff','#9ad57f','#c79be0'];
+  const n = 9, y = H*0.05;
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,y);
+  for (let i=0;i<=n;i++){ const x=(i/n)*W; ctx.quadraticCurveTo(x-W/n/2, y+8, x, y); } ctx.stroke();
+  for (let i=0;i<n;i++){
+    const x=(i/n)*W + W/n/2;
+    ctx.fillStyle = cols[i%cols.length];
+    ctx.beginPath(); ctx.moveTo(x-7,y+2); ctx.lineTo(x+7,y+2); ctx.lineTo(x,y+16); ctx.closePath(); ctx.fill();
+  }
+}
+
+function drawCake(b){
+  const cx = W/2, cw = W*0.34, ch = H*0.09, x0 = cx-cw/2, y0 = H*0.66;
+  // plate
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(cx, y0+ch+7, cw*0.66, 8, 0,0,7); ctx.fill();
+  ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(cx, y0+ch+5, cw*0.62, 7, 0,0,7); ctx.fill();
+  // body + frosting
+  ctx.fillStyle = '#b06a44'; roundRect(x0, y0, cw, ch, 6); ctx.fill();
+  ctx.fillStyle = '#f7d9e3'; roundRect(x0, y0-7, cw, 16, 7); ctx.fill();
+  for (let i=0;i<6;i++){ const dx=x0+ (i+0.5)/6*cw; ctx.beginPath(); ctx.arc(dx, y0+6, 4,0,Math.PI); ctx.fill(); }
+  // candles
+  for (const c of b.candles){
+    const px = x0 + c.x*cw, top = y0-7, stickH = 22, wickY = top-stickH;
+    ctx.fillStyle = '#7ec8e3'; ctx.fillRect(px-1.6, wickY, 3.2, stickH);
+    ctx.fillStyle = '#5a3b22'; ctx.fillRect(px-0.6, wickY-2, 1.2, 3);
+    if (c.lit){
+      const shrink = 1 - Math.min(0.75, b.blow*2.2);          // flame shrinks as you blow
+      const lean = b.blow*45 + Math.sin(b.t*10 + c.flick)*1.4; // and leans away
+      const fx = px + lean, fy = wickY-2;
+      ctx.fillStyle = 'rgba(255,200,80,.35)';                 // glow
+      ctx.beginPath(); ctx.arc(fx, fy-4*shrink, 9*shrink, 0,7); ctx.fill();
+      ctx.fillStyle = '#ffcf33';
+      ctx.beginPath(); ctx.ellipse(fx, fy-6*shrink, 4*shrink, 8*shrink, 0,0,7); ctx.fill();
+      ctx.fillStyle = '#ff8a2a';
+      ctx.beginPath(); ctx.ellipse(fx, fy-4*shrink, 2.3*shrink, 5*shrink, 0,0,7); ctx.fill();
+    } else if (c.smoke>0){
+      ctx.fillStyle = `rgba(210,210,210,${c.smoke*0.5})`;
+      ctx.beginPath(); ctx.arc(px, wickY-6-(1-c.smoke)*12, 2+(1-c.smoke)*3, 0,7); ctx.fill();
+    }
+  }
+}
+
+function drawBirthdayText(b){
+  ctx.textAlign = 'center';
+  if (!b.done){
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 15px Segoe UI, sans-serif';
+    ctx.fillText('🎵 Happy Birthday ' + CONFIG.name + ' 🎵', W/2, H*0.15);
+    ctx.font = '12px Segoe UI, sans-serif';
+    ctx.fillStyle = micAnalyser ? 'rgba(255,255,255,.85)' : 'rgba(255,220,120,.95)';
+    ctx.fillText(micAnalyser ? 'Blow into the mic to blow out the candles' : 'Tap the candles to blow them out',
+                 W/2, H*0.205);
+    if (micAnalyser){                                          // blow strength meter
+      const bw = W*0.42, bx = W/2-bw/2, by = H*0.225;
+      ctx.fillStyle = 'rgba(255,255,255,.18)'; roundRect(bx,by,bw,6,3); ctx.fill();
+      ctx.fillStyle = b.blow > BIRTHDAY.blowThreshold ? '#7fd0ff' : 'rgba(127,208,255,.5)';
+      roundRect(bx,by,bw*Math.min(1,b.blow/0.4),6,3); ctx.fill();
+    }
+  } else {
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 20px Segoe UI, sans-serif';
+    ctx.fillText('🎉 Make a wish! 🎉', W/2, H*0.15);
+    ctx.font = '13px Segoe UI, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.8)';
+    ctx.fillText('Tap to return', W/2, H*0.21);
+  }
+}
+
+function drawConfetti(){
+  if (!birthday || !birthday.confetti.length) return;
+  for (const p of birthday.confetti){
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+    ctx.fillStyle = p.c; ctx.fillRect(-p.s/2, -p.s/2, p.s, p.s*0.6); ctx.restore();
+  }
+}
+
 function render(){
   ctx.clearRect(0,0,W,H);
+  if (birthday){ drawBirthdayScene(); return; }
   if (SCENES[currentScene] === 'beach') drawBeach();
   else if (SCENES[currentScene] === 'backyard') drawBackyard();
   else if (SCENES[currentScene] === 'river') drawRiver();
