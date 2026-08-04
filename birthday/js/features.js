@@ -87,6 +87,10 @@ const TRINKET_POOL = (()=>{
   g(['moontemple'], ['🌙','⛩️','✨']);
   g(['willowispmarsh'], ['🔥','🌫️','🐸']);
   g(['enchantedmirrorhall'], ['🪞','✨','🕯️']);
+  g(['hummingbirdgarden'], ['🐦','🌺','🌿']);
+  g(['gelateria'], ['🍨','🍦','🍧']);
+  g(['lotuspond'], ['🪷','🐸','🍃']);
+  g(['trainstation'], ['🚂','🎫','🧳']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -693,6 +697,9 @@ const LOVE_NOTES = [
   {day:24, text:'Almost a month of little visits, and you still feel like the best surprise I ever got. 🎁'},
   {day:115, text:'The days keep adding up, and every one of them just makes me more sure it\'s you. 💛'},
   {day:220, text:'If I could bottle one feeling forever, it\'d be this — knowing I get to keep choosing you. 🫙💗'},
+  {day:23, text:'Twenty-three days, and you\'ve made even the waiting-in-between feel like something sweet. 💛'},
+  {day:135, text:'The number keeps climbing, but the feeling stays exactly the same: lucky, and a little in awe of you. 🌟'},
+  {day:260, text:'After all this time, you\'re still the person I most want to tell every little thing to. 💬💗'},
 ];
 function notesUnlocked(){ const d=(meta&&meta.totalDays)||0; return LOVE_NOTES.filter(n=>d>=n.day).length; }
 function buildNotes(){

@@ -2244,3 +2244,137 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 14). Two scene-gated, contained moments — one serene,
+   one playful. No always-on overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   32) TEMPLE GONG  —  at the moon temple a great bronze gong hangs waiting. Tap it
+   to strike a deep, resonant note: the disc quivers and rings of sound ripple
+   outward while she bows her head in a peaceful moment. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxGong(){
+  try{
+    const TEMPLES = new Set(['moontemple','lotustemple','zentemple','shrine','pagoda']);
+    let gong = null;                     // {x,y,r,quiver,cd,rings:[]}
+    function inTemple(){ try{ return (typeof SCENES!=='undefined') && TEMPLES.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inTemple()){ gong = null; return; }
+      if (!gong){ gong = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.74)), y: rand(H*0.42,H*0.52), r: 22, quiver:0, cd:0, rings:[] }; }
+      if (gong.quiver > 0) gong.quiver -= dt; if (gong.cd > 0) gong.cd -= dt;
+      for (let i=gong.rings.length-1;i>=0;i--){ const r=gong.rings[i]; r.t+=dt; if (r.t>=r.life) gong.rings.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gong || !inTemple()) return;
+      const x = gong.x, y = gong.y, R = gong.r;
+      const q = gong.quiver > 0 ? Math.sin(gong.quiver*40) * gong.quiver * 2 : 0;
+      ctx.save();
+      // sound rings behind
+      for (const r of gong.rings){
+        const k = r.t / r.life;
+        ctx.globalAlpha = Math.max(0, 1 - k) * 0.35;
+        ctx.strokeStyle = 'rgba(255,235,180,0.9)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(x, y, R + k*36, 0, 7); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      // frame posts + top beam
+      ctx.strokeStyle = '#6b2f2f'; ctx.lineWidth = 4; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(x-R-8, y-R-6); ctx.lineTo(x-R-8, y+R+10);
+                       ctx.moveTo(x+R+8, y-R-6); ctx.lineTo(x+R+8, y+R+10);
+                       ctx.moveTo(x-R-12, y-R-6); ctx.lineTo(x+R+12, y-R-6); ctx.stroke();
+      // hanging cords
+      ctx.strokeStyle = 'rgba(60,40,30,0.7)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x-R*0.6, y-R-6); ctx.lineTo(x-R*0.5+q, y-R*0.7);
+                       ctx.moveTo(x+R*0.6, y-R-6); ctx.lineTo(x+R*0.5+q, y-R*0.7); ctx.stroke();
+      // disc
+      ctx.translate(q, 0);
+      const g = ctx.createRadialGradient(x-6, y-6, 2, x, y, R);
+      g.addColorStop(0, '#e8c46a'); g.addColorStop(0.7, '#c99a3a'); g.addColorStop(1, '#8a6a24');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#6a4e1a'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, R*0.6, 0, 7); ctx.stroke();
+      ctx.fillStyle = '#a97e2a'; ctx.beginPath(); ctx.arc(x, y, R*0.18, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gong || !inTemple()) return false;
+        if (Math.hypot(px - gong.x, py - gong.y) > gong.r + 8) return false;
+        if (gong.cd > 0) return true;
+        gong.cd = 1.2; gong.quiver = 0.7;
+        gong.rings.push({ t:0, life:1.4 }); setTimeout(()=>{ try{ if (gong) gong.rings.push({ t:0, life:1.6 }); }catch(e){} }, 160);
+        if (typeof sfx === 'function') sfx('rest');
+        if (typeof fxAt === 'function') fxAt(gong.x, gong.y - gong.r - 6, pick(['🔔','🎶','✨']));
+        if (typeof say === 'function') say(pick(['Ommm… 🙏','So resonant 🔔','A moment of peace 😌','Feel it ring 💛']));
+        try{ state.energy = clamp(state.energy + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   33) CATCH THE LEAVES  —  in the autumn forest, leaves tumble down on the breeze.
+   Tap them as they fall to catch them; a quick run builds a little streak. Purely
+   playful, and it only happens among the autumn trees.
+   -------------------------------------------------------------------------- */
+(function fxLeafCatch(){
+  try{
+    let leaves = null;                   // array of {x,y,vy,sway,phase,rot,rv,ch}
+    let spawnT = 0, streak = 0, streakT = 0;
+    function inAutumn(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'autumnforest'; }catch(e){ return false; } }
+    const LEAVES = ['🍂','🍁','🍂','🍁','🌰'];
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inAutumn()){ leaves = null; streak = 0; return; }
+      if (!leaves) leaves = [];
+      if (streakT > 0){ streakT -= dt; if (streakT <= 0) streak = 0; }
+      spawnT -= dt;
+      if (spawnT <= 0 && leaves.length < 4){
+        spawnT = rand(1.4, 2.8);
+        leaves.push({ x: rand(W*0.14, W*0.86), y: -12, vy: rand(24, 40), sway: rand(10,22), phase: rand(0,Math.PI*2), rot: rand(0,Math.PI*2), rv: rand(-1.2,1.2), ch: pick(LEAVES) });
+      }
+      for (let i=leaves.length-1;i>=0;i--){
+        const l = leaves[i];
+        l.phase += dt; l.rot += l.rv*dt;
+        l.y += l.vy*dt; l.x += Math.sin(l.phase*1.3) * l.sway * dt;
+        if (l.y > H*0.86) leaves.splice(i,1);            // reached the ground uncaught
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!leaves || !inAutumn() || !leaves.length) return;
+      ctx.save();
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      for (const l of leaves){
+        ctx.globalAlpha = 0.95;
+        ctx.font = '15px serif';
+        ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(l.rot); ctx.fillText(l.ch, 0, 0); ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!leaves || !inAutumn() || !leaves.length) return false;
+        let hit = -1, best = 20;
+        for (let i=0;i<leaves.length;i++){ const d = Math.hypot(px-leaves[i].x, py-leaves[i].y); if (d < best){ best=d; hit=i; } }
+        if (hit < 0) return false;
+        const l = leaves[hit]; leaves.splice(hit,1);
+        streak++; streakT = 2.2;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') fxAt(l.x, l.y-4, streak >= 2 ? ('×'+streak+' '+l.ch) : l.ch);
+        const bonus = streak >= 3;
+        if (bonus){ if (typeof hearts === 'function') hearts(); if (typeof say === 'function') say(pick(['Caught a bunch! 🍁','×'+streak+' — nice! 🍂','So many colours! 🥰'])); }
+        else if (Math.random() < 0.4 && typeof say === 'function') say(pick(['Got it! 🍂','Pretty leaf 🍁','Autumn magic ✨']));
+        try{ state.fun = clamp(state.fun + (bonus?4:2)); state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

@@ -62,6 +62,8 @@ const SCENE_LABELS = {
   willowispmarsh:"Will-o'-Wisp Marsh", enchantedmirrorhall:'Enchanted Mirror Hall',
   hummingbirdgarden:'Hummingbird Garden', gelateria:'Gelateria', lotuspond:'Lotus Pond',
   trainstation:'Vintage Train Station',
+  birchgrove:'Birch Grove', balloonride:'Balloon Ride', bonsaigarden:'Bonsai Garden',
+  harvestbarn:'Harvest Barn',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

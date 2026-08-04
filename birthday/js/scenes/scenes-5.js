@@ -2930,3 +2930,185 @@ function drawTrainStation(){
   ctx.fillStyle='#8a5a34'; roundRect(W*0.30,H*0.90,22,14,2); ctx.fill(); ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=1; ctx.strokeRect(W*0.30,H*0.90,22,14); ctx.fillStyle='#6a4326'; roundRect(W*0.33,H*0.86,16,10,2); ctx.fill();
 }
 registerScene('trainstation', drawTrainStation);
+
+/* ── BIRCH GROVE (outdoor · autumn white birches) ── */
+function drawBirchGrove(){
+  const t = sceneTime, groundY = H*0.68;
+
+  // crisp autumn sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#8fc4e8'); sky.addColorStop(1,'#e8dcc0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='rgba(255,244,200,.5)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.14,40,0,7); ctx.fill();
+
+  // soft golden foliage canopy across the top (dappled)
+  function canopy(cx,cy,r,col){ ctx.fillStyle=col; for (let k=0;k<7;k++){ const a=k/7*6.28; ctx.beginPath(); ctx.arc(cx+Math.cos(a)*r*0.6,cy+Math.sin(a)*r*0.6,r*0.5,0,7); ctx.fill(); } ctx.beginPath(); ctx.arc(cx,cy,r*0.6,0,7); ctx.fill(); }
+  canopy(W*0.16,H*0.06,60,'#e2b83a'); canopy(W*0.5,-6,72,'#e8a838'); canopy(W*0.84,H*0.05,62,'#dcae44'); canopy(W*0.34,H*0.02,44,'#efc85a'); canopy(W*0.68,H*0.04,46,'#e0b040');
+
+  // ground with fallen leaves
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#8a7a4a'); gr.addColorStop(1,'#6a5a34'); ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  const leafCol=['#e2a02e','#d06a2a','#c0402a','#e0b84a'];
+  for (let i=0;i<44;i++){ const lx=(i*53+7)%W; const ly=groundY+8+((i*37+5)%(H-groundY-8)); ctx.fillStyle=leafCol[i%4]; ctx.save(); ctx.translate(lx,ly); ctx.rotate(i); ctx.beginPath(); ctx.ellipse(0,0,3,1.6,0,0,7); ctx.fill(); ctx.restore(); }
+
+  // birch trunks — white bark with dark scars, receding sizes
+  function birch(bx,w,topY){ const grd=ctx.createLinearGradient(bx-w/2,0,bx+w/2,0); grd.addColorStop(0,'#d8d4c8'); grd.addColorStop(0.4,'#f4f2ea'); grd.addColorStop(1,'#c8c4b6');
+    ctx.fillStyle=grd; ctx.fillRect(bx-w/2,topY,w,groundY-topY+6);
+    // dark bark scars/notches
+    ctx.fillStyle='#2a2620'; for (let i=0;i<7;i++){ const sy=topY+20+i*((groundY-topY)/7); const sw=w*(0.3+ (i%3)*0.2); ctx.fillRect(bx-sw/2,sy,sw,2.5); }
+    ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(bx+w*0.2,topY,w*0.3,groundY-topY); }
+  // back row (thin)
+  birch(W*0.30,8,H*0.14); birch(W*0.44,7,H*0.16); birch(W*0.62,9,H*0.13); birch(W*0.74,7,H*0.17);
+  // front framing trunks (thick, sides)
+  birch(W*0.10,20,H*0.06); birch(W*0.90,22,H*0.05); birch(W*0.22,14,H*0.10);
+
+  // falling autumn leaves drifting down
+  for (let i=0;i<20;i++){ const lx=(i*47 + t*8 + Math.sin(t*0.7+i)*24)%W; const ly=(i*53 + t*20)%H; ctx.fillStyle=leafCol[i%4]; ctx.save(); ctx.translate(lx,ly); ctx.rotate(t*2+i); ctx.beginPath(); ctx.ellipse(0,0,3.2,1.6,0,0,7); ctx.fill(); ctx.restore(); }
+
+  // sun rays slanting through the trunks
+  ctx.fillStyle='rgba(255,244,190,.06)'; for (let i=0;i<3;i++){ ctx.save(); ctx.translate(W*0.5,H*0.14); ctx.rotate(0.4+i*0.22); ctx.fillRect(0,0,20,H*0.7); ctx.restore(); }
+  // a small mushroom cluster + a log (sides, low)
+  ctx.fillStyle='#8a5a34'; roundRect(W*0.82,H*0.90,30,8,4); ctx.fill(); ctx.fillStyle='#c9a878'; ctx.beginPath(); ctx.arc(W*0.82,H*0.90+4,4,Math.PI,0); ctx.fill();
+  for (const mx of [W*0.14,W*0.18]){ ctx.fillStyle='#e8e0d0'; ctx.fillRect(mx-1.5,H*0.92,3,5); ctx.fillStyle='#c05a3a'; ctx.beginPath(); ctx.ellipse(mx,H*0.92,4,2.4,0,Math.PI,0); ctx.fill(); }
+}
+registerScene('birchgrove', drawBirchGrove);
+
+/* ── HOT AIR BALLOON RIDE (outdoor · aerial view from the basket) ── */
+function drawBalloonRide(){
+  const t = sceneTime, horizonY = H*0.52;
+
+  // high-altitude sky (deeper blue up top)
+  const sky=ctx.createLinearGradient(0,0,0,horizonY); sky.addColorStop(0,'#3a80c8'); sky.addColorStop(0.6,'#7ab4e2'); sky.addColorStop(1,'#c8e2f0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizonY);
+  ctx.fillStyle='#fff6c0'; ctx.beginPath(); ctx.arc(W*0.14,H*0.10,16,0,7); ctx.fill();
+  // clouds at/below eye level (we're up high)
+  drawCloud(W*0.7+Math.sin(t*0.1)*10,H*0.16,0.9); drawCloud(W*0.3+Math.sin(t*0.08+2)*8,H*0.26,0.7); drawCloud(W*0.9+Math.sin(t*0.12+4)*6,H*0.34,0.6);
+
+  // patchwork landscape far below (fields, river, tiny roads)
+  const land=ctx.createLinearGradient(0,horizonY,0,H); land.addColorStop(0,'#8ab06a'); land.addColorStop(1,'#6a9a4a'); ctx.fillStyle=land; ctx.fillRect(0,horizonY,W,H-horizonY);
+  // field patches (perspective quilt)
+  const fcol=['#9ac06a','#c0b060','#7aa84a','#b8a850','#8ab85a'];
+  for (let r=0;r<5;r++){ const y0=horizonY+r*(H-horizonY)/5; const y1=horizonY+(r+1)*(H-horizonY)/5; for (let c=0;c<6;c++){ const x0=c*W/6 - r*4; ctx.fillStyle=fcol[(r+c)%5]; ctx.fillRect(x0,y0,W/6+8,y1-y0); ctx.strokeStyle='rgba(90,120,60,.3)'; ctx.lineWidth=1; ctx.strokeRect(x0,y0,W/6+8,y1-y0); } }
+  // winding river
+  ctx.strokeStyle='#5aa0c0'; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(W*0.1,horizonY); for (let y=horizonY;y<H;y+=10){ ctx.lineTo(W*0.4+Math.sin(y*0.05)*40, y);} ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=2; ctx.stroke();
+
+  // other balloons floating in the distance
+  function farBalloon(bx,by,sc,c1,c2){ ctx.save(); ctx.translate(bx,by); ctx.scale(sc,sc);
+    for (let k=0;k<6;k++){ ctx.fillStyle= k%2?c1:c2; ctx.beginPath(); ctx.moveTo(0,14); ctx.arc(0,0,12,Math.PI*0.5+k*Math.PI/6*2,Math.PI*0.5+(k+1)*Math.PI/6*2); ctx.closePath(); ctx.fill(); }
+    ctx.fillStyle='#8a6038'; ctx.fillRect(-3,14,6,4); ctx.strokeStyle='#5a4a30'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(-8,4); ctx.lineTo(-3,14); ctx.moveTo(8,4); ctx.lineTo(3,14); ctx.stroke(); ctx.restore(); }
+  farBalloon(W*0.66,H*0.22,0.9,'#e05a5a','#f2e2c0'); farBalloon(W*0.42,H*0.12,0.6,'#5ab0e0','#f2e2c0'); farBalloon(W*0.82,H*0.40,0.7,'#e0b040','#c05a8a');
+
+  // OUR balloon envelope filling the top (we look up at it) — big canopy overhead
+  const bx=W*0.5, bTop=-30;
+  for (let k=0;k<8;k++){ const a0=k/8, a1=(k+1)/8; ctx.fillStyle= k%2?'#d83a5a':'#f2c84a';
+    ctx.beginPath(); ctx.moveTo(bx,bTop+130); ctx.quadraticCurveTo(bx-90+a0*180, bTop, bx-90+a0*180+ (a0<0.5?10:-10), bTop+40);
+    ctx.lineTo(bx-90+a1*180, bTop+40); ctx.quadraticCurveTo(bx-90+a1*180, bTop, bx, bTop+130); ctx.closePath(); ctx.fill(); }
+  // simpler: overlay a big rounded envelope with vertical gore stripes
+  ctx.save(); ctx.beginPath(); ctx.ellipse(bx,H*0.06,96,86,0,0,7); ctx.clip();
+  for (let i=0;i<10;i++){ ctx.fillStyle= i%2?'#d83a5a':'#f2c84a'; ctx.fillRect(bx-96+i*19.2,H*0.06-90,20,180); }
+  ctx.fillStyle='rgba(255,255,255,.12)'; ctx.beginPath(); ctx.ellipse(bx-30,H*0.02,30,50,0,0,7); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(bx-14,H*0.06+82,28,8); // skirt/burner base
+  // burner flame glow
+  ctx.fillStyle=`rgba(255,170,60,${0.4+0.3*Math.sin(t*8)})`; ctx.beginPath(); ctx.moveTo(bx-6,H*0.06+90); ctx.quadraticCurveTo(bx,H*0.06+90-14-6*Math.sin(t*10),bx+6,H*0.06+90); ctx.fill();
+  // suspension ropes down to the basket
+  ctx.strokeStyle='#6a5a3a'; ctx.lineWidth=1.5; for (const rx of [-40,-14,14,40]){ ctx.beginPath(); ctx.moveTo(bx+rx*0.5,H*0.06+86); ctx.lineTo(bx+rx,H*0.80); ctx.stroke(); }
+
+  // the basket rim in the immediate foreground (we stand in it)
+  const rimY=H*0.82;
+  ctx.fillStyle='#8a6038'; ctx.fillRect(0,rimY,W,H-rimY);
+  // wicker weave
+  ctx.strokeStyle='rgba(90,60,30,.5)'; ctx.lineWidth=1; for (let y=rimY+6;y<H;y+=7){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  for (let x=8;x<W;x+=14){ for (let y=rimY+6;y<H;y+=7){ ctx.fillStyle= ((x/14+ (y-rimY)/7)|0)%2? 'rgba(120,80,40,.4)':'rgba(160,110,60,.4)'; ctx.fillRect(x-3,y-3,6,4); } }
+  ctx.fillStyle='#6a4a2e'; ctx.fillRect(0,rimY-6,W,8); // padded rim top
+}
+registerScene('balloonride', drawBalloonRide);
+
+/* ── BONSAI GARDEN (indoor · nursery of miniature trees) ── */
+function drawBonsaiGarden(){
+  const t = sceneTime, benchY = H*0.62;
+
+  // calm paper-screen wall with soft daylight
+  const wall=ctx.createLinearGradient(0,0,0,benchY); wall.addColorStop(0,'#eee6d2'); wall.addColorStop(1,'#e0d6bc');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,benchY);
+  // shoji lattice on the upper wall
+  ctx.strokeStyle='rgba(150,130,100,.4)'; ctx.lineWidth=1.5; for (let x=0;x<=W;x+=W/8){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,benchY*0.7); ctx.stroke(); } for (let y=20;y<benchY*0.7;y+=28){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.fillStyle='rgba(255,250,220,.16)'; ctx.fillRect(0,0,W,benchY*0.7);
+  // a hanging scroll (center-back, high)
+  ctx.fillStyle='#efe6d2'; ctx.fillRect(W*0.46,H*0.06,28,54); ctx.fillStyle='#8a5a3a'; ctx.fillRect(W*0.45,H*0.05,30,4); ctx.fillRect(W*0.45,H*0.06+54,30,4);
+  ctx.strokeStyle='#3a5a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.5,H*0.09); ctx.quadraticCurveTo(W*0.53,H*0.14,W*0.48,H*0.18); ctx.stroke();
+
+  // long display bench
+  const bench=ctx.createLinearGradient(0,benchY,0,H); bench.addColorStop(0,'#7a5a3a'); bench.addColorStop(1,'#5a4028'); ctx.fillStyle=bench; ctx.fillRect(0,benchY,W,H-benchY);
+  ctx.fillStyle='rgba(255,240,200,.12)'; ctx.fillRect(0,benchY,W,4);
+  ctx.strokeStyle='rgba(0,0,0,.16)'; ctx.lineWidth=1; for (let x=0;x<W;x+=30){ ctx.beginPath(); ctx.moveTo(x,benchY); ctx.lineTo(x-8,H); ctx.stroke(); }
+
+  // several bonsai in shallow pots — varied styles (sides + back, center kept lower-open)
+  function bonsai(cx,baseY,sc,style){ ctx.save(); ctx.translate(cx,baseY); ctx.scale(sc,sc);
+    // shallow pot
+    ctx.fillStyle='#7a4a3a'; roundRect(-20,0,40,10,2); ctx.fill(); ctx.fillStyle='#5a3428'; ctx.fillRect(-20,8,40,3);
+    // soil + moss
+    ctx.fillStyle='#3a2a1a'; ctx.beginPath(); ctx.ellipse(0,1,17,3,0,0,7); ctx.fill(); ctx.fillStyle='#4a7a3a'; ctx.beginPath(); ctx.ellipse(-6,0,5,2,0,0,7); ctx.ellipse(7,0,4,1.6,0,0,7); ctx.fill();
+    // trunk
+    ctx.strokeStyle='#5a3a22'; ctx.lineWidth=4;
+    if (style==='slant'){ ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(-8,-14,-14,-24); ctx.stroke(); var foliage=[[-16,-28],[-6,-30],[-22,-22]]; }
+    else if (style==='cascade'){ ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(6,-10,14,-6); ctx.quadraticCurveTo(20,-2,16,6); ctx.stroke(); var foliage=[[16,4],[10,-6],[2,-12]]; }
+    else { ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(-2,-16,2,-28); ctx.stroke(); var foliage=[[2,-30],[-8,-24],[12,-24]]; }
+    // canopy pads
+    for (const [fx,fy] of foliage){ const sway=Math.sin(t*1.2+cx+fx)*1.5; ctx.fillStyle='#3a7a3a'; ctx.beginPath(); ctx.ellipse(fx+sway,fy,10,6,0,0,7); ctx.fill(); ctx.fillStyle='#4a9a44'; ctx.beginPath(); ctx.ellipse(fx+sway-2,fy-2,6,3.5,0,0,7); ctx.fill(); }
+    ctx.restore(); }
+  bonsai(W*0.16,benchY+22,1.2,'slant');
+  bonsai(W*0.84,benchY+24,1.25,'cascade');
+  bonsai(W*0.5,benchY+10,0.8,'upright');
+  bonsai(W*0.32,benchY+8,0.7,'upright');
+  bonsai(W*0.70,benchY+8,0.7,'slant');
+
+  // pruning shears + a watering can on the bench (sides, low)
+  ctx.strokeStyle='#8a8a92'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.24,H-14); ctx.lineTo(W*0.30,H-8); ctx.moveTo(W*0.24,H-8); ctx.lineTo(W*0.30,H-14); ctx.stroke();
+  ctx.fillStyle='#5a8a9a'; roundRect(W*0.78,H-20,20,14,3); ctx.fill(); ctx.strokeStyle='#5a8a9a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(W*0.78,H-18); ctx.lineTo(W*0.72,H-22); ctx.stroke(); ctx.fillStyle='#5a8a9a'; ctx.beginPath(); ctx.moveTo(W*0.72,H-22); ctx.lineTo(W*0.70,H-18); ctx.lineTo(W*0.74,H-19); ctx.fill();
+
+  // a tiny raked-gravel tray + stone (center-back, high)
+  ctx.fillStyle='#d8cdb2'; roundRect(W*0.42,benchY+6,W*0.16,10,2); ctx.fill(); ctx.strokeStyle='rgba(150,130,100,.4)'; ctx.lineWidth=0.6; for (let k=0;k<4;k++){ ctx.beginPath(); ctx.moveTo(W*0.43,benchY+8+k*2.4); ctx.lineTo(W*0.57,benchY+8+k*2.4); ctx.stroke(); } ctx.fillStyle='#7a7a72'; ctx.beginPath(); ctx.arc(W*0.46,benchY+11,3,0,7); ctx.fill();
+}
+registerScene('bonsaigarden', drawBonsaiGarden);
+
+/* ── HARVEST BARN (indoor · rustic autumn barn interior) ── */
+function drawHarvestBarn(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // weathered red-plank barn wall
+  const wall=ctx.createLinearGradient(0,0,0,floorY); wall.addColorStop(0,'#7a3428'); wall.addColorStop(1,'#5e281e');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+  ctx.strokeStyle='rgba(0,0,0,.24)'; ctx.lineWidth=1; for (let x=0;x<W;x+=20){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,floorY); ctx.stroke(); }
+  // A-frame rafters up top with a hayloft opening
+  ctx.fillStyle='#3a1e16'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W*0.5,H*0.02); ctx.lineTo(W,0); ctx.lineTo(W,H*0.14); ctx.lineTo(0,H*0.14); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#2a140e'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(W*0.1,H*0.14); ctx.lineTo(W*0.5,H*0.02); ctx.lineTo(W*0.9,H*0.14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.5,H*0.02); ctx.lineTo(W*0.5,H*0.14); ctx.stroke();
+  // hayloft window with warm daylight + hanging hay
+  ctx.fillStyle='#f0d78a'; ctx.fillRect(W*0.42,H*0.05,W*0.16,H*0.08);
+  ctx.fillStyle='rgba(255,220,120,.2)'; ctx.beginPath(); ctx.moveTo(W*0.42,H*0.13); ctx.lineTo(W*0.58,H*0.13); ctx.lineTo(W*0.66,floorY); ctx.lineTo(W*0.34,floorY); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#c8a850'; ctx.lineWidth=1; for (let i=0;i<8;i++){ ctx.beginPath(); ctx.moveTo(W*0.44+i*3,H*0.13); ctx.lineTo(W*0.44+i*3+2,H*0.16); ctx.stroke(); }
+
+  // hanging lantern (left) + string of dried corn/gourds
+  ctx.strokeStyle='#2a140e'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.16,H*0.14); ctx.lineTo(W*0.16,H*0.20); ctx.stroke();
+  ctx.fillStyle='rgba(255,200,110,.25)'; ctx.beginPath(); ctx.arc(W*0.16,H*0.24,14,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(255,205,120,${0.85+0.1*Math.sin(t*2)})`; roundRect(W*0.16-5,H*0.20,10,12,2); ctx.fill();
+  ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=1; ctx.beginPath(); for (let x=W*0.3;x<W*0.7;x+=6){ const y=H*0.16+Math.sin(x*0.05)*4; x===W*0.3?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+  for (let x=W*0.32;x<W*0.7;x+=14){ ctx.fillStyle=['#e0a030','#d06a2a','#c8a040'][(x/14|0)%3]; ctx.beginPath(); ctx.ellipse(x,H*0.16+Math.sin(x*0.05)*4+6,4,6,0,0,7); ctx.fill(); }
+
+  // stacked hay bales (right)
+  function bale(bx,by,w,h){ ctx.fillStyle='#d8b85a'; ctx.fillRect(bx,by,w,h); ctx.strokeStyle='rgba(150,120,50,.6)'; ctx.lineWidth=1; for (let y=by+3;y<by+h;y+=4){ ctx.beginPath(); ctx.moveTo(bx,y); ctx.lineTo(bx+w,y); ctx.stroke(); } ctx.fillStyle='#8a6a30'; ctx.fillRect(bx+w*0.25,by,2,h); ctx.fillRect(bx+w*0.72,by,2,h); }
+  bale(W*0.70,floorY-24,44,24); bale(W*0.78,floorY-46,44,22); bale(W*0.66,floorY-42,30,18);
+
+  // wooden floor scattered with straw
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#8a6a44'); fl.addColorStop(1,'#6a4e30'); ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1; for (let y=floorY+10;y<H;y+=12){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.strokeStyle='rgba(210,180,90,.5)'; for (let i=0;i<24;i++){ const sx=(i*61+9)%W, sy=floorY+8+((i*29)%(H-floorY-8)); ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+rand(-4,4),sy-rand(2,4)); ctx.stroke(); }
+
+  // pumpkins + a basket of apples in the foreground (sides, low)
+  function pumpkin(px,py,r){ ctx.fillStyle='#e0781e'; ctx.beginPath(); ctx.ellipse(px,py,r,r*0.8,0,0,7); ctx.fill(); ctx.strokeStyle='rgba(150,70,10,.5)'; ctx.lineWidth=1; for (let k=-2;k<=2;k++){ ctx.beginPath(); ctx.ellipse(px,py,Math.abs(k)*r*0.25+1,r*0.8,0,0,7); ctx.stroke(); } ctx.strokeStyle='#4a7a2a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px,py-r*0.8); ctx.lineTo(px+2,py-r*0.8-5); ctx.stroke(); }
+  pumpkin(W*0.14,H*0.90,16); pumpkin(W*0.26,H*0.93,11); pumpkin(W*0.06,H*0.94,10);
+  // apple basket (right, low)
+  const abx=W*0.88, aby=H*0.90; ctx.fillStyle='#a9742e'; ctx.beginPath(); ctx.moveTo(abx-16,aby); ctx.lineTo(abx+16,aby); ctx.lineTo(abx+12,aby+16); ctx.lineTo(abx-12,aby+16); ctx.closePath(); ctx.fill();
+  for (let k=0;k<5;k++){ ctx.fillStyle='#c0392b'; ctx.beginPath(); ctx.arc(abx-10+k*5,aby-3-(k%2)*3,4,0,7); ctx.fill(); }
+}
+registerScene('harvestbarn', drawHarvestBarn);
