@@ -6156,6 +6156,59 @@ function drawFencing(){
 }
 registerScene('fencing', drawFencing);
 
+/* ── GEYSER FIELD (outdoor · geothermal basin, erupting geyser) ── */
+function drawGeyser(){
+  const t=sceneTime, groundY=H*0.6;
+  // pale steamy sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#9fc4dc'); sky.addColorStop(1,'#e4ecec');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  // distant hills
+  ctx.fillStyle='#8a9a86'; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.quadraticCurveTo(W*0.3,groundY-26,W*0.6,groundY-4); ctx.quadraticCurveTo(W*0.85,groundY-20,W,groundY-2); ctx.lineTo(W,groundY); ctx.fill();
+  // pale mineral crust ground (sinter)
+  ctx.fillStyle='#dcd6c8'; ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.fillStyle='#cfc8b6'; ctx.beginPath(); ctx.moveTo(0,groundY+16); ctx.quadraticCurveTo(W*0.5,groundY+2,W,groundY+18); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.fill();
+  // colorful hot spring pools with bacterial-mat rings (like Grand Prismatic)
+  function pool(cx,cy,r){
+    const rings=[['#2a6a8a',1],['#3a9a8a',0.8],['#5abf7a',0.62],['#c9c040',0.44],['#e0902a',0.28],['#c85a2a',0.16]];
+    for(const [col,f] of rings){ ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(cx,cy,r*f,r*f*0.4,0,0,7); ctx.fill(); }
+    // steam off the pool
+    ctx.strokeStyle=`rgba(255,255,255,${0.1+0.05*Math.sin(t*2+cx)})`; ctx.lineWidth=5; ctx.lineCap='round';
+    for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.moveTo(cx+i*r*0.3, cy); for(let k=1;k<=3;k++) ctx.lineTo(cx+i*r*0.3+Math.sin(t*1.5+i+k)*6, cy-k*20); ctx.stroke(); }
+    ctx.lineCap='butt';
+  }
+  pool(W*0.2, groundY+40, 40);
+  pool(W*0.8, groundY+52, 34);
+  // the geyser cone (mineral mound) center with a periodic erupting column
+  const gx=W*0.5, gBase=groundY+30;
+  ctx.fillStyle='#c8c0ac'; ctx.beginPath(); ctx.moveTo(gx-26,gBase+16); ctx.lineTo(gx-10,gBase-6); ctx.lineTo(gx+10,gBase-6); ctx.lineTo(gx+26,gBase+16); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#3a6a7a'; ctx.beginPath(); ctx.ellipse(gx,gBase-6,10,4,0,0,7); ctx.fill(); // vent
+  // eruption cycle
+  const cyc=(t*0.5)%1; const erupt = cyc<0.55 ? Math.sin(cyc/0.55*Math.PI) : 0; // rises & falls
+  const colH = erupt*H*0.5;
+  if(colH>2){
+    // water column
+    const cg=ctx.createLinearGradient(0,gBase-6-colH,0,gBase-6); cg.addColorStop(0,'rgba(255,255,255,.85)'); cg.addColorStop(1,'rgba(200,225,235,.6)');
+    ctx.fillStyle=cg;
+    ctx.beginPath(); ctx.moveTo(gx-6,gBase-6);
+    for(let y=0;y<=colH;y+=10){ const w=6+ (y/colH)*10; ctx.lineTo(gx - w + Math.sin(y*0.1+t*6)*3, gBase-6-y); }
+    for(let y=colH;y>=0;y-=10){ const w=6+ (y/colH)*10; ctx.lineTo(gx + w + Math.sin(y*0.1+t*6+1)*3, gBase-6-y); }
+    ctx.closePath(); ctx.fill();
+    // spray droplets at the top
+    for(let i=0;i<12;i++){ const a=-Math.PI/2 + (i-6)*0.16; const sp=colH*0.2*erupt; ctx.fillStyle='rgba(255,255,255,.7)';
+      ctx.beginPath(); ctx.arc(gx+Math.cos(a)*sp*(0.5+ (i%3)*0.2), gBase-6-colH + Math.abs(Math.sin(a))* -sp*0.3 + 6, 2.4,0,7); ctx.fill(); }
+    // billowing steam cloud above
+    ctx.fillStyle=`rgba(255,255,255,${0.3*erupt})`; ctx.beginPath(); ctx.arc(gx,gBase-6-colH-6,18,0,7); ctx.arc(gx-14,gBase-6-colH+2,12,0,7); ctx.arc(gx+14,gBase-6-colH+2,12,0,7); ctx.fill();
+  }
+  // a wooden boardwalk crossing the foreground
+  ctx.fillStyle='#8a6a44'; ctx.fillRect(0,H*0.9,W,10);
+  ctx.fillStyle='#7a5a38'; for(let x=0;x<W;x+=14){ ctx.fillRect(x,H*0.9,2,10); }
+  ctx.fillStyle='#5a4028'; ctx.fillRect(0,H*0.9-2,W,2);
+  // a couple of steam vents puffing at the edges
+  for(let i=0;i<2;i++){ const vx= i? W*0.94:W*0.06; ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.moveTo(vx,groundY+20); for(let k=1;k<=3;k++) ctx.lineTo(vx+Math.sin(t*2+i+k)*5, groundY+20-k*18); ctx.stroke(); }
+}
+registerScene('geyser', drawGeyser);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
