@@ -2827,6 +2827,7 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   say('Hi! 💛');
   save();
 });
+currentScene = SCENES.length - 1;   // on load, show the newest scene first
 resize();
 refreshHUD();
 requestAnimationFrame(loop);
