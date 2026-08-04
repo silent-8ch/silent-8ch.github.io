@@ -4561,6 +4561,48 @@ function drawHotSpring(){
 }
 registerScene('hotspring', drawHotSpring);
 
+/* ── CINEMA (indoor · a movie playing in a small theater) ── */
+function drawCinema(){
+  const t=sceneTime, floorY=H*0.7;
+  // dark auditorium
+  ctx.fillStyle='#12100f'; ctx.fillRect(0,0,W,H);
+  // side walls with warm sconces
+  ctx.fillStyle='#2a1a1e'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W*0.12,H*0.14); ctx.lineTo(W*0.12,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W,0); ctx.lineTo(W*0.88,H*0.14); ctx.lineTo(W*0.88,H); ctx.lineTo(W,H); ctx.closePath(); ctx.fill();
+  for(let i=0;i<3;i++){ const wy=H*0.22+i*H*0.18; const g=0.5+0.15*Math.sin(t*3+i);
+    ctx.fillStyle=`rgba(255,180,90,${g})`; ctx.beginPath(); ctx.arc(W*0.06,wy,4,0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(W*0.94,wy,4,0,7); ctx.fill(); }
+  // the screen — flickering film content
+  const sx=W*0.16, sy=H*0.1, sw=W*0.68, sh=H*0.42;
+  ctx.fillStyle='#000'; ctx.fillRect(sx-4,sy-4,sw+8,sh+8);
+  // build a shifting scene on the screen (sky gradient + rolling hills + a "sun")
+  const hue=0.5+0.5*Math.sin(t*0.4);
+  const sc=ctx.createLinearGradient(0,sy,0,sy+sh);
+  sc.addColorStop(0,`rgb(${120+80*hue},${150},${200-60*hue})`); sc.addColorStop(1,`rgb(${240},${200-40*hue},${140})`);
+  ctx.fillStyle=sc; ctx.fillRect(sx,sy,sw,sh);
+  ctx.fillStyle='rgba(255,250,210,.9)'; ctx.beginPath(); ctx.arc(sx+sw*0.5+Math.sin(t*0.5)*sw*0.3, sy+sh*0.35, 16,0,7); ctx.fill();
+  ctx.fillStyle='#3f7a4a'; ctx.beginPath(); ctx.moveTo(sx,sy+sh);
+  for(let x=0;x<=sw;x+=10){ ctx.lineTo(sx+x, sy+sh*0.68+Math.sin(x*0.03+t)*8); } ctx.lineTo(sx+sw,sy+sh); ctx.closePath(); ctx.fill();
+  // a little silhouette figure walking across the film
+  const fxp=sx+ ((t*30)%(sw+40))-20;
+  ctx.fillStyle='#1a2a1a'; ctx.fillRect(fxp,sy+sh*0.68-10,4,10);
+  // film grain flicker overlay
+  ctx.globalAlpha=0.06+0.05*Math.abs(Math.sin(t*20)); ctx.fillStyle='#fff'; ctx.fillRect(sx,sy,sw,sh); ctx.globalAlpha=1;
+  for(let i=0;i<8;i++){ ctx.globalAlpha=0.05; ctx.fillStyle='#000'; ctx.fillRect(sx+((i*97+t*40)%sw), sy+((i*53)%sh), 1, sh*0.1); ctx.globalAlpha=1; }
+  // projector beam from the back (top) widening to the screen
+  ctx.save(); ctx.globalAlpha=0.06; ctx.fillStyle='#fff8e0';
+  ctx.beginPath(); ctx.moveTo(W*0.5-6,H); ctx.lineTo(W*0.5+6,H); ctx.lineTo(sx+sw,sy+sh); ctx.lineTo(sx,sy+sh); ctx.closePath(); ctx.fill(); ctx.restore();
+  // rows of seat silhouettes (foreground), lit faintly by the screen
+  for(let r=0;r<3;r++){ const ry=floorY+r*((H-floorY)/3)+6, seatH=16+r*6;
+    for(let c=0;c<7;c++){ const cx=W*0.12+c*W*0.11 + (r*W*0.03);
+      ctx.fillStyle=`rgb(${30+r*6},${14+r*4},${20+r*4})`;
+      ctx.beginPath(); ctx.moveTo(cx-10,ry+seatH); ctx.lineTo(cx-10,ry+4); ctx.quadraticCurveTo(cx,ry-4,cx+10,ry+4); ctx.lineTo(cx+10,ry+seatH); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='rgba(120,150,190,.06)'; ctx.fillRect(cx-10,ry+2,20,3); } }
+  // aisle floor lights
+  for(let i=0;i<5;i++){ ctx.fillStyle='rgba(255,160,80,.5)'; ctx.fillRect(W*0.13, floorY+8+i*((H-floorY)/5), 3,2); ctx.fillRect(W*0.85, floorY+8+i*((H-floorY)/5), 3,2); }
+}
+registerScene('cinema', drawCinema);
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
