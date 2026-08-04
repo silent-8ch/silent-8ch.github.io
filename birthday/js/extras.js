@@ -2643,3 +2643,125 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 17). Two scene-gated micro-interactions. No always-on
+   overlays; each lives only in its scene, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   38) TEND THE HIVE  —  in the beekeeper's garden a little skep hive hums. Tap it
+   gently and a few bees loop out and back while a bead of golden honey drips from
+   the comb; the air smells sweet. Only in the beekeeper garden.
+   -------------------------------------------------------------------------- */
+(function fxBeehive(){
+  try{
+    let hive = null;                     // {x,y,cd,bees:[],drips:[],t}
+    function atHive(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'beekeepergarden'; }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!atHive()){ hive = null; return; }
+      if (!hive){ hive = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.72)), y: rand(H*0.6,H*0.68), cd:0, bees:[], drips:[], t:rand(0,10) }; }
+      hive.t += dt; if (hive.cd > 0) hive.cd -= dt;
+      // idle: a lone bee now and then
+      if (hive.bees.length < 5 && Math.random() < dt*0.6) hive.bees.push({ a: rand(0,Math.PI*2), r: rand(10,16), sp: rand(1.5,3)*(Math.random()<0.5?-1:1), life: rand(3,6), t:0, cx: hive.x+rand(-6,6), cy: hive.y-6+rand(-4,4) });
+      for (let i=hive.bees.length-1;i>=0;i--){ const b=hive.bees[i]; b.t+=dt; b.a+=b.sp*dt; if (b.t>=b.life) hive.bees.splice(i,1); }
+      for (let i=hive.drips.length-1;i>=0;i--){ const d=hive.drips[i]; d.t+=dt; d.y+=d.vy*dt; d.vy+=60*dt; if (d.t>=d.life) hive.drips.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!hive || !atHive()) return;
+      const x = hive.x, y = hive.y;
+      ctx.save();
+      // hanging branch peg
+      ctx.strokeStyle = 'rgba(90,70,45,0.6)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x, y-22); ctx.lineTo(x, y-16); ctx.stroke();
+      // skep (coiled straw dome) as stacked ellipses
+      for (let i=0;i<4;i++){ const w = 16 - i*3, yy = y - 2 - i*5; ctx.fillStyle = i%2? '#d9a642':'#c9962f'; ctx.beginPath(); ctx.ellipse(x, yy, w, 4, 0, 0, 7); ctx.fill(); }
+      // entrance
+      ctx.fillStyle = '#5a3f1a'; ctx.beginPath(); ctx.ellipse(x, y-3, 3, 2.4, 0, 0, 7); ctx.fill();
+      // honey drips
+      for (const d of hive.drips){ ctx.globalAlpha = Math.max(0, 1 - d.t/d.life); ctx.fillStyle = '#f2b21a'; ctx.beginPath(); ctx.ellipse(d.x, d.y, 1.8, 2.6, 0, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      // bees looping around
+      for (const b of hive.bees){ const bx = b.cx + Math.cos(b.a)*b.r*1.4, by = b.cy + Math.sin(b.a)*b.r; ctx.fillStyle = '#f2c21a'; ctx.beginPath(); ctx.ellipse(bx, by, 2, 1.4, b.a, 0, 7); ctx.fill(); ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=0.4; ctx.beginPath(); ctx.moveTo(bx-1.4,by); ctx.lineTo(bx+1.4,by); ctx.stroke(); }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!hive || !atHive()) return false;
+        if (Math.hypot(px - hive.x, py - (hive.y - 8)) > 22) return false;
+        if (hive.cd > 0) return true;
+        hive.cd = 1;
+        for (let i=0;i<4;i++) hive.bees.push({ a: rand(0,Math.PI*2), r: rand(10,18), sp: rand(2,3.5)*(Math.random()<0.5?-1:1), life: rand(2.5,4.5), t:0, cx: hive.x+rand(-6,6), cy: hive.y-6+rand(-4,4) });
+        hive.drips.push({ x: hive.x+rand(-4,4), y: hive.y+2, vy: 6, t:0, life: 1.4 });
+        if (typeof sfx === 'function') sfx('draw');
+        if (typeof fxAt === 'function') fxAt(hive.x, hive.y - 26, pick(['🐝','🍯','✨']));
+        if (typeof say === 'function') say(pick(['Sweet honey 🍯','Busy little bees 🐝','Mind the buzz 😊','Smells lovely 💛']));
+        try{ state.fun = clamp(state.fun + 3); state.hunger = clamp(state.hunger + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   39) SEA OTTER  —  in the kelp forest a little sea otter floats on its back among
+   the fronds. Tap to give its tummy a gentle rub — it wriggles happily, taps a
+   shell on a rock, and drifts on the swell. Only in the kelp forest.
+   -------------------------------------------------------------------------- */
+(function fxOtter(){
+  try{
+    let ot = null;                       // {x,y,t,vx,wriggle,cd}
+    function inKelp(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'kelpforest'; }catch(e){ return false; } }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!inKelp()){ ot = null; return; }
+      if (!ot){ ot = { x: rand(W*0.3,W*0.7), y: rand(H*0.46,H*0.56), t:rand(0,10), vx: rand(4,8)*(Math.random()<0.5?-1:1), wriggle:0, cd:0 }; }
+      ot.t += dt; if (ot.wriggle > 0) ot.wriggle -= dt; if (ot.cd > 0) ot.cd -= dt;
+      ot.x += ot.vx*dt;
+      if (ot.x < W*0.2){ ot.x = W*0.2; ot.vx = Math.abs(ot.vx); }
+      if (ot.x > W*0.8){ ot.x = W*0.8; ot.vx = -Math.abs(ot.vx); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!ot || !inKelp()) return;
+      const x = ot.x, y = ot.y + Math.sin(ot.t*1.5)*2;
+      const wig = ot.wriggle > 0 ? Math.sin(ot.wriggle*30)*2 : 0;
+      ctx.save();
+      // water sheen ellipse
+      ctx.fillStyle = 'rgba(120,170,190,0.2)'; ctx.beginPath(); ctx.ellipse(x, y+4, 20, 5, 0, 0, 7); ctx.fill();
+      // body floating on back
+      ctx.fillStyle = '#7a5236';
+      ctx.beginPath(); ctx.ellipse(x, y, 16, 7, 0, 0, 7); ctx.fill();
+      // lighter tummy
+      ctx.fillStyle = '#a9805a';
+      ctx.beginPath(); ctx.ellipse(x, y-1, 12, 4.5, 0, 0, 7); ctx.fill();
+      // head
+      ctx.fillStyle = '#6b4830';
+      ctx.beginPath(); ctx.arc(x-14, y-2, 5, 0, 7); ctx.fill();
+      ctx.fillStyle = '#2a1a12'; ctx.beginPath(); ctx.arc(x-16, y-3, 0.9, 0, 7); ctx.arc(x-15, y-1.5, 0.9, 0, 7); ctx.fill();
+      // little paws holding a shell on the tummy (paws wriggle when petted)
+      ctx.fillStyle = '#5a3f2a';
+      ctx.beginPath(); ctx.arc(x+2+wig, y-4, 2, 0, 7); ctx.arc(x+6-wig, y-4, 2, 0, 7); ctx.fill();
+      ctx.font = '7px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('🐚', x+4, y-6);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!ot || !inKelp()) return false;
+        if (px < ot.x - 20 || px > ot.x + 20 || py < ot.y - 12 || py > ot.y + 10) return false;
+        if (typeof fxAt === 'function') fxAt(ot.x, ot.y - 12, pick(['🦦','💗','🐚']));
+        if (ot.cd <= 0){
+          ot.cd = 1.2; ot.wriggle = 0.6;
+          if (typeof sfx === 'function') sfx('tap');
+          if (typeof say === 'function') say(pick(['An otter! 🦦','So cute 🥰','It’s cracking a shell 🐚','Hello, floaty friend 💛']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

@@ -68,6 +68,8 @@ const SCENE_LABELS = {
   sunroom:'Sunroom',
   duckpond:'Duck Pond', beekeepergarden:"Beekeeper's Garden", kelpforest:'Kelp Forest',
   cheesecave:'Cheese Cave',
+  citrusgrove:'Citrus Grove', watermill:'Watermill', quiltshop:'Quilt Shop',
+  mossgarden:'Moss Garden',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

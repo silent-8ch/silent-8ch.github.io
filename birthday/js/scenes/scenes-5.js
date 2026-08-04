@@ -3503,3 +3503,196 @@ function drawCheeseCave(){
   ctx.fillStyle='#e8d090'; ctx.beginPath(); ctx.arc(cxx-7,cyy-16,5,0,7); ctx.arc(cxx+6,cyy-16,5,0,7); ctx.fill();
 }
 registerScene('cheesecave', drawCheeseCave);
+
+/* ── CITRUS GROVE (outdoor · sunny orange orchard) ── */
+function drawCitrusGrove(){
+  const t = sceneTime, groundY = H*0.66;
+
+  // warm mediterranean sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#6fbce8'); sky.addColorStop(1,'#f2ecc8');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  ctx.fillStyle='#fff2a8'; ctx.beginPath(); ctx.arc(W*0.80,H*0.13,20,0,7); ctx.fill(); ctx.fillStyle='rgba(255,242,168,.3)'; ctx.beginPath(); ctx.arc(W*0.80,H*0.13,32,0,7); ctx.fill();
+  drawCloud(W*0.22+Math.sin(t*0.1)*8,H*0.10,0.55); drawCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.16,0.4);
+
+  // distant hills with rows of trees
+  ctx.fillStyle='#7aa84a'; ctx.beginPath(); ctx.moveTo(0,groundY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,groundY-22-14*Math.sin(x*0.016+1)); } ctx.lineTo(W,groundY); ctx.fill();
+  ctx.fillStyle='#5a8a3a'; for (let x=6;x<W;x+=20){ ctx.beginPath(); ctx.arc(x,groundY-24,5,0,7); ctx.fill(); }
+
+  // grove ground
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#6aa842'); gr.addColorStop(1,'#4a842e'); ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  // fallen oranges + dappled shade
+  ctx.fillStyle='rgba(30,70,15,.18)'; for (const [sx,sr] of [[W*0.3,40],[W*0.7,44],[W*0.5,30]]){ ctx.beginPath(); ctx.ellipse(sx,groundY+30,sr,10,0,0,7); ctx.fill(); }
+  ctx.fillStyle='#e8843a'; for (const [fx,fy] of [[W*0.34,H*0.86],[W*0.62,H*0.90],[W*0.5,H*0.94]]){ ctx.beginPath(); ctx.arc(fx,fy,4,0,7); ctx.fill(); ctx.fillStyle='#3a7a2a'; ctx.fillRect(fx-1,fy-5,2,2); ctx.fillStyle='#e8843a'; }
+
+  // big orange trees framing the sides (glossy leaves + oranges)
+  function citrusTree(cx,baseY,sc){ ctx.save(); ctx.translate(cx,baseY); ctx.scale(sc,sc);
+    // trunk
+    ctx.fillStyle='#6a4a2e'; ctx.fillRect(-6,-40,12,40);
+    ctx.strokeStyle='#5a3a1e'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,-30); ctx.lineTo(-14,-46); ctx.moveTo(0,-34); ctx.lineTo(16,-50); ctx.stroke();
+    // canopy — layered green mounds
+    ctx.fillStyle='#2f7a34'; for (let k=0;k<7;k++){ const a=k/7*6.28; ctx.beginPath(); ctx.arc(Math.cos(a)*26,-56+Math.sin(a)*20,20,0,7); ctx.fill(); }
+    ctx.fillStyle='#3a9a3e'; for (let k=0;k<5;k++){ const a=k/5*6.28+0.5; ctx.beginPath(); ctx.arc(Math.cos(a)*16,-56+Math.sin(a)*12,15,0,7); ctx.fill(); }
+    // oranges dotted in the canopy
+    for (let i=0;i<9;i++){ const a=i/9*6.28; const ox2=Math.cos(a)*24 + Math.sin(t+i)*1.5; const oy2=-56+Math.sin(a)*20; ctx.fillStyle='#f0842a'; ctx.beginPath(); ctx.arc(ox2,oy2,4,0,7); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(ox2-1,oy2-1,1.2,0,7); ctx.fill(); }
+    // white blossoms
+    ctx.fillStyle='#fff'; for (let i=0;i<5;i++){ const a=i/5*6.28+1; ctx.beginPath(); ctx.arc(Math.cos(a)*22,-56+Math.sin(a)*16,1.8,0,7); ctx.fill(); }
+    ctx.restore(); }
+  citrusTree(W*0.14,groundY+30,1.5); citrusTree(W*0.88,groundY+34,1.6); citrusTree(W*0.5,groundY+8,0.8);
+
+  // a wooden crate of picked oranges (right-back, high) + a ladder against a tree (left)
+  ctx.fillStyle='#8a6038'; ctx.fillRect(W*0.64,groundY-4,40,14); ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=1; ctx.strokeRect(W*0.64,groundY-4,40,14);
+  for (let i=0;i<6;i++){ ctx.fillStyle='#f0842a'; ctx.beginPath(); ctx.arc(W*0.64+7+ (i%3)*13, groundY-2-(i>2?6:0), 5,0,7); ctx.fill(); }
+  ctx.strokeStyle='#a9885a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(W*0.22,groundY+10); ctx.lineTo(W*0.16,groundY-70); ctx.moveTo(W*0.30,groundY+10); ctx.lineTo(W*0.24,groundY-70); ctx.stroke(); ctx.lineWidth=2; for (let k=0;k<7;k++){ const yy=groundY+6-k*11; ctx.beginPath(); ctx.moveTo(W*0.22-k*0.8,yy); ctx.lineTo(W*0.30-k*0.8,yy); ctx.stroke(); }
+
+  // butterflies/bees in the sun
+  for (let i=0;i<3;i++){ const bx=W*0.35+i*W*0.2+Math.sin(t*1.5+i)*16; const by=groundY-14+Math.cos(t*1.8+i)*12; ctx.fillStyle=i%2?'#e0a020':'#f2c84a'; ctx.beginPath(); ctx.ellipse(bx,by,2.4,1.6,0,0,7); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(bx,by-2,2,1,0,0,7); ctx.fill(); }
+}
+registerScene('citrusgrove', drawCitrusGrove);
+
+/* ── WATERMILL (outdoor · turning wheel by a stream) ── */
+function drawWatermill(){
+  const t = sceneTime, groundY = H*0.40;
+
+  // soft countryside sky
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#7ab8e6'); sky.addColorStop(1,'#d8ecd0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  drawCloud(W*0.25+Math.sin(t*0.09)*8,H*0.08,0.6); drawCloud(W*0.7+Math.sin(t*0.07+2)*6,H*0.12,0.5);
+
+  // green hillside behind
+  ctx.fillStyle='#5a9a3e'; ctx.fillRect(0,groundY-14,W,H-groundY+14);
+  ctx.fillStyle='#4a8a2e'; ctx.beginPath(); ctx.moveTo(0,groundY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,groundY-6-8*Math.sin(x*0.03+1)); } ctx.lineTo(W,groundY); ctx.fill();
+  // trees on the hill
+  for (const [tx,ty] of [[W*0.1,groundY-10],[W*0.9,groundY-16],[W*0.78,groundY-8]]){ ctx.fillStyle='#5a3a20'; ctx.fillRect(tx-2,ty,4,14); ctx.fillStyle='#3a8a3a'; ctx.beginPath(); ctx.arc(tx,ty-4,10,0,7); ctx.fill(); }
+
+  // the stone-and-timber mill house (left-center)
+  const mx=W*0.30, my=H*0.24, mw=W*0.40, mh=H*0.44;
+  ctx.fillStyle='#b8a888'; ctx.fillRect(mx,my,mw,mh);
+  ctx.strokeStyle='rgba(0,0,0,.14)'; ctx.lineWidth=1; for (let y=my;y<my+mh;y+=12){ for (let x=mx+((y/12|0)%2)*10; x<mx+mw; x+=20){ ctx.strokeRect(x,y,20,12); } }
+  // timber framing
+  ctx.strokeStyle='#5a3a24'; ctx.lineWidth=3; ctx.strokeRect(mx,my,mw,mh); ctx.beginPath(); ctx.moveTo(mx,my+mh*0.5); ctx.lineTo(mx+mw,my+mh*0.5); ctx.moveTo(mx+mw*0.5,my); ctx.lineTo(mx+mw*0.5,my+mh); ctx.stroke();
+  // pitched roof
+  ctx.fillStyle='#7a4a2a'; ctx.beginPath(); ctx.moveTo(mx-10,my); ctx.lineTo(mx+mw*0.5,my-34); ctx.lineTo(mx+mw+10,my); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#8a5a34'; for (let x=mx-6;x<mx+mw;x+=8){ ctx.fillRect(x,my-4,3,4); }
+  // window with warm glow
+  ctx.fillStyle='#ffe6a0'; ctx.fillRect(mx+mw*0.18,my+mh*0.3,16,16); ctx.strokeStyle='#5a3a24'; ctx.lineWidth=2; ctx.strokeRect(mx+mw*0.18,my+mh*0.3,16,16);
+  // a small door
+  ctx.fillStyle='#5a3a24'; ctx.fillRect(mx+mw*0.6,my+mh-24,16,24);
+
+  // the water wheel on the right side of the mill, turning
+  const wcx=mx+mw+2, wcy=my+mh*0.55, wr=42;
+  ctx.fillStyle='#2a1a10'; ctx.beginPath(); ctx.arc(wcx,wcy,wr,0,7); ctx.fill();
+  ctx.fillStyle='#5a3a24'; ctx.beginPath(); ctx.arc(wcx,wcy,wr,0,7); ctx.arc(wcx,wcy,wr-6,0,7,true); ctx.fill();
+  ctx.strokeStyle='#3a2414'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(wcx,wcy,wr-6,0,7); ctx.stroke();
+  const rot=t*0.9;
+  for (let k=0;k<12;k++){ const a=rot + k/12*6.28; ctx.strokeStyle='#4a3020'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(wcx,wcy); ctx.lineTo(wcx+Math.cos(a)*(wr-4),wcy+Math.sin(a)*(wr-4)); ctx.stroke();
+    // paddle
+    ctx.fillStyle='#6a4a2e'; ctx.save(); ctx.translate(wcx+Math.cos(a)*(wr-3),wcy+Math.sin(a)*(wr-3)); ctx.rotate(a); ctx.fillRect(-6,-2,12,4); ctx.restore(); }
+  ctx.fillStyle='#3a2414'; ctx.beginPath(); ctx.arc(wcx,wcy,5,0,7); ctx.fill();
+  // water pouring off the wheel + splashes
+  ctx.strokeStyle='rgba(220,240,245,.5)'; ctx.lineWidth=1.5; for (let i=0;i<5;i++){ const sx=wcx+wr-6+i*2; ctx.beginPath(); ctx.moveTo(sx,wcy+ ((t*30+i*8)%20)-4); ctx.lineTo(sx,wcy+ ((t*30+i*8)%20)+4); ctx.stroke(); }
+
+  // the stream / millpond (fills lower canvas)
+  const wat=ctx.createLinearGradient(0,H*0.62,0,H); wat.addColorStop(0,'#5a9ab0'); wat.addColorStop(1,'#3a7288'); ctx.fillStyle=wat; ctx.fillRect(0,H*0.62,W,H-H*0.62);
+  // moving current lines
+  ctx.strokeStyle='rgba(230,245,248,.18)'; ctx.lineWidth=1; for (let y=H*0.64;y<H;y+=8){ ctx.beginPath(); for (let x=0;x<=W;x+=6){ const yy=y+Math.sin(x*0.06+t*2+y)*2; x===0?ctx.moveTo(x,yy):ctx.lineTo(x,yy);} ctx.stroke(); }
+  // foam where the wheel meets the water
+  ctx.fillStyle='rgba(255,255,255,.4)'; for (let i=0;i<10;i++){ const fx=wcx-10+ (i*4); const fy=H*0.62+2+Math.sin(t*4+i)*2; ctx.beginPath(); ctx.arc(fx,fy,1.6,0,7); ctx.fill(); }
+  // reeds on the near bank (sides)
+  ctx.strokeStyle='#3a7a3a'; ctx.lineWidth=2; for (const gx of [W*0.06,W*0.1,W*0.92]){ for (let k=-1;k<=1;k++){ ctx.beginPath(); ctx.moveTo(gx+k*3,H); ctx.quadraticCurveTo(gx+k*3+Math.sin(t*1.5+k+gx)*3,H*0.72,gx+k*3,H*0.62); ctx.stroke(); } }
+  // a lily pad + a duck
+  ctx.fillStyle='#2e7a4a'; ctx.beginPath(); ctx.ellipse(W*0.24,H*0.80,10,4,0,0.5,6.5); ctx.fill();
+}
+registerScene('watermill', drawWatermill);
+
+/* ── QUILT SHOP (indoor · cozy patchwork & fabric store) ── */
+function drawQuiltShop(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // warm cream wall
+  ctx.fillStyle='#f0e6d2'; ctx.fillRect(0,0,W,floorY);
+  ctx.fillStyle='rgba(200,170,140,.14)'; for (let x=0;x<W;x+=20){ ctx.fillRect(x,0,10,floorY); }
+
+  // a big patchwork quilt hung on the back wall (grid of colored patches)
+  const qx=W*0.30, qy=H*0.10, qw=W*0.44, qh=H*0.34, cellsX=6, cellsY=5;
+  ctx.fillStyle='#8a5a3a'; ctx.fillRect(qx-4,qy-4,qw+8,qh+8);
+  const pcol=['#d0607a','#e0b040','#5a9ac0','#7ab06a','#c07ae0','#e0885a','#e6d0a0'];
+  for (let r=0;r<cellsY;r++){ for (let c=0;c<cellsX;c++){ const px=qx+c*qw/cellsX, py=qy+r*qh/cellsY; const cw=qw/cellsX, ch=qh/cellsY;
+    ctx.fillStyle=pcol[(r*cellsX+c)%pcol.length]; ctx.fillRect(px,py,cw,ch);
+    // simple patch motif (alternating triangles / dots)
+    ctx.fillStyle='rgba(255,255,255,.3)'; if ((r+c)%2){ ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px+cw,py); ctx.lineTo(px,py+ch); ctx.closePath(); ctx.fill(); } else { ctx.beginPath(); ctx.arc(px+cw/2,py+ch/2,cw*0.18,0,7); ctx.fill(); }
+    ctx.strokeStyle='rgba(90,60,40,.3)'; ctx.lineWidth=1; ctx.strokeRect(px,py,cw,ch); } }
+  // stitching border
+  ctx.strokeStyle='#efe6d0'; ctx.lineWidth=1; ctx.setLineDash([3,3]); ctx.strokeRect(qx,qy,qw,qh); ctx.setLineDash([]);
+
+  // shelves of folded fabric bolts (left) + spools (right)
+  for (let s=0;s<3;s++){ const sy=H*0.16+s*H*0.16; ctx.fillStyle='#8a6038'; ctx.fillRect(W*0.02,sy+16,W*0.20,5);
+    for (let i=0;i<5;i++){ const fx=W*0.03+i*W*0.037; ctx.fillStyle=pcol[(i+s)%pcol.length]; ctx.fillRect(fx,sy,7,16); ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fillRect(fx,sy+3,7,1); } }
+  // thread spool rack (right)
+  ctx.fillStyle='#8a6038'; ctx.fillRect(W*0.80,H*0.16,4,H*0.30);
+  for (let i=0;i<8;i++){ const sy=H*0.18+i*H*0.035; ctx.fillStyle=pcol[i%pcol.length]; roundRect(W*0.80+4,sy,16,8,2); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.3)'; ctx.fillRect(W*0.80+4,sy+3,16,1.5); }
+
+  // hanging sign + a garland of fabric triangles
+  ctx.strokeStyle='rgba(150,110,90,.5)'; ctx.lineWidth=1; ctx.beginPath(); for (let x=0;x<=W;x+=8){ const y=10+Math.sin(x*0.05)*5; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+  for (let x=6;x<W;x+=18){ const y=10+Math.sin(x*0.05)*5; ctx.fillStyle=pcol[(x/18|0)%pcol.length]; ctx.beginPath(); ctx.moveTo(x-5,y); ctx.lineTo(x+5,y); ctx.lineTo(x,y+9); ctx.closePath(); ctx.fill(); }
+
+  // wood floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#b98a58'); fl.addColorStop(1,'#966b3e'); ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=1; for (let x=0;x<W;x+=30){ ctx.beginPath(); ctx.moveTo(x,floorY); ctx.lineTo(x-8,H); ctx.stroke(); }
+
+  // an old sewing machine on a table (left, low) + a basket of yarn (right, low)
+  const smx=W*0.16, smy=H*0.86;
+  ctx.fillStyle='#5a3a2a'; ctx.fillRect(smx-24,smy+6,48,6); ctx.fillRect(smx-20,smy+12,4,14); ctx.fillRect(smx+16,smy+12,4,14);
+  ctx.fillStyle='#1a1a20'; ctx.beginPath(); ctx.moveTo(smx-18,smy+6); ctx.lineTo(smx-18,smy-6); ctx.lineTo(smx-2,smy-6); ctx.lineTo(smx+2,smy+6); ctx.closePath(); ctx.fill(); // machine body arm
+  ctx.fillRect(smx-18,smy,22,6); ctx.fillStyle='#c9a24a'; ctx.fillRect(smx-16,smy-4,3,3); // detail
+  ctx.strokeStyle='#8a8a92'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(smx-4,smy-6); ctx.lineTo(smx-4,smy); ctx.stroke();
+  // yarn basket (right, low)
+  const ybx=W*0.86, yby=H*0.92; ctx.fillStyle='#a9742e'; ctx.beginPath(); ctx.moveTo(ybx-14,yby); ctx.lineTo(ybx+14,yby); ctx.lineTo(ybx+11,yby+14); ctx.lineTo(ybx-11,yby+14); ctx.closePath(); ctx.fill();
+  for (let i=0;i<4;i++){ ctx.fillStyle=pcol[i]; ctx.beginPath(); ctx.arc(ybx-8+ (i%2)*14, yby-2-(i>1?7:0), 5,0,7); ctx.fill(); ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=0.6; ctx.beginPath(); ctx.arc(ybx-8+ (i%2)*14, yby-2-(i>1?7:0), 3,0,7); ctx.stroke(); }
+}
+registerScene('quiltshop', drawQuiltShop);
+
+/* ── MOSS GARDEN (outdoor · serene shaded Japanese moss garden) ── */
+function drawMossGarden(){
+  const t = sceneTime, groundY = H*0.44;
+
+  // soft overcast light filtering through trees
+  const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#cfe0d4'); sky.addColorStop(1,'#dce8d0');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+  // dense green canopy across the top
+  ctx.fillStyle='#2f5a34'; for (let i=0;i<7;i++){ const cx=i*60-10; ctx.beginPath(); ctx.arc(cx,10,44,0,7); ctx.fill(); }
+  ctx.fillStyle='#3a6a3e'; for (let i=0;i<6;i++){ const cx=i*66+20; ctx.beginPath(); ctx.arc(cx,26,34,0,7); ctx.fill(); }
+  // shafts of soft light
+  ctx.fillStyle='rgba(240,250,220,.10)'; for (let i=0;i<3;i++){ ctx.save(); ctx.translate(W*0.3+i*50,0); ctx.rotate(0.2); ctx.fillRect(0,0,26,groundY+40); ctx.restore(); }
+
+  // tree trunks (maple/cedar) rising into the canopy — sides
+  ctx.fillStyle='#5a4030'; ctx.fillRect(W*0.06,0,14,groundY+20); ctx.fillRect(W*0.90,0,16,groundY+10);
+  ctx.strokeStyle='rgba(30,20,10,.4)'; ctx.lineWidth=1; for (let y=20;y<groundY;y+=26){ ctx.beginPath(); ctx.moveTo(W*0.065,y); ctx.quadraticCurveTo(W*0.10,y+8,W*0.13,y+2); ctx.stroke(); }
+
+  // undulating moss-covered ground (rich velvety greens)
+  const gr=ctx.createLinearGradient(0,groundY,0,H); gr.addColorStop(0,'#4a8a3a'); gr.addColorStop(0.5,'#3a7a30'); gr.addColorStop(1,'#2e6428'); ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  // mossy mounds (soft bumps)
+  for (let i=0;i<7;i++){ const mx=(i*57+20)%W; const my=groundY+18+ (i*29)%(H-groundY-20); const mr=14+ (i%3)*8; ctx.fillStyle= i%2?'#4a9a3e':'#3f8a34'; ctx.beginPath(); ctx.ellipse(mx,my,mr,mr*0.5,0,0,7); ctx.fill(); ctx.fillStyle='rgba(180,230,150,.12)'; ctx.beginPath(); ctx.ellipse(mx-mr*0.3,my-mr*0.2,mr*0.4,mr*0.2,0,0,7); ctx.fill(); }
+  // moss speckle texture
+  ctx.fillStyle='rgba(150,210,120,.2)'; for (let i=0;i<60;i++){ const sx=(i*53+7)%W, sy=groundY+8+((i*37+5)%(H-groundY-8)); ctx.fillRect(sx,sy,1.4,1.4); }
+
+  // a curved stepping-stone path (center, low, for the pet)
+  ctx.fillStyle='#8a8880'; for (let i=0;i<5;i++){ const sy=groundY+30+i*((H-groundY-30)/5); const sxc=W*0.5+Math.sin(i*0.8)*18; ctx.beginPath(); ctx.ellipse(sxc,sy,16-i*0.5,7,0,0,7); ctx.fill(); ctx.fillStyle='#767468'; ctx.beginPath(); ctx.ellipse(sxc,sy+1,13,5,0,0,7); ctx.fill(); ctx.fillStyle='#8a8880'; }
+
+  // a stone lantern (right) + a small water basin (tsukubai, left)
+  const lx=W*0.82, ly=groundY+40;
+  ctx.fillStyle='#8a8880'; ctx.fillRect(lx-4,ly,8,20); ctx.fillRect(lx-9,ly-10,18,10); ctx.beginPath(); ctx.moveTo(lx-11,ly-10); ctx.lineTo(lx,ly-22); ctx.lineTo(lx+11,ly-10); ctx.fill(); ctx.fillStyle='#6a6860'; ctx.fillRect(lx-6,ly+20,12,6);
+  ctx.fillStyle='rgba(255,220,140,.5)'; ctx.fillRect(lx-2,ly-7,4,4);
+  // moss on the lantern
+  ctx.fillStyle='rgba(90,150,70,.6)'; ctx.beginPath(); ctx.arc(lx-6,ly+18,3,0,7); ctx.fill();
+  // tsukubai basin with a bamboo spout dripping
+  const tx=W*0.16, ty=groundY+50; ctx.fillStyle='#6a6860'; ctx.beginPath(); ctx.arc(tx,ty,12,0,7); ctx.fill(); ctx.fillStyle='#4a7a8a'; ctx.beginPath(); ctx.arc(tx,ty,8,0,7); ctx.fill();
+  ctx.strokeStyle='#8a9a4a'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(tx-2,ty-30); ctx.lineTo(tx-2,ty-12); ctx.stroke(); ctx.strokeStyle='#7a8a3a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(tx-2,ty-14); ctx.lineTo(tx+4,ty-12); ctx.stroke();
+  // water drip
+  const drop=(t*40)%20; ctx.fillStyle='rgba(180,220,235,.7)'; ctx.beginPath(); ctx.arc(tx+4,ty-12+drop,1.2,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(200,230,235,.4)'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.arc(tx,ty,5+ (drop/20)*4,0,7); ctx.stroke();
+
+  // a red maple sapling accent (center-back, high)
+  ctx.fillStyle='#5a3a20'; ctx.fillRect(W*0.5-2,groundY,4,-16+groundY-groundY); ctx.fillRect(W*0.5-2,groundY-14,4,14);
+  ctx.fillStyle='#c0402a'; for (let k=0;k<5;k++){ const a=k/5*6.28; ctx.beginPath(); ctx.arc(W*0.5+Math.cos(a)*7,groundY-18+Math.sin(a)*5,4,0,7); ctx.fill(); }
+}
+registerScene('mossgarden', drawMossGarden);
