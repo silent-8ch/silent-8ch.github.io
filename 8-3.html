@@ -689,12 +689,22 @@ function updateScene(dt) {
    candles out. Mic needs https or localhost — if it's blocked, tap the candles.
    ============================================================================ */
 const BIRTHDAY = {
-  candleCount: 43,         // candles on the cake, laid out in an isometric grid
-  cols: 8,                 // candles per grid row
-  tileW: 13, tileH: 6.5,   // isometric tile half-size (px)
+  // Candle count grows with age: 43 on Aug 3, 2026, +1 every Aug 3 thereafter.
+  baseYear: 2026, baseMonth: 8, baseDay: 3, baseCount: 43,
   blowThreshold: 0.07,     // mic loudness (0..1) that counts as "blowing" (lower = easier)
   candleCost: 0.05,        // blow-energy needed to put out one candle (lower = easier)
 };
+
+// How many candles today: baseCount, plus one for every Aug 3 that has passed
+// since the base date (she turns a year older on each birthday).
+function candleCountForToday(){
+  const now = new Date();
+  let years = now.getFullYear() - BIRTHDAY.baseYear;
+  const m = now.getMonth() + 1, d = now.getDate();           // getMonth() is 0-based
+  const beforeBirthday = (m < BIRTHDAY.baseMonth) || (m === BIRTHDAY.baseMonth && d < BIRTHDAY.baseDay);
+  if (beforeBirthday) years -= 1;                            // this year's birthday hasn't happened yet
+  return Math.max(1, BIRTHDAY.baseCount + years);
+}
 let birthday = null;                                   // active scene, or null
 let audioCtx = null, micAnalyser = null, micData = null, micStream = null;
 
@@ -709,12 +719,13 @@ function ensureAudio(){
 function startBirthday(){
   if (birthday) return;
   ensureAudio();                                       // must happen on the click gesture
-  const n = BIRTHDAY.candleCount, candles = [];
+  const n = candleCountForToday();   // 43 on Aug 3, 2026; +1 each Aug 3 after
+  const cols = Math.max(1, Math.ceil(Math.sqrt(n)));   // roughly square grid, fixed cake
+  const candles = [];
   for (let k=0;k<n;k++){
-    candles.push({ col:k%BIRTHDAY.cols, row:Math.floor(k/BIRTHDAY.cols),
-                   lit:true, flick:rand(0,6.28), smoke:0, sx:0, sy:0 });
+    candles.push({ col:k%cols, row:Math.floor(k/cols), lit:true, flick:rand(0,6.28), smoke:0, sx:0, sy:0 });
   }
-  birthday = { t:0, candles, energy:0, blow:0, done:false, doneT:0, confetti:[] };
+  birthday = { t:0, candles, cols, energy:0, blow:0, done:false, doneT:0, confetti:[] };
   hugGroup = [...HUG_POOL];                             // everyone gathers around Krystal
   playHappyBirthday();
   initMic();
@@ -847,26 +858,26 @@ function drawBunting(){
 }
 
 function drawCake(b){
-  const cx = W/2, cyTop = H*0.62;                         // centre of the cake's top surface
-  const COLS = BIRTHDAY.cols, ROWS = Math.ceil(b.candles.length / COLS);
-  const tw = BIRTHDAY.tileW, th = BIRTHDAY.tileH;
-  // footprint of the isometric grid (diamond) + margin
-  const rx = ((COLS-1)/2 + (ROWS-1)/2) * tw + 20;
-  const ry = ((COLS-1)/2 + (ROWS-1)/2) * th + 14;
-  const bh = H*0.13;                                      // cake body height
+  const cx = W/2, cyTop = H*0.60;                         // centre of the cake's top surface
+  const RX = W*0.30, RY = H*0.14, bh = H*0.13, margin = 12; // FIXED cake size (never grows)
+  const COLS = b.cols, ROWS = Math.ceil(b.candles.length / COLS);
+  const S = Math.max(1, ((COLS-1) + (ROWS-1)) / 2);        // grid half-span, in tiles
+  const tw = (RX - margin) / S, th = (RY - margin) / S;    // tiles shrink as the grid grows
+  const scale = Math.min(1, Math.max(0.12, tw / 13));      // candle size scales with spacing
 
   // plate
-  ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(cx, cyTop+bh+ry*0.5+8, rx*1.15, ry*0.7, 0,0,7); ctx.fill();
-  ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(cx, cyTop+bh+ry*0.5+5, rx*1.1, ry*0.62, 0,0,7); ctx.fill();
-  // cake body (a cylinder: side wall + rounded bottom)
+  ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(cx, cyTop+bh+RY*0.5+8, RX*1.15, RY*0.7, 0,0,7); ctx.fill();
+  ctx.fillStyle = '#e9e2d6'; ctx.beginPath(); ctx.ellipse(cx, cyTop+bh+RY*0.5+5, RX*1.1, RY*0.62, 0,0,7); ctx.fill();
+  // cake body (cylinder: side wall + rounded bottom)
   ctx.fillStyle = '#a4623d';
-  ctx.fillRect(cx-rx, cyTop, rx*2, bh);
-  ctx.beginPath(); ctx.ellipse(cx, cyTop+bh, rx, ry, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillRect(cx-RX, cyTop, RX*2, bh);
+  ctx.beginPath(); ctx.ellipse(cx, cyTop+bh, RX, RY, 0, 0, Math.PI*2); ctx.fill();
   // frosting rim + top surface
   ctx.fillStyle = '#e6b8c8';
-  for (let i=0;i<Math.round(rx/9);i++){ const dx=cx-rx + (i+0.5)/Math.round(rx/9)*rx*2; ctx.beginPath(); ctx.arc(dx, cyTop+6, 6,0,Math.PI); ctx.fill(); }
-  ctx.fillStyle = '#f7d9e3'; ctx.beginPath(); ctx.ellipse(cx, cyTop, rx, ry, 0,0,7); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth=1; ctx.stroke();
+  const rimN = Math.round(RX/9);
+  for (let i=0;i<rimN;i++){ const dx=cx-RX + (i+0.5)/rimN*RX*2; ctx.beginPath(); ctx.arc(dx, cyTop+6, 6,0,Math.PI); ctx.fill(); }
+  ctx.fillStyle = '#f7d9e3'; ctx.beginPath(); ctx.ellipse(cx, cyTop, RX, RY, 0,0,7); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1; ctx.stroke();
 
   // place candles on the top surface, then draw back-to-front for depth
   for (const c of b.candles){
@@ -875,26 +886,28 @@ function drawCake(b){
     c.sy = cyTop + (gi + gj) * th;
   }
   const ordered = b.candles.slice().sort((p,q)=> p.sy - q.sy);
-  for (const c of ordered) drawCandle(c, b);
+  for (const c of ordered) drawCandle(c, b, scale);
 }
 
-function drawCandle(c, b){
-  const stickH = 13, bx = c.sx, baseY = c.sy, topY = baseY - stickH;
+function drawCandle(c, b, s){
+  const stickH = Math.max(2, 13*s), bx = c.sx, baseY = c.sy, topY = baseY - stickH;
+  const sw = Math.max(1, 2.8*s);
   ctx.fillStyle = (c.col % 2) ? '#e37b8e' : '#7ec8e3';    // alternating stripes
-  ctx.fillRect(bx-1.4, topY, 2.8, stickH);
+  ctx.fillRect(bx-sw/2, topY, sw, stickH);
   if (c.lit){
     const shrink = 1 - Math.min(0.8, b.blow*2.2);         // flame shrinks as you blow
-    const lean = b.blow*34 + Math.sin(b.t*10 + c.flick)*1.2;
-    const fx = bx + lean, fy = topY - 1;
+    const lean = (b.blow*34 + Math.sin(b.t*10 + c.flick)*1.2) * s;
+    const fx = bx + lean, fy = topY - s;
+    const fl = Math.max(0.6, s);                           // keep tiny flames visible as dots
     ctx.fillStyle = 'rgba(255,200,80,.28)';
-    ctx.beginPath(); ctx.arc(fx, fy-3*shrink, 6*shrink, 0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(fx, fy-3*shrink*fl, 6*shrink*fl, 0,7); ctx.fill();
     ctx.fillStyle = '#ffcf33';
-    ctx.beginPath(); ctx.ellipse(fx, fy-4*shrink, 2.6*shrink, 5.5*shrink, 0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(fx, fy-4*shrink*fl, 2.6*shrink*fl, 5.5*shrink*fl, 0,0,7); ctx.fill();
     ctx.fillStyle = '#ff8a2a';
-    ctx.beginPath(); ctx.ellipse(fx, fy-3*shrink, 1.5*shrink, 3.3*shrink, 0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(fx, fy-3*shrink*fl, 1.5*shrink*fl, 3.3*shrink*fl, 0,0,7); ctx.fill();
   } else if (c.smoke>0){
     ctx.fillStyle = `rgba(210,210,210,${c.smoke*0.5})`;
-    ctx.beginPath(); ctx.arc(bx, topY-4-(1-c.smoke)*10, 1.6+(1-c.smoke)*2.5, 0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(bx, topY-4-(1-c.smoke)*10, (1.6+(1-c.smoke)*2.5)*Math.max(0.5,s), 0,7); ctx.fill();
   }
 }
 
@@ -1087,6 +1100,34 @@ function updateWaves(dt) {
   }
 }
 
+function clamp01(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+// Bumpy crest profile across the shore (0 at the screen edges, lumpy in the
+// middle) — several sines stacked so the wave has multiple humps, not one arc.
+function crestProfile(wave, xn){
+  const env = Math.pow(Math.sin(clamp01(xn) * Math.PI), 0.7);   // taper at edges
+  const s = wave.seed;
+  const bumps = 0.50
+    + 0.26 * Math.sin(xn * Math.PI * 3 + s * 1.7)
+    + 0.16 * Math.sin(xn * Math.PI * 5 + s * 2.3)
+    + 0.10 * Math.sin(xn * Math.PI * 8 + s * 0.9);
+  return env * Math.max(0, bumps);
+}
+
+// Per-column timing field (~-1..1): how much EARLIER (+) or later (-) this part
+// of the wave is in its cycle, so some sections crest/crash ahead of others.
+function phaseField(wave, xn){
+  const s = wave.seed;
+  return 0.55 * Math.sin(xn * Math.PI * 2   + s)
+       + 0.30 * Math.sin(xn * Math.PI * 3.7 + s * 2.1)
+       + 0.15 * Math.sin(xn * Math.PI * 6.3 + s * 0.6);
+}
+
+// Per-column crash speed multiplier (~0.8..1.4): some parts collapse faster.
+function crashRate(wave, xn){
+  return 1.1 + 0.35 * Math.sin(xn * Math.PI * 4 + wave.seed * 1.3);
+}
+
 
 function drawBreakingWave(wave, oceanTop, oceanBot) {
   const p = wave.phase / WAVE_CYCLE; // 0-1 normalized phase
@@ -1100,9 +1141,9 @@ function drawBreakingWave(wave, oceanTop, oceanBot) {
     const approachP = p / 0.35;
     const waveY = oceanTop + (shoreY - oceanTop) * (0.3 + approachP * 0.65);
     const height = (6 + approachP * 16) * amp;
-    const width = W * 1.6;
 
-    // Wave body (dark water mound)
+    // Wave body (dark water mound) — bumpy crest, and each column rises on its
+    // own local clock so the crest is uneven (some parts ahead of others).
     const bodyGrad = ctx.createLinearGradient(0, waveY - height, 0, waveY + 4);
     bodyGrad.addColorStop(0, `rgba(30,100,160,${0.2 + approachP * 0.5})`);
     bodyGrad.addColorStop(1, `rgba(40,130,180,${0.1 + approachP * 0.3})`);
@@ -1110,87 +1151,92 @@ function drawBreakingWave(wave, oceanTop, oceanBot) {
     ctx.beginPath();
     ctx.moveTo(0, waveY + 4);
     for (let x = 0; x <= W; x += 3) {
-      const shape = Math.sin((x / width) * Math.PI + seed) *
-        Math.sin((x / width) * Math.PI); // bell curve envelope
+      const xn = x / W;
+      const prof = crestProfile(wave, xn);
+      const localA = clamp01(approachP + phaseField(wave, xn) * 0.12);   // per-column progress
+      const localH = height * (0.5 + 0.5 * localA);
       const ripple = Math.sin(x * 0.08 + seed * 3) * 2 * approachP;
-      ctx.lineTo(x, waveY - shape * height + ripple);
+      ctx.lineTo(x, waveY - prof * localH + ripple);
     }
     ctx.lineTo(W, waveY + 4);
     ctx.closePath();
     ctx.fill();
 
-    // Crest foam (white cap forming at the top as wave steepens)
-    if (approachP > 0.6) {
-      const foamAlpha = (approachP - 0.6) / 0.4;
-      ctx.fillStyle = `rgba(255,255,255,${foamAlpha * 0.7})`;
-      ctx.beginPath();
-      for (let x = 0; x <= W; x += 3) {
-        const shape = Math.sin((x / width) * Math.PI + seed) *
-          Math.sin((x / width) * Math.PI);
-        if (shape > 0.4) {
-          const fx = x;
-          const fy = waveY - shape * height - 1;
-          ctx.moveTo(fx, fy);
-          ctx.arc(fx, fy, 3 * foamAlpha * amp, 0, 7);
-        }
-      }
-      ctx.fill();
-
-      // Curling lip — the top pitches forward
-      if (approachP > 0.8) {
-        const curlP = (approachP - 0.8) / 0.2;
-        ctx.fillStyle = `rgba(200,235,255,${curlP * 0.6})`;
-        ctx.beginPath();
-        for (let x = W * 0.1; x <= W * 0.9; x += 4) {
-          const shape = Math.sin((x / width) * Math.PI + seed) *
-            Math.sin((x / width) * Math.PI);
-          if (shape > 0.5) {
-            const fy = waveY - shape * height;
-            // Lip curls forward (downward)
-            ctx.moveTo(x, fy);
-            ctx.quadraticCurveTo(x + 4 * curlP, fy + 6 * curlP * amp, x + 2, fy + 10 * curlP * amp);
-          }
-        }
-        ctx.stroke();
-        ctx.fill();
-      }
-    }
-
-  } else if (p < 0.45) {
-    // ── BREAK / CRASH ──
-    // The wave crashes down — big white splash
-    const breakP = (p - 0.35) / 0.1;
-    const crashY = shoreY - 6;
-    const spread = (10 + breakP * 30) * amp;
-
-    // Splash — white burst spreading outward
-    ctx.fillStyle = `rgba(255,255,255,${0.8 - breakP * 0.3})`;
+    // Crest foam — whitens on each lobe once it's far enough along locally, so
+    // some bumps foam up and start pitching before their neighbours.
+    ctx.fillStyle = `rgba(255,255,255,0.7)`;
     ctx.beginPath();
-    for (let x = 0; x <= W; x += 5) {
-      const envl = Math.sin((x / W) * Math.PI);
-      const splash = envl * spread * (1 + Math.sin(x * 0.15 + seed) * 0.3);
-      if (envl > 0.2) {
-        ctx.moveTo(x, crashY);
-        ctx.arc(x, crashY - splash * 0.3, 4 + splash * 0.15, 0, 7);
+    for (let x = 0; x <= W; x += 3) {
+      const xn = x / W;
+      const prof = crestProfile(wave, xn);
+      const localA = clamp01(approachP + phaseField(wave, xn) * 0.12);
+      if (localA > 0.55 && prof > 0.45) {
+        const fa = (localA - 0.55) / 0.45;
+        const fy = waveY - prof * height * (0.5 + 0.5 * localA) - 1;
+        ctx.moveTo(x, fy);
+        ctx.arc(x, fy, 3 * fa * amp, 0, 7);
       }
     }
     ctx.fill();
 
-    // Spray droplets above the crash
+    // Curling lip — each foaming lobe pitches forward at its own pace
+    ctx.strokeStyle = 'rgba(200,235,255,0.6)';
+    ctx.fillStyle = 'rgba(200,235,255,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let x = W * 0.05; x <= W * 0.95; x += 4) {
+      const xn = x / W;
+      const prof = crestProfile(wave, xn);
+      const localA = clamp01(approachP + phaseField(wave, xn) * 0.12);
+      if (localA > 0.78 && prof > 0.5) {
+        const curlP = (localA - 0.78) / 0.22;
+        const fy = waveY - prof * height * (0.5 + 0.5 * localA);
+        ctx.moveTo(x, fy);
+        ctx.quadraticCurveTo(x + 4 * curlP, fy + 6 * curlP * amp, x + 2, fy + 10 * curlP * amp);
+      }
+    }
+    ctx.stroke();
+
+  } else if (p < 0.45) {
+    // ── BREAK / CRASH ──
+    // Each column collapses on its own local clock (offset + speed), so the
+    // crash sweeps and ripples across the arc instead of dropping all at once.
+    const breakP = (p - 0.35) / 0.1;
+    const crashY = shoreY - 6;
+
+    // Splash — per-column burst; height follows each column's local progress
+    ctx.fillStyle = `rgba(255,255,255,${0.8 - breakP * 0.3})`;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 5) {
+      const xn = x / W;
+      const env = crestProfile(wave, xn);
+      if (env <= 0.15) continue;
+      const lbp = clamp01(breakP * crashRate(wave, xn) + phaseField(wave, xn) * 0.18);
+      const splashAmt = Math.sin(lbp * Math.PI);          // rises then falls: 0→1→0
+      const spread = (8 + splashAmt * 34) * amp * (0.4 + env);
+      ctx.moveTo(x, crashY);
+      ctx.arc(x, crashY - spread * 0.35, 3 + spread * 0.16, 0, 7);
+    }
+    ctx.fill();
+
+    // Spray droplets above the crash — biased toward columns currently peaking
     ctx.fillStyle = `rgba(255,255,255,${0.6 - breakP * 0.4})`;
-    for (let i = 0; i < 12; i++) {
-      const dx = Math.sin(seed * (i + 1) * 7.3) * W * 0.4 + W * 0.5;
-      const dy = crashY - spread * 0.5 - Math.abs(Math.sin(seed * i * 3.1)) * 20 * (1 - breakP);
-      const r = (1 + Math.sin(seed * i) * 0.5) * (1 - breakP * 0.5);
-      ctx.beginPath(); ctx.arc(dx, dy, r, 0, 7); ctx.fill();
+    for (let i = 0; i < 14; i++) {
+      const xn = 0.5 + Math.sin(seed * (i + 1) * 7.3) * 0.4;
+      const lbp = clamp01(breakP * crashRate(wave, xn) + phaseField(wave, xn) * 0.18);
+      const peak = Math.sin(lbp * Math.PI);
+      const dx = xn * W;
+      const dy = crashY - 10 - peak * 26 - Math.abs(Math.sin(seed * i * 3.1)) * 12;
+      const r = (1 + Math.sin(seed * i) * 0.5) * peak;
+      if (r > 0.2){ ctx.beginPath(); ctx.arc(dx, dy, r, 0, 7); ctx.fill(); }
     }
 
-    // Turbulent foam at water level
+    // Turbulent foam at water level — extra ripple for character
     ctx.fillStyle = `rgba(220,240,255,${0.7 - breakP * 0.2})`;
     ctx.beginPath();
     ctx.moveTo(0, crashY + 2);
     for (let x = 0; x <= W; x += 3) {
-      const turb = Math.sin(x * 0.12 + seed) * 5 * (1 - breakP * 0.3);
+      const turb = (Math.sin(x * 0.12 + seed) * 4 + Math.sin(x * 0.31 + seed * 2) * 2.5) * (1 - breakP * 0.3);
       ctx.lineTo(x, crashY + turb);
     }
     ctx.lineTo(W, crashY + 8);
