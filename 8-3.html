@@ -977,6 +977,7 @@ function loop(ts){
     findTrinket(dt);
     updateWish(dt);
     updateStar(dt);
+    updateShootingStar(dt);
     updatePet(dt);
     // refresh bars periodically (cheap)
     hudAccum += dt; if (hudAccum > 0.25){ refreshHUD(); checkAchievements(); hudAccum = 0; }
@@ -1932,6 +1933,41 @@ function applyNightVignette(scene){
   ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
 }
 
+/* ---- ambient shooting star: a faint streak now and then at night ---- */
+let shoot = null, shootTimer = 9 + Math.random()*14;
+function updateShootingStar(dt){
+  if (!isNight()){ shoot = null; return; }
+  if (shoot){ shoot.t += dt; if (shoot.t >= shoot.dur) shoot = null; return; }
+  shootTimer -= dt;
+  if (shootTimer <= 0){
+    shootTimer = 13 + Math.random()*17;
+    const ang = 0.35 + Math.random()*0.28;   // heading down-and-right
+    shoot = {
+      x: W*(0.12 + Math.random()*0.5), y: H*(0.04 + Math.random()*0.13),
+      dx: Math.cos(ang), dy: Math.sin(ang),
+      dur: 0.75 + Math.random()*0.35, t: 0,
+      len: 32 + Math.random()*22, speed: 190 + Math.random()*90
+    };
+  }
+}
+function drawShootingStar(){
+  if (!shoot) return;
+  const p = shoot.t / shoot.dur;
+  const fade = Math.sin(Math.max(0,Math.min(1,p))*Math.PI);   // ease in then out
+  const dist = shoot.speed * shoot.t;
+  const hx = shoot.x + shoot.dx*dist, hy = shoot.y + shoot.dy*dist;
+  const tx = hx - shoot.dx*shoot.len, ty = hy - shoot.dy*shoot.len;
+  const g = ctx.createLinearGradient(tx,ty,hx,hy);
+  g.addColorStop(0,'rgba(255,255,255,0)');
+  g.addColorStop(1,`rgba(255,255,255,${(0.8*fade).toFixed(3)})`);
+  ctx.save();
+  ctx.strokeStyle=g; ctx.lineWidth=2; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(hx,hy); ctx.stroke();
+  ctx.fillStyle=`rgba(255,255,240,${(0.9*fade).toFixed(3)})`;
+  ctx.beginPath(); ctx.arc(hx,hy,1.8,0,7); ctx.fill();
+  ctx.restore();
+}
+
 let placeTimer = null, lastLabeledScene = -1;
 function showPlace(name){
   const el = document.getElementById('placeLabel'); if (!el) return;
@@ -1950,6 +1986,7 @@ function render(){
     if (!SCENE_SELF_PET.has(scene)) drawPet();   // scenes that don't place her themselves
     applyDayNight(scene);                        // global time-of-day tint over scene + pet
     applyNightVignette(scene);                   // cozy edge-darkening after dark
+    drawShootingStar();                          // rare bright streak across the night sky
   }
 }
 
