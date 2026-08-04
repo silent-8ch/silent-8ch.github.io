@@ -359,6 +359,7 @@ const LINES = {
   rest:  ["Zzz… 💤", "A little nap 😴", "So cozy…", "Mmm, rested 😌"],
   tired: ["I'm so sleepy… 😴", "Can I nap? 💤", "My eyes are heavy…"],
   sleepyNight:["It's late… 🌙", "Sleepy time 😴", "The stars are out ✨"],
+  pet:   ["Hehe 😊", "*nuzzles* 🥰", "That tickles!", "Boop! 😄", "You're sweet 💗", "Aww 😳"],
 };
 
 /* A rotating variety of treats for the Cookie button — the icon previews the next one. */
@@ -424,6 +425,7 @@ const pet = {
   wanderTimer: 1.5,
   bob: 0,
   resting: false, restTimer: 0, zzzTimer: 0,
+  blush: 0,
 };
 
 /* ---------- save / load ---------- */
@@ -562,10 +564,25 @@ stagewrap.addEventListener('pointerdown', (e)=>{
   // sprite occupies roughly a box above the feet point (pet.x, pet.y)
   const h = SHEETS.walk.displayH;
   const halfW = h * 0.32;
-  if (px > pet.x-halfW && px < pet.x+halfW && py > pet.y-h && py < pet.y+12){ doAction('hug'); return; }
+  if (px > pet.x-halfW && px < pet.x+halfW && py > pet.y-h && py < pet.y+12){
+    if (py < pet.y - h*0.55) doPet();      // tapping her head/face -> a gentle nuzzle
+    else doAction('hug');                  // tapping her body -> a hug
+    return;
+  }
   // tapping elsewhere: she looks over, walks to the spot, and reacts to the place
   tapScene(px, py);
 });
+// a gentle boop on the head — she blushes and giggles (distinct from a hug)
+let petCd = 0;
+function doPet(){
+  if (petCd > 0 || pet.animLock > 0) return;
+  petCd = 0.5;
+  pet.blush = Math.min(2.2, pet.blush + 1.4);
+  state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 4);
+  say(pick(LINES.pet)); sfx('tap');
+  fxAt(pet.x + rand(-14,14), pet.y - SHEETS.walk.displayH*0.6, pick(['💗','✨','😊']));
+  refreshHUD();
+}
 
 /* ---------- scripted animation ---------- */
 function playAnim(action, dur, lockFrame){
@@ -801,6 +818,7 @@ function loop(ts){
     if (state.fun < 80) state.overdraw = 0;
     if (cooldown>0) cooldown -= dt;
     if (interactCd>0) interactCd -= dt;
+    if (petCd>0) petCd -= dt;
     maybeNag(dt);
     idleThoughts(dt);
     findTrinket(dt);
@@ -821,6 +839,7 @@ let hudAccum = 0, saveAccum = 0;
 
 function updatePet(dt){
   pet.bob += dt;
+  if (pet.blush > 0) pet.blush -= dt;
 
   // scripted action (eat/draw/hug) — stand facing forward and play the action art
   if (pet.animLock > 0){
@@ -8149,6 +8168,16 @@ function drawPet(){
   if (!(isCrying())){
     const topY = (feetY - dispH - bob) + dispH*0.175;   // approx top of her head
     drawAccessory(activeAccessory(), feetX, topY, dispW/46);
+  }
+
+  // blushing cheeks after a nuzzle
+  if (pet.blush > 0 && !isCrying() && (!acting || pet.action!=='hug')){
+    const a = Math.min(0.5, pet.blush * 0.28);
+    const faceY = (feetY - dispH - bob) + dispH*0.335;
+    const cxo = dispW*0.10;
+    ctx.fillStyle = `rgba(255,120,150,${a})`;
+    ctx.beginPath(); ctx.ellipse(feetX-cxo, faceY, dispW*0.05, dispH*0.02, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(feetX+cxo, faceY, dispW*0.05, dispH*0.02, 0, 0, 7); ctx.fill();
   }
 
   // (fallback path while the hug sheets are still loading) float a heart
