@@ -1314,11 +1314,13 @@ let meta = (function(){ try{ const r=localStorage.getItem('bpet_meta'); if(r) re
   || { firstDay:null, lastDay:null, totalDays:0, streak:0 };
 function saveMeta(){ try{ localStorage.setItem('bpet_meta', JSON.stringify(meta)); }catch(e){} }
 function updateDaysChip(){ const el=document.getElementById('daysChip'); if(el){ el.textContent='💛 '+meta.totalDays; el.title=`${meta.totalDays} day${meta.totalDays===1?'':'s'} together`+(meta.streak>1?` · ${meta.streak}-day streak`:''); } }
+let greetedNewDay = false;   // set by initDaysTogether so welcomeBack won't double-greet
 function initDaysTogether(){
   const t = todayStr();
   const firstEver = !meta.firstDay;
   if (firstEver) meta.firstDay = t;
   const isNewDay = meta.lastDay !== t;
+  greetedNewDay = isNewDay;
   if (isNewDay){
     meta.streak = (meta.lastDay && daysBetween(meta.lastDay, t) === 1) ? (meta.streak||0)+1 : 1;
     meta.lastDay = t;
@@ -1338,6 +1340,21 @@ function initDaysTogether(){
     }
   }
   updateDaysChip();
+}
+// If you were away a while (same day — a new day is already greeted above), she lights up on your return.
+function welcomeBack(){
+  if (greetedNewDay) return;              // the day-greeting already welcomed her
+  const last = state.lastSeen || 0;
+  if (!last) return;
+  const awayMin = (Date.now() - last) / 60000;
+  if (awayMin < 25) return;               // only after a real gap, not a quick refresh
+  const long = awayMin > 240;             // gone more than ~4 hours
+  setTimeout(()=>{
+    say(long ? pick(['You were gone so long… I missed you 🥺💛','There you are! I kept the light on 💛','I missed you more than cookies 🍪💛'])
+             : pick(['Welcome back! I missed you 💛','You\'re back! 🥰','Hi again! I hoped you\'d visit 💛']));
+    hearts(); if (pet) pet.blush = Math.max(pet.blush||0, 2.2);
+    state.love = clamp(state.love + (long?9:6)); refreshHUD();
+  }, 1500);
 }
 function markVisited(name){
   if (visited.has(name)) return;
@@ -8478,6 +8495,7 @@ refreshHUD();
 offerTreat = pick(TREATS); updateFeedBtn();   // start with a random treat on offer
 if (!state.favTreat){ state.favTreat = pick(TREATS).e; save(); }   // she secretly has a favorite
 initDaysTogether();   // greets her, counts the day, updates the 💛 chip
+welcomeBack();        // if you've been away a while, she happily greets you back
 requestAnimationFrame(loop);
 window.addEventListener('beforeunload', save);
 </script>
