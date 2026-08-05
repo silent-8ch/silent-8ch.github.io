@@ -509,6 +509,7 @@ function render(){
   if (birthday){ drawBirthdayScene(); return; }
   if (cutscene){ drawCutscene(); return; }
   const scene = SCENES[currentScene];
+  if (DEBUG_MODE) try { sessionStorage.setItem('bpet_debug_scene', scene); } catch(e){}
   if (started) markVisited(scene);
   if (started && currentScene !== lastLabeledScene){ lastLabeledScene = currentScene; showPlace(sceneLabel(scene)); }
   const draw = SCENE_RENDERERS[scene];

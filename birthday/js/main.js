@@ -3,7 +3,17 @@
 
 /* ---------- boot ---------- */
 // on load, drop into a random enabled location (then every change is random too)
-(function(){ const en = enabledIndices(); if (en.length) currentScene = en[Math.floor(Math.random()*en.length)]; })();
+(function(){
+  if (DEBUG_MODE) {
+    // Restore last scene from sessionStorage so reloads stay put
+    const saved = sessionStorage.getItem('bpet_debug_scene');
+    if (saved) {
+      const idx = SCENES.indexOf(saved);
+      if (idx >= 0) { currentScene = idx; return; }
+    }
+  }
+  const en = enabledIndices(); if (en.length) currentScene = en[Math.floor(Math.random()*en.length)];
+})();
 resize();
 refreshHUD();
 offerTreat = pick(TREATS); updateFeedBtn();   // start with a random treat on offer
