@@ -83,30 +83,24 @@ function fxNowSec(){ try{ return (performance && performance.now ? performance.n
       ctx.restore();
     });
 
-    EXTRA_TAPS.push(function(px, py){
+    // Blow a kiss — now delivered by the 💋 Kiss action button (id="kissBtn"), not a
+    // double-tap near her (that collided with the head-pat combo). Also exposed as
+    // window.blowKiss so anything else can trigger it.
+    function doKiss(){
       try{
-        if (typeof pet === 'undefined') return false;
-        if (pet.resting || pet.animLock > 0) return false;
-        if (!nearHer(px, py)) return false;                 // only care about taps by her
-        const now = fxNowSec();
-        const quick = (now - lastT) <= WINDOW;
-        const close = Math.hypot(px - lastX, py - lastY) < 64;
-        lastT = now; lastX = px; lastY = py;
-        if (quick && close){
-          lastT = 0;                                        // reset so a 3rd tap won't chain
-          spawnKiss();
-          if (typeof sfx === 'function') sfx('hug');
-          try{ pet.blush = Math.min(2.4, (pet.blush||0) + 1.6); }catch(e){}
-          if (reactCd <= 0){                                // gate the reward/speech, not the sparkle
-            reactCd = 1.4;
-            try{ state.love = clamp(state.love + 4); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
-            if (typeof say === 'function') say(pick(['Mwah! 💋','A kiss for me? 🥰','I love you too 💗','Oh, you 😊']));
-          }
-          return true;                                      // consume this (second) tap
+        if (typeof pet === 'undefined' || pet.resting || pet.animLock > 0) return;
+        spawnKiss();
+        if (typeof sfx === 'function') sfx('hug');
+        try{ pet.blush = Math.min(2.4, (pet.blush||0) + 1.6); }catch(e){}
+        if (reactCd <= 0){                                  // gate the reward/speech, not the sparkle
+          reactCd = 1.4;
+          try{ state.love = clamp(state.love + 4); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          if (typeof say === 'function') say(pick(['Mwah! 💋','A kiss for me? 🥰','I love you too 💗','Oh, you 😊']));
         }
-        return false;                                       // first tap: leave default behaviour alone
-      }catch(e){ return false; }
-    });
+      }catch(e){}
+    }
+    try{ window.blowKiss = doKiss; }catch(e){}
+    try{ const kb = document.getElementById('kissBtn'); if (kb) kb.addEventListener('click', doKiss); }catch(e){}
   }catch(e){}
 })();
 
@@ -1038,7 +1032,7 @@ function fxWalkHerTo(px, py){
       try{
         if (!cat) return false;
         if (px < cat.x - 24 || px > cat.x + 24 || py < cat.y - 18 || py > cat.y + 12) return false;
-        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(cat.x + rand(-14,14), cat.y - 10, pick(['🐾','💗','😺'])), i*80);
+        if (typeof fxAt === 'function'){ const cx=cat.x, cy=cat.y; for (let i=0;i<3;i++) setTimeout(()=> fxAt(cx + rand(-14,14), cy - 10, pick(['🐾','💗','😺'])), i*80); }
         if (cat.petCd <= 0){
           cat.petCd = 1.4; cat.ttl = Math.max(cat.ttl, 10);   // a good pet keeps it around a little
           if (typeof sfx === 'function') sfx('tap');
@@ -1506,7 +1500,7 @@ function fxWalkHerTo(px, py){
           p.cd = 0.8; p.ripple = 0.6;
           // she skips over and splashes
           if (typeof fxWalkHerTo === 'function') fxWalkHerTo(p.x, p.y);
-          if (typeof fxAt === 'function') for (let i=0;i<4;i++) setTimeout(()=> fxAt(p.x + rand(-p.rx,p.rx), p.y - rand(2,14), pick(['💧','💦'])), i*60);
+          if (typeof fxAt === 'function'){ const pxp=p.x, pyp=p.y, prx=p.rx; for (let i=0;i<4;i++) setTimeout(()=> fxAt(pxp + rand(-prx,prx), pyp - rand(2,14), pick(['💧','💦'])), i*60); }
           if (typeof sfx === 'function') sfx('find');
           if (typeof say === 'function') say(pick(['Splash! 💦','Wheee! 🌧️','Jump in the puddles! 💧','Muddy toes 😄']));
           try{ state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
@@ -2002,8 +1996,8 @@ function fxWalkHerTo(px, py){
         card.cd = 1.2;
         card.face = pick(READINGS); card.flip = 0.001;         // start the flip
         if (typeof sfx === 'function') sfx('find');
-        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(card.x+rand(-14,14), card.y-20, pick(['✨','🔮','🌟'])), i*90);
-        setTimeout(()=>{ try{ if (typeof showToast==='function') showToast(card.face.icon, card.face.name, card.face.note); else if (typeof say==='function') say(card.face.note); }catch(e){} }, 500);
+        if (typeof fxAt === 'function'){ const cx=card.x, cy=card.y; for (let i=0;i<3;i++) setTimeout(()=> fxAt(cx+rand(-14,14), cy-20, pick(['✨','🔮','🌟'])), i*90); }
+        { const cf=card.face; setTimeout(()=>{ try{ if (typeof showToast==='function') showToast(cf.icon, cf.name, cf.note); else if (typeof say==='function') say(cf.note); }catch(e){} }, 500); }
         try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
         return true;
       }catch(e){ return false; }
@@ -2152,7 +2146,7 @@ function fxWalkHerTo(px, py){
         if (chime.cd > 0){ chime.swing = Math.min(0.5, chime.swing + 0.1); return true; }
         chime.cd = 0.8; chime.swing = Math.min(0.55, chime.swing + 0.42);
         if (typeof sfx === 'function'){ sfx('draw'); }
-        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(chime.x+rand(-16,16), chime.topY+rand(20,40), pick(['♪','🎐','✨'])), i*100);
+        if (typeof fxAt === 'function'){ const cx=chime.x, cty=chime.topY; for (let i=0;i<3;i++) setTimeout(()=> fxAt(cx+rand(-16,16), cty+rand(20,40), pick(['♪','🎐','✨'])), i*100); }
         if (typeof say === 'function') say(pick(['So peaceful 🎐','Mmm, listen… 😌','Like a soft breeze 💛','Ahhh 🍃']));
         try{ state.energy = clamp(state.energy + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
         return true;
@@ -3159,13 +3153,2221 @@ function fxWalkHerTo(px, py){
         if (px < crab.x - 13 || px > crab.x + 13 || py < crab.y - 12 || py > crab.y + 8) return false;
         crab.dir = (px < crab.x) ? 1 : -1;                     // scuttle away from the tap
         crab.scuttle = 1;
-        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(crab.x+rand(-8,8), crab.y-rand(2,12), pick(['🫧','🦀','💧'])), i*80);
+        if (typeof fxAt === 'function'){ const cx=crab.x, cy=crab.y; for (let i=0;i<3;i++) setTimeout(()=> fxAt(cx+rand(-8,8), cy-rand(2,12), pick(['🫧','🦀','💧'])), i*80); }
         if (crab.cd <= 0){
           crab.cd = 1.2;
           if (typeof sfx === 'function') sfx('tap');
           if (typeof say === 'function') say(pick(['A crab! 🦀','Off it scuttles! 😄','Snippy little thing 🥰','Bubbles! 🫧']));
           try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
         }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 21). Three scene-gated micro-interactions. No
+   always-on overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   46) SHAKE THE SNOW GLOBE  —  in the snow-globe shop, ski lodge, or crystal cave
+   a little snow globe rests on a shelf. Tap it to give it a shake: the snow inside
+   bursts up in a swirling flurry and then drifts gently back down to settle over a
+   tiny pine tree. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxSnowGlobe(){
+  try{
+    const PLACES = new Set(['snowglobeshop','skilodge','crystalcave']);
+    let gl = null;                       // {x,y,r,shake,cd,flakes:[{lx,ly,vx,vy,s}]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && PLACES.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const x = Math.max(W*0.16, Math.min(W*0.84, W*0.20));
+      const y = rand(H*0.66, H*0.72), r = 20, flakes = [];
+      for (let i=0;i<18;i++){
+        const a = rand(0, Math.PI*2), m = rand(0, r-6);
+        flakes.push({ lx: Math.cos(a)*m, ly: Math.sin(a)*m, vx:0, vy:0, s: rand(0.7,1.5) });
+      }
+      gl = { x, y, r, shake:0, cd:0, flakes };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ gl = null; return; }
+      if (!gl) build();
+      if (gl.cd > 0) gl.cd -= dt;
+      if (gl.shake > 0) gl.shake -= dt;
+      const r = gl.r;
+      for (const f of gl.flakes){
+        f.vy += 30 * dt * f.s;                 // gravity
+        f.vx *= 0.94; if (f.vy > 34) f.vy = 34;
+        f.lx += f.vx * dt; f.ly += f.vy * dt;
+        const d = Math.hypot(f.lx, f.ly) || 1;
+        if (d > r-5){ const k = (r-5)/d; f.lx *= k; f.ly *= k; f.vx *= 0.4; f.vy *= 0.4; }
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gl || !here()) return;
+      const wob = gl.shake > 0 ? Math.sin(gl.shake*40) * 1.6 : 0;
+      const x = gl.x + wob, cy = gl.y - gl.r, r = gl.r;
+      ctx.save();
+      // wooden base
+      ctx.fillStyle = '#6a4a34';
+      if (typeof roundRect === 'function'){ roundRect(x-r*0.8, gl.y-4, r*1.6, 8, 2); ctx.fill(); } else ctx.fillRect(x-r*0.8, gl.y-4, r*1.6, 8);
+      ctx.fillStyle = '#8a6244'; ctx.fillRect(x-r*0.55, gl.y-8, r*1.1, 5);
+      // glass dome fill
+      ctx.beginPath(); ctx.arc(x, cy, r, 0, 7);
+      const g = ctx.createRadialGradient(x-r*0.3, cy-r*0.3, 2, x, cy, r);
+      g.addColorStop(0, 'rgba(210,235,255,0.55)'); g.addColorStop(1, 'rgba(150,190,230,0.35)');
+      ctx.fillStyle = g; ctx.fill();
+      // clip to the glass, then draw the little scene + snow
+      ctx.save(); ctx.clip();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(x-r+2, cy+r-8, r*2-4, 8);   // snow floor
+      ctx.fillStyle = '#2f6b3a';
+      ctx.beginPath(); ctx.moveTo(x, cy-2); ctx.lineTo(x-6, cy+8); ctx.lineTo(x+6, cy+8); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x, cy-8); ctx.lineTo(x-5, cy+2); ctx.lineTo(x+5, cy+2); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fff';
+      for (const f of gl.flakes){ ctx.beginPath(); ctx.arc(x+f.lx, cy+f.ly, 1.4*f.s, 0, 7); ctx.fill(); }
+      ctx.restore();
+      // glass rim + highlight
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(x, cy, r, 0, 7); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x, cy, r-3, Math.PI*1.15, Math.PI*1.5); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gl || !here()) return false;
+        const cy = gl.y - gl.r;
+        if (Math.hypot(px - gl.x, py - cy) > gl.r + 6) return false;
+        gl.shake = 0.5;
+        for (const f of gl.flakes){ f.vx = rand(-55,55); f.vy = rand(-130,-30); }   // a good shake
+        if (gl.cd <= 0){
+          gl.cd = 1.0;
+          if (typeof sfx === 'function') sfx('tap');
+          if (typeof fxAt === 'function') fxAt(gl.x, cy - gl.r - 4, pick(['❄️','✨','💙']));
+          if (typeof say === 'function') say(pick(['A little snowstorm! ❄️','So pretty when it swirls ✨','Shake it again? 🥰','Our own tiny winter 💙']));
+          try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   47) LIGHT THE CANDLES  —  in the candle workshop or the snowy cabin a little row
+   of candles waits. Tap each unlit one to light it: a flame flickers up with a warm
+   glow. Light them all for a birthday cheer + a shower of hearts; after a while they
+   burn down and can be lit again. Scene-gated, progressive.
+   -------------------------------------------------------------------------- */
+(function fxCandles(){
+  try{
+    const PLACES = new Set(['candleshop','snowycabin']);
+    let row = null;                      // {x,y,cands:[{lx,h,lit,fl}],cd,allT}
+    function here(){ try{ return (typeof SCENES!=='undefined') && PLACES.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const n = 5, cands = [];
+      for (let i=0;i<n;i++) cands.push({ lx: i*13, h: 16 + (i%2)*4, lit:false, fl: rand(0,Math.PI*2) });
+      row = { x: Math.max(W*0.12, Math.min(W*0.5, W*0.16)), y: rand(H*0.70, H*0.76), cands, cd:0, allT:0 };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ row = null; return; }
+      if (!row) build();
+      if (row.cd > 0) row.cd -= dt;
+      for (const c of row.cands) if (c.lit) c.fl += dt*8;
+      if (row.allT > 0){ row.allT -= dt; if (row.allT <= 0){ for (const c of row.cands) c.lit = false; } }   // burn down & reset
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!row || !here()) return;
+      ctx.save();
+      for (const c of row.cands){
+        const cx = row.x + c.lx, base = row.y, top = base - c.h;
+        ctx.fillStyle = '#f3e6d0'; ctx.fillRect(cx-3, top, 6, c.h);                 // body
+        ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.fillRect(cx+1, top, 2, c.h);        // shading
+        ctx.strokeStyle = '#3a2a20'; ctx.lineWidth = 1;                             // wick
+        ctx.beginPath(); ctx.moveTo(cx, top); ctx.lineTo(cx, top-3); ctx.stroke();
+        if (c.lit){
+          const fl = 0.7 + 0.3*Math.sin(c.fl) + 0.1*Math.sin(c.fl*2.7);
+          const gr = ctx.createRadialGradient(cx, top-6, 0, cx, top-6, 16);          // glow
+          gr.addColorStop(0, 'rgba(255,200,110,'+(0.28*fl).toFixed(3)+')');
+          gr.addColorStop(1, 'rgba(255,200,110,0)');
+          ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(cx, top-6, 16, 0, 7); ctx.fill();
+          const fh = 7*fl;                                                           // flame
+          ctx.fillStyle = '#ffcf6b';
+          ctx.beginPath(); ctx.moveTo(cx, top-3-fh); ctx.quadraticCurveTo(cx+2.4, top-3-fh*0.4, cx, top-3); ctx.quadraticCurveTo(cx-2.4, top-3-fh*0.4, cx, top-3-fh); ctx.fill();
+          ctx.fillStyle = '#fff2c0';
+          ctx.beginPath(); ctx.moveTo(cx, top-3-fh*0.7); ctx.quadraticCurveTo(cx+1.2, top-3-fh*0.25, cx, top-3); ctx.quadraticCurveTo(cx-1.2, top-3-fh*0.25, cx, top-3-fh*0.7); ctx.fill();
+        }
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!row || !here()) return false;
+        for (const c of row.cands){
+          const cx = row.x + c.lx, base = row.y, top = base - c.h;
+          if (px >= cx-6 && px <= cx+6 && py >= top-12 && py <= base+2){
+            if (c.lit) return true;                       // already lit — consume quietly
+            c.lit = true;
+            if (typeof sfx === 'function') sfx('tap');
+            if (typeof fxAt === 'function') fxAt(cx, top-10, pick(['🕯️','✨','💛']));
+            const allLit = row.cands.every(k => k.lit);
+            if (allLit){
+              row.allT = 12;                              // glow a while, then reset
+              if (row.cd <= 0){
+                row.cd = 1.5;
+                if (typeof sfx === 'function') sfx('find');
+                if (typeof say === 'function') say(pick(['All aglow — make a wish! 🎂','Happy birthday, my love 💛','So warm and cozy ✨','Every one lit, just for you 🥰']));
+                if (typeof hearts === 'function') hearts();
+                try{ state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+              }
+            } else {
+              if (typeof say === 'function' && Math.random() < 0.5) say(pick(['One more… 🕯️','Warm and glowy ✨','Light them all? 🥰']));
+              try{ state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+            }
+            return true;
+          }
+        }
+        return false;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 22). Three more scene-gated micro-interactions, on
+   scenes not yet interactive. No always-on overlays; each self-clears on scene
+   change and its tap returns false on a miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   49) SWEEP THE LIGHTHOUSE  —  on the coastal cliffs or by the lighthouse a little
+   striped tower stands. Tap its lamp to switch on the beacon: a soft beam sweeps
+   once across the sky and out to sea, then fades. "I'll always leave a light on."
+   Scene-gated; the beam only exists during the sweep.
+   -------------------------------------------------------------------------- */
+(function fxLighthouse(){
+  try{
+    const COAST = new Set(['lighthouse','cliffs','coastalcliffs','harbornight']);
+    let lh = null;                       // {x,base,h,sweep,cd,dur}
+    function here(){ try{ return (typeof SCENES!=='undefined') && COAST.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const x = Math.max(W*0.16, Math.min(W*0.86, W*0.84));
+      lh = { x, base: rand(H*0.70, H*0.74), h: rand(H*0.34, H*0.42), sweep:0, cd:0, dur:2.4 };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ lh = null; return; }
+      if (!lh) build();
+      if (lh.cd > 0) lh.cd -= dt;
+      if (lh.sweep > 0) lh.sweep -= dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!lh || !here()) return;
+      const x = lh.x, base = lh.base, h = lh.h, topY = base - h;
+      const lampx = x, lampy = topY - 2;
+      ctx.save();
+      // beam (only while sweeping) — drawn first so the tower sits on top of it
+      if (lh.sweep > 0){
+        const p = 1 - lh.sweep/lh.dur;
+        const ang = Math.PI*1.15 + Math.PI*0.7*p;             // sweeps upper-left -> upper-right
+        const L = W*0.95;
+        const fin = Math.min(1,(lh.dur-lh.sweep)/0.25), fout = Math.min(1, lh.sweep/0.35);
+        const a = Math.max(0, Math.min(fin,fout)) * 0.14;
+        const a1 = ang-0.11, a2 = ang+0.11;
+        const mx = lampx+Math.cos(ang)*L, my = lampy+Math.sin(ang)*L;
+        const grd = ctx.createLinearGradient(lampx, lampy, mx, my);
+        grd.addColorStop(0, 'rgba(255,246,190,'+a.toFixed(3)+')');
+        grd.addColorStop(1, 'rgba(255,246,190,0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath(); ctx.moveTo(lampx, lampy);
+        ctx.lineTo(lampx+Math.cos(a1)*L, lampy+Math.sin(a1)*L);
+        ctx.lineTo(lampx+Math.cos(a2)*L, lampy+Math.sin(a2)*L);
+        ctx.closePath(); ctx.fill();
+      }
+      // tower body (trapezoid)
+      ctx.beginPath();
+      ctx.moveTo(x-9, base); ctx.lineTo(x-5, topY+6); ctx.lineTo(x+5, topY+6); ctx.lineTo(x+9, base); ctx.closePath();
+      ctx.fillStyle = '#f3f0ea'; ctx.fill();
+      // red stripes clipped to the tower
+      ctx.save(); ctx.clip();
+      ctx.fillStyle = '#d94f4f';
+      for (let i=0;i<3;i++) ctx.fillRect(x-11, base - h*(0.16 + i*0.28), 22, h*0.11);
+      ctx.restore();
+      // gallery deck
+      ctx.fillStyle = '#5a5a66'; ctx.fillRect(x-7, topY+2, 14, 4);
+      // lamp room
+      ctx.fillStyle = lh.sweep > 0 ? '#fff6c0' : '#cfe3ea';
+      ctx.fillRect(x-5, topY-6, 10, 8);
+      // roof
+      ctx.fillStyle = '#3a3a44';
+      ctx.beginPath(); ctx.moveTo(x-6, topY-6); ctx.lineTo(x, topY-13); ctx.lineTo(x+6, topY-6); ctx.closePath(); ctx.fill();
+      // lamp glow while lit
+      if (lh.sweep > 0){
+        const g = ctx.createRadialGradient(lampx, lampy, 0, lampx, lampy, 14);
+        g.addColorStop(0, 'rgba(255,246,190,0.6)'); g.addColorStop(1, 'rgba(255,246,190,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lampx, lampy, 14, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!lh || !here()) return false;
+        const topY = lh.base - lh.h;
+        if (px < lh.x - 12 || px > lh.x + 12 || py < topY - 14 || py > lh.base) return false;
+        if (lh.cd > 0) return true;
+        lh.cd = 1.0; lh.sweep = lh.dur;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') fxAt(lh.x, topY - 14, pick(['💡','✨','🌟']));
+        if (typeof say === 'function') say(pick(["I'll always leave a light on ✨",'The light guides you home 💛','Sweep the sea… 🌊','Home is wherever you are 🥰']));
+        try{ state.love = clamp(state.love + 5); state.energy = clamp(state.energy + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   50) CARVE THE PUMPKIN  —  in the pumpkin patch a plump pumpkin sits in the dirt.
+   Tap it to carve a little jack-o-lantern face that flickers to life with a warm
+   inner glow; after a while the candle burns out and a fresh pumpkin is ready to
+   carve again. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxPumpkin(){
+  try{
+    let pk = null;                       // {x,y,carved,glow,cd,ttl,t}
+    function here(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'pumpkinpatch'; }catch(e){ return false; } }
+    function build(){ pk = { x: Math.max(W*0.14, Math.min(W*0.5, W*0.22)), y: rand(H*0.74, H*0.80), carved:false, glow:0, cd:0, ttl:0, t: rand(0,6) }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ pk = null; return; }
+      if (!pk) build();
+      pk.t += dt;
+      if (pk.cd > 0) pk.cd -= dt;
+      if (pk.carved){
+        pk.glow = Math.min(1, pk.glow + dt*2);
+        pk.ttl -= dt;
+        if (pk.ttl <= 0) build();          // candle out — a fresh pumpkin
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pk || !here()) return;
+      const x = pk.x, y = pk.y, rx = 16, ry = 13;
+      ctx.save();
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.14)'; ctx.beginPath(); ctx.ellipse(x, y+ry-1, rx*0.9, 3, 0, 0, 7); ctx.fill();
+      // stem
+      ctx.fillStyle = '#6b8e3a'; ctx.fillRect(x-2, y-ry-4, 4, 6);
+      // body (a few lobes)
+      ctx.fillStyle = '#d96b16'; ctx.beginPath(); ctx.ellipse(x-7, y, rx*0.55, ry, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x+7, y, rx*0.55, ry, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#e8791f'; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fill();
+      // ribs
+      ctx.strokeStyle = 'rgba(150,70,10,0.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x-6, y-ry+3); ctx.quadraticCurveTo(x-9, y, x-6, y+ry-3);
+      ctx.moveTo(x+6, y-ry+3); ctx.quadraticCurveTo(x+9, y, x+6, y+ry-3);
+      ctx.moveTo(x, y-ry+2); ctx.lineTo(x, y+ry-2); ctx.stroke();
+      // carved face
+      if (pk.carved){
+        const fl = 0.75 + 0.25*Math.sin(pk.t*7) + 0.08*Math.sin(pk.t*17);
+        const gy = ctx.createRadialGradient(x, y+1, 0, x, y+1, 20);
+        gy.addColorStop(0, 'rgba(255,180,60,'+(0.35*pk.glow*fl).toFixed(3)+')');
+        gy.addColorStop(1, 'rgba(255,180,60,0)');
+        ctx.fillStyle = gy; ctx.beginPath(); ctx.arc(x, y+1, 20, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,214,94,'+(0.85*pk.glow*fl+0.1).toFixed(3)+')';
+        // eyes (triangles)
+        ctx.beginPath(); ctx.moveTo(x-8, y-3); ctx.lineTo(x-3, y-3); ctx.lineTo(x-5.5, y+2); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x+8, y-3); ctx.lineTo(x+3, y-3); ctx.lineTo(x+5.5, y+2); ctx.closePath(); ctx.fill();
+        // nose
+        ctx.beginPath(); ctx.moveTo(x, y+1); ctx.lineTo(x-2, y+4); ctx.lineTo(x+2, y+4); ctx.closePath(); ctx.fill();
+        // toothy grin
+        ctx.beginPath();
+        ctx.moveTo(x-8, y+5); ctx.lineTo(x+8, y+5); ctx.lineTo(x+5, y+9);
+        ctx.lineTo(x+3, y+6.5); ctx.lineTo(x, y+9); ctx.lineTo(x-3, y+6.5); ctx.lineTo(x-5, y+9);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pk || !here()) return false;
+        const dx = (px - pk.x)/19, dy = (py - pk.y)/16;
+        if (dx*dx + dy*dy > 1) return false;
+        if (pk.carved) return true;          // already carved — consume quietly
+        pk.carved = true; pk.ttl = 14; pk.glow = 0.1;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof burstAt === 'function') burstAt(pick(['🎃','✨','🍂']), pk.x, pk.y-10);
+        if (typeof say === 'function') say(pick(['Boo! 🎃','A jack-o-lantern! 🥰','Look at his little smile 😊','Spooky and cute ✨']));
+        try{ state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   51) GUMBALL MACHINE  —  in the candy or toy shop a little gumball machine waits.
+   Tap the knob to turn it: a gumball clinks down the chute and rolls out across the
+   counter before fading. A small sweet reward each turn. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxGumball(){
+  try{
+    const SHOPS = new Set(['candyshop','toyshop','sweetshop','confectionery']);
+    const COLORS = ['#ff5b6a','#ffd166','#6ac8ff','#9be59b','#c8a2ff','#ff9ec4'];
+    let gm = null;                       // {x,y,cd,inner:[{ix,iy,c}]}
+    const balls = [];                    // rolling gumballs {x,y,vx,color,t,life}
+    function here(){ try{ return (typeof SCENES!=='undefined') && SHOPS.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const x = Math.max(W*0.16, Math.min(W*0.86, W*0.80));
+      const inner = [];
+      for (let i=0;i<10;i++){ const a = rand(0,Math.PI*2), r = rand(0,9); inner.push({ ix: Math.cos(a)*r, iy: Math.sin(a)*r, c: pick(COLORS) }); }
+      gm = { x, y: rand(H*0.68, H*0.72), cd:0, inner };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ gm = null; balls.length = 0; return; }
+      if (!gm) build();
+      if (gm.cd > 0) gm.cd -= dt;
+      for (let i=balls.length-1;i>=0;i--){
+        const b = balls[i];
+        b.t += dt; b.x += b.vx*dt; b.vx *= 0.95;
+        if (b.t >= b.life || b.x > W+10) balls.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gm || !here()) return;
+      const x = gm.x, gy = gm.y;
+      ctx.save();
+      // rolling gumballs on the counter
+      for (const b of balls){
+        const a = Math.max(0, Math.min(1, (b.life - b.t)/0.5));
+        ctx.globalAlpha = a;
+        ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.beginPath(); ctx.ellipse(b.x, b.y+3, 4, 1.4, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(b.x, b.y, 3.4, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(b.x-1, b.y-1, 1, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // machine: glass globe of gumballs
+      const gcx = x, gcy = gy - 30;
+      ctx.fillStyle = 'rgba(200,230,240,0.35)'; ctx.beginPath(); ctx.arc(gcx, gcy, 13, 0, 7); ctx.fill();
+      for (const p of gm.inner){ ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(gcx+p.ix, gcy+p.iy, 2.4, 0, 7); ctx.fill(); }
+      ctx.strokeStyle = '#b0b0b8'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(gcx, gcy, 13, 0, 7); ctx.stroke();
+      // red base
+      ctx.fillStyle = '#d63b3b';
+      if (typeof roundRect === 'function'){ roundRect(x-11, gy-18, 22, 16, 3); ctx.fill(); } else ctx.fillRect(x-11, gy-18, 22, 16);
+      // knob + chute
+      ctx.fillStyle = '#e8e8ea'; ctx.beginPath(); ctx.arc(x, gy-11, 2.6, 0, 7); ctx.fill();
+      ctx.fillStyle = '#8a2a2a'; ctx.fillRect(x-4, gy-6, 8, 4);
+      // little stand
+      ctx.fillStyle = '#7a7a82'; ctx.fillRect(x-2, gy-2, 4, 4);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gm || !here()) return false;
+        if (px < gm.x - 14 || px > gm.x + 14 || py < gm.y - 46 || py > gm.y + 4) return false;
+        if (gm.cd > 0) return true;
+        gm.cd = 0.5;
+        balls.push({ x: gm.x, y: gm.y - 3, vx: rand(35, 70), color: pick(COLORS), t:0, life:2.6 });
+        if (balls.length > 8) balls.shift();
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof fxAt === 'function') fxAt(gm.x, gm.y - 46, pick(['🍬','🍭','✨']));
+        if (typeof say === 'function') say(pick(['A gumball for me? 🍬','Ooh, my favorite color! 🥰','Clink-clink! 😄','Sweet! 🍭']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 23). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Any deferred callback captures coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   52) THE BAKERY OVEN  —  in the bakery a little oven waits. Tap it to bake: the
+   window glows warm, steam curls up from the top, and a fresh treat pops out with
+   a happy "ding." Fills her up a little. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxBakeryOven(){
+  try{
+    const AT = new Set(['bakery','patisserie','gingerbreadhouse']);
+    let ov = null;                       // {x,y,bake,cd,steamT,steam:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ ov = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.80)), y: rand(H*0.68, H*0.74), bake:0, cd:0, steamT:0, steam:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ ov = null; return; }
+      if (!ov) build();
+      if (ov.cd > 0) ov.cd -= dt;
+      if (ov.bake > 0){
+        ov.bake -= dt;
+        ov.steamT -= dt;
+        if (ov.steamT <= 0){ ov.steamT = 0.13; ov.steam.push({ x: ov.x + rand(-8,8), y: ov.y - 36, vy: rand(-14,-24), t:0, life: rand(0.8,1.3), r: rand(3,6) }); }
+      }
+      for (let i=ov.steam.length-1;i>=0;i--){
+        const s = ov.steam[i];
+        s.t += dt; s.y += s.vy*dt; s.vy *= 0.99; s.x += Math.sin(s.t*3)*6*dt;
+        if (s.t >= s.life) ov.steam.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!ov || !here()) return;
+      const x = ov.x, base = ov.y, topY = base - 34, lit = ov.bake > 0;
+      ctx.save();
+      // steam first (behind the treat pop, above the oven)
+      for (const s of ov.steam){
+        const a = Math.max(0, (1 - s.t/s.life)) * 0.4;
+        ctx.fillStyle = 'rgba(240,240,245,'+a.toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+      }
+      // body
+      ctx.fillStyle = '#8a8f98';
+      if (typeof roundRect === 'function'){ roundRect(x-16, topY, 32, 34, 4); ctx.fill(); } else ctx.fillRect(x-16, topY, 32, 34);
+      // door
+      ctx.fillStyle = '#6a6f78';
+      if (typeof roundRect === 'function'){ roundRect(x-13, topY+8, 26, 22, 3); ctx.fill(); } else ctx.fillRect(x-13, topY+8, 26, 22);
+      // window
+      if (lit){
+        const g = ctx.createRadialGradient(x, topY+17, 1, x, topY+17, 12);
+        g.addColorStop(0, 'rgba(255,190,100,0.95)'); g.addColorStop(1, 'rgba(255,150,70,0.5)');
+        ctx.fillStyle = g;
+      } else ctx.fillStyle = '#3a3f48';
+      if (typeof roundRect === 'function'){ roundRect(x-9, topY+11, 18, 12, 2); ctx.fill(); } else ctx.fillRect(x-9, topY+11, 18, 12);
+      // handle + knobs
+      ctx.fillStyle = '#c9ccd2'; ctx.fillRect(x-12, topY+4, 24, 3);
+      ctx.fillStyle = '#b0b4bc'; ctx.beginPath(); ctx.arc(x-9, topY+2, 1.6, 0, 7); ctx.arc(x-3, topY+2, 1.6, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!ov || !here()) return false;
+        if (px < ov.x - 18 || px > ov.x + 18 || py < ov.y - 38 || py > ov.y + 2) return false;
+        if (ov.cd > 0) return true;
+        ov.cd = 1.4; ov.bake = 1.6; ov.steamT = 0;
+        if (typeof sfx === 'function') sfx('find');
+        // treat pops out — capture coords BEFORE any deferred callback
+        const tx = ov.x, ty = ov.y - 12;
+        if (typeof fxAt === 'function'){
+          const treat = pick(['🍪','🥐','🧁','🥧','🍞']);
+          for (let i=0;i<3;i++){ const dx = rand(-10,10), dy = rand(-6,4); setTimeout(function(){ try{ fxAt(tx+dx, ty+dy, treat); }catch(e){} }, i*120); }
+        }
+        if (typeof say === 'function') say(pick(['Mmm, fresh from the oven! 🍪','Smells amazing 🥰','Baked with love 💛','Ding! All done ✨']));
+        try{ state.hunger = clamp(state.hunger + 5); state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   53) LAUNCH A FIREWORK  —  in the fireworks scene, tap anywhere in the upper sky
+   to send a rocket streaking up; it bursts at your spot into a colored shell of
+   sparks that drift and fade. Floor taps still walk her, so only sky taps are
+   consumed. Scene-gated; particles live in managed arrays (no deferred coords).
+   -------------------------------------------------------------------------- */
+(function fxFireworks(){
+  try{
+    const AT = new Set(['fireworks','fireworksfestival','newyear']);
+    const COLORS = ['255,120,120','255,220,130','150,220,255','200,160,255','150,240,170','255,170,220'];
+    const rockets = [];                  // {x,y,ty,vy,color}
+    const sparks = [];                   // {x,y,vx,vy,color,t,life}
+    let cd = 0;
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    function explode(x, y, color){
+      const n = 22 + Math.floor(Math.random()*10);
+      for (let i=0;i<n;i++){
+        const a = (i/n)*Math.PI*2 + rand(-0.1,0.1), sp = rand(40, 90);
+        sparks.push({ x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, color, t:0, life: rand(0.9,1.5) });
+        if (sparks.length > 260) sparks.shift();
+      }
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ rockets.length = 0; sparks.length = 0; return; }
+      if (cd > 0) cd -= dt;
+      for (let i=rockets.length-1;i>=0;i--){
+        const r = rockets[i];
+        r.y += r.vy*dt; r.vy += 26*dt;                 // decelerates as it climbs
+        if (r.y <= r.ty || r.vy >= 0){ explode(r.x, r.y, r.color); rockets.splice(i,1); }
+      }
+      for (let i=sparks.length-1;i>=0;i--){
+        const s = sparks[i];
+        s.t += dt; s.vx *= 0.96; s.vy = s.vy*0.96 + 40*dt; s.x += s.vx*dt; s.y += s.vy*dt;
+        if (s.t >= s.life) sparks.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!here()) return;
+      ctx.save();
+      for (const r of rockets){
+        ctx.fillStyle = 'rgba('+r.color+',0.9)';
+        ctx.beginPath(); ctx.arc(r.x, r.y, 2, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba('+r.color+',0.35)'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(r.x, r.y + 10); ctx.stroke();
+      }
+      for (const s of sparks){
+        const a = Math.max(0, 1 - s.t/s.life);
+        ctx.fillStyle = 'rgba('+s.color+','+a.toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(s.x, s.y, 1.8*a + 0.6, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!here()) return false;
+        if (py > H*0.6) return false;                  // leave floor taps for walking
+        const color = pick(COLORS);
+        rockets.push({ x: px, y: H*0.96, ty: py, vy: -Math.sqrt(Math.max(60, (H*0.96 - py))*52), color });
+        if (rockets.length > 6) rockets.shift();
+        if (typeof sfx === 'function') sfx('tap');
+        if (cd <= 0){
+          cd = 1.0;
+          if (typeof say === 'function') say(pick(['Ooooh! 🎆','So beautiful! 🥰','Again! Light another ✨','Happy birthday, my love 🎆']));
+          try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   54) GLOWING JELLYFISH  —  in the aquarium tunnel or the bioluminescent bay a
+   jellyfish drifts by now and then, its bell softly pulsing. Tap it to make it
+   flash a bright bloom of light and jet gracefully away. Scene-gated; one at a
+   time, and it drifts off on its own if left alone.
+   -------------------------------------------------------------------------- */
+(function fxJellyfish(){
+  try{
+    const SEA = new Set(['aquariumtunnel','biobay','jellyfishtank','deepsea']);
+    const HUES = ['150,200,255','180,150,255','150,240,220','255,170,220'];
+    let jf = null;                       // {x,y,vx,vy,ph,pulse,pjet,life,hue}
+    let timer = rand(4, 10);
+    function here(){ try{ return (typeof SCENES!=='undefined') && SEA.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function spawn(){ jf = { x: rand(W*0.25, W*0.75), y: rand(H*0.32, H*0.5), vx: rand(-8,8), vy: rand(-5,-10), ph: rand(0,Math.PI*2), pulse:0, pjet:0, life: rand(12,18), hue: pick(HUES) }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ jf = null; timer = rand(4,10); return; }
+      if (!jf){ timer -= dt; if (timer <= 0){ timer = rand(10,20); spawn(); } return; }
+      jf.ph += dt*2; jf.life -= dt;
+      if (jf.pulse > 0) jf.pulse -= dt;
+      const jet = 0.5 + 0.5*Math.sin(jf.ph);                    // bell contraction
+      jf.y += jf.vy*dt*(0.6 + jet*0.8);
+      jf.x += jf.vx*dt + Math.sin(jf.ph*0.5)*4*dt;
+      if (jf.pjet < 0){ jf.y += jf.pjet*dt; jf.pjet *= 0.9; if (jf.pjet > -1) jf.pjet = 0; }
+      if (jf.x < W*0.14){ jf.x = W*0.14; jf.vx = Math.abs(jf.vx); }
+      if (jf.x > W*0.86){ jf.x = W*0.86; jf.vx = -Math.abs(jf.vx); }
+      if (jf.y < -30 || jf.life <= 0) jf = null;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!jf || !here()) return;
+      const x = jf.x, y = jf.y, r = 14;
+      const squish = 0.82 + 0.18*Math.sin(jf.ph);               // bell pulse
+      const bright = jf.pulse > 0 ? 1 : (0.45 + 0.25*Math.sin(jf.ph));
+      ctx.save();
+      // glow halo
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r*2.4);
+      g.addColorStop(0, 'rgba('+jf.hue+','+(0.35*bright).toFixed(3)+')');
+      g.addColorStop(1, 'rgba('+jf.hue+',0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r*2.4, 0, 7); ctx.fill();
+      // tentacles
+      ctx.strokeStyle = 'rgba('+jf.hue+','+(0.5*bright+0.15).toFixed(3)+')'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+      for (let i=-2;i<=2;i++){
+        const tx = x + i*3;
+        ctx.beginPath(); ctx.moveTo(tx, y + r*0.4);
+        ctx.quadraticCurveTo(tx + Math.sin(jf.ph*2 + i)*4, y + r*0.4 + 9, tx + Math.sin(jf.ph*2 + i + 1)*3, y + r*0.4 + 18);
+        ctx.stroke();
+      }
+      // bell (dome)
+      ctx.fillStyle = 'rgba('+jf.hue+','+(0.4*bright+0.25).toFixed(3)+')';
+      ctx.beginPath(); ctx.ellipse(x, y, r, r*squish, 0, Math.PI, Math.PI*2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,'+(0.3*bright).toFixed(3)+')';
+      ctx.beginPath(); ctx.ellipse(x-3, y-3, r*0.3, r*0.25, 0, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!jf || !here()) return false;
+        if (Math.hypot(px - jf.x, py - jf.y) > 22) return false;
+        jf.pulse = 0.8; jf.pjet = -60;                          // flash + jet away
+        const jx = jf.x, jy = jf.y;                             // capture coords first
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') fxAt(jx, jy - 16, pick(['🪼','✨','💙']));
+        if (typeof say === 'function') say(pick(['It glows! 🪼','So graceful ✨','Like a little lantern 💙','Off it drifts 🥰']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 24). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   55) THE POTTER'S WHEEL  —  in the pottery studio a lump of clay waits on the
+   wheel. Tap to spin it: the wheel turns and the clay rises and rounds a little
+   more with each touch, until a finished pot lifts away and a fresh lump appears.
+   Scene-gated, progressive.
+   -------------------------------------------------------------------------- */
+(function fxPotteryWheel(){
+  try{
+    const AT = new Set(['pottery','potterystudio','ceramics']);
+    let pw = null;                       // {x,y,spin,spinV,shape,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ pw = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), spin:0, spinV:0, shape:0, cd:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ pw = null; return; }
+      if (!pw) build();
+      if (pw.cd > 0) pw.cd -= dt;
+      pw.spin += pw.spinV*dt;
+      pw.spinV *= 0.95; if (pw.spinV < 0.15) pw.spinV = 0;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pw || !here()) return;
+      const x = pw.x, y = pw.y, s = pw.shape;
+      const wob = pw.spinV > 0 ? Math.sin(pw.spin)*1.2*(1-s) : 0;   // wetter clay wobbles more
+      ctx.save();
+      // wheel head
+      ctx.fillStyle = '#5a4d40'; ctx.beginPath(); ctx.ellipse(x, y+5, 21, 6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#6c5c4c'; ctx.beginPath(); ctx.ellipse(x, y+3, 21, 5.5, 0, 0, 7); ctx.fill();
+      // spin marks on the head
+      ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 1;
+      const mark = pw.spin % (Math.PI*2);
+      ctx.beginPath(); ctx.ellipse(x + Math.cos(mark)*9, y+3, 3, 1.4, 0, 0, 7); ctx.stroke();
+      // clay form (base -> belly -> neck grows with shape)
+      const h = 6 + s*22, belly = 5 + s*11, neck = 3 + s*3, top = y - h;
+      ctx.fillStyle = '#a86a4a';
+      ctx.beginPath();
+      ctx.moveTo(x-4, y+2);
+      ctx.quadraticCurveTo(x-belly+wob, y - h*0.5, x-neck+wob, top);
+      ctx.lineTo(x+neck+wob, top);
+      ctx.quadraticCurveTo(x+belly+wob, y - h*0.5, x+4, y+2);
+      ctx.closePath(); ctx.fill();
+      // rim highlight + opening
+      ctx.fillStyle = '#8a5238';
+      ctx.beginPath(); ctx.ellipse(x+wob, top, neck, 1.6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(x-belly*0.4+wob, y-h*0.6, 2, h*0.5);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pw || !here()) return false;
+        if (px < pw.x - 22 || px > pw.x + 22 || py < pw.y - 32 || py > pw.y + 10) return false;
+        if (pw.cd > 0) return true;
+        pw.cd = 0.2; pw.spinV = 9;
+        if (typeof sfx === 'function') sfx('draw');
+        pw.shape += 0.34;
+        if (pw.shape >= 1){
+          pw.shape = 0;
+          const cx = pw.x, cy = pw.y - 26;                       // capture BEFORE any deferred use
+          if (typeof burstAt === 'function') burstAt(pick(['🏺','✨','🫙']), cx, cy);
+          if (typeof say === 'function') say(pick(['Ta-da! A little pot 🏺','I made it just for you 🥰','Look what we shaped! ✨','So satisfying 😌']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); state.energy = clamp(state.energy + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          if (typeof say === 'function' && Math.random() < 0.5) say(pick(['Round and round… 😌','Keep going ✨','Feels lovely 🥰']));
+          try{ state.fun = clamp(state.fun + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   56) FIRE THE BURNER  —  in the hot-air-balloon scene a little balloon hovers.
+   Tap its basket to fire the burner: a flame flares under the envelope and the
+   balloon lifts with a happy whoosh, then eases gently back down. Scene-gated;
+   sits up high so it never covers her.
+   -------------------------------------------------------------------------- */
+(function fxHotAirBalloon(){
+  try{
+    const AT = new Set(['balloons','balloonfest','hotairballoons']);
+    const PANELS = ['#ff8fab','#ffd166','#8ad3ff'];
+    let hab = null;                      // {x,baseY,y,flame,cd,sway,col}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ hab = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.72)), baseY: rand(H*0.30, H*0.38), y:0, flame:0, cd:0, sway: rand(0,Math.PI*2), col: pick(PANELS) }; hab.y = hab.baseY; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ hab = null; return; }
+      if (!hab) build();
+      if (hab.cd > 0) hab.cd -= dt;
+      if (hab.flame > 0) hab.flame -= dt;
+      hab.sway += dt;
+      const target = hab.baseY - (hab.flame > 0 ? 20 : 0);
+      hab.y += (target - hab.y) * Math.min(1, dt*3);
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!hab || !here()) return;
+      const x = hab.x + Math.sin(hab.sway*0.8)*3, cy = hab.y, rx = 22, ry = 26;
+      const basketY = cy + ry + 16;
+      ctx.save();
+      // ropes
+      ctx.strokeStyle = 'rgba(90,80,70,0.6)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x-8, cy+ry-2); ctx.lineTo(x-5, basketY-4); ctx.moveTo(x+8, cy+ry-2); ctx.lineTo(x+5, basketY-4); ctx.stroke();
+      // flame under the envelope
+      if (hab.flame > 0){
+        const fl = 0.6 + 0.4*Math.sin(hab.sway*30);
+        const g = ctx.createRadialGradient(x, cy+ry+4, 0, x, cy+ry+4, 12);
+        g.addColorStop(0, 'rgba(255,210,120,'+(0.9*fl).toFixed(3)+')'); g.addColorStop(1, 'rgba(255,120,60,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, cy+ry+4, 12, 0, 7); ctx.fill();
+        ctx.fillStyle = '#ffcf6b';
+        ctx.beginPath(); ctx.moveTo(x, cy+ry-2); ctx.quadraticCurveTo(x+4, cy+ry+6, x, cy+ry+10*fl); ctx.quadraticCurveTo(x-4, cy+ry+6, x, cy+ry-2); ctx.fill();
+      }
+      // envelope
+      ctx.fillStyle = hab.col;
+      ctx.beginPath(); ctx.moveTo(x, cy+ry);
+      ctx.bezierCurveTo(x-rx*1.4, cy+ry*0.4, x-rx, cy-ry, x, cy-ry);
+      ctx.bezierCurveTo(x+rx, cy-ry, x+rx*1.4, cy+ry*0.4, x, cy+ry);
+      ctx.fill();
+      // panel seams
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, cy-ry); ctx.lineTo(x, cy+ry);
+      ctx.moveTo(x-rx*0.6, cy-ry*0.7); ctx.quadraticCurveTo(x-rx*0.7, cy, x-rx*0.2, cy+ry*0.9);
+      ctx.moveTo(x+rx*0.6, cy-ry*0.7); ctx.quadraticCurveTo(x+rx*0.7, cy, x+rx*0.2, cy+ry*0.9);
+      ctx.stroke();
+      // basket
+      ctx.fillStyle = '#9a6a3a';
+      if (typeof roundRect === 'function'){ roundRect(x-6, basketY-4, 12, 9, 2); ctx.fill(); } else ctx.fillRect(x-6, basketY-4, 12, 9);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!hab || !here()) return false;
+        const x = hab.x, cy = hab.y, rx = 22, ry = 26, basketY = cy + ry + 16;
+        const inEnv = ((px-x)*(px-x))/(rx*rx*1.3) + ((py-cy)*(py-cy))/(ry*ry) <= 1;
+        const inBasket = (px >= x-10 && px <= x+10 && py >= basketY-6 && py <= basketY+8);
+        if (!inEnv && !inBasket) return false;
+        hab.flame = 0.7;
+        if (hab.cd <= 0){
+          hab.cd = 1.0;
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof fxAt === 'function') fxAt(x, cy - ry - 6, pick(['🎈','🔥','✨']));
+          if (typeof say === 'function') say(pick(['Up, up we go! 🎈','Whoosh! 🔥','Take me flying 🥰','What a view up here ✨']));
+          try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   57) CHOCOLATE FOUNTAIN  —  in the chocolate shop a little fountain burbles with
+   flowing cocoa. Tap it to dip a strawberry: it comes up glossy and coated, and
+   she pops it in with a happy sigh. A sweet, filling treat. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxChocolateFountain(){
+  try{
+    const AT = new Set(['chocolateshop','chocolatier','cocoahouse']);
+    let cf = null;                       // {x,y,flow,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ cf = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.80)), y: rand(H*0.68, H*0.74), flow:0, cd:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ cf = null; return; }
+      if (!cf) build();
+      cf.flow += dt;
+      if (cf.cd > 0) cf.cd -= dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!cf || !here()) return;
+      const x = cf.x, base = cf.y;
+      ctx.save();
+      // base bowl
+      ctx.fillStyle = '#c9a24a';
+      ctx.beginPath(); ctx.ellipse(x, base, 20, 6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#5a3a24'; ctx.beginPath(); ctx.ellipse(x, base-1, 16, 4, 0, 0, 7); ctx.fill();   // pooled chocolate
+      // central column
+      ctx.fillStyle = '#b8923f'; ctx.fillRect(x-2, base-30, 4, 28);
+      // two tiers (cones)
+      for (const ty of [base-14, base-24]){
+        ctx.fillStyle = '#c9a24a';
+        ctx.beginPath(); ctx.moveTo(x-11, ty); ctx.lineTo(x+11, ty); ctx.lineTo(x, ty-6); ctx.closePath(); ctx.fill();
+        // cascading chocolate sheet (animated) — contained to the tier width only
+        ctx.fillStyle = '#5a3a24';
+        for (let i=-2;i<=2;i++){
+          const dx = i*4.2;
+          const drip = ((cf.flow*22 + (i+2)*7) % 10);
+          ctx.fillRect(x+dx-1, ty + drip*0.2, 2, 5 + Math.sin(cf.flow*6 + i)*1.2);
+        }
+      }
+      // top dollop
+      ctx.fillStyle = '#5a3a24'; ctx.beginPath(); ctx.arc(x, base-30, 3, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!cf || !here()) return false;
+        if (px < cf.x - 20 || px > cf.x + 20 || py < cf.y - 36 || py > cf.y + 6) return false;
+        if (cf.cd > 0) return true;
+        cf.cd = 1.1;
+        const cx = cf.x, cy = cf.y - 20;                          // capture BEFORE any deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof burstAt === 'function') burstAt(pick(['🍫','🍓','😋']), cx, cy);
+        if (typeof say === 'function') say(pick(['Mmm, chocolate-dipped! 🍫','So decadent 😋','Just one more strawberry 🍓','Sweet like you 🥰']));
+        try{ state.hunger = clamp(state.hunger + 4); state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 25). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   58) BOWL A STRIKE  —  in the bowling alley a little lane runs off to one side.
+   Tap it to roll the ball down and scatter the pins with a satisfying strike. The
+   pins tumble, then reset for another go. Scene-gated; tucked to the side.
+   -------------------------------------------------------------------------- */
+(function fxBowling(){
+  try{
+    const AT = new Set(['bowling','bowlingalley']);
+    let bw = null;                       // {y,x0,pinX,ball,pins:[],cd,resetT,knocked}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function makePins(){
+      const layout = [ [0,0],[-5,-4],[5,-4],[-10,-8],[0,-8],[10,-8] ];
+      return layout.map(function(o){ return { ox:o[0], oy:o[1], fx:0, fy:0, rot:0, vx:0, vy:0, rv:0, down:false }; });
+    }
+    function build(){
+      const y = rand(H*0.74, H*0.80);
+      const x0 = Math.max(W*0.48, Math.min(W*0.62, W*0.58));
+      const pinX = Math.min(W*0.9, x0 + Math.max(90, W*0.26));
+      bw = { y, x0, pinX, ball:null, pins: makePins(), cd:0, resetT:0, knocked:false };
+    }
+    function drawPin(px, py, rot){
+      ctx.save(); ctx.translate(px, py); ctx.rotate(rot);
+      ctx.fillStyle = '#f5f5f5';
+      ctx.beginPath(); ctx.ellipse(0, -3, 2.1, 3.2, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-2.4, 4); ctx.quadraticCurveTo(0, -2, 2.4, 4); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#e05a5a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-1.8, -1.5); ctx.lineTo(1.8, -1.5); ctx.stroke();
+      ctx.restore();
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ bw = null; return; }
+      if (!bw) build();
+      if (bw.cd > 0) bw.cd -= dt;
+      if (bw.resetT > 0){ bw.resetT -= dt; if (bw.resetT <= 0){ for (const p of bw.pins){ p.fx=0; p.fy=0; p.rot=0; p.vx=0; p.vy=0; p.down=false; } } }
+      if (bw.ball){
+        const b = bw.ball; b.x += b.vx*dt; b.rot += b.vx*dt*0.12;
+        if (b.x >= bw.pinX - 8 && !bw.knocked){
+          bw.knocked = true;
+          const cx = bw.pinX, cy = bw.y - 8;                     // capture coords first
+          for (const p of bw.pins){ p.down = true; p.vx = (Math.random()*80+30); p.vy = -(Math.random()*70+30); p.rv = rand(-7,7); }
+          if (typeof burstAt === 'function') burstAt(pick(['🎳','✨','💥']), cx, cy);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['Strike! 🎳','Down they go! 😄','Nice roll! 🥰','All of them! ✨']));
+          try{ state.fun = clamp(state.fun + 5); state.energy = clamp(state.energy + 2); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          bw.ball = null; bw.resetT = 1.6;
+        } else if (b.x > W + 20){ bw.ball = null; }
+      }
+      for (const p of bw.pins){ if (p.down){ p.fx += p.vx*dt; p.fy += p.vy*dt; p.vy += 200*dt; p.rot += p.rv*dt; } }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!bw || !here()) return;
+      const y = bw.y;
+      ctx.save();
+      // lane (a slim parallelogram)
+      ctx.fillStyle = '#caa26a';
+      ctx.beginPath(); ctx.moveTo(bw.x0-16, y+6); ctx.lineTo(bw.pinX+18, y+6); ctx.lineTo(bw.pinX+12, y-14); ctx.lineTo(bw.x0-10, y-14); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(120,80,40,0.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(bw.x0-10, y-14); ctx.lineTo(bw.pinX+12, y-14); ctx.moveTo(bw.x0-16, y+6); ctx.lineTo(bw.pinX+18, y+6); ctx.stroke();
+      // pins
+      for (const p of bw.pins) drawPin(bw.pinX + p.ox + p.fx, y - 6 + p.oy + p.fy, p.rot);
+      // ball
+      if (bw.ball){
+        const bx = bw.ball.x, by = y - 2;
+        ctx.fillStyle = 'rgba(0,0,0,0.16)'; ctx.beginPath(); ctx.ellipse(bx, by+4, 6, 2, 0, 0, 7); ctx.fill();
+        ctx.save(); ctx.translate(bx, by); ctx.rotate(bw.ball.rot);
+        ctx.fillStyle = '#3a4a8a'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.beginPath(); ctx.arc(-1.6, -1.6, 0.9, 0, 7); ctx.arc(1.6, -1.6, 0.9, 0, 7); ctx.arc(0, 1.6, 0.9, 0, 7); ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!bw || !here()) return false;
+        if (px < bw.x0 - 16 || px > bw.pinX + 18 || py < bw.y - 22 || py > bw.y + 10) return false;
+        if (bw.ball || bw.resetT > 0 || bw.cd > 0) return true;   // busy — consume quietly
+        bw.cd = 0.3; bw.knocked = false; bw.ball = { x: bw.x0, vx: rand(180,225), rot:0 };
+        if (typeof sfx === 'function') sfx('tap');
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   59) GLOWWORM RIPPLE  —  in the glowworm cave a scatter of tiny lights dots the
+   ceiling. Tap the ceiling to send a ripple through them: worms flare brighter in
+   an expanding wave, like touching still water. Scene-gated; stays up in the roof
+   band so it never covers her, and only ceiling taps are consumed.
+   -------------------------------------------------------------------------- */
+(function fxGlowworms(){
+  try{
+    let worms = null;                    // array of {x,y,ph}
+    const ripples = [];                  // {x,y,t}
+    let T = 0;
+    function here(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'glowwormcave'; }catch(e){ return false; } }
+    function build(){
+      worms = [];
+      for (let i=0;i<16;i++) worms.push({ x: rand(W*0.12, W*0.88), y: rand(H*0.07, H*0.30), ph: rand(0,Math.PI*2) });
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ worms = null; ripples.length = 0; return; }
+      if (!worms) build();
+      T += dt;
+      for (let i=ripples.length-1;i>=0;i--){ ripples[i].t += dt; if (ripples[i].t > 1.5) ripples.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!worms || !here()) return;
+      ctx.save();
+      for (const w of worms){
+        let boost = 0;
+        for (const r of ripples){
+          const d = Math.hypot(w.x - r.x, w.y - r.y);
+          const front = r.t * 210;
+          if (Math.abs(d - front) < 26) boost += (1 - r.t/1.5) * 0.9;
+        }
+        const glow = Math.min(1.2, 0.35 + 0.25*Math.sin(T*2 + w.ph) + boost);
+        const g = ctx.createRadialGradient(w.x, w.y, 0, w.x, w.y, 7);
+        g.addColorStop(0, 'rgba(170,255,190,'+(0.75*glow).toFixed(3)+')');
+        g.addColorStop(1, 'rgba(120,220,255,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(w.x, w.y, 7, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(210,255,225,'+Math.min(1,0.5+boost).toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(w.x, w.y, 1.2, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!worms || !here()) return false;
+        if (py > H*0.36) return false;                 // only ceiling taps; floor taps still walk her
+        ripples.push({ x: px, y: py, t:0 });
+        if (ripples.length > 5) ripples.shift();
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof say === 'function' && Math.random() < 0.6) say(pick(['Ooh, they shimmer! ✨','Like tiny stars 🥰','Touch and they glow 💚','So magical down here 🌌']));
+        try{ state.love = clamp(state.love + 2); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   60) THE STORYBOOK  —  in the library a little book rests on a stand. Tap it to
+   open: the pages flip and a sweet line drifts up on a heart — a tiny love note
+   tucked between the pages. Closes itself again after a moment. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxStorybook(){
+  try{
+    const AT = new Set(['library','cozylibrary','bookbindery','bookshop','bookstore']);
+    const NOTES = ['"…and they lived, happily, together." 💛','Chapter one: the day I met you. 🥰','Every story is better with you in it. 📖','P.S. I love you. Always have. ✨','Our favorite page is still being written. 💫'];
+    let bk = null;                       // {x,y,open,flip,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ bk = { x: Math.max(W*0.14, Math.min(W*0.5, W*0.20)), y: rand(H*0.70, H*0.76), open:0, flip:0, cd:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ bk = null; return; }
+      if (!bk) build();
+      if (bk.cd > 0) bk.cd -= dt;
+      if (bk.open > 0){ bk.open -= dt; bk.flip += dt*6; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!bk || !here()) return;
+      const x = bk.x, y = bk.y;
+      ctx.save();
+      // little stand
+      ctx.strokeStyle = '#6a5030'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x-10, y+6); ctx.lineTo(x-4, y-2); ctx.moveTo(x+10, y+6); ctx.lineTo(x+4, y-2); ctx.stroke();
+      if (bk.open <= 0){
+        // closed book, slightly angled
+        ctx.fillStyle = '#8a3b4a'; ctx.beginPath();
+        ctx.moveTo(x-13, y-2); ctx.lineTo(x+13, y-4); ctx.lineTo(x+13, y+2); ctx.lineTo(x-13, y+4); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#f0e6d0'; ctx.fillRect(x-12, y-1, 24, 3);            // page edges
+        ctx.strokeStyle = '#e0b04a'; ctx.lineWidth = 1;                        // gilt title line
+        ctx.beginPath(); ctx.moveTo(x-6, y-2.5); ctx.lineTo(x+6, y-3.2); ctx.stroke();
+      } else {
+        // open book: two pages + spine + a flipping page
+        ctx.fillStyle = '#faf3e2';
+        ctx.beginPath(); ctx.moveTo(x, y-4); ctx.lineTo(x-14, y-2); ctx.lineTo(x-13, y+5); ctx.lineTo(x, y+3); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x, y-4); ctx.lineTo(x+14, y-2); ctx.lineTo(x+13, y+5); ctx.lineTo(x, y+3); ctx.closePath(); ctx.fill();
+        // faint text lines
+        ctx.strokeStyle = 'rgba(120,100,80,0.4)'; ctx.lineWidth = 0.6;
+        for (let i=0;i<3;i++){ const ly = y-1+i*1.6; ctx.beginPath(); ctx.moveTo(x-11, ly); ctx.lineTo(x-2, ly+0.4); ctx.moveTo(x+2, ly+0.2); ctx.lineTo(x+11, ly-0.2); ctx.stroke(); }
+        // flipping page
+        const fp = 0.5 + 0.5*Math.sin(bk.flip);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.beginPath(); ctx.moveTo(x, y-4); ctx.lineTo(x - 14*fp, y-3 - 2*fp); ctx.lineTo(x - 13*fp, y+3); ctx.lineTo(x, y+3); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#8a3b4a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y-5); ctx.lineTo(x, y+4); ctx.stroke();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!bk || !here()) return false;
+        if (px < bk.x - 15 || px > bk.x + 15 || py < bk.y - 12 || py > bk.y + 10) return false;
+        if (bk.cd > 0) return true;
+        bk.cd = 2.0; bk.open = 1.8; bk.flip = 0;
+        const bx = bk.x, by = bk.y - 8;                            // capture BEFORE deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function'){ for (let i=0;i<3;i++){ const dx = rand(-8,8), dy = rand(-4,4); setTimeout(function(){ try{ fxAt(bx+dx, by+dy, pick(['💛','📖','✨'])); }catch(e){} }, i*130); } }
+        if (Math.random() < 0.6 && typeof showToast === 'function') showToast('📖','From the storybook', pick(NOTES));
+        else if (typeof say === 'function') say(pick(['Once upon a time… 📖','A little love note ✨','Read to me? 🥰','I dog-eared this page for you 💛']));
+        try{ state.love = clamp(state.love + 4); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 26). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   61) HAMMER THE FORGE  —  at the blacksmith's an anvil holds a glowing bar. Tap
+   it to bring the hammer down: sparks fly, the metal glows, and every few strikes
+   a finished piece rings out. Scene-gated; off to the side.
+   -------------------------------------------------------------------------- */
+(function fxForge(){
+  try{
+    const AT = new Set(['forge','blacksmith','smithy','blacksmithforge']);
+    let fg = null;                       // {x,y,hammer,heat,cd,strikes,sparks:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ fg = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.72, H*0.78), hammer:0, heat:0.3, cd:0, strikes:0, sparks:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ fg = null; return; }
+      if (!fg) build();
+      if (fg.cd > 0) fg.cd -= dt;
+      if (fg.hammer > 0) fg.hammer -= dt;
+      fg.heat = Math.max(0.3, fg.heat - dt*0.7);
+      for (let i=fg.sparks.length-1;i>=0;i--){
+        const s = fg.sparks[i];
+        s.t += dt; s.x += s.vx*dt; s.y += s.vy*dt; s.vy += 240*dt;
+        if (s.t >= s.life) fg.sparks.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!fg || !here()) return;
+      const x = fg.x, y = fg.y;
+      ctx.save();
+      // stump
+      ctx.fillStyle = '#5a4030'; ctx.fillRect(x-10, y+2, 20, 9);
+      // anvil
+      ctx.fillStyle = '#3a3f46';
+      ctx.fillRect(x-14, y-10, 30, 5);                              // top slab
+      ctx.beginPath(); ctx.moveTo(x+16, y-10); ctx.lineTo(x+25, y-7); ctx.lineTo(x+16, y-4.5); ctx.closePath(); ctx.fill();  // horn
+      ctx.fillRect(x-6, y-5, 12, 4);                                // waist
+      ctx.fillRect(x-12, y-1, 24, 4);                              // foot
+      // hot bar on the face
+      const hc = fg.heat;
+      if (hc > 0.32){
+        const g = ctx.createRadialGradient(x-1, y-12, 0, x-1, y-12, 12);
+        g.addColorStop(0, 'rgba(255,180,90,'+(0.5*hc).toFixed(3)+')'); g.addColorStop(1, 'rgba(255,120,50,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x-1, y-12, 12, 0, 7); ctx.fill();
+      }
+      ctx.fillStyle = 'rgb('+Math.round(120+hc*135)+','+Math.round(50+hc*90)+',40)';
+      ctx.fillRect(x-9, y-13, 15, 3);
+      // hammer (swings down on strike)
+      const p = fg.hammer > 0 ? fg.hammer/0.26 : 0;                 // 1 just after strike -> 0
+      const ang = -1.25*(1-p);
+      ctx.save(); ctx.translate(x+3, y-30); ctx.rotate(ang);
+      ctx.strokeStyle = '#7a5a3a'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,16); ctx.stroke();
+      ctx.fillStyle = '#555b63'; ctx.fillRect(-5, 15, 10, 5);
+      ctx.restore();
+      // sparks
+      for (const s of fg.sparks){
+        const a = Math.max(0, 1 - s.t/s.life);
+        ctx.fillStyle = 'rgba(255,'+Math.round(160+90*a)+',80,'+a.toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(s.x, s.y, 1.3*a+0.5, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!fg || !here()) return false;
+        if (px < fg.x - 16 || px > fg.x + 26 || py < fg.y - 34 || py > fg.y + 12) return false;
+        if (fg.cd > 0) return true;
+        fg.cd = 0.18; fg.hammer = 0.26; fg.heat = 1; fg.strikes++;
+        const ix = fg.x - 2, iy = fg.y - 13;                        // capture impact coords first
+        for (let i=0;i<9;i++) fg.sparks.push({ x: ix, y: iy, vx: rand(-95,95), vy: rand(-150,-40), t:0, life: rand(0.4,0.8) });
+        if (fg.sparks.length > 60) fg.sparks.splice(0, fg.sparks.length-60);
+        if (typeof sfx === 'function') sfx('tap');
+        if (fg.strikes % 4 === 0){
+          const hx = ix, hy = iy - 6;
+          if (typeof burstAt === 'function') burstAt(pick(['✨','⚙️','🔥']), hx, hy);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['A fine blade! 🗡️','Forged with love 🔥','Look what we made! ✨','Strong and true 💪']));
+          try{ state.energy = clamp(state.energy + 4); state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          try{ state.energy = clamp(state.energy + 1); state.fun = clamp(state.fun + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   62) THE BUBBLING BEAKER  —  in the science lab a flask of colored liquid sits on
+   the bench. Tap it to add a drop: it fizzes, bubbles race to the top, and the
+   brew shifts to a brand-new color. Harmless, delightful science. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxBeaker(){
+  try{
+    const AT = new Set(['sciencelab','laboratory','chemlab','apothecarylab']);
+    const HUES = ['#57d977','#57b6ff','#ff6bd0','#ffd166','#b07bff','#ff8a5c'];
+    let bk = null;                       // {x,y,hi,fizz,cd,bubbles:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ bk = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), hi:0, fizz:0, cd:0, bubbles:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ bk = null; return; }
+      if (!bk) build();
+      if (bk.cd > 0) bk.cd -= dt;
+      if (bk.fizz > 0) bk.fizz -= dt;
+      for (let i=bk.bubbles.length-1;i>=0;i--){
+        const b = bk.bubbles[i]; b.by += b.vy*dt; b.bx += Math.sin(b.by*0.4)*4*dt;
+        if (b.by < bk.y - 9) bk.bubbles.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!bk || !here()) return;
+      const x = bk.x, y = bk.y;
+      function bodyPath(){ ctx.beginPath(); ctx.moveTo(x-14, y); ctx.lineTo(x+14, y); ctx.lineTo(x+5, y-22); ctx.lineTo(x-5, y-22); ctx.closePath(); }
+      ctx.save();
+      // glass body
+      bodyPath(); ctx.fillStyle = 'rgba(220,235,240,0.22)'; ctx.fill();
+      // liquid + bubbles (clipped to the flask)
+      ctx.save(); bodyPath(); ctx.clip();
+      ctx.fillStyle = HUES[bk.hi]; ctx.fillRect(x-16, y-9, 32, 12);
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      for (const b of bk.bubbles){ ctx.beginPath(); ctx.arc(x + b.bx, b.by, b.r, 0, 7); ctx.fill(); }
+      if (bk.fizz > 0){                                             // foam at the surface
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        for (let i=-3;i<=3;i++){ ctx.beginPath(); ctx.arc(x + i*3, y-9 + Math.sin(i+bk.fizz*10), 1.6, 0, 7); ctx.fill(); }
+      }
+      ctx.restore();
+      // outline
+      bodyPath(); ctx.strokeStyle = 'rgba(180,205,215,0.6)'; ctx.lineWidth = 1; ctx.stroke();
+      // neck + rim
+      ctx.fillStyle = 'rgba(220,235,240,0.3)'; ctx.fillRect(x-4, y-30, 8, 9);
+      ctx.fillStyle = '#cfe0e6'; ctx.fillRect(x-5, y-31, 10, 2);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!bk || !here()) return false;
+        if (px < bk.x - 15 || px > bk.x + 15 || py < bk.y - 32 || py > bk.y + 3) return false;
+        if (bk.cd > 0) return true;
+        bk.cd = 0.4; bk.hi = (bk.hi + 1) % HUES.length; bk.fizz = 0.8;
+        for (let i=0;i<7;i++) bk.bubbles.push({ bx: rand(-10,10), by: bk.y - 1, vy: rand(-16,-30), r: rand(1,2.4) });
+        const px2 = bk.x, py2 = bk.y - 26;                          // capture first
+        if (typeof sfx === 'function') sfx('draw');
+        if (typeof fxAt === 'function') fxAt(px2, py2, pick(['🧪','💨','✨']));
+        if (typeof say === 'function') say(pick(['Fizz fizz! 🧪','A new color! 🥰','Science is fun ✨','What does this one do? 😄']));
+        try{ state.fun = clamp(state.fun + 3); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   63) THE GRANDFATHER CLOCK  —  in the clockmaker's shop a tall clock stands in the
+   corner. Tap it to set the pendulum swinging; it sways and softly chimes, notes
+   drifting up, before easing back to a gentle tick. Scene-gated; tall and narrow
+   so it keeps to the side.
+   -------------------------------------------------------------------------- */
+(function fxGrandClock(){
+  try{
+    const AT = new Set(['clockmaker','clockshop','clocktower','clockwork']);
+    let ck = null;                       // {x,y,topY,pivotY,bobLen,amp,phase,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const y = rand(H*0.74, H*0.80);
+      let caseH = y - H*0.30; if (caseH < H*0.24) caseH = H*0.24;
+      const topY = y - caseH;
+      ck = { x: Math.max(W*0.16, Math.min(W*0.86, W*0.82)), y, topY, pivotY: topY + caseH*0.44, bobLen: caseH*0.33, amp:0.12, phase:0, cd:0 };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ ck = null; return; }
+      if (!ck) build();
+      if (ck.cd > 0) ck.cd -= dt;
+      ck.phase += dt*2.4;
+      ck.amp += (0.12 - ck.amp) * Math.min(1, dt*0.5);              // eases back to a gentle idle swing
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!ck || !here()) return;
+      const x = ck.x, y = ck.y, topY = ck.topY;
+      ctx.save();
+      // case
+      ctx.fillStyle = '#6a4a2e'; ctx.fillRect(x-13, topY, 26, y - topY);
+      // crown
+      ctx.fillStyle = '#7a5636'; ctx.beginPath(); ctx.moveTo(x-14, topY); ctx.lineTo(x+14, topY); ctx.lineTo(x+9, topY-8); ctx.lineTo(x-9, topY-8); ctx.closePath(); ctx.fill();
+      // pendulum window (dark inset)
+      ctx.fillStyle = '#2e2016'; ctx.fillRect(x-9, topY+30, 18, (y-6) - (topY+30));
+      // pendulum
+      const ang = ck.amp * Math.sin(ck.phase);
+      const bx = x + Math.sin(ang)*ck.bobLen, by = ck.pivotY + Math.cos(ang)*ck.bobLen;
+      ctx.strokeStyle = '#caa24a'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(x, ck.pivotY); ctx.lineTo(bx, by); ctx.stroke();
+      ctx.fillStyle = '#e0b84a'; ctx.beginPath(); ctx.arc(bx, by, 4.5, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.arc(bx-1.2, by-1.2, 1.4, 0, 7); ctx.fill();
+      // face
+      const fy = topY + 16;
+      ctx.fillStyle = '#f3ead0'; ctx.beginPath(); ctx.arc(x, fy, 10, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(x, fy, 10, 0, 7); ctx.stroke();
+      ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(x, fy); ctx.lineTo(x, fy-6); ctx.moveTo(x, fy); ctx.lineTo(x+5, fy+2); ctx.stroke();   // hands
+      ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.arc(x, fy, 1.2, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!ck || !here()) return false;
+        if (px < ck.x - 15 || px > ck.x + 15 || py < ck.topY - 8 || py > ck.y) return false;
+        if (ck.cd > 0){ ck.amp = Math.min(0.55, ck.amp + 0.12); return true; }
+        ck.cd = 1.4; ck.amp = 0.5;
+        const cx = ck.x, cy = ck.topY + 6;                          // capture BEFORE deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function'){ for (let i=0;i<3;i++){ const dx = rand(-8,8); setTimeout(function(){ try{ fxAt(cx+dx, cy - i*4, pick(['🕰️','♪','✨'])); }catch(e){} }, i*150); } }
+        if (typeof say === 'function') say(pick(['Tick, tock… 🕰️','It chimes so sweetly ♪','Time stands still with you 🥰','Listen — our song ✨']));
+        try{ state.love = clamp(state.love + 3); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 27). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   64) WATER THE SPROUT  —  in the greenhouse a little pot of soil waits. Tap to
+   water it and it grows a stage at a time — seedling, stem, bud — until it bursts
+   into bloom, rests a while, then is ready to grow again. Scene-gated, progressive.
+   -------------------------------------------------------------------------- */
+(function fxSprout(){
+  try{
+    const AT = new Set(['greenhouse','terrariumshop','nursery','plantshop','flowermarket']);
+    let sp = null;                       // {x,y,grow,g,bloomT,cd,wob}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ sp = { x: Math.max(W*0.14, Math.min(W*0.5, W*0.22)), y: rand(H*0.72, H*0.78), grow:0, g:0, bloomT:0, cd:0, wob:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ sp = null; return; }
+      if (!sp) build();
+      if (sp.cd > 0) sp.cd -= dt;
+      sp.wob += dt;
+      sp.g += (sp.grow - sp.g) * Math.min(1, dt*4);
+      if (sp.bloomT > 0){ sp.bloomT -= dt; if (sp.bloomT <= 0) sp.grow = 0; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!sp || !here()) return;
+      const x = sp.x, y = sp.y, g = sp.g;
+      ctx.save();
+      // pot
+      ctx.fillStyle = '#b5623a';
+      ctx.beginPath(); ctx.moveTo(x-9, y); ctx.lineTo(x+9, y); ctx.lineTo(x+7, y+11); ctx.lineTo(x-7, y+11); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#c9713f'; ctx.fillRect(x-10, y-2, 20, 4);
+      ctx.fillStyle = '#4a3420'; ctx.beginPath(); ctx.ellipse(x, y-1, 8, 2.4, 0, 0, 7); ctx.fill();
+      // plant
+      if (g > 0.15){
+        const h = (g/4)*26, topx = x + Math.sin(sp.wob*1.5)*1.5*(g/4), topy = y-2 - h;
+        ctx.strokeStyle = '#3f8a44'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x, y-2); ctx.quadraticCurveTo(x, y-2-h*0.5, topx, topy); ctx.stroke();
+        if (g >= 1.3){
+          const my = y-2-h*0.5; ctx.fillStyle = '#4aa050';
+          ctx.beginPath(); ctx.ellipse(x-4, my, 4, 2, -0.6, 0, 7); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(x+4, my-2, 4, 2, 0.6, 0, 7); ctx.fill();
+        }
+        if (g >= 3.6){
+          ctx.fillStyle = '#ff8fab';
+          for (let k=0;k<5;k++){ const a = k/5*Math.PI*2 + sp.wob*0.3; ctx.beginPath(); ctx.ellipse(topx+Math.cos(a)*4, topy+Math.sin(a)*4, 3, 2, a, 0, 7); ctx.fill(); }
+          ctx.fillStyle = '#ffd166'; ctx.beginPath(); ctx.arc(topx, topy, 2.4, 0, 7); ctx.fill();
+        } else if (g >= 2.6){
+          ctx.fillStyle = '#7fbf6a'; ctx.beginPath(); ctx.ellipse(topx, topy, 3, 4, 0, 0, 7); ctx.fill();
+          ctx.fillStyle = '#ff9ec4'; ctx.beginPath(); ctx.arc(topx, topy-1, 1.6, 0, 7); ctx.fill();
+        }
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!sp || !here()) return false;
+        if (px < sp.x - 12 || px > sp.x + 12 || py < sp.y - 34 || py > sp.y + 12) return false;
+        if (sp.cd > 0) return true;
+        sp.cd = 0.3;
+        const wx = sp.x, wy = sp.y - 8;                             // capture first
+        if (typeof fxAt === 'function') fxAt(wx, wy - 6, '💧');
+        if (sp.grow >= 4) return true;                              // already blooming — just a sip of water
+        sp.grow++;
+        if (sp.grow >= 4){
+          const bx = sp.x, by = sp.y - 32;
+          if (typeof burstAt === 'function') burstAt(pick(['🌸','🌼','✨']), bx, by);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['It bloomed! 🌸','For you, my flower 🥰','Look how it opened ✨','We grew this together 💛']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          sp.bloomT = 8;
+        } else {
+          if (typeof sfx === 'function') sfx('draw');
+          if (typeof say === 'function' && Math.random() < 0.5) say(pick(['Grow, little one 🌱','A good drink 💧','Almost there ✨']));
+          try{ state.energy = clamp(state.energy + 1); state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   65) THE MODEL TRAIN  —  in the model-train room a little engine sits on an oval
+   of track. Tap it to send it chugging around the loop, puffing smoke and tooting,
+   before it coasts back to a stop. Scene-gated; on its tabletop off to the side.
+   -------------------------------------------------------------------------- */
+(function fxTrainSet(){
+  try{
+    const AT = new Set(['trainroom','modeltrains','modeltrainroom']);
+    let tr = null;                       // {cx,cy,rx,ry,a,speed,running,cd,puffT,puffs:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ tr = { cx: Math.max(W*0.2, Math.min(W*0.8, W*0.72)), cy: rand(H*0.66, H*0.72), rx:22, ry:9, a:0, speed:0, running:false, cd:0, puffT:0, puffs:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ tr = null; return; }
+      if (!tr) build();
+      if (tr.cd > 0) tr.cd -= dt;
+      if (tr.running){
+        tr.a += tr.speed*dt;
+        tr.speed -= dt*0.4;
+        if (tr.speed <= 0.3){ tr.speed = 0; tr.running = false; }
+        tr.puffT -= dt;
+        if (tr.puffT <= 0){ tr.puffT = 0.24; const ex = tr.cx + Math.cos(tr.a)*tr.rx, ey = tr.cy + Math.sin(tr.a)*tr.ry - 6; tr.puffs.push({ x: ex, y: ey, t:0, life: rand(0.8,1.3), r: rand(2,4) }); }
+      }
+      for (let i=tr.puffs.length-1;i>=0;i--){ const p = tr.puffs[i]; p.t += dt; p.y -= 12*dt; p.r += 4*dt; if (p.t >= p.life) tr.puffs.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!tr || !here()) return;
+      const cx = tr.cx, cy = tr.cy, rx = tr.rx, ry = tr.ry;
+      ctx.save();
+      // tabletop
+      ctx.fillStyle = 'rgba(120,90,60,0.25)'; ctx.beginPath(); ctx.ellipse(cx, cy, rx+8, ry+6, 0, 0, 7); ctx.fill();
+      // rails
+      ctx.strokeStyle = '#8a7a5a'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 7); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(cx, cy, rx-3, ry-2, 0, 0, 7); ctx.stroke();
+      ctx.strokeStyle = 'rgba(120,90,60,0.5)'; ctx.lineWidth = 1;
+      for (let k=0;k<12;k++){ const a = k/12*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*(rx-3), cy+Math.sin(a)*(ry-2)); ctx.lineTo(cx+Math.cos(a)*rx, cy+Math.sin(a)*ry); ctx.stroke(); }
+      // smoke
+      for (const p of tr.puffs){ const a = Math.max(0, 1 - p.t/p.life)*0.5; ctx.fillStyle = 'rgba(220,220,225,'+a.toFixed(3)+')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill(); }
+      // car behind
+      const a2 = tr.a - 0.55, c2x = cx+Math.cos(a2)*(rx-1.5), c2y = cy+Math.sin(a2)*(ry-1);
+      ctx.fillStyle = '#2980b9'; ctx.fillRect(c2x-3, c2y-5, 6, 5);
+      // engine
+      const ex = cx+Math.cos(tr.a)*(rx-1.5), ey = cy+Math.sin(tr.a)*(ry-1);
+      ctx.fillStyle = '#c0392b'; ctx.fillRect(ex-4, ey-6, 8, 6);
+      ctx.fillStyle = '#2a2a2a'; ctx.fillRect(ex-1, ey-10, 3, 4);
+      ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(ex, ey-2, 1.2, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!tr || !here()) return false;
+        if (px < tr.cx - tr.rx - 8 || px > tr.cx + tr.rx + 8 || py < tr.cy - tr.ry - 14 || py > tr.cy + tr.ry + 8) return false;
+        if (tr.cd > 0) return true;
+        tr.cd = 0.4; tr.running = true; tr.speed = Math.max(tr.speed, rand(3.6, 4.6));
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof say === 'function') say(pick(['Toot toot! 🚂','All aboard! 🥰','Round the bend it goes 😄','Chugga chugga ✨']));
+        try{ state.fun = clamp(state.fun + 4); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   66) THE PERFUME ATOMIZER  —  in the perfumery a pretty bottle waits with its
+   little squeeze bulb. Tap the bulb to spritz: a fine mist puffs out and drifting
+   scent notes bloom in the air. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxPerfume(){
+  try{
+    const AT = new Set(['perfumery','perfumeshop','fragrancehouse']);
+    let pf = null;                       // {x,y,squeeze,cd,mist:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ pf = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), squeeze:0, cd:0, mist:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ pf = null; return; }
+      if (!pf) build();
+      if (pf.cd > 0) pf.cd -= dt;
+      if (pf.squeeze > 0) pf.squeeze -= dt;
+      for (let i=pf.mist.length-1;i>=0;i--){ const m = pf.mist[i]; m.t += dt; m.x += m.vx*dt; m.y += m.vy*dt; m.vy -= 6*dt; m.r += 6*dt; if (m.t >= m.life) pf.mist.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pf || !here()) return;
+      const x = pf.x, y = pf.y;
+      ctx.save();
+      // mist first (behind the bottle)
+      for (const m of pf.mist){ const a = Math.max(0, 1 - m.t/m.life)*0.4; ctx.fillStyle = 'rgba(255,220,240,'+a.toFixed(3)+')'; ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, 7); ctx.fill(); }
+      // bottle body
+      ctx.fillStyle = 'rgba(220,180,210,0.45)'; ctx.beginPath(); ctx.ellipse(x, y-8, 10, 11, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(220,120,180,0.55)'; ctx.beginPath(); ctx.ellipse(x, y-4, 8, 6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.ellipse(x-3.5, y-11, 2.4, 3, -0.5, 0, 7); ctx.fill();
+      // neck + collar
+      ctx.fillStyle = 'rgba(220,180,210,0.6)'; ctx.fillRect(x-3, y-24, 6, 7);
+      ctx.fillStyle = '#c9a24a'; ctx.fillRect(x-4, y-26, 8, 3);
+      // squeeze bulb
+      const sq = pf.squeeze > 0 ? 0.75 : 1;
+      ctx.fillStyle = '#8a5a6a'; ctx.beginPath(); ctx.ellipse(x-8, y-24, 4*sq, 4, 0, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#c9a24a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x-4, y-24); ctx.lineTo(x-6, y-24); ctx.stroke();
+      // tassel
+      ctx.beginPath(); ctx.moveTo(x-8, y-20); ctx.lineTo(x-8, y-16); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pf || !here()) return false;
+        if (px < pf.x - 14 || px > pf.x + 12 || py < pf.y - 30 || py > pf.y + 6) return false;
+        if (pf.cd > 0) return true;
+        pf.cd = 0.5; pf.squeeze = 0.3;
+        const nx = pf.x - 3, ny = pf.y - 24;                        // nozzle — capture first
+        for (let i=0;i<10;i++) pf.mist.push({ x: nx, y: ny, vx: rand(-42,-8), vy: rand(-16,4), t:0, life: rand(0.8,1.4), r: rand(1.5,3) });
+        if (typeof sfx === 'function') sfx('draw');
+        if (typeof fxAt === 'function') fxAt(nx-8, ny-6, pick(['🌸','✨','💐']));
+        if (typeof say === 'function') say(pick(['Mmm, divine 🌸','A little spritz 🥰','Smells like a garden ✨','You always smell wonderful 💛']));
+        try{ state.love = clamp(state.love + 3); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 28). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   67) DEVELOP A PHOTO  —  in the darkroom a print soaks in the tray under the red
+   safelight. Tap to agitate it and the image slowly surfaces — a little heart of
+   us — until it's fully developed. Tap once more to start a fresh print. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxDarkroom(){
+  try{
+    const AT = new Set(['darkroom','photolab']);
+    let dr = null;                       // {x,y,dev,g,cd,rip}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ dr = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), dev:0, g:0, cd:0, rip:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ dr = null; return; }
+      if (!dr) build();
+      if (dr.cd > 0) dr.cd -= dt;
+      dr.rip += dt;
+      dr.g += (dr.dev - dr.g) * Math.min(1, dt*3);
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!dr || !here()) return;
+      const x = dr.x, y = dr.y, g = dr.g;
+      ctx.save();
+      // tray
+      ctx.fillStyle = '#2a2028';
+      ctx.beginPath(); ctx.ellipse(x, y, 20, 8, 0, 0, 7); ctx.fill();
+      // developer fluid
+      ctx.fillStyle = 'rgba(90,30,30,0.7)'; ctx.beginPath(); ctx.ellipse(x, y, 17, 6, 0, 0, 7); ctx.fill();
+      // paper
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(x, y, 17, 6, 0, 0, 7); ctx.clip();
+      const bob = Math.sin(dr.rip*2)*0.6;
+      ctx.fillStyle = 'rgba(230,225,215,0.85)'; ctx.fillRect(x-11, y-4+bob, 22, 9);
+      // the surfacing image — a little heart + initials
+      if (g > 0.05){
+        ctx.globalAlpha = Math.min(1, g);
+        ctx.fillStyle = '#6a4030';
+        const hx = x-3, hy = y-1+bob, s = 2.3;
+        ctx.beginPath();
+        ctx.moveTo(hx, hy+ s*1.4);
+        ctx.bezierCurveTo(hx - s*1.6, hy - s*0.3, hx - s*0.6, hy - s*1.4, hx, hy - s*0.4);
+        ctx.bezierCurveTo(hx + s*0.6, hy - s*1.4, hx + s*1.6, hy - s*0.3, hx, hy + s*1.4);
+        ctx.fill();
+        ctx.font = '5px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('P+K', x+6, y-1+bob);
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+      // red safelight hint (small, cornered — not a full overlay)
+      const sg = ctx.createRadialGradient(x+22, y-16, 0, x+22, y-16, 14);
+      sg.addColorStop(0, 'rgba(255,60,60,0.18)'); sg.addColorStop(1, 'rgba(255,60,60,0)');
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(x+22, y-16, 14, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!dr || !here()) return false;
+        if (px < dr.x - 20 || px > dr.x + 20 || py < dr.y - 10 || py > dr.y + 9) return false;
+        if (dr.cd > 0) return true;
+        dr.cd = 0.3;
+        const rx = dr.x, ry = dr.y - 6;                             // capture first
+        if (dr.dev >= 1){ dr.dev = 0; if (typeof fxAt === 'function') fxAt(rx, ry, '🌊'); return true; }  // fresh blank print
+        dr.dev = Math.min(1, dr.dev + 0.34);
+        if (typeof fxAt === 'function') fxAt(rx + rand(-6,6), ry, pick(['💧','✨']));
+        if (dr.dev >= 1){
+          if (typeof burstAt === 'function') burstAt(pick(['📷','💛','✨']), rx, ry-4);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['There we are! 📷','Look — us 🥰','It came out perfectly 💛','A keeper ✨']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          if (typeof sfx === 'function') sfx('draw');
+          if (typeof say === 'function' && Math.random() < 0.5) say(pick(['Coming into focus… ✨','Agitate, agitate 🌊','I see a shape 🥰']));
+          try{ state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   68) THE SEWING MACHINE  —  in the sewing studio a machine sits threaded and
+   ready. Tap it to run a seam: the needle bobs, the fabric feeds, and a little
+   heart of stitches fills in stitch by stitch until it's finished. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxSewingMachine(){
+  try{
+    const AT = new Set(['sewingstudio','tailorshop','quiltshop','sewingroom']);
+    const N = 14;
+    let sm = null;                       // {x,y,run,stitch,ph,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ sm = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), run:0, stitch:0, ph:0, cd:0 }; }
+    function heartPt(t){ // t in 0..1 around a small heart, returns [dx,dy]
+      const a = t*Math.PI*2;
+      const hx = 16*Math.pow(Math.sin(a),3);
+      const hy = 13*Math.cos(a) - 5*Math.cos(2*a) - 2*Math.cos(3*a) - Math.cos(4*a);
+      return [hx*0.28, -hy*0.28];
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ sm = null; return; }
+      if (!sm) build();
+      if (sm.cd > 0) sm.cd -= dt;
+      if (sm.run > 0){ sm.run -= dt; sm.ph += dt*30; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!sm || !here()) return;
+      const x = sm.x, y = sm.y;
+      ctx.save();
+      // fabric with the stitched heart
+      ctx.fillStyle = '#f3ead8'; ctx.fillRect(x-16, y-4, 32, 12);
+      ctx.fillStyle = '#c94f6d';
+      const done = Math.round(sm.stitch * N);
+      for (let i=0;i<done;i++){ const p = heartPt(i/N); ctx.beginPath(); ctx.arc(x + p[0], y + 2 + p[1], 0.9, 0, 7); ctx.fill(); }
+      // machine base + arm
+      ctx.fillStyle = '#3a6ea5';
+      ctx.fillRect(x-18, y+6, 36, 5);                              // bed
+      ctx.fillRect(x-16, y-24, 7, 30);                            // pillar
+      ctx.fillRect(x-16, y-24, 30, 7);                            // arm
+      ctx.fillStyle = '#2f5a86'; ctx.beginPath(); ctx.arc(x+13, y-20, 4, 0, 7); ctx.fill();   // hand wheel
+      // needle head + needle bobbing
+      ctx.fillStyle = '#2f5a86'; ctx.fillRect(x+6, y-20, 8, 10);
+      const nb = sm.run > 0 ? Math.abs(Math.sin(sm.ph))*4 : 0;
+      ctx.strokeStyle = '#c9ccd2'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(x+10, y-10); ctx.lineTo(x+10, y-2 + nb); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!sm || !here()) return false;
+        if (px < sm.x - 20 || px > sm.x + 20 || py < sm.y - 26 || py > sm.y + 12) return false;
+        if (sm.cd > 0) return true;
+        sm.cd = 0.25; sm.run = 0.9;
+        if (sm.stitch >= 1){ sm.stitch = 0; if (typeof sfx === 'function') sfx('draw'); return true; }  // fresh patch
+        sm.stitch = Math.min(1, sm.stitch + 0.34);
+        const hx = sm.x, hy = sm.y - 4;                             // capture first
+        if (sm.stitch >= 1){
+          if (typeof burstAt === 'function') burstAt(pick(['🧵','❤️','✨']), hx, hy);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['A little heart, all done! ❤️','Stitched with love 🧵','Made just for you 🥰','Ta-da! ✨']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 2); state.energy = clamp(state.energy + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          if (typeof sfx === 'function') sfx('draw');
+          if (typeof say === 'function' && Math.random() < 0.5) say(pick(['Rrr-rrr goes the needle 🧵','Almost there ✨','Steady hands 😌']));
+          try{ state.fun = clamp(state.fun + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   69) THE PUPPET THEATER  —  in the puppet theater a curtained little stage waits.
+   Tap it and a puppet pops up from behind the drapes to wave and take a bow, then
+   ducks back down. Scene-gated; the stage sits up to the side.
+   -------------------------------------------------------------------------- */
+(function fxPuppetTheater(){
+  try{
+    const AT = new Set(['puppettheater','puppetshow','marionette']);
+    const COLORS = ['#ff8fab','#8ad3ff','#ffd166','#9be59b','#c8a2ff'];
+    let pt = null;                       // {x,y,pop,ph,cd,col}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ pt = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.74)), y: rand(H*0.38, H*0.46), pop:0, ph:0, cd:0, col: pick(COLORS) }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ pt = null; return; }
+      if (!pt) build();
+      if (pt.cd > 0) pt.cd -= dt;
+      if (pt.pop > 0){ pt.pop -= dt; pt.ph += dt*8; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pt || !here()) return;
+      const x = pt.x, y = pt.y, w = 46, h = 40;
+      const left = x - w/2, top = y - h/2, floor = y + h/2 - 4;
+      ctx.save();
+      // stage box
+      ctx.fillStyle = '#5a3a2a'; ctx.fillRect(left-3, top-3, w+6, h+6);
+      ctx.fillStyle = '#1e1420'; ctx.fillRect(left, top, w, h);
+      // puppet rising in the opening (drawn before curtains so drapes frame it)
+      if (pt.pop > 0){
+        const rise = Math.max(0, Math.min(1, Math.min((2.0-pt.pop)/0.25, pt.pop/0.3, 1)));
+        const py = floor - rise*24;
+        const wave = Math.sin(pt.ph)*0.6;
+        ctx.save();
+        // body
+        ctx.fillStyle = pt.col; ctx.beginPath(); ctx.moveTo(x-6, floor); ctx.lineTo(x+6, floor); ctx.lineTo(x+4, py+6); ctx.lineTo(x-4, py+6); ctx.closePath(); ctx.fill();
+        // head
+        ctx.fillStyle = '#ffe0c2'; ctx.beginPath(); ctx.arc(x, py, 6, 0, 7); ctx.fill();
+        // eyes + smile
+        ctx.fillStyle = '#3a2a20'; ctx.beginPath(); ctx.arc(x-2, py-1, 0.9, 0, 7); ctx.arc(x+2, py-1, 0.9, 0, 7); ctx.fill();
+        ctx.strokeStyle = '#3a2a20'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.arc(x, py+1, 2.4, 0.2, Math.PI-0.2); ctx.stroke();
+        // waving arm
+        ctx.strokeStyle = pt.col; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x+4, py+8); ctx.lineTo(x+9, py+2 - wave*4); ctx.stroke();
+        ctx.restore();
+      }
+      // curtains (drapes framing the opening)
+      ctx.fillStyle = '#a33';
+      ctx.beginPath(); ctx.moveTo(left, top); ctx.lineTo(left+13, top); ctx.quadraticCurveTo(left+7, top+h*0.5, left+11, floor); ctx.lineTo(left, floor); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(left+w, top); ctx.lineTo(left+w-13, top); ctx.quadraticCurveTo(left+w-7, top+h*0.5, left+w-11, floor); ctx.lineTo(left+w, floor); ctx.closePath(); ctx.fill();
+      // valance
+      ctx.fillStyle = '#c0392b'; ctx.fillRect(left, top, w, 7);
+      ctx.fillStyle = '#e0b84a'; ctx.fillRect(left, top+7, w, 1.5);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pt || !here()) return false;
+        const w = 46, h = 40;
+        if (px < pt.x - w/2 - 3 || px > pt.x + w/2 + 3 || py < pt.y - h/2 - 3 || py > pt.y + h/2 + 3) return false;
+        if (pt.cd > 0) return true;
+        pt.cd = 1.2; pt.pop = 2.0; pt.ph = 0; pt.col = pick(COLORS);
+        const bx = pt.x, by = pt.y - 18;                            // capture first
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof burstAt === 'function') burstAt(pick(['🎭','👏','✨']), bx, by);
+        if (typeof say === 'function') say(pick(['Ta-daa! 🎭','Take a bow! 👏','Hello up there! 🥰','Encore! ✨']));
+        try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 29). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   70) THE GEYSER  —  in the geyser field a little vent bubbles on the ground. Tap
+   it to set it off: a column of water and steam jets skyward, then rains back down
+   and settles. Scene-gated; particles live in a managed array.
+   -------------------------------------------------------------------------- */
+(function fxGeyser(){
+  try{
+    const AT = new Set(['geyser','geyserfield','geyserbasin']);
+    let gy = null;                       // {x,y,erupt,cd,spawnT,jets:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ gy = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.72)), y: rand(H*0.74, H*0.80), erupt:0, cd:0, spawnT:0, jets:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ gy = null; return; }
+      if (!gy) build();
+      if (gy.cd > 0) gy.cd -= dt;
+      if (gy.erupt > 0){
+        gy.erupt -= dt; gy.spawnT -= dt;
+        if (gy.spawnT <= 0){
+          gy.spawnT = 0.04;
+          const vx0 = gy.x, vy0 = gy.y - 6;
+          for (let k=0;k<3;k++) gy.jets.push({ x: vx0 + rand(-3,3), y: vy0, vx: rand(-32,32), vy: rand(-300,-220), t:0, life: rand(1.0,1.7), steam: Math.random()<0.3 });
+          if (gy.jets.length > 140) gy.jets.splice(0, gy.jets.length-140);
+        }
+      }
+      for (let i=gy.jets.length-1;i>=0;i--){ const j = gy.jets[i]; j.t += dt; j.x += j.vx*dt; j.y += j.vy*dt; j.vy += 340*dt; if (j.t >= j.life) gy.jets.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gy || !here()) return;
+      const x = gy.x, y = gy.y;
+      ctx.save();
+      // mineral mound
+      ctx.fillStyle = '#8a7a66'; ctx.beginPath(); ctx.moveTo(x-16, y+6); ctx.quadraticCurveTo(x, y-10, x+16, y+6); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(180,200,210,0.35)'; ctx.beginPath(); ctx.ellipse(x, y+4, 15, 3, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#3a3230'; ctx.beginPath(); ctx.ellipse(x, y-4, 6, 2.2, 0, 0, 7); ctx.fill();
+      // jets
+      for (const j of gy.jets){
+        const a = Math.max(0, 1 - j.t/j.life);
+        if (j.steam){ ctx.fillStyle = 'rgba(230,235,240,'+(a*0.4).toFixed(3)+')'; ctx.beginPath(); ctx.arc(j.x, j.y, 3 + j.t*3, 0, 7); ctx.fill(); }
+        else { ctx.fillStyle = 'rgba(130,195,230,'+a.toFixed(3)+')'; ctx.beginPath(); ctx.arc(j.x, j.y, 1.6, 0, 7); ctx.fill(); }
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gy || !here()) return false;
+        if (px < gy.x - 18 || px > gy.x + 18 || py < gy.y - 14 || py > gy.y + 10) return false;
+        if (gy.cd > 0) return true;
+        gy.cd = 1.6; gy.erupt = 1.0; gy.spawnT = 0;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof say === 'function') say(pick(['Whoooosh! 💦','Up it goes! 🥰','Stand back! 😄','Nature is showing off ✨']));
+        try{ state.fun = clamp(state.fun + 4); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   71) STRUM THE GUITAR  —  in the luthier's workshop an instrument hangs finished
+   on its stand. Tap the strings to strum: they shiver into a blur and a few notes
+   ring out and drift up. Scene-gated; tucked to one side.
+   -------------------------------------------------------------------------- */
+(function fxLuthier(){
+  try{
+    const AT = new Set(['luthier','guitarshop','violinshop','instrumentmaker']);
+    let gt = null;                       // {x,y,strum,ph,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ gt = { x: Math.max(W*0.14, Math.min(W*0.5, W*0.20)), y: rand(H*0.58, H*0.64), strum:0, ph:0, cd:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ gt = null; return; }
+      if (!gt) build();
+      if (gt.cd > 0) gt.cd -= dt;
+      if (gt.strum > 0){ gt.strum -= dt; gt.ph += dt*40; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gt || !here()) return;
+      const x = gt.x, y = gt.y;
+      ctx.save();
+      // body (figure-8)
+      ctx.fillStyle = '#b5793a';
+      ctx.beginPath(); ctx.ellipse(x, y+6, 14, 16, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x, y-8, 11, 12, 0, 0, 7); ctx.fill();
+      // neck + headstock
+      ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x-3, y-40, 6, 22);
+      ctx.fillStyle = '#5a3a1a'; ctx.fillRect(x-4, y-47, 8, 7);
+      // soundhole + bridge
+      ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.arc(x, y+2, 4, 0, 7); ctx.fill();
+      ctx.fillStyle = '#5a3a1a'; ctx.fillRect(x-4, y+11, 8, 2);
+      // strings (shiver when strummed)
+      const topY = y-45, botY = y+12;
+      ctx.strokeStyle = 'rgba(235,235,225,0.85)'; ctx.lineWidth = 0.6;
+      for (let i=0;i<5;i++){
+        const sx = x-3 + i*1.5;
+        const amp = gt.strum > 0 ? Math.sin(gt.ph + i)*(gt.strum/0.8)*2 : 0;
+        ctx.beginPath(); ctx.moveTo(sx, topY); ctx.quadraticCurveTo(sx+amp, (topY+botY)/2, sx, botY); ctx.stroke();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gt || !here()) return false;
+        if (px < gt.x - 15 || px > gt.x + 15 || py < gt.y - 48 || py > gt.y + 24) return false;
+        if (gt.cd > 0) return true;
+        gt.cd = 0.6; gt.strum = 0.8; gt.ph = 0;
+        const sx = gt.x, sy = gt.y - 6;                             // capture BEFORE deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function'){ for (let i=0;i<3;i++){ const dx = rand(-8,8); setTimeout(function(){ try{ fxAt(sx+dx, sy - i*5, pick(['♪','🎸','🎵'])); }catch(e){} }, i*120); } }
+        if (typeof say === 'function') say(pick(['Play me a song 🎸','Such a sweet sound ♪','Our song? 🥰','Strum, strum ✨']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   72) POKE THE TIDE POOL  —  among the tide pools a little rocky basin holds a
+   starfish and a fringed anemone. Tap the water: ripples spread, the anemone's
+   tentacles shyly retract, and the starfish gives a wiggle. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxTidepool(){
+  try{
+    const AT = new Set(['tidepools','rockpools','tidepool']);
+    let tp = null;                       // {x,y,poke,cd,ph,ripples:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ tp = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.24)), y: rand(H*0.74, H*0.80), poke:0, cd:0, ph:0, ripples:[] }; }
+    function star(sx, sy, wig){
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(wig);
+      ctx.fillStyle = '#e5834a'; ctx.beginPath();
+      for (let k=0;k<10;k++){ const rr = (k%2===0)?5:2; const a = k/10*Math.PI*2 - Math.PI/2; ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr*0.72); }
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#c96a34'; ctx.beginPath(); ctx.arc(0, 0, 1, 0, 7); ctx.fill();
+      ctx.restore();
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ tp = null; return; }
+      if (!tp) build();
+      if (tp.cd > 0) tp.cd -= dt;
+      tp.ph += dt;
+      if (tp.poke > 0) tp.poke -= dt;
+      for (let i=tp.ripples.length-1;i>=0;i--){ tp.ripples[i].t += dt; if (tp.ripples[i].t > 1.4) tp.ripples.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!tp || !here()) return;
+      const x = tp.x, y = tp.y, retract = tp.poke > 0 ? 0.5 : 1;
+      ctx.save();
+      // rock rim
+      ctx.fillStyle = '#6a6258'; ctx.beginPath(); ctx.ellipse(x, y, 22, 11, 0, 0, 7); ctx.fill();
+      // water
+      ctx.fillStyle = 'rgba(70,150,180,0.7)'; ctx.beginPath(); ctx.ellipse(x, y, 17, 8, 0, 0, 7); ctx.fill();
+      // contents + ripples (clipped to the water)
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(x, y, 17, 8, 0, 0, 7); ctx.clip();
+      star(x-6, y+1, tp.poke > 0 ? Math.sin(tp.ph*10)*0.3 : 0);
+      // anemone
+      const ax = x+8, ay = y-1;
+      ctx.strokeStyle = '#e28aa6'; ctx.lineWidth = 1; ctx.lineCap = 'round';
+      for (let k=0;k<7;k++){ const a = k/7*Math.PI*2, len = 4*retract; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax+Math.cos(a)*len + Math.sin(tp.ph*3+k)*retract, ay+Math.sin(a)*len - 1); ctx.stroke(); }
+      ctx.fillStyle = '#d16a8a'; ctx.beginPath(); ctx.arc(ax, ay, 3, 0, 7); ctx.fill();
+      // ripples
+      for (const r of tp.ripples){ const rad = r.t*40, a = (1 - r.t/1.4)*0.5; ctx.strokeStyle = 'rgba(255,255,255,'+a.toFixed(3)+')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(r.x, r.y, rad, rad*0.5, 0, 0, 7); ctx.stroke(); }
+      ctx.restore();
+      // rim highlight
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(x, y, 17, 8, 0, 0, 7); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!tp || !here()) return false;
+        if (((px-tp.x)*(px-tp.x))/(20*20) + ((py-tp.y)*(py-tp.y))/(11*11) > 1) return false;
+        if (tp.cd > 0){ tp.ripples.push({ x: px, y: py, t:0 }); return true; }
+        tp.cd = 0.5; tp.poke = 0.8;
+        tp.ripples.push({ x: px, y: py, t:0 });
+        if (tp.ripples.length > 6) tp.ripples.shift();
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof say === 'function' && Math.random() < 0.7) say(pick(['A starfish! ⭐','It ducked away 🥰','So many little creatures ✨','Gentle now 💙']));
+        try{ state.love = clamp(state.love + 2); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 30). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   73) LIGHT THE STAINED GLASS  —  in the stained-glass studio an arched window is
+   set in lead. Tap each dark pane to let the sun catch it, glowing a jewel color;
+   light them all for a warm bloom of colored light, then it dims and can be lit
+   again. Scene-gated, progressive.
+   -------------------------------------------------------------------------- */
+(function fxStainedGlass(){
+  try{
+    const AT = new Set(['stainedglass','stainedglassstudio','chapel']);
+    const HUES = ['#e0556a','#5a9bd8','#e8c24a','#57b06a','#a06ad0','#e0884a'];
+    let sg = null;                       // {x,left,top,cw,ch,panes:[],allT,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const x = Math.max(W*0.18, Math.min(W*0.82, W*0.78)), top = rand(H*0.20, H*0.28), cw = 18, ch = 15;
+      const panes = [];
+      for (let r=0;r<3;r++) for (let c=0;c<2;c++) panes.push({ r, c, lit:false, hue: HUES[(r*2+c)%HUES.length] });
+      sg = { x, left: x-cw, top, cw, ch, panes, allT:0, cd:0 };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ sg = null; return; }
+      if (!sg) build();
+      if (sg.cd > 0) sg.cd -= dt;
+      if (sg.allT > 0){ sg.allT -= dt; if (sg.allT <= 0){ for (const p of sg.panes) p.lit = false; } }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!sg || !here()) return;
+      const left = sg.left, top = sg.top, cw = sg.cw, ch = sg.ch, W2 = cw*2, H2 = ch*3, cx = sg.x;
+      ctx.save();
+      // floor light cast when panes are lit (small, under the window — not full-screen)
+      let litN = 0; for (const p of sg.panes) if (p.lit) litN++;
+      if (litN > 0){
+        const fg = ctx.createRadialGradient(cx, top+H2+16, 0, cx, top+H2+16, 26);
+        fg.addColorStop(0, 'rgba(255,220,150,'+(0.05*litN).toFixed(3)+')'); fg.addColorStop(1, 'rgba(255,220,150,0)');
+        ctx.fillStyle = fg; ctx.beginPath(); ctx.ellipse(cx, top+H2+16, 26, 8, 0, 0, 7); ctx.fill();
+      }
+      // stone frame + arch
+      ctx.fillStyle = '#4a3f38';
+      ctx.beginPath(); ctx.arc(cx, top, W2/2+4, Math.PI, 0); ctx.fill();
+      ctx.fillRect(left-4, top-2, W2+8, H2+6);
+      // arch tint
+      ctx.save(); ctx.beginPath(); ctx.arc(cx, top, W2/2, Math.PI, 0); ctx.clip();
+      ctx.fillStyle = litN>0 ? 'rgba(230,200,90,0.5)' : '#1c2a30'; ctx.fillRect(left, top-W2/2, W2, W2/2); ctx.restore();
+      // panes
+      for (const p of sg.panes){
+        const rx = left + p.c*cw, ry = top + p.r*ch;
+        if (p.lit){
+          const g = ctx.createRadialGradient(rx+cw/2, ry+ch/2, 1, rx+cw/2, ry+ch/2, cw);
+          g.addColorStop(0, '#fff'); g.addColorStop(0.4, p.hue); g.addColorStop(1, p.hue);
+          ctx.fillStyle = g;
+        } else ctx.fillStyle = '#1c2a30';
+        ctx.fillRect(rx+1, ry+1, cw-2, ch-2);
+      }
+      // lead lines
+      ctx.strokeStyle = '#2a2420'; ctx.lineWidth = 1.4;
+      for (let c=0;c<=2;c++){ ctx.beginPath(); ctx.moveTo(left+c*cw, top); ctx.lineTo(left+c*cw, top+H2); ctx.stroke(); }
+      for (let r=0;r<=3;r++){ ctx.beginPath(); ctx.moveTo(left, top+r*ch); ctx.lineTo(left+W2, top+r*ch); ctx.stroke(); }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!sg || !here()) return false;
+        const c = Math.floor((px - sg.left)/sg.cw), r = Math.floor((py - sg.top)/sg.ch);
+        if (c < 0 || c > 1 || r < 0 || r > 2) return false;
+        if (sg.cd > 0) return true;
+        const pane = sg.panes.find(function(p){ return p.r===r && p.c===c; });
+        if (!pane) return false;
+        if (pane.lit) return true;                                  // already lit — consume
+        pane.lit = true;
+        const lx = sg.left + c*sg.cw + sg.cw/2, ly = sg.top + r*sg.ch + sg.ch/2;   // capture first
+        if (typeof fxAt === 'function') fxAt(lx, ly, pick(['✨','🌈','💛']));
+        const allLit = sg.panes.every(function(p){ return p.lit; });
+        if (allLit){
+          sg.allT = 8;
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['All aglow! 🌈','Look at the colors 🥰','Light pouring through ✨','Like a little cathedral 💛']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          if (typeof sfx === 'function') sfx('tap');
+          try{ state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   74) SKIP A STONE  —  at the waterfall a calm pool gathers at the base. Tap the
+   water to skip a flat stone: it bounces across the surface a few times, each hop
+   leaving a spreading ripple, before it plops in. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxWaterfall(){
+  try{
+    let wf = null;                       // {x,y,left,right,stone,cd,t,ripples:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'waterfall'; }catch(e){ return false; } }
+    function build(){ const x = Math.max(W*0.2, Math.min(W*0.8, W*0.70)); wf = { x, y: rand(H*0.72, H*0.78), left: x-24, right: x+24, stone:null, cd:0, t:0, ripples:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ wf = null; return; }
+      if (!wf) build();
+      if (wf.cd > 0) wf.cd -= dt;
+      wf.t += dt;
+      for (let i=wf.ripples.length-1;i>=0;i--){ wf.ripples[i].t += dt; if (wf.ripples[i].t > 1.3) wf.ripples.splice(i,1); }
+      if (wf.stone){
+        const s = wf.stone; s.x += s.vx*dt; s.y += s.vy*dt; s.vy += 300*dt; s.spin += dt*9;
+        if (s.y >= wf.y && s.vy > 0){
+          s.y = wf.y; s.vy = -s.vy*0.5; s.bounces++;
+          wf.ripples.push({ x: s.x, t:0 });
+          if (Math.abs(s.vy) < 45 || s.bounces > 4 || s.x > wf.right){ wf.stone = null; }
+        } else if (s.x > W + 20){ wf.stone = null; }
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!wf || !here()) return;
+      const x = wf.x, y = wf.y;
+      ctx.save();
+      // falling water streaks above the pool
+      ctx.strokeStyle = 'rgba(205,228,240,0.45)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      for (let k=-2;k<=2;k++){ const fx = x + k*3.5 + Math.sin(wf.t*4 + k)*0.8; ctx.beginPath(); ctx.moveTo(fx, y-42); ctx.lineTo(fx, y-12); ctx.stroke(); }
+      // pool
+      ctx.fillStyle = 'rgba(70,150,180,0.7)'; ctx.beginPath(); ctx.ellipse(x, y, 26, 8, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.beginPath(); ctx.ellipse(x, y-1, 20, 4, 0, 0, 7); ctx.fill();
+      // ripples (clipped to pool)
+      ctx.save(); ctx.beginPath(); ctx.ellipse(x, y, 26, 8, 0, 0, 7); ctx.clip();
+      for (const r of wf.ripples){ const rad = r.t*34, a = (1 - r.t/1.3)*0.55; ctx.strokeStyle = 'rgba(255,255,255,'+a.toFixed(3)+')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(r.x, y, rad, rad*0.4, 0, 0, 7); ctx.stroke(); }
+      ctx.restore();
+      // stone in flight
+      if (wf.stone){
+        const s = wf.stone;
+        ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.spin);
+        ctx.fillStyle = '#7a7168'; ctx.beginPath(); ctx.ellipse(0, 0, 4, 1.8, 0, 0, 7); ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!wf || !here()) return false;
+        if (px < wf.x - 30 || px > wf.x + 30 || py < wf.y - 44 || py > wf.y + 10) return false;
+        if (wf.cd > 0) return true;
+        wf.cd = 0.6;
+        if (!wf.stone) wf.stone = { x: wf.left, y: wf.y - 30, vx: rand(95,125), vy: rand(-45,-12), spin:0, bounces:0 };
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof say === 'function' && Math.random() < 0.7) say(pick(['Skip, skip, skip! 💧','Four bounces! 🥰','So peaceful here ✨','Watch this one 😄']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   75) THE SONGBIRD  —  in the aviary a little bird sits on its perch. Tap it and it
+   bursts into song — beak wide, wings a-flutter — with notes lifting into the air.
+   Scene-gated; perched off to the side.
+   -------------------------------------------------------------------------- */
+(function fxAviary(){
+  try{
+    const AT = new Set(['aviary','birdsanctuary','birdhouse']);
+    const BODIES = [['#f2a53a','#d98724'],['#5aa9e0','#3a86c0'],['#e06a7a','#c04a5a'],['#7fc06a','#5a9a48']];
+    let av = null;                       // {x,y,sing,ph,idle,cd,col,col2}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ const b = pick(BODIES); av = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.72)), y: rand(H*0.48, H*0.56), sing:0, ph:0, idle: rand(0,6), cd:0, col: b[0], col2: b[1] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ av = null; return; }
+      if (!av) build();
+      if (av.cd > 0) av.cd -= dt;
+      av.idle += dt;
+      if (av.sing > 0){ av.sing -= dt; av.ph += dt*14; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!av || !here()) return;
+      const x = av.x, y = av.y;
+      ctx.save();
+      // perch
+      ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x-18, y+6); ctx.lineTo(x+16, y+8); ctx.stroke();
+      const bob = Math.sin(av.idle*2)*0.8 + (av.sing>0 ? Math.sin(av.ph)*1 : 0);
+      // legs
+      ctx.strokeStyle = '#c88a3a'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x-1, y+4+bob); ctx.lineTo(x-1, y+7); ctx.moveTo(x+2, y+4+bob); ctx.lineTo(x+2, y+7); ctx.stroke();
+      ctx.save(); ctx.translate(x, y+bob);
+      // tail
+      ctx.fillStyle = av.col2; ctx.beginPath(); ctx.moveTo(-6,-2); ctx.lineTo(-13,2); ctx.lineTo(-6,3); ctx.closePath(); ctx.fill();
+      // body
+      ctx.fillStyle = av.col; ctx.beginPath(); ctx.ellipse(0, 0, 7, 6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#f5efe0'; ctx.beginPath(); ctx.ellipse(1, 2, 4, 3.5, 0, 0, 7); ctx.fill();
+      // wing (flutters when singing)
+      const wfl = av.sing > 0 ? Math.abs(Math.sin(av.ph))*0.9 : 0.1;
+      ctx.fillStyle = av.col2; ctx.save(); ctx.translate(0, -1); ctx.rotate(-wfl); ctx.beginPath(); ctx.ellipse(-1, 0, 5, 3, 0.3, 0, 7); ctx.fill(); ctx.restore();
+      // head + eye
+      ctx.fillStyle = av.col; ctx.beginPath(); ctx.arc(6, -4, 4, 0, 7); ctx.fill();
+      ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(7, -5, 1, 0, 7); ctx.fill();
+      // beak (opens when singing)
+      const open = av.sing > 0 ? Math.abs(Math.sin(av.ph*1.5))*1.6 : 0;
+      ctx.fillStyle = '#e8a83a'; ctx.beginPath(); ctx.moveTo(9, -5); ctx.lineTo(13, -4.5-open*0.5); ctx.lineTo(9, -3.5+open*0.5); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!av || !here()) return false;
+        if (px < av.x - 14 || px > av.x + 16 || py < av.y - 14 || py > av.y + 10) return false;
+        if (av.cd > 0) return true;
+        av.cd = 0.8; av.sing = 1.0; av.ph = 0;
+        const nx = av.x + 10, ny = av.y - 10;                       // capture BEFORE deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function'){ for (let i=0;i<3;i++){ const dx = rand(-6,8); setTimeout(function(){ try{ fxAt(nx+dx, ny - i*5, pick(['♪','🐦','🎵'])); }catch(e){} }, i*130); } }
+        if (typeof say === 'function') say(pick(['Such a sweet song! 🐦','Sing for us, little one ♪','Good morning! 🥰','Tweet tweet! ✨']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
         return true;
       }catch(e){ return false; }
     });
