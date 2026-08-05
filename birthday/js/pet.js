@@ -1146,6 +1146,66 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.76, r:50, e:'💧', lines:['A still black pool 💧','Mirroring the glow','So calm and secret']},
     {nx:0.40, ny:0.10, r:44, e:'✨', lines:['Crystals on the ceiling ✨','Twinkling far above','Like little stars']},
   ],
+  sushibar: [
+    {nx:0.20, ny:0.75, r:56, e:'🍣', lines:['Fresh nigiri! 🍣','So beautifully made','Which piece first? 😋']},
+    {nx:0.86, ny:0.14, r:46, e:'🏮', lines:['A paper lantern 🏮','Glowing warm and orange','So cozy at the counter 🥰']},
+    {nx:0.50, ny:0.20, r:46, e:'🌊', lines:['A framed wave print 🌊','Such a classic scene','So calming to look at 💛']},
+    {nx:0.50, ny:0.06, r:44, e:'🎌', lines:['The noren curtain 🎌','We duck under to enter','Our little date spot']},
+  ],
+  seasidecarousel: [
+    {nx:0.50, ny:0.45, r:60, e:'🎠', lines:['A carousel! 🎠','The horses go round','Ride one with me? 🥰']},
+    {nx:0.20, ny:0.52, r:52, e:'🌊', lines:['The sparkling sea 🌊','Right by the boardwalk','So bright and blue 💛']},
+    {nx:0.85, ny:0.11, r:46, e:'☀️', lines:['A cheery sun ☀️','Warm on my face','What a perfect day 🥰']},
+    {nx:0.50, ny:0.82, r:50, e:'🪵', lines:['The wooden boardwalk 🪵','Stroll it with me','Salt air and sunshine']},
+  ],
+  potionkitchen: [
+    {nx:0.50, ny:0.20, r:54, e:'🧪', lines:['Shelves of potions 🧪','All glowing colors!','Which one\'s a love spell? 💗']},
+    {nx:0.20, ny:0.78, r:52, e:'⚗️', lines:['A bubbling cauldron ⚗️','Blub, blub, blub','What are we brewing? 🥰']},
+    {nx:0.82, ny:0.78, r:46, e:'📖', lines:['An open spellbook 📖','Ancient scribbles','Read me an incantation 💛']},
+    {nx:0.10, ny:0.12, r:44, e:'🌿', lines:['Dried herbs hanging 🌿','So fragrant and witchy','For the potions, I bet']},
+  ],
+  kitehill: [
+    {nx:0.30, ny:0.20, r:52, e:'🪁', lines:['A red kite! 🪁','Dancing in the wind','Hold the string with me 🥰']},
+    {nx:0.66, ny:0.16, r:48, e:'🪁', lines:['A blue one too 🪁','So high up there!','With a wavy tail 💛']},
+    {nx:0.50, ny:0.75, r:56, e:'🌱', lines:['The grassy hill 🌱','Swept by the breeze','Run up it with me!']},
+    {nx:0.14, ny:0.90, r:46, e:'🧺', lines:['A picnic blanket 🧺','Let\'s rest a while','Watch the kites together 🥰']},
+  ],
+  flowermarket: [
+    {nx:0.15, ny:0.78, r:56, e:'💐', lines:['Buckets of flowers 💐','So many colors!','Pick a bouquet? 🥰']},
+    {nx:0.85, ny:0.78, r:52, e:'🌷', lines:['More blooms over here 🌷','So fresh this morning','They smell wonderful 💛']},
+    {nx:0.34, ny:0.38, r:46, e:'🌸', lines:['Hanging flower baskets 🌸','Spilling over with petals','So pretty overhead']},
+    {nx:0.50, ny:0.30, r:48, e:'🏘️', lines:['Pastel little shopfronts 🏘️','So charming and quaint','What a lovely street']},
+  ],
+  snowglobeshop: [
+    {nx:0.30, ny:0.32, r:54, e:'🔮', lines:['Rows of snow globes! 🔮','Give one a shake','Watch the snow swirl 🥰']},
+    {nx:0.70, ny:0.52, r:50, e:'❄️', lines:['A wintry little scene ❄️','Trapped in glass','So magical and tiny 💛']},
+    {nx:0.16, ny:0.80, r:50, e:'🏠', lines:['A big feature globe 🏠','A cozy house inside','I wish we lived in there 🥰']},
+    {nx:0.50, ny:0.13, r:44, e:'💡', lines:['A warm pendant light 💡','Glowing so softly','So cozy in this shop']},
+  ],
+  nightgarden: [
+    {nx:0.80, ny:0.13, r:52, e:'🌙', lines:['A soft glowing moon 🌙','Watching over the garden','So peaceful tonight 🥰']},
+    {nx:0.50, ny:0.16, r:48, e:'✨', lines:['An arch of lights ✨','Twinkling overhead','Walk under it with me 💛']},
+    {nx:0.15, ny:0.70, r:50, e:'🌸', lines:['Glowing flowers 🌸','Lit up in the dark','So dreamy and magical']},
+    {nx:0.88, ny:0.68, r:48, e:'🌼', lines:['More glowing blooms 🌼','Every color aglow','Like little lanterns 🥰']},
+  ],
+  mochishop: [
+    {nx:0.30, ny:0.26, r:52, e:'🍡', lines:['Jars of mochi 🍡','So soft and pastel','So squishy and cute 🥰']},
+    {nx:0.80, ny:0.76, r:52, e:'🍡', lines:['Trays of wagashi 🍡','Little works of art','Almost too pretty to eat 💛']},
+    {nx:0.50, ny:0.72, r:46, e:'🍢', lines:['A dango skewer 🍢','Three sweet little balls','Share it with me? 😋']},
+    {nx:0.20, ny:0.14, r:44, e:'🎏', lines:['A paper garland 🎏','Fluttering up top','So festive and sweet']},
+  ],
+  aquariumtunnel: [
+    {nx:0.50, ny:0.42, r:56, e:'✨', lines:['A glass tunnel! ✨','Water all around us','We\'re walking under the sea 🥰']},
+    {nx:0.30, ny:0.24, r:52, e:'🐠', lines:['Fish overhead! 🐠','Swimming right above us','So close I could touch them 💛']},
+    {nx:0.22, ny:0.16, r:46, e:'🪼', lines:['A drifting jellyfish 🪼','So floaty and glowy','Like a little ghost 🥰']},
+    {nx:0.90, ny:0.85, r:44, e:'🪸', lines:['Coral and seaweed 🪸','Swaying at the base','So colorful down here']},
+  ],
+  starrymeadow: [
+    {nx:0.50, ny:0.25, r:58, e:'✨', lines:['The Milky Way! ✨','So many stars','I\'ve never seen so many 🥰']},
+    {nx:0.16, ny:0.14, r:46, e:'🌙', lines:['A crescent moon 🌙','Slim and silver','So pretty tonight 💛']},
+    {nx:0.12, ny:0.88, r:48, e:'🏮', lines:['A lantern and blanket 🏮','Our little spot','Lie back and look up with me 🥰']},
+    {nx:0.86, ny:0.90, r:46, e:'🔭', lines:['A telescope 🔭','Let\'s find a planet','Point it wherever you like']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){

@@ -5143,3 +5143,233 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 30). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   73) LIGHT THE STAINED GLASS  —  in the stained-glass studio an arched window is
+   set in lead. Tap each dark pane to let the sun catch it, glowing a jewel color;
+   light them all for a warm bloom of colored light, then it dims and can be lit
+   again. Scene-gated, progressive.
+   -------------------------------------------------------------------------- */
+(function fxStainedGlass(){
+  try{
+    const AT = new Set(['stainedglass','stainedglassstudio','chapel']);
+    const HUES = ['#e0556a','#5a9bd8','#e8c24a','#57b06a','#a06ad0','#e0884a'];
+    let sg = null;                       // {x,left,top,cw,ch,panes:[],allT,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const x = Math.max(W*0.18, Math.min(W*0.82, W*0.78)), top = rand(H*0.20, H*0.28), cw = 18, ch = 15;
+      const panes = [];
+      for (let r=0;r<3;r++) for (let c=0;c<2;c++) panes.push({ r, c, lit:false, hue: HUES[(r*2+c)%HUES.length] });
+      sg = { x, left: x-cw, top, cw, ch, panes, allT:0, cd:0 };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ sg = null; return; }
+      if (!sg) build();
+      if (sg.cd > 0) sg.cd -= dt;
+      if (sg.allT > 0){ sg.allT -= dt; if (sg.allT <= 0){ for (const p of sg.panes) p.lit = false; } }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!sg || !here()) return;
+      const left = sg.left, top = sg.top, cw = sg.cw, ch = sg.ch, W2 = cw*2, H2 = ch*3, cx = sg.x;
+      ctx.save();
+      // floor light cast when panes are lit (small, under the window — not full-screen)
+      let litN = 0; for (const p of sg.panes) if (p.lit) litN++;
+      if (litN > 0){
+        const fg = ctx.createRadialGradient(cx, top+H2+16, 0, cx, top+H2+16, 26);
+        fg.addColorStop(0, 'rgba(255,220,150,'+(0.05*litN).toFixed(3)+')'); fg.addColorStop(1, 'rgba(255,220,150,0)');
+        ctx.fillStyle = fg; ctx.beginPath(); ctx.ellipse(cx, top+H2+16, 26, 8, 0, 0, 7); ctx.fill();
+      }
+      // stone frame + arch
+      ctx.fillStyle = '#4a3f38';
+      ctx.beginPath(); ctx.arc(cx, top, W2/2+4, Math.PI, 0); ctx.fill();
+      ctx.fillRect(left-4, top-2, W2+8, H2+6);
+      // arch tint
+      ctx.save(); ctx.beginPath(); ctx.arc(cx, top, W2/2, Math.PI, 0); ctx.clip();
+      ctx.fillStyle = litN>0 ? 'rgba(230,200,90,0.5)' : '#1c2a30'; ctx.fillRect(left, top-W2/2, W2, W2/2); ctx.restore();
+      // panes
+      for (const p of sg.panes){
+        const rx = left + p.c*cw, ry = top + p.r*ch;
+        if (p.lit){
+          const g = ctx.createRadialGradient(rx+cw/2, ry+ch/2, 1, rx+cw/2, ry+ch/2, cw);
+          g.addColorStop(0, '#fff'); g.addColorStop(0.4, p.hue); g.addColorStop(1, p.hue);
+          ctx.fillStyle = g;
+        } else ctx.fillStyle = '#1c2a30';
+        ctx.fillRect(rx+1, ry+1, cw-2, ch-2);
+      }
+      // lead lines
+      ctx.strokeStyle = '#2a2420'; ctx.lineWidth = 1.4;
+      for (let c=0;c<=2;c++){ ctx.beginPath(); ctx.moveTo(left+c*cw, top); ctx.lineTo(left+c*cw, top+H2); ctx.stroke(); }
+      for (let r=0;r<=3;r++){ ctx.beginPath(); ctx.moveTo(left, top+r*ch); ctx.lineTo(left+W2, top+r*ch); ctx.stroke(); }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!sg || !here()) return false;
+        const c = Math.floor((px - sg.left)/sg.cw), r = Math.floor((py - sg.top)/sg.ch);
+        if (c < 0 || c > 1 || r < 0 || r > 2) return false;
+        if (sg.cd > 0) return true;
+        const pane = sg.panes.find(function(p){ return p.r===r && p.c===c; });
+        if (!pane) return false;
+        if (pane.lit) return true;                                  // already lit — consume
+        pane.lit = true;
+        const lx = sg.left + c*sg.cw + sg.cw/2, ly = sg.top + r*sg.ch + sg.ch/2;   // capture first
+        if (typeof fxAt === 'function') fxAt(lx, ly, pick(['✨','🌈','💛']));
+        const allLit = sg.panes.every(function(p){ return p.lit; });
+        if (allLit){
+          sg.allT = 8;
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['All aglow! 🌈','Look at the colors 🥰','Light pouring through ✨','Like a little cathedral 💛']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          if (typeof sfx === 'function') sfx('tap');
+          try{ state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   74) SKIP A STONE  —  at the waterfall a calm pool gathers at the base. Tap the
+   water to skip a flat stone: it bounces across the surface a few times, each hop
+   leaving a spreading ripple, before it plops in. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxWaterfall(){
+  try{
+    let wf = null;                       // {x,y,left,right,stone,cd,t,ripples:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'waterfall'; }catch(e){ return false; } }
+    function build(){ const x = Math.max(W*0.2, Math.min(W*0.8, W*0.70)); wf = { x, y: rand(H*0.72, H*0.78), left: x-24, right: x+24, stone:null, cd:0, t:0, ripples:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ wf = null; return; }
+      if (!wf) build();
+      if (wf.cd > 0) wf.cd -= dt;
+      wf.t += dt;
+      for (let i=wf.ripples.length-1;i>=0;i--){ wf.ripples[i].t += dt; if (wf.ripples[i].t > 1.3) wf.ripples.splice(i,1); }
+      if (wf.stone){
+        const s = wf.stone; s.x += s.vx*dt; s.y += s.vy*dt; s.vy += 300*dt; s.spin += dt*9;
+        if (s.y >= wf.y && s.vy > 0){
+          s.y = wf.y; s.vy = -s.vy*0.5; s.bounces++;
+          wf.ripples.push({ x: s.x, t:0 });
+          if (Math.abs(s.vy) < 45 || s.bounces > 4 || s.x > wf.right){ wf.stone = null; }
+        } else if (s.x > W + 20){ wf.stone = null; }
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!wf || !here()) return;
+      const x = wf.x, y = wf.y;
+      ctx.save();
+      // falling water streaks above the pool
+      ctx.strokeStyle = 'rgba(205,228,240,0.45)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      for (let k=-2;k<=2;k++){ const fx = x + k*3.5 + Math.sin(wf.t*4 + k)*0.8; ctx.beginPath(); ctx.moveTo(fx, y-42); ctx.lineTo(fx, y-12); ctx.stroke(); }
+      // pool
+      ctx.fillStyle = 'rgba(70,150,180,0.7)'; ctx.beginPath(); ctx.ellipse(x, y, 26, 8, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.beginPath(); ctx.ellipse(x, y-1, 20, 4, 0, 0, 7); ctx.fill();
+      // ripples (clipped to pool)
+      ctx.save(); ctx.beginPath(); ctx.ellipse(x, y, 26, 8, 0, 0, 7); ctx.clip();
+      for (const r of wf.ripples){ const rad = r.t*34, a = (1 - r.t/1.3)*0.55; ctx.strokeStyle = 'rgba(255,255,255,'+a.toFixed(3)+')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(r.x, y, rad, rad*0.4, 0, 0, 7); ctx.stroke(); }
+      ctx.restore();
+      // stone in flight
+      if (wf.stone){
+        const s = wf.stone;
+        ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.spin);
+        ctx.fillStyle = '#7a7168'; ctx.beginPath(); ctx.ellipse(0, 0, 4, 1.8, 0, 0, 7); ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!wf || !here()) return false;
+        if (px < wf.x - 30 || px > wf.x + 30 || py < wf.y - 44 || py > wf.y + 10) return false;
+        if (wf.cd > 0) return true;
+        wf.cd = 0.6;
+        if (!wf.stone) wf.stone = { x: wf.left, y: wf.y - 30, vx: rand(95,125), vy: rand(-45,-12), spin:0, bounces:0 };
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof say === 'function' && Math.random() < 0.7) say(pick(['Skip, skip, skip! 💧','Four bounces! 🥰','So peaceful here ✨','Watch this one 😄']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   75) THE SONGBIRD  —  in the aviary a little bird sits on its perch. Tap it and it
+   bursts into song — beak wide, wings a-flutter — with notes lifting into the air.
+   Scene-gated; perched off to the side.
+   -------------------------------------------------------------------------- */
+(function fxAviary(){
+  try{
+    const AT = new Set(['aviary','birdsanctuary','birdhouse']);
+    const BODIES = [['#f2a53a','#d98724'],['#5aa9e0','#3a86c0'],['#e06a7a','#c04a5a'],['#7fc06a','#5a9a48']];
+    let av = null;                       // {x,y,sing,ph,idle,cd,col,col2}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ const b = pick(BODIES); av = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.72)), y: rand(H*0.48, H*0.56), sing:0, ph:0, idle: rand(0,6), cd:0, col: b[0], col2: b[1] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ av = null; return; }
+      if (!av) build();
+      if (av.cd > 0) av.cd -= dt;
+      av.idle += dt;
+      if (av.sing > 0){ av.sing -= dt; av.ph += dt*14; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!av || !here()) return;
+      const x = av.x, y = av.y;
+      ctx.save();
+      // perch
+      ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x-18, y+6); ctx.lineTo(x+16, y+8); ctx.stroke();
+      const bob = Math.sin(av.idle*2)*0.8 + (av.sing>0 ? Math.sin(av.ph)*1 : 0);
+      // legs
+      ctx.strokeStyle = '#c88a3a'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x-1, y+4+bob); ctx.lineTo(x-1, y+7); ctx.moveTo(x+2, y+4+bob); ctx.lineTo(x+2, y+7); ctx.stroke();
+      ctx.save(); ctx.translate(x, y+bob);
+      // tail
+      ctx.fillStyle = av.col2; ctx.beginPath(); ctx.moveTo(-6,-2); ctx.lineTo(-13,2); ctx.lineTo(-6,3); ctx.closePath(); ctx.fill();
+      // body
+      ctx.fillStyle = av.col; ctx.beginPath(); ctx.ellipse(0, 0, 7, 6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#f5efe0'; ctx.beginPath(); ctx.ellipse(1, 2, 4, 3.5, 0, 0, 7); ctx.fill();
+      // wing (flutters when singing)
+      const wfl = av.sing > 0 ? Math.abs(Math.sin(av.ph))*0.9 : 0.1;
+      ctx.fillStyle = av.col2; ctx.save(); ctx.translate(0, -1); ctx.rotate(-wfl); ctx.beginPath(); ctx.ellipse(-1, 0, 5, 3, 0.3, 0, 7); ctx.fill(); ctx.restore();
+      // head + eye
+      ctx.fillStyle = av.col; ctx.beginPath(); ctx.arc(6, -4, 4, 0, 7); ctx.fill();
+      ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(7, -5, 1, 0, 7); ctx.fill();
+      // beak (opens when singing)
+      const open = av.sing > 0 ? Math.abs(Math.sin(av.ph*1.5))*1.6 : 0;
+      ctx.fillStyle = '#e8a83a'; ctx.beginPath(); ctx.moveTo(9, -5); ctx.lineTo(13, -4.5-open*0.5); ctx.lineTo(9, -3.5+open*0.5); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!av || !here()) return false;
+        if (px < av.x - 14 || px > av.x + 16 || py < av.y - 14 || py > av.y + 10) return false;
+        if (av.cd > 0) return true;
+        av.cd = 0.8; av.sing = 1.0; av.ph = 0;
+        const nx = av.x + 10, ny = av.y - 10;                       // capture BEFORE deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function'){ for (let i=0;i<3;i++){ const dx = rand(-6,8); setTimeout(function(){ try{ fxAt(nx+dx, ny - i*5, pick(['♪','🐦','🎵'])); }catch(e){} }, i*130); } }
+        if (typeof say === 'function') say(pick(['Such a sweet song! 🐦','Sing for us, little one ♪','Good morning! 🥰','Tweet tweet! ✨']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

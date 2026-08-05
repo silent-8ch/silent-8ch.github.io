@@ -1980,3 +1980,232 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   SWAN. On calm pond/lake scenes a swan glides serenely across the water. Tap it
+   to watch it dip and preen — a graceful, tender moment about lasting love.
+   -------------------------------------------------------------------------- */
+(function encSwan(){
+  try{
+    const CALM = new Set(['duckpond','koipond','lotuspond','waterlily','river','marina','zengarden',
+      'watermill','riceterraces','moonlitjetty','harbornight','lighthouse','icepond','waterfall',
+      'lanternfestival','nightgarden','bambootearoom']);
+    let swan = null, timer = 26 + Math.random()*44;
+    function canHere(){ try{ return CALM.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (swan){
+          swan.t += dt; swan.x += swan.vx*dt;
+          swan.y = swan.baseY + Math.sin(swan.t*0.7)*3;
+          swan.neck = Math.sin(swan.t*0.9)*0.15;
+          if (swan.x < -34 || swan.x > W+34) swan = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 36 + Math.random()*54;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            const by = H*(0.68+Math.random()*0.06);
+            swan = { x: dir>0 ? -26 : W+26, baseY: by, y: by, vx: dir*rand(10,16), dir, t:0, neck:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!swan) return;
+      try{
+        const x = swan.x, y = swan.y, d = swan.dir;
+        ctx.save();
+        // reflection ripple
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(x, y+7, 16, 4, 0, 0, 7); ctx.stroke();
+        // body
+        ctx.fillStyle = '#fbfbfb';
+        ctx.beginPath(); ctx.ellipse(x, y, 13, 7, 0, 0, 7); ctx.fill();
+        // raised tail
+        ctx.beginPath(); ctx.moveTo(x - d*11, y-2); ctx.lineTo(x - d*18, y-7); ctx.lineTo(x - d*11, y+2); ctx.fill();
+        // curved neck
+        ctx.strokeStyle = '#fbfbfb'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+        const nx = x + d*10, ny = y - 3;
+        ctx.beginPath();
+        ctx.moveTo(nx, ny);
+        ctx.quadraticCurveTo(nx + d*8, ny - 12 + swan.neck*10, nx + d*4, ny - 18);
+        ctx.stroke();
+        // head + beak
+        ctx.fillStyle = '#fbfbfb';
+        ctx.beginPath(); ctx.arc(nx + d*4, ny - 19, 3.2, 0, 7); ctx.fill();
+        ctx.fillStyle = '#e8973a';
+        ctx.beginPath(); ctx.moveTo(nx + d*6, ny-19); ctx.lineTo(nx + d*10, ny-18); ctx.lineTo(nx + d*6, ny-17); ctx.fill();
+        ctx.fillStyle = '#20130a';
+        ctx.beginPath(); ctx.arc(nx + d*5, ny-20, 0.9, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!swan) return false;
+      const cx = swan.x, cy = swan.y - 8;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 34*34) return false;
+      say(pick(['A swan 🦢 they mate for life, you know — I understand them completely',
+                'So graceful it hurts 🦢 all calm on top, paddling like mad beneath — relatable 😄',
+                'Look how serene 🤍 this is the kind of quiet I want a lifetime of, with you',
+                'She dipped her head like a little bow 🦢 even she thinks you\'re royalty']));
+      fxAt(cx, cy-8, '🦢'); hearts(); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.energy = clamp(state.energy + 2); refreshHUD();
+      swan = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   SNAIL. On garden/greenhouse/mossy scenes a snail inches along a leaf, feelers
+   waving. Tap it (no rush!) for a slow-down-and-savor-the-moment wish.
+   -------------------------------------------------------------------------- */
+(function encSnail(){
+  try{
+    const LEAFY = new Set(['greenhouse','mossgarden','herbshed','nursery','florist','flowermarket',
+      'bonsaigarden','sunroom','zengarden','bamboo','bambootearoom','mushroomglade','fairyring',
+      'orchard','vineyard','peonygarden','topiary','mistyforest','redwoods','tulipfield']);
+    let snail = null, timer = 24 + Math.random()*42;
+    function canHere(){ try{ return LEAFY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (snail){
+          snail.t += dt; snail.x += snail.vx*dt;    // very slow
+          snail.feel = Math.sin(snail.t*2)*0.3;
+          snail.glide = Math.sin(snail.t*6)*0.6;
+          if (snail.x < -16 || snail.x > W+16) snail = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 32 + Math.random()*50;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            snail = { x: dir>0 ? -12 : W+12, groundY: H*0.8, feel:0, glide:0,
+                      vx: dir*rand(4,8), dir, t:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!snail) return;
+      try{
+        const x = snail.x, y = snail.groundY + snail.glide, d = snail.dir;
+        ctx.save();
+        // foot
+        ctx.fillStyle = '#d8b98a';
+        ctx.beginPath(); ctx.ellipse(x, y+3, 10, 3, 0, 0, 7); ctx.fill();
+        // head/neck
+        ctx.beginPath(); ctx.ellipse(x + d*9, y, 4, 3, 0, 0, 7); ctx.fill();
+        // shell (spiral)
+        ctx.fillStyle = '#c98a54';
+        ctx.beginPath(); ctx.arc(x - d*2, y - 3, 7, 0, 7); ctx.fill();
+        ctx.strokeStyle = '#8a5a2e'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        for (let a=0;a<8;a+=0.3){ const r=a*0.9; const px2=x - d*2 + Math.cos(a*d)*r, py2=y-3 + Math.sin(a)*r; if(a===0) ctx.moveTo(px2,py2); else ctx.lineTo(px2,py2); }
+        ctx.stroke();
+        // feelers
+        ctx.strokeStyle = '#d8b98a'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x + d*11, y-1); ctx.lineTo(x + d*13 + d*snail.feel*3, y-7); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + d*12, y-1); ctx.lineTo(x + d*15 + d*snail.feel*3, y-5); ctx.stroke();
+        ctx.fillStyle = '#20130a';
+        ctx.beginPath(); ctx.arc(x + d*13 + d*snail.feel*3, y-7, 1, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!snail) return false;
+      const cx = snail.x, cy = snail.groundY - 3;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 26*26) return false;
+      say(pick(['A snail 🐌 no rush, little one — the best days are the slow ones with you',
+                'He carries his whole home on his back 🐌 as long as I\'m with you, I\'m home too',
+                'Slow and steady 🐌 that\'s us — no hurry, we\'ve got forever',
+                'Feelers up, saying hello 🐌 take your time, sweetheart, so will I 💛']));
+      fxAt(cx, cy-8, '🐌'); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 3); state.energy = clamp(state.energy + 3); refreshHUD();
+      snail = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   SPARKLER. On festival/celebration scenes a hand-held sparkler crackles to life,
+   throwing golden sparks. Tap it to write your initials in the air together.
+   -------------------------------------------------------------------------- */
+(function encSparkler(){
+  try{
+    const PARTY = new Set(['fireworks','lanternfestival','carnival','nightmarket','balloonfest','ferriswheel',
+      'seasidecarousel','fairyring','harbornight','rooftop','rooftoppool','campsite','ballroom',
+      'giftwrapshop','moonbeach','fireflypier']);
+    let sp = null, timer = 24 + Math.random()*42;
+    function nightish(){ try{ return typeof isNight==='function' ? isNight() : (currentHour() >= 19 || currentHour() < 6); }catch(e){ return true; } }
+    function canHere(){ try{ const s = SCENES[currentScene];
+      const alwaysOk = (s==='fireworks'||s==='lanternfestival'||s==='nightmarket'||s==='ballroom'||s==='ferriswheel');
+      return PARTY.has(s) && (alwaysOk || nightish()); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (sp){
+          sp.t += dt; sp.life -= dt;
+          sp.sway = Math.sin(sp.t*1.5)*8;
+          // spawn sparks
+          sp.spawn -= dt;
+          if (sp.spawn <= 0){ sp.spawn = 0.04; sp.sparks.push({ a: Math.random()*7, r:0, sp: rand(20,55), life: rand(0.3,0.6), t:0 }); }
+          for (let i=sp.sparks.length-1;i>=0;i--){ const k=sp.sparks[i]; k.t+=dt; k.r+=k.sp*dt; if(k.t>=k.life) sp.sparks.splice(i,1); }
+          if (sp.life <= 0) sp = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 34 + Math.random()*52;
+          if (canHere()){
+            sp = { x: rand(W*0.3,W*0.7), y: H*(0.5+Math.random()*0.1), sway:0,
+                   t:0, life: rand(5,8), spawn:0, sparks:[] };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!sp) return;
+      try{
+        const x = sp.x + sp.sway, y = sp.y;
+        ctx.save();
+        // stick
+        ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 3, y + 18); ctx.stroke();
+        // sparks
+        for (const k of sp.sparks){
+          const a = 1 - k.t/k.life;
+          const sx = x + Math.cos(k.a)*k.r, sy = y + Math.sin(k.a)*k.r;
+          ctx.globalAlpha = a;
+          ctx.fillStyle = k.r < 12 ? '#fffde0' : (Math.random()<0.5 ? '#ffd24a' : '#ff9a3a');
+          ctx.beginPath(); ctx.arc(sx, sy, 1.3, 0, 7); ctx.fill();
+        }
+        // hot core
+        ctx.globalAlpha = 1; ctx.fillStyle = '#fffef0';
+        ctx.beginPath(); ctx.arc(x, y, 2.2, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!sp) return false;
+      const cx = sp.x + sp.sway, cy = sp.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 30*30) return false;
+      say(pick(['A sparkler! ✨ quick, write our initials in the air before it fades',
+                'Golden and fizzing 🎇 hold it high, my love — happy birthday 🥳',
+                'Careful, it\'s hot! 🔥 but so worth it — look at your face glow',
+                'Round and round — I drew a heart 💛 did you see it?']));
+      // little burst of sparks on tap — capture coords first
+      for (let i=0;i<5;i++) setTimeout(()=> fxAt(cx + rand(-16,16), cy + rand(-16,10), pick(['✨','🎇','💛'])), i*60);
+      if (typeof sfx==='function') sfx('day');
+      state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 3); refreshHUD();
+      sp = null;
+      return true;
+    });
+  }catch(e){}
+})();
