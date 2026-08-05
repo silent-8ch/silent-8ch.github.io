@@ -105,6 +105,8 @@ const TRINKET_POOL = (()=>{
   g(['cheesecave'], ['🧀','🍷','🪵']);
   g(['tarotparlor'], ['🔮','🃏','🕯️']);
   g(['enchantedforest'], ['🧚','✨','🍄']);
+  g(['crystalgrotto'], ['💎','🔮','💜']);
+  g(['potionlab'], ['🧪','⚗️','🌿']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];

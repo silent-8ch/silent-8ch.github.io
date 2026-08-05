@@ -4676,3 +4676,353 @@ function drawEnchantedForest(){
   ctx.fillRect(0,0,W,H);
 }
 registerScene('enchantedforest', drawEnchantedForest);
+
+/* ── CRYSTAL GROTTO (underground · glowing geodes · underground lake · bioluminescent) ── */
+function drawCrystalGrotto(){
+  const t = sceneTime, floorY = H*0.68;
+
+  // deep underground darkness
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#0a0818'); bg.addColorStop(0.4,'#10102a'); bg.addColorStop(1,'#080614');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // ambient cave glow — cool purple-blue tones from crystal light
+  const ag1=ctx.createRadialGradient(W*0.3,H*0.35,10,W*0.3,H*0.35,160);
+  ag1.addColorStop(0,'rgba(100,60,200,.08)'); ag1.addColorStop(1,'rgba(100,60,200,0)');
+  ctx.fillStyle=ag1; ctx.fillRect(0,0,W,H);
+  const ag2=ctx.createRadialGradient(W*0.75,H*0.3,10,W*0.75,H*0.3,140);
+  ag2.addColorStop(0,'rgba(60,180,200,.06)'); ag2.addColorStop(1,'rgba(60,180,200,0)');
+  ctx.fillStyle=ag2; ctx.fillRect(0,0,W,H);
+
+  // rough cave ceiling with stalactites
+  ctx.fillStyle='#16103a';
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(W,0); ctx.lineTo(W,36);
+  for (let x=W;x>=0;x-=22){
+    const h=20+28*Math.abs(Math.sin(x*0.18+2.3));
+    ctx.lineTo(x-11,36+h); ctx.lineTo(x-22,36+8*Math.abs(Math.cos(x*0.25)));
+  }
+  ctx.closePath(); ctx.fill();
+
+  // dripping stalactites (detail)
+  ctx.fillStyle='#1e1848';
+  for (const sx of [W*0.18,W*0.42,W*0.58,W*0.78,W*0.92]){
+    const sh=30+20*Math.abs(Math.sin(sx*0.4));
+    ctx.beginPath(); ctx.moveTo(sx-5,30); ctx.lineTo(sx,30+sh); ctx.lineTo(sx+5,30); ctx.fill();
+    // water drip animation
+    const dripPhase=(t*0.8+sx*0.1)%4;
+    if (dripPhase<1.5){
+      ctx.fillStyle=`rgba(120,180,255,${0.4-dripPhase*0.25})`;
+      ctx.beginPath(); ctx.arc(sx,30+sh+dripPhase*20,1.5,0,7); ctx.fill();
+    }
+    ctx.fillStyle='#1e1848';
+  }
+
+  // cave walls — rough layered texture on sides
+  ctx.fillStyle='#12102e';
+  ctx.beginPath(); ctx.moveTo(0,36); ctx.quadraticCurveTo(30,H*0.3,24,floorY);
+  ctx.lineTo(0,floorY); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W,36); ctx.quadraticCurveTo(W-28,H*0.3,W-20,floorY);
+  ctx.lineTo(W,floorY); ctx.closePath(); ctx.fill();
+
+  // bioluminescent moss patches on walls
+  for (const [mx,my] of [[W*0.04,H*0.30],[W*0.08,H*0.45],[W*0.92,H*0.35],[W*0.96,H*0.50]]){
+    const pulse=0.3+0.2*Math.sin(t*1.2+mx+my);
+    ctx.fillStyle=`rgba(80,220,120,${pulse*0.35})`;
+    ctx.beginPath(); ctx.ellipse(mx,my,18,8,0.2,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(100,240,140,${pulse*0.6})`;
+    ctx.beginPath(); ctx.ellipse(mx,my,10,4,0.2,0,7); ctx.fill();
+  }
+
+  // bioluminescent moss on the ground
+  for (const mx of [W*0.15,W*0.35,W*0.55,W*0.80]){
+    const my=floorY+4, pulse=0.25+0.18*Math.sin(t*1.5+mx);
+    ctx.fillStyle=`rgba(60,200,100,${pulse*0.3})`;
+    ctx.beginPath(); ctx.ellipse(mx,my,20,5,0,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(80,230,120,${pulse*0.55})`;
+    ctx.beginPath(); ctx.ellipse(mx,my,12,3,0,0,7); ctx.fill();
+  }
+
+  // large crystal formations — pulsing glow
+  function bigCrystal(cx,cy,sc,hue,angle){
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(angle||0); ctx.scale(sc,sc);
+    const glow=0.5+0.4*Math.sin(t*1.2+cx*0.05+hue*0.02);
+    // ambient glow halo
+    ctx.fillStyle=`hsla(${hue},70%,55%,${0.12*glow})`;
+    ctx.beginPath(); ctx.arc(0,-24,40,0,7); ctx.fill();
+    // main crystal shards
+    const shards=[[0,-48,11],[-14,-32,8],[14,-36,9],[-8,-22,6],[10,-20,7],[-18,-18,5]];
+    for (const [dx,dy,w] of shards){
+      ctx.fillStyle=`hsla(${hue},65%,${50+18*glow}%,0.85)`;
+      ctx.beginPath(); ctx.moveTo(dx-w,0); ctx.lineTo(dx-1,dy); ctx.lineTo(dx+1,dy); ctx.lineTo(dx+w,0); ctx.closePath(); ctx.fill();
+      // inner highlight facet
+      ctx.fillStyle=`hsla(${hue},80%,80%,${0.35+0.2*glow})`;
+      ctx.beginPath(); ctx.moveTo(dx-1,0); ctx.lineTo(dx,dy); ctx.lineTo(dx+w*0.4,dy*0.4); ctx.closePath(); ctx.fill();
+    }
+    // sparkle at tip
+    ctx.fillStyle=`rgba(255,255,255,${0.3+0.4*glow})`;
+    ctx.beginPath(); ctx.arc(0,-48,2,0,7); ctx.fill();
+    ctx.restore();
+  }
+  bigCrystal(W*0.10,floorY+16,1.3,260,0.08);
+  bigCrystal(W*0.28,floorY+6,0.9,200,-0.06);
+  bigCrystal(W*0.88,floorY+18,1.4,280,0.05);
+  bigCrystal(W*0.72,floorY+4,0.85,310,-0.1);
+  // small ceiling crystals hanging down
+  bigCrystal(W*0.38,52,0.45,230,Math.PI);
+  bigCrystal(W*0.65,48,0.4,250,Math.PI+0.15);
+
+  // underground lake — center-bottom
+  const lakeY=floorY+10;
+  ctx.fillStyle='#0a0e24'; ctx.beginPath(); ctx.ellipse(W*0.5,lakeY,140,18,0,0,7); ctx.fill();
+  // ripple rings
+  ctx.strokeStyle='rgba(100,160,240,.15)'; ctx.lineWidth=0.8;
+  for (let i=0;i<4;i++){
+    const rr=30+i*24+Math.sin(t*1.5+i*1.2)*6;
+    ctx.beginPath(); ctx.ellipse(W*0.5,lakeY,rr,rr*0.13,0,0,7); ctx.stroke();
+  }
+  // crystal reflections on water surface
+  for (const [rx,hue] of [[W*0.28,200],[W*0.72,310],[W*0.5,240]]){
+    const pulse=0.15+0.1*Math.sin(t*1.8+rx);
+    ctx.fillStyle=`hsla(${hue},60%,60%,${pulse})`;
+    ctx.beginPath(); ctx.ellipse(rx,lakeY+2,12,3,0,0,7); ctx.fill();
+  }
+
+  // cave floor — dark stone
+  const gf=ctx.createLinearGradient(0,floorY,0,H);
+  gf.addColorStop(0,'#14102a'); gf.addColorStop(1,'#0c0a1a');
+  ctx.fillStyle=gf; ctx.fillRect(0,floorY,W,H-floorY);
+
+  // small loose gemstones scattered on the ground
+  for (let i=0;i<8;i++){
+    const gx=W*0.1+((i*47+23)%240), gy=floorY+14+(i%3)*6;
+    const hue=(i*45+180)%360;
+    ctx.fillStyle=`hsla(${hue},70%,60%,${0.6+0.2*Math.sin(t*2+i)})`;
+    ctx.beginPath(); ctx.moveTo(gx,gy-3); ctx.lineTo(gx+3,gy); ctx.lineTo(gx,gy+2); ctx.lineTo(gx-3,gy); ctx.closePath(); ctx.fill();
+  }
+
+  // floating luminous motes — drifting slowly upward
+  for (let i=0;i<18;i++){
+    const mx=(i*53+Math.sin(t*0.3+i*2)*20)%W;
+    const my=(i*41+200-t*6)%H;
+    const c=i%3===0?'160,120,255':i%3===1?'80,200,180':'200,140,220';
+    ctx.fillStyle=`rgba(${c},${0.12+0.2*Math.abs(Math.sin(t*1.6+i*1.3))})`;
+    ctx.beginPath(); ctx.arc(mx,my,1.5+Math.sin(t*2+i)*0.5,0,7); ctx.fill();
+  }
+}
+registerScene('crystalgrotto', drawCrystalGrotto);
+
+/* ── POTION LAB (indoor · witch's workshop · bubbling cauldrons · floating bottles) ── */
+function drawPotionLab(){
+  const t = sceneTime, floorY = H*0.70;
+
+  // stone dungeon walls
+  const wall=ctx.createLinearGradient(0,0,0,floorY);
+  wall.addColorStop(0,'#1a1418'); wall.addColorStop(0.5,'#221a1e'); wall.addColorStop(1,'#2a2024');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+
+  // stone block pattern on walls
+  ctx.strokeStyle='rgba(60,50,55,.25)'; ctx.lineWidth=0.8;
+  for (let y=0;y<floorY;y+=18){ for (let x=(y/18%2)*24;x<W;x+=48){
+    ctx.strokeRect(x,y,48,18);
+  }}
+
+  // warm ambient glow from the cauldron fire
+  const cauldronGlow=ctx.createRadialGradient(W*0.35,floorY-10,10,W*0.35,floorY-10,120);
+  cauldronGlow.addColorStop(0,'rgba(200,100,40,.12)'); cauldronGlow.addColorStop(1,'rgba(200,100,40,0)');
+  ctx.fillStyle=cauldronGlow; ctx.fillRect(0,0,W,H);
+
+  // ingredient shelves on the back wall (upper area)
+  ctx.fillStyle='#3a2820'; ctx.fillRect(W*0.55,H*0.10,W*0.38,6); // top shelf
+  ctx.fillRect(W*0.55,H*0.28,W*0.38,6); // mid shelf
+  ctx.fillRect(W*0.55,H*0.44,W*0.38,6); // lower shelf
+  // shelf brackets
+  ctx.fillStyle='#4a3830';
+  for (const sy of [H*0.10,H*0.28,H*0.44]){
+    ctx.fillRect(W*0.56,sy,3,10); ctx.fillRect(W*0.92,sy,3,10);
+  }
+
+  // potion bottles on the shelves
+  function potionBottle(bx,by,col,shape){
+    // bottle body
+    ctx.fillStyle=col;
+    if (shape===0){ // round flask
+      ctx.beginPath(); ctx.arc(bx,by-6,6,0,7); ctx.fill();
+      ctx.fillRect(bx-2,by-14,4,8);
+    } else if (shape===1){ // tall thin
+      ctx.fillRect(bx-3,by-18,6,18);
+      roundRect(bx-4,by-4,8,4,1); ctx.fill();
+    } else { // wide squat
+      roundRect(bx-6,by-10,12,10,2); ctx.fill();
+      ctx.fillRect(bx-2,by-14,4,4);
+    }
+    // cork
+    ctx.fillStyle='#b89060'; ctx.fillRect(bx-2,by-16,4,3);
+    // liquid glow
+    ctx.fillStyle=col.replace('0.8','0.3').replace('0.9','0.3');
+    ctx.beginPath(); ctx.arc(bx,by-6,8,0,7); ctx.fill();
+    // highlight
+    ctx.fillStyle='rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(bx-2,by-10,1.5,0,7); ctx.fill();
+  }
+  // top shelf bottles
+  potionBottle(W*0.60,H*0.10,'rgba(80,200,120,0.8)',0);
+  potionBottle(W*0.68,H*0.10,'rgba(200,80,200,0.8)',1);
+  potionBottle(W*0.76,H*0.10,'rgba(80,160,220,0.8)',2);
+  potionBottle(W*0.84,H*0.10,'rgba(220,180,60,0.9)',0);
+  // mid shelf bottles
+  potionBottle(W*0.58,H*0.28,'rgba(220,60,80,0.8)',1);
+  potionBottle(W*0.66,H*0.28,'rgba(100,220,200,0.8)',2);
+  potionBottle(W*0.74,H*0.28,'rgba(180,100,220,0.8)',0);
+  potionBottle(W*0.82,H*0.28,'rgba(60,200,100,0.9)',1);
+  potionBottle(W*0.90,H*0.28,'rgba(220,160,80,0.8)',2);
+  // lower shelf — jars of ingredients
+  for (let i=0;i<4;i++){
+    const jx=W*0.58+i*28, jy=H*0.44;
+    ctx.fillStyle=['rgba(80,120,60,0.6)','rgba(160,100,60,0.5)','rgba(100,60,120,0.5)','rgba(60,100,80,0.6)'][i];
+    roundRect(jx-7,jy-14,14,14,3); ctx.fill();
+    ctx.strokeStyle='rgba(180,160,140,.4)'; ctx.lineWidth=0.6; roundRect(jx-7,jy-14,14,14,3); ctx.stroke();
+    ctx.fillStyle='#c0a080'; ctx.fillRect(jx-8,jy-16,16,3); // lid
+  }
+
+  // floating potion bottles (animated — bobbing in mid-air)
+  for (let i=0;i<3;i++){
+    const fbx=W*0.15+i*60, fby=H*0.18+Math.sin(t*1.5+i*2.1)*12;
+    const rot=Math.sin(t*0.8+i)*0.2;
+    ctx.save(); ctx.translate(fbx,fby); ctx.rotate(rot);
+    // bottle glow trail
+    ctx.fillStyle=`rgba(${i===0?'180,100,255':i===1?'100,220,180':'220,160,80'},${0.08+0.06*Math.sin(t*2+i)})`;
+    ctx.beginPath(); ctx.arc(0,4,18,0,7); ctx.fill();
+    // bottle
+    const bcol=i===0?'rgba(160,80,240,0.85)':i===1?'rgba(80,200,160,0.85)':'rgba(200,140,60,0.85)';
+    ctx.fillStyle=bcol;
+    ctx.beginPath(); ctx.arc(0,0,5,0,7); ctx.fill();
+    ctx.fillRect(-1.5,-8,3,8);
+    ctx.fillStyle='#b89060'; ctx.fillRect(-2,-10,4,3);
+    // sparkle
+    ctx.fillStyle=`rgba(255,255,255,${0.4+0.4*Math.sin(t*3+i)})`;
+    ctx.beginPath(); ctx.arc(1,-2,1,0,7); ctx.fill();
+    ctx.restore();
+  }
+
+  // large cauldron — center-left
+  const cX=W*0.32, cY=floorY-4;
+  // fire under cauldron
+  for (let i=0;i<5;i++){
+    const fx=cX-16+i*8, fh=8+Math.sin(t*4+i*1.4)*4;
+    ctx.fillStyle=`rgba(255,${140+i*20},40,${0.6+0.3*Math.sin(t*5+i)})`;
+    ctx.beginPath(); ctx.moveTo(fx-3,cY+14); ctx.quadraticCurveTo(fx,cY+14-fh,fx+3,cY+14); ctx.fill();
+  }
+  // embers
+  for (let i=0;i<4;i++){
+    const ex=cX-10+i*7, ey=cY+6-Math.abs(Math.sin(t*3+i))*16;
+    ctx.fillStyle=`rgba(255,160,40,${0.3+0.3*Math.sin(t*4+i)})`;
+    ctx.beginPath(); ctx.arc(ex,ey,1,0,7); ctx.fill();
+  }
+  // cauldron body — iron pot
+  ctx.fillStyle='#2a2a2a';
+  ctx.beginPath(); ctx.ellipse(cX,cY+10,30,10,0,0,Math.PI); ctx.fill();
+  ctx.fillRect(cX-30,cY-8,60,18);
+  ctx.beginPath(); ctx.ellipse(cX,cY-8,30,10,0,0,7); ctx.fill();
+  // rim highlight
+  ctx.strokeStyle='#4a4a4a'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.ellipse(cX,cY-8,30,10,0,0,7); ctx.stroke();
+  // bubbling potion inside
+  const potionCol=`hsla(${(t*20)%360},70%,55%,`;
+  ctx.fillStyle=potionCol+'0.7)';
+  ctx.beginPath(); ctx.ellipse(cX,cY-7,27,8,0,0,7); ctx.fill();
+  // bubbles rising from cauldron
+  for (let i=0;i<6;i++){
+    const bx=cX-18+((i*13+t*20)%36), by=cY-10-((t*30+i*17)%40);
+    const br=2+Math.sin(t*2+i)*1.2;
+    ctx.fillStyle=potionCol+(0.3+0.2*Math.sin(t*3+i))+')';
+    ctx.beginPath(); ctx.arc(bx,by,br,0,7); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.2)'; ctx.beginPath(); ctx.arc(bx-br*0.3,by-br*0.3,br*0.3,0,7); ctx.fill();
+  }
+  // steam / fumes rising
+  ctx.strokeStyle='rgba(160,120,200,.15)'; ctx.lineWidth=3;
+  for (let s=0;s<3;s++){
+    ctx.beginPath();
+    for (let k=0;k<=8;k++){
+      const yy=cY-16-k*10, xx=cX-8+s*8+Math.sin(t*1.2+k*0.7+s)*10;
+      k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy);
+    }
+    ctx.stroke();
+  }
+
+  // large spell book — open on a stand, left side
+  const bkX=W*0.08, bkY=floorY-14;
+  // book stand
+  ctx.fillStyle='#3a2818'; ctx.fillRect(bkX-2,bkY+6,4,22);
+  ctx.fillRect(bkX-12,bkY+26,24,4);
+  // open book pages
+  ctx.fillStyle='#e8e0d0'; ctx.fillRect(bkX-18,bkY-16,18,28); ctx.fillRect(bkX,bkY-16,18,28);
+  // spine
+  ctx.fillStyle='#6a3020'; ctx.fillRect(bkX-1,bkY-17,2,30);
+  // text lines on pages
+  ctx.fillStyle='rgba(60,40,30,.3)';
+  for (let ln=0;ln<5;ln++){ ctx.fillRect(bkX-16,bkY-12+ln*5,14,1); ctx.fillRect(bkX+2,bkY-12+ln*5,14,1); }
+  // glowing rune on the right page
+  ctx.fillStyle=`rgba(180,100,255,${0.4+0.3*Math.sin(t*2)})`;
+  ctx.font='10px serif'; ctx.fillText('✦',bkX+4,bkY+6);
+
+  // second smaller cauldron — right side, simmering
+  const c2X=W*0.78, c2Y=floorY+2;
+  ctx.fillStyle='#2e2e2e';
+  ctx.beginPath(); ctx.ellipse(c2X,c2Y+6,20,7,0,0,Math.PI); ctx.fill();
+  ctx.fillRect(c2X-20,c2Y-4,40,10);
+  ctx.beginPath(); ctx.ellipse(c2X,c2Y-4,20,7,0,0,7); ctx.fill();
+  ctx.strokeStyle='#484848'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(c2X,c2Y-4,20,7,0,0,7); ctx.stroke();
+  // green simmering liquid
+  ctx.fillStyle='rgba(80,200,100,0.6)'; ctx.beginPath(); ctx.ellipse(c2X,c2Y-3,17,5,0,0,7); ctx.fill();
+  // tiny bubbles
+  for (let i=0;i<3;i++){
+    const bx2=c2X-10+((i*9+t*15)%20), by2=c2Y-6-((t*20+i*11)%18);
+    ctx.fillStyle=`rgba(100,220,120,${0.3+0.2*Math.sin(t*3+i)})`;
+    ctx.beginPath(); ctx.arc(bx2,by2,1.5,0,7); ctx.fill();
+  }
+
+  // hanging dried herbs from the ceiling
+  for (let i=0;i<5;i++){
+    const hx=W*0.05+i*56, hy=10;
+    ctx.strokeStyle='#6a5040'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(hx,0); ctx.lineTo(hx,hy); ctx.stroke();
+    // herb bundle
+    ctx.fillStyle=['#4a7a3a','#7a6a30','#5a4a6a','#3a6a5a','#6a5a3a'][i];
+    ctx.beginPath(); ctx.ellipse(hx,hy+8,5,10,0,0,7); ctx.fill();
+  }
+
+  // candles on the wall — flickering
+  for (const [cx,cy] of [[W*0.46,H*0.22],[W*0.46,H*0.44]]){
+    // wall bracket
+    ctx.fillStyle='#5a4a3a'; ctx.fillRect(cx-1,cy,6,3); ctx.fillRect(cx+4,cy-8,2,8);
+    // candle
+    ctx.fillStyle='#e8d8c0'; ctx.fillRect(cx,cy-16,4,8);
+    // flame
+    const fh=Math.sin(t*5+cx)*2;
+    ctx.fillStyle=`rgba(255,200,80,${0.8+0.2*Math.sin(t*6+cx)})`;
+    ctx.beginPath(); ctx.moveTo(cx+2,cy-16); ctx.quadraticCurveTo(cx,cy-22+fh,cx+2,cy-26+fh);
+    ctx.quadraticCurveTo(cx+4,cy-22+fh,cx+2,cy-16); ctx.fill();
+    // glow
+    ctx.fillStyle='rgba(255,180,60,.08)'; ctx.beginPath(); ctx.arc(cx+2,cy-20,16,0,7); ctx.fill();
+  }
+
+  // floor — worn stone tiles
+  const fl=ctx.createLinearGradient(0,floorY,0,H);
+  fl.addColorStop(0,'#2a2228'); fl.addColorStop(1,'#1e1820');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  // tile lines
+  ctx.strokeStyle='rgba(80,70,75,.2)'; ctx.lineWidth=0.6;
+  for (let x=0;x<W;x+=30) ctx.strokeRect(x,floorY,30,H-floorY);
+
+  // spilled potion stain on the floor
+  ctx.fillStyle='rgba(120,60,180,.12)';
+  ctx.beginPath(); ctx.ellipse(W*0.55,floorY+16,18,6,0.3,0,7); ctx.fill();
+
+  // ambient magical sparkles drifting around the lab
+  for (let i=0;i<12;i++){
+    const sx=(i*59+t*8)%W, sy=(i*37+Math.sin(t*0.5+i)*18)%(floorY*0.85)+8;
+    const c=i%3===0?'200,140,255':i%3===1?'120,220,160':'220,200,80';
+    ctx.fillStyle=`rgba(${c},${0.1+0.15*Math.sin(t*2.2+i)})`;
+    ctx.beginPath(); ctx.arc(sx,sy,1.2,0,7); ctx.fill();
+  }
+}
+registerScene('potionlab', drawPotionLab);
