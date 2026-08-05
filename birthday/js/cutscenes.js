@@ -394,6 +394,7 @@ function csCampfireStory(){
   }
 
   return {
+    id: 'campfire_story',
     chars: ['krystal', 'paul', 'luna'],
     skipable: true,
     steps: [
@@ -569,6 +570,7 @@ function csStargazing(){
   }
 
   return {
+    id: 'stargazing',
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
@@ -730,6 +732,7 @@ function csBeachSunsetPicnic(){
   }
 
   return {
+    id: 'beach_sunset_picnic',
     chars: ['krystal', 'paul', 'wade'],
     skipable: true,
     steps: [
@@ -878,6 +881,7 @@ function csBakeryMishap(){
   }
 
   return {
+    id: 'bakery_mishap',
     chars: ['krystal', 'luna'],
     skipable: true,
     steps: [
@@ -1068,6 +1072,7 @@ function csLibraryGhost(){
   }
 
   return {
+    id: 'library_ghost',
     chars: ['krystal', 'william'],
     skipable: true,
     steps: [
@@ -1279,6 +1284,7 @@ function csAquariumWonder(){
   }
 
   return {
+    id: 'aquarium_wonder',
     chars: ['krystal', 'luke'],
     skipable: true,
     steps: [
@@ -1454,6 +1460,7 @@ function csRainyDayChat(){
   }
 
   return {
+    id: 'rainy_day_chat',
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
@@ -1622,6 +1629,7 @@ function csFlowerCrown(){
   }
 
   return {
+    id: 'flower_crown',
     chars: ['krystal', 'luna', 'wade'],
     skipable: true,
     steps: [
@@ -1790,6 +1798,7 @@ function csSnowAngelContest(){
   }
 
   return {
+    id: 'snow_angel_contest',
     chars: ['krystal', 'paul', 'william'],
     skipable: true,
     steps: [
@@ -1993,6 +2002,7 @@ function csMusicJam(){
   }
 
   return {
+    id: 'music_jam',
     chars: ['krystal', 'paul', 'luke', 'luna'],
     skipable: true,
     steps: [
@@ -2154,6 +2164,7 @@ function csPaintingTogether(){
   }
 
   return {
+    id: 'painting_together',
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
@@ -6316,6 +6327,540 @@ function csSunriseYoga(){
 }
 
 /* ============================================================================
+   CUTSCENE 35: SANDCASTLE CONTEST  (triggers at beach, moonbeach, driftwoodbeach)
+   ============================================================================ */
+function csSandcastleContest(){
+  const groundY = H * 0.74;
+  const charH = 78;
+  const fY = groundY + 10;
+  const krystalX = W * 0.18, paulX = W * 0.40, wadeX = W * 0.62, williamX = W * 0.82;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // bright beach sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#5fa8d4'); sky.addColorStop(0.6, '#8cc8e8'); sky.addColorStop(1, '#c8e4f4');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // sun
+    const sg = ctx.createRadialGradient(W * 0.8, H * 0.12, 4, W * 0.8, H * 0.12, 50);
+    sg.addColorStop(0, 'rgba(255,240,180,.6)'); sg.addColorStop(0.4, 'rgba(255,220,140,.15)');
+    sg.addColorStop(1, 'rgba(255,220,140,0)');
+    ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(W * 0.8, H * 0.12, 50, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff4cc'; ctx.beginPath(); ctx.arc(W * 0.8, H * 0.12, 14, 0, 7); ctx.fill();
+
+    // wispy clouds
+    ctx.fillStyle = 'rgba(255,255,255,.3)';
+    for (let i = 0; i < 3; i++){
+      const cx = (W * 0.1 + i * W * 0.35 + t * 1.5) % (W + 60) - 30;
+      ctx.beginPath(); ctx.arc(cx, 22 + i * 12, 12, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 14, 20 + i * 12, 8, 0, 7); ctx.fill();
+    }
+
+    // ocean at horizon
+    ctx.fillStyle = '#5098c0';
+    ctx.fillRect(0, groundY - 16, W, 16);
+    // wave line
+    ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 6) ctx.lineTo(x, groundY - 8 + Math.sin(x * 0.06 + t * 2) * 2);
+    ctx.stroke();
+
+    // sandy beach ground
+    const gr = ctx.createLinearGradient(0, groundY, 0, H);
+    gr.addColorStop(0, '#f0dca8'); gr.addColorStop(1, '#e0cc90');
+    ctx.fillStyle = gr; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // sand texture
+    ctx.fillStyle = 'rgba(200,170,100,.15)';
+    for (let i = 0; i < 30; i++){
+      const sx = (i * 67 + 11) % W, sy = groundY + 4 + (i * 23) % (H - groundY - 8);
+      ctx.fillRect(sx, sy, 1.5, 1);
+    }
+  }
+
+  // draw a sandcastle of given size and detail
+  function drawCastle(cx, baseY, size, fancy){
+    // base mound
+    ctx.fillStyle = '#d4b878';
+    ctx.beginPath();
+    ctx.moveTo(cx - size * 0.7, baseY);
+    ctx.quadraticCurveTo(cx, baseY - size * 0.5, cx + size * 0.7, baseY);
+    ctx.closePath(); ctx.fill();
+
+    if (fancy){
+      // elaborate fortress — multiple towers, battlements
+      ctx.fillStyle = '#c8a860';
+      ctx.fillRect(cx - size * 0.5, baseY - size * 0.8, size * 0.3, size * 0.5);
+      ctx.fillRect(cx + size * 0.2, baseY - size * 0.8, size * 0.3, size * 0.5);
+      ctx.fillRect(cx - size * 0.15, baseY - size, size * 0.3, size * 0.7);
+      // battlements
+      ctx.fillStyle = '#b89850';
+      for (let i = 0; i < 3; i++){
+        ctx.fillRect(cx - size * 0.18 + i * size * 0.12, baseY - size - size * 0.12, size * 0.08, size * 0.12);
+      }
+      // door
+      ctx.fillStyle = '#8a6830';
+      ctx.beginPath(); ctx.arc(cx, baseY - size * 0.15, size * 0.08, Math.PI, 0); ctx.fill();
+      ctx.fillRect(cx - size * 0.08, baseY - size * 0.15, size * 0.16, size * 0.15);
+      // flag
+      ctx.strokeStyle = '#8a6830'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cx, baseY - size); ctx.lineTo(cx, baseY - size - size * 0.3); ctx.stroke();
+      ctx.fillStyle = '#e04040';
+      ctx.beginPath(); ctx.moveTo(cx, baseY - size - size * 0.3); ctx.lineTo(cx + size * 0.15, baseY - size - size * 0.22);
+      ctx.lineTo(cx, baseY - size - size * 0.14); ctx.closePath(); ctx.fill();
+    } else {
+      // tiny lopsided tower
+      ctx.fillStyle = '#c8a860';
+      ctx.save(); ctx.translate(cx, baseY - size * 0.3); ctx.rotate(0.15);
+      ctx.fillRect(-size * 0.12, -size * 0.3, size * 0.24, size * 0.3);
+      ctx.restore();
+    }
+  }
+
+  // moat around Krystal's castle
+  function drawMoat(cx, baseY, size){
+    ctx.strokeStyle = '#6898c0'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, baseY + 2, size * 0.85, 0, Math.PI);
+    ctx.stroke();
+    // water fill
+    ctx.fillStyle = 'rgba(100,160,210,.25)';
+    ctx.beginPath();
+    ctx.arc(cx, baseY + 2, size * 0.85, 0, Math.PI);
+    ctx.fill();
+  }
+
+  // draw wave washing away (animated)
+  function drawWashWave(cs, t){
+    const progress = Math.min(1, (t) / 1.2);
+    const waveX = W * (-0.2 + progress * 1.4);
+    ctx.fillStyle = 'rgba(100,180,220,.35)';
+    ctx.beginPath();
+    ctx.moveTo(waveX - 60, groundY + 3);
+    for (let x = waveX - 60; x <= waveX + 60; x += 4){
+      ctx.lineTo(x, groundY + 1 + Math.sin((x - waveX) * 0.08 + cs.totalT * 6) * 3);
+    }
+    ctx.lineTo(waveX + 60, H); ctx.lineTo(waveX - 60, H); ctx.closePath(); ctx.fill();
+  }
+
+  return {
+    chars: ['krystal', 'paul', 'wade', 'william'],
+    skipable: true,
+    steps: [
+      // Step 1: Everyone building sandcastles. Wade has a tiny lopsided one.
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawCastle(wadeX, fY + 6, 18, false);
+          drawCastle(krystalX, fY + 6, 24, false);
+          csDrawExpression('krystal', 'nod', krystalX, fY, charH);
+          csDrawExpression('paul', 'search', paulX, fY, charH);
+          csDrawExpression('wade', 'shrug', wadeX, fY, charH);
+          csDrawExpression('william', 'think', williamX, fY, charH);
+          csDrawBubble(wadeX, fY - charH - 4, 'Wade', "Well... it's got character. 🏖️");
+      }},
+      // Step 2: William reveals an elaborate fortress. Paul inspects it — stunned.
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawCastle(wadeX, fY + 6, 18, false);
+          drawCastle(williamX - 10, fY + 6, 30, true);
+          drawCastle(krystalX, fY + 6, 24, false);
+          csDrawExpression('william', 'cheer', williamX, fY, charH);
+          csDrawExpression('paul', 'inspect', paulX, fY, charH);
+          csDrawExpression('krystal', 'wave', krystalX, fY, charH);
+          csDrawExpression('wade', 'surprised', wadeX, fY, charH);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'How?! It has a FLAG! 😲');
+      }},
+      // Step 3: A wave comes and washes William's castle away. William: sad. Krystal's survives — moat!
+      { dur: 2.8, draw(cs){
+          drawBg(cs);
+          // Krystal's castle with moat survives
+          drawMoat(krystalX, fY + 6, 26);
+          drawCastle(krystalX, fY + 6, 24, true);
+          drawCastle(wadeX, fY + 6, 18, false);
+          // William's castle gone after wave
+          if (cs.stepT < 1.0){
+            drawCastle(williamX - 10, fY + 6, 30, true);
+          }
+          drawWashWave(cs, cs.stepT);
+          csDrawExpression('william', 'sad', williamX, fY, charH);
+          csDrawExpression('paul', 'scared', paulX, fY, charH);
+          csDrawExpression('krystal', 'point', krystalX, fY, charH);
+          csDrawExpression('wade', 'shake', wadeX, fY, charH);
+          if (cs.stepT < 1.4){
+            csDrawBubble(williamX, fY - charH - 4, 'William', 'My fortress... no... 😢');
+          } else {
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'MOAT! Always build a moat! 🏰');
+          }
+      }},
+      // Step 4: Everyone surprised then laughing. Hearts.
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawMoat(krystalX, fY + 6, 26);
+          drawCastle(krystalX, fY + 6, 24, true);
+          if (cs.stepT < 1.2){
+            csDrawExpression('paul', 'surprised', paulX, fY, charH);
+            csDrawExpression('wade', 'surprised', wadeX, fY, charH);
+            csDrawExpression('william', 'surprised', williamX, fY, charH);
+            csDrawExpression('krystal', 'beckon', krystalX, fY, charH);
+            csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Wait — yours survived?!');
+          } else {
+            csDrawExpression('paul', 'laugh', paulX, fY, charH);
+            csDrawExpression('wade', 'laugh', wadeX, fY, charH);
+            csDrawExpression('william', 'laugh', williamX, fY, charH);
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Engineering! 😂👑');
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 36: CANDLELIT DINNER  (triggers at cafe, diner, winecellar)
+   ============================================================================ */
+function csCandlelitDinner(){
+  const groundY = H * 0.72;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.62, paulX = W * 0.38;
+  const tableX = W * 0.50, tableY = groundY - 6;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // warm dim interior
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#2a1a18'); wall.addColorStop(0.5, '#3a2420'); wall.addColorStop(1, '#4a3028');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // warm ambient glow from candles
+    const glow = ctx.createRadialGradient(tableX, tableY - 20, 3, tableX, tableY - 20, H * 0.5);
+    glow.addColorStop(0, 'rgba(255,180,80,.18)'); glow.addColorStop(0.5, 'rgba(255,150,60,.06)');
+    glow.addColorStop(1, 'rgba(255,150,60,0)');
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+    // elegant wallpaper pattern (faint diamond)
+    ctx.strokeStyle = 'rgba(255,200,140,.04)'; ctx.lineWidth = 0.5;
+    for (let r = 0; r < 6; r++){
+      for (let c = 0; c < 10; c++){
+        const dx = c * 28 + (r % 2) * 14, dy = r * 26;
+        ctx.beginPath(); ctx.moveTo(dx, dy + 13); ctx.lineTo(dx + 14, dy);
+        ctx.lineTo(dx + 28, dy + 13); ctx.lineTo(dx + 14, dy + 26); ctx.closePath(); ctx.stroke();
+      }
+    }
+
+    // floor
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#3c2820'); floor.addColorStop(1, '#2c1c14');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // subtle floor reflection
+    const ref = ctx.createRadialGradient(tableX, groundY + 10, 0, tableX, groundY + 10, 50);
+    ref.addColorStop(0, 'rgba(255,180,80,.06)'); ref.addColorStop(1, 'rgba(255,180,80,0)');
+    ctx.fillStyle = ref; ctx.beginPath(); ctx.arc(tableX, groundY + 10, 50, 0, 7); ctx.fill();
+  }
+
+  function drawTable(cs){
+    const t = cs.totalT;
+    // white tablecloth
+    ctx.fillStyle = '#f0ece4';
+    ctx.beginPath();
+    ctx.moveTo(tableX - 50, tableY); ctx.lineTo(tableX + 50, tableY);
+    ctx.lineTo(tableX + 44, tableY + 8); ctx.lineTo(tableX - 44, tableY + 8);
+    ctx.closePath(); ctx.fill();
+    // draping cloth sides
+    ctx.fillStyle = '#e8e0d4';
+    ctx.fillRect(tableX - 44, tableY + 8, 88, 18);
+    // cloth edge lace
+    ctx.strokeStyle = 'rgba(200,180,160,.3)'; ctx.lineWidth = 0.5;
+    for (let x = tableX - 42; x < tableX + 42; x += 6){
+      ctx.beginPath(); ctx.arc(x, tableY + 26, 2, 0, Math.PI); ctx.stroke();
+    }
+
+    // candles (two)
+    for (const cx of [tableX - 12, tableX + 12]){
+      // candlestick
+      ctx.fillStyle = '#c0a060';
+      ctx.fillRect(cx - 2, tableY - 18, 4, 14);
+      ctx.beginPath(); ctx.arc(cx, tableY - 4, 5, 0, 7); ctx.fill();
+      // candle
+      ctx.fillStyle = '#f5f0e0';
+      ctx.fillRect(cx - 1.5, tableY - 28, 3, 10);
+      // flame
+      const fl = 0.7 + 0.3 * Math.sin(t * 8 + cx);
+      ctx.fillStyle = '#ffa830';
+      ctx.beginPath(); ctx.moveTo(cx - 2, tableY - 28);
+      ctx.quadraticCurveTo(cx + Math.sin(t * 10 + cx) * 1.5, tableY - 28 - 7 * fl, cx + 2, tableY - 28);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#ffe880';
+      ctx.beginPath(); ctx.moveTo(cx - 1, tableY - 28);
+      ctx.quadraticCurveTo(cx + Math.sin(t * 10 + cx) * 0.8, tableY - 28 - 4 * fl, cx + 1, tableY - 28);
+      ctx.closePath(); ctx.fill();
+      // glow
+      const cg = ctx.createRadialGradient(cx, tableY - 28, 1, cx, tableY - 28, 18);
+      cg.addColorStop(0, 'rgba(255,200,100,.2)'); cg.addColorStop(1, 'rgba(255,200,100,0)');
+      ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(cx, tableY - 28, 18, 0, 7); ctx.fill();
+    }
+
+    // wine glasses
+    for (const gx of [tableX - 28, tableX + 28]){
+      ctx.strokeStyle = 'rgba(200,200,200,.5)'; ctx.lineWidth = 0.8;
+      // stem
+      ctx.beginPath(); ctx.moveTo(gx, tableY - 2); ctx.lineTo(gx, tableY - 12); ctx.stroke();
+      // bowl
+      ctx.beginPath(); ctx.arc(gx, tableY - 16, 5, 0.3, Math.PI - 0.3); ctx.stroke();
+      // base
+      ctx.beginPath(); ctx.moveTo(gx - 4, tableY - 1); ctx.lineTo(gx + 4, tableY - 1); ctx.stroke();
+      // wine
+      ctx.fillStyle = 'rgba(160,40,60,.35)';
+      ctx.beginPath(); ctx.arc(gx, tableY - 14, 3.5, 0.2, Math.PI - 0.2); ctx.fill();
+    }
+
+    // small flower vase center
+    ctx.fillStyle = 'rgba(180,200,220,.5)';
+    ctx.fillRect(tableX - 3, tableY - 14, 6, 10);
+    ctx.fillStyle = '#e06080';
+    ctx.beginPath(); ctx.arc(tableX, tableY - 16, 4, 0, 7); ctx.fill();
+    ctx.fillStyle = '#e87090';
+    ctx.beginPath(); ctx.arc(tableX + 3, tableY - 18, 3, 0, 7); ctx.fill();
+  }
+
+  // water spill puddle
+  function drawSpill(cs){
+    ctx.fillStyle = 'rgba(140,180,220,.3)';
+    ctx.beginPath();
+    ctx.arc(paulX + 14, tableY - 2, 10, 0, 7); ctx.fill();
+    // tipped glass
+    ctx.save();
+    ctx.translate(paulX + 8, tableY - 6); ctx.rotate(1.2);
+    ctx.strokeStyle = 'rgba(200,200,200,.4)'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -8); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, -10, 4, 0.3, Math.PI - 0.3); ctx.stroke();
+    ctx.restore();
+  }
+
+  return {
+    chars: ['krystal', 'paul'],
+    skipable: true,
+    steps: [
+      // Step 1: Romantic setup. Paul pulls out her chair (beckon).
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawTable(cs);
+          csDrawExpression('paul', 'beckon', paulX, fY, charH);
+          csDrawExpression('krystal', 'wave', krystalX, fY, charH);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'After you, my lady. 🪑✨');
+      }},
+      // Step 2: They clink glasses (cheer). Sweet moment.
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawTable(cs);
+          csDrawExpression('paul', 'cheer', paulX, fY, charH);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'To us. 🥂💛');
+      }, onStart(cs){
+          csHearts(cs, tableX, tableY - 30, 4);
+      }},
+      // Step 3: Paul tries to be smooth — knocks over his water. Embarrassed.
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawTable(cs);
+          drawSpill(cs);
+          csDrawExpression('paul', 'embarrassed', paulX, fY, charH);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          if (cs.stepT < 1.2){
+            csDrawBubble(paulX, fY - charH - 4, 'Paul', '...I did not just do that. 😳');
+          } else {
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Smooth moves, babe. 😂');
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+          }
+      }},
+      // Step 4: Paul owns it — nods. Romantic despite chaos. Hearts.
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawTable(cs);
+          drawSpill(cs);
+          csDrawExpression('paul', 'nod', paulX, fY, charH);
+          csDrawExpression('krystal', 'talk', krystalX, fY, charH);
+          if (cs.stepT < 1.2){
+            csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Nailed it. 😎');
+          } else {
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'You really did. 💛');
+            csDrawExpression('krystal', 'think', krystalX, fY, charH);
+          }
+      }, onStart(cs){
+          csHearts(cs, tableX, tableY - 30, 8);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 37: FOSSIL DISCOVERY  (triggers at naturalhistory, canyon, cliffs)
+   ============================================================================ */
+function csFossilDiscovery(){
+  const groundY = H * 0.74;
+  const charH = 78;
+  const fY = groundY + 10;
+  const lukeX = W * 0.30, krystalX = W * 0.54, lunaX = W * 0.76;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // warm canyon/dig-site sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#6aa0c8'); sky.addColorStop(0.5, '#90b8d8'); sky.addColorStop(1, '#d0c8b0');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // sun
+    ctx.fillStyle = '#fff4cc';
+    ctx.beginPath(); ctx.arc(W * 0.15, H * 0.10, 14, 0, 7); ctx.fill();
+    const sg = ctx.createRadialGradient(W * 0.15, H * 0.10, 4, W * 0.15, H * 0.10, 40);
+    sg.addColorStop(0, 'rgba(255,240,180,.3)'); sg.addColorStop(1, 'rgba(255,240,180,0)');
+    ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(W * 0.15, H * 0.10, 40, 0, 7); ctx.fill();
+
+    // layered rock strata behind
+    const strata = ['#c0a070', '#b89060', '#a88050', '#987040'];
+    for (let i = 0; i < strata.length; i++){
+      ctx.fillStyle = strata[i];
+      const sy = groundY - 40 + i * 10;
+      ctx.beginPath(); ctx.moveTo(0, sy);
+      for (let x = 0; x <= W; x += 12) ctx.lineTo(x, sy + Math.sin(x * 0.04 + i) * 4);
+      ctx.lineTo(W, groundY); ctx.lineTo(0, groundY); ctx.closePath(); ctx.fill();
+    }
+
+    // rocky ground
+    const gr = ctx.createLinearGradient(0, groundY, 0, H);
+    gr.addColorStop(0, '#c0a878'); gr.addColorStop(1, '#a89060');
+    ctx.fillStyle = gr; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // scattered pebbles
+    ctx.fillStyle = 'rgba(140,110,70,.2)';
+    for (let i = 0; i < 20; i++){
+      const px = (i * 53 + 7) % W, py = groundY + 3 + (i * 31) % (H - groundY - 6);
+      ctx.beginPath(); ctx.arc(px, py, 1.5 + (i % 3), 0, 7); ctx.fill();
+    }
+
+    // dig site — a small excavation pit
+    const pitX = W * 0.40, pitY = groundY + 2;
+    ctx.fillStyle = '#a08050';
+    ctx.beginPath();
+    ctx.moveTo(pitX - 35, pitY); ctx.quadraticCurveTo(pitX, pitY + 14, pitX + 35, pitY);
+    ctx.lineTo(pitX + 30, pitY - 3); ctx.quadraticCurveTo(pitX, pitY + 8, pitX - 30, pitY - 3);
+    ctx.closePath(); ctx.fill();
+    // dig edge shadow
+    ctx.strokeStyle = 'rgba(80,60,30,.2)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pitX - 30, pitY - 3); ctx.quadraticCurveTo(pitX, pitY + 8, pitX + 30, pitY - 3);
+    ctx.stroke();
+
+    // small tools on ground
+    // brush
+    ctx.fillStyle = '#8a6840';
+    ctx.fillRect(pitX + 20, pitY + 2, 12, 2);
+    ctx.fillStyle = '#c0a060';
+    ctx.fillRect(pitX + 30, pitY + 1, 5, 4);
+    // pick/hammer
+    ctx.fillStyle = '#6a5030';
+    ctx.save(); ctx.translate(pitX - 25, pitY + 4); ctx.rotate(-0.4);
+    ctx.fillRect(0, 0, 14, 2);
+    ctx.fillStyle = '#888';
+    ctx.fillRect(12, -2, 5, 6);
+    ctx.restore();
+  }
+
+  // draw the fossil embedded in rock
+  function drawFossil(cx, cy, revealed){
+    if (!revealed) return;
+    // rock slab
+    ctx.fillStyle = '#b09868';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 16, 0, 7); ctx.fill();
+    ctx.strokeStyle = 'rgba(80,60,30,.3)'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.arc(cx, cy, 16, 0, 7); ctx.stroke();
+    // fossil imprint — simple ammonite spiral
+    ctx.strokeStyle = '#705830'; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for (let a = 0; a < Math.PI * 5; a += 0.2){
+      const r = 2 + a * 1.4;
+      const fx = cx + Math.cos(a) * r;
+      const fy = cy + Math.sin(a) * r * 0.7;
+      if (a === 0) ctx.moveTo(fx, fy); else ctx.lineTo(fx, fy);
+    }
+    ctx.stroke();
+    // highlight
+    ctx.fillStyle = 'rgba(255,240,200,.15)';
+    ctx.beginPath(); ctx.arc(cx - 3, cy - 3, 8, 0, 7); ctx.fill();
+  }
+
+  const fossilX = W * 0.36, fossilY = groundY + 6;
+
+  return {
+    chars: ['krystal', 'luke', 'luna'],
+    skipable: true,
+    steps: [
+      // Step 1: Digging in rock. Luke brushes dirt away carefully (inspect).
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawFossil(fossilX, fossilY, false);
+          csDrawExpression('luke', 'inspect', lukeX, fY, charH);
+          csDrawExpression('krystal', 'search', krystalX, fY, charH);
+          csDrawExpression('luna', 'beckon', lunaX, fY, charH);
+          csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Hold on, there\u2019s something here\u2026 🪨');
+      }},
+      // Step 2: Luna asks. Luke reveals: "A fossil!" (surprised + point)
+      { dur: 2.6, draw(cs){
+          drawBg(cs);
+          drawFossil(fossilX, fossilY, true);
+          csDrawExpression('luna', 'talk', lunaX, fY, charH);
+          if (cs.stepT < 1.2){
+            csDrawExpression('luke', 'surprised', lukeX, fY, charH);
+            csDrawBubble(lunaX, fY - charH - 4, 'Luna', 'What is it?! Let me see! 👀');
+          } else {
+            csDrawExpression('luke', 'point', lukeX, fY, charH);
+            csDrawExpression('krystal', 'wave', krystalX, fY, charH);
+            csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'A fossil! A real one! 🦴✨');
+          }
+      }},
+      // Step 3: Krystal examines it (inspect). "Millions of years old..."
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawFossil(fossilX, fossilY, true);
+          csDrawExpression('krystal', 'inspect', krystalX, fY, charH);
+          csDrawExpression('luke', 'nod', lukeX, fY, charH);
+          csDrawExpression('luna', 'scared', lunaX, fY, charH);
+          if (cs.stepT < 1.3){
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'It\u2019s millions of years old\u2026 🌍');
+          } else {
+            csDrawBubble(lunaX, fY - charH - 4, 'Luna', 'That\u2019s older than grandma\u2019s couch! 😳');
+          }
+      }},
+      // Step 4: All three think, then cheer. Science moment!
+      { dur: 2.8, draw(cs){
+          drawBg(cs);
+          drawFossil(fossilX, fossilY, true);
+          if (cs.stepT < 1.2){
+            csDrawExpression('krystal', 'think', krystalX, fY, charH);
+            csDrawExpression('luke', 'think', lukeX, fY, charH);
+            csDrawExpression('luna', 'shake', lunaX, fY, charH);
+            csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Imagine what it saw\u2026 🤔');
+          } else {
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('luke', 'cheer', lukeX, fY, charH);
+            csDrawExpression('luna', 'laugh', lunaX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'SCIENCE! 🔬🎉');
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 3);
+          csHearts(cs, lukeX, fY - charH * 0.7, 3);
+          csHearts(cs, lunaX, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
@@ -6324,8 +6869,8 @@ const CUTSCENE_MAP = {
   observatory:       [csStargazing, csConstellationDrawing],
   planetarium:       [csConstellationDrawing],
   aurora:            [csConstellationDrawing],
-  beach:             [csBeachSunsetPicnic, csSunriseYoga],
-  moonbeach:         [csBeachSunsetPicnic],
+  beach:             [csBeachSunsetPicnic, csSunriseYoga, csSandcastleContest],
+  moonbeach:         [csBeachSunsetPicnic, csSandcastleContest],
   bakery:            [csBakeryMishap],
   gingerbreadkitchen:[csBakeryMishap],
   library:           [csLibraryGhost],
@@ -6353,11 +6898,11 @@ const CUTSCENE_MAP = {
   backyard:          [csHideAndSeek],
   teahouse:          [csTeaParty],
   bambootearoom:     [csTeaParty],
-  cafe:              [csTeaParty],
+  cafe:              [csTeaParty, csCandlelitDinner],
   balloonride:       [csSunsetBalloonRide],
   balloonfest:       [csSunsetBalloonRide],
   kitehill:          [csSunsetBalloonRide],
-  diner:             [csCookingDisaster],
+  diner:             [csCookingDisaster, csCandlelitDinner],
   dumplinghouse:     [csCookingDisaster],
   ramenshop:         [csCookingDisaster],
   tidepools:         [csTidePoolDiscovery],
@@ -6379,7 +6924,7 @@ const CUTSCENE_MAP = {
   butterflydome:     [csGardenButterflies],
   greenhouse:        [csGardenButterflies],
   sunflowers:        [csGardenButterflies],
-  canyon:            [csTreasureHunt],
+  canyon:            [csTreasureHunt, csFossilDiscovery],
   sanddunes:         [csTreasureHunt],
   cornmaze:          [csTreasureHunt],
   alpinemeadow:      [csCloudWatching, csSunriseYoga],
@@ -6397,6 +6942,10 @@ const CUTSCENE_MAP = {
   nightmarket:       [csLanternRelease],
   harbornight:       [csLanternRelease],
   rooftoppool:       [csSunriseYoga],
+  driftwoodbeach:    [csSandcastleContest],
+  winecellar:        [csCandlelitDinner],
+  naturalhistory:    [csFossilDiscovery],
+  cliffs:            [csFossilDiscovery],
 };
 
 /* ============================================================================

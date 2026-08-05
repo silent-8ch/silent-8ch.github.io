@@ -29,7 +29,7 @@ The world has **216 places** to visit, **215 of them with hand-placed tap spots*
 
 ---
 
-## 🎬 Cutscenes (34)
+## 🎬 Cutscenes (37)
 
 _Now and then, if she's idle in the right place, a little story plays out. The screen fades in, characters walk on, and they talk, tease, and share a moment together. Each cutscene is skipable (tap **Skip >>** in the top-right corner) and lasts about 20–30 seconds. They trigger randomly (~15 % chance every 30–60 s) — linger in a scene and one might start on its own._
 
@@ -69,6 +69,9 @@ _Debug shortcut: press **X** on a keyboard to force-trigger the cutscene for the
 - **Lantern Release** — triggers at _Lantern Festival_, _Night Market_, or _Harbor at Night_. Characters: Krystal, Paul, Luna, Wade, Luke, William. Everyone holds paper lanterns by a lake at night. They light them one by one, each saying something heartfelt. All release together — lanterns float upward, glowing, reflected in the water. Krystal: "I love all of you so much." Hearts everywhere.
 - **Board Game Night** — triggers at _Treehouse_, _Snowy Cabin_, or _Cozy Igloo_. Characters: Krystal, Paul, Wade, Luke. Around a table with a board game. Wade is losing badly. Luke lands on Wade's spot — Wade: "NOOO!" Everyone laughs. Krystal wins. Paul: "She always wins." Wade demands a rematch.
 - **Sunrise Yoga** — triggers at _Beach_, _Alpine Meadow_, or _Rooftop Pool_. Characters: Krystal, Luna. Early morning, soft pink sky. Both doing yoga poses. Luna wobbles and falls (embarrassed). Krystal holds a perfect pose. Luna tries again and they both hold a pose together. Peaceful and warm.
+- **Sandcastle Contest** — triggers at _Beach_, _Moonlit Beach_, or _Driftwood Beach_. Characters: Krystal, Paul, Wade, William. Building sandcastles on the shore. Wade builds a tiny lopsided one. William unveils an elaborate fortress with a flag — Paul inspects it in disbelief. A wave washes William's away but Krystal's survives — she built a moat! Everyone surprised, then laughing.
+- **Candlelit Dinner** — triggers at _Coffee Shop_, _Diner_, or _Wine Cellar_. Characters: Krystal, Paul. A romantic dinner by candlelight. Paul pulls out her chair, they clink glasses. He tries to be smooth but knocks over his water — mortified. Krystal: "Smooth moves." He nods: "Nailed it." Romantic despite the chaos, hearts everywhere.
+- **Fossil Discovery** — triggers at _Natural History Museum_, _Canyon_, or _Coastal Cliffs_. Characters: Krystal, Luke, Luna. Digging at a rock site. Luke brushes away dirt and finds a fossil — a real ammonite! Krystal examines it: "Millions of years old…" All three think quietly, then burst into cheers. Science moment!
 
 ---
 
