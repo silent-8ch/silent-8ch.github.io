@@ -136,6 +136,50 @@ func retainLargestComponent(_ bitmap: inout Bitmap, column: Int, row: Int) {
     }
 }
 
+func removeTinyComponents(_ bitmap: inout Bitmap, column: Int, row: Int) {
+    let originX = column * bitmap.width / columns
+    let originY = row * bitmap.height / rows
+    let endX = (column + 1) * bitmap.width / columns
+    let endY = (row + 1) * bitmap.height / rows
+    let width = endX - originX, height = endY - originY
+    var visited = [Bool](repeating: false, count: width * height)
+    var components = [[Int]]()
+    for localY in 0..<height {
+        for localX in 0..<width {
+            let start = localY * width + localX
+            let startOffset = ((originY + localY) * bitmap.width + originX + localX) * 4
+            if visited[start] || bitmap.pixels[startOffset + 3] <= 8 { continue }
+            var component = [Int](), queue = [start], cursor = 0
+            visited[start] = true
+            while cursor < queue.count {
+                let current = queue[cursor]; cursor += 1; component.append(current)
+                let x = current % width, y = current / width
+                for dy in -1...1 {
+                    for dx in -1...1 where dx != 0 || dy != 0 {
+                        let nx = x + dx, ny = y + dy
+                        guard nx >= 0, nx < width, ny >= 0, ny < height else { continue }
+                        let next = ny * width + nx
+                        let nextOffset = ((originY + ny) * bitmap.width + originX + nx) * 4
+                        if !visited[next] && bitmap.pixels[nextOffset + 3] > 8 {
+                            visited[next] = true; queue.append(next)
+                        }
+                    }
+                }
+            }
+            components.append(component)
+        }
+    }
+    let threshold = max(8, (components.map(\.count).max() ?? 0) / 20)
+    for component in components where component.count < threshold {
+        for index in component {
+            let x = index % width, y = index / width
+            let offset = ((originY + y) * bitmap.width + originX + x) * 4
+            bitmap.pixels[offset] = 0; bitmap.pixels[offset + 1] = 0
+            bitmap.pixels[offset + 2] = 0; bitmap.pixels[offset + 3] = 0
+        }
+    }
+}
+
 func frameBounds(_ bitmap: Bitmap, column: Int, row: Int) -> Bounds? {
     let originX = column * bitmap.width / columns
     let originY = row * bitmap.height / rows
@@ -362,6 +406,54 @@ func splitTextureGrid(_ input: String, outputDirectory: String, names: [String])
     }
 }
 
+func splitObjectGrid(_ input: String, outputDirectory: String, names: [String]) throws {
+    guard names.count == rows * columns else {
+        throw NSError(domain: "WalkSprite", code: 20,
+                      userInfo: [NSLocalizedDescriptionKey: "Exactly sixteen object names are required"])
+    }
+    try FileManager.default.createDirectory(atPath: outputDirectory,
+                                            withIntermediateDirectories: true)
+    var source = try loadPNG(input)
+    removeChromaKey(&source)
+    for row in 0..<rows {
+        for column in 0..<columns { removeTinyComponents(&source, column: column, row: row) }
+    }
+    for row in 0..<rows {
+        for column in 0..<columns {
+            guard let frame = frameBounds(source, column: column, row: row) else {
+                throw NSError(domain: "WalkSprite", code: 21,
+                              userInfo: [NSLocalizedDescriptionKey: "Empty object at row \(row), column \(column)"])
+            }
+            let scale = min(Double(outputCell - sidePadding * 2) / Double(frame.width),
+                            Double(baseline - topPadding) / Double(frame.height))
+            let targetWidth = max(1, Int((Double(frame.width) * scale).rounded()))
+            let targetHeight = max(1, Int((Double(frame.height) * scale).rounded()))
+            let targetX = (outputCell - targetWidth) / 2
+            let targetY = baseline - targetHeight
+            let sourceOriginX = column * source.width / columns
+            let sourceOriginY = row * source.height / rows
+            var object = Bitmap(width: outputCell, height: outputCell,
+                                pixels: [UInt8](repeating: 0, count: outputCell * outputCell * 4))
+            for y in 0..<targetHeight {
+                let sourceY = targetHeight > 1 ? y * (frame.height - 1) / (targetHeight - 1) : 0
+                for x in 0..<targetWidth {
+                    let sourceX = targetWidth > 1 ? x * (frame.width - 1) / (targetWidth - 1) : 0
+                    let sx = sourceOriginX + frame.minX + sourceX
+                    let sy = sourceOriginY + frame.minY + sourceY
+                    let sourceOffset = (sy * source.width + sx) * 4
+                    let targetOffset = ((targetY + y) * outputCell + targetX + x) * 4
+                    object.pixels[targetOffset..<(targetOffset + 4)] = source.pixels[sourceOffset..<(sourceOffset + 4)]
+                }
+            }
+            let name = names[row * columns + column]
+            let output = URL(fileURLWithPath: outputDirectory)
+                .appendingPathComponent("\(name).png").path
+            try savePNG(object, to: output)
+            print("split static object \(name) -> \(output)")
+        }
+    }
+}
+
 func validate(_ path: String) throws {
     let bitmap = try loadPNG(path)
     guard bitmap.width == outputCell * columns, bitmap.height == outputCell * rows else {
@@ -444,6 +536,26 @@ func validateTexture(_ path: String) throws {
     print("validated \(path): one full-bleed static texture")
 }
 
+func validateStaticObject(_ path: String) throws {
+    let bitmap = try loadPNG(path)
+    var bounds = Bounds(minX: bitmap.width, minY: bitmap.height, maxX: -1, maxY: -1)
+    for y in 0..<bitmap.height {
+        for x in 0..<bitmap.width {
+            if bitmap.pixels[(y * bitmap.width + x) * 4 + 3] > 8 {
+                bounds.minX = min(bounds.minX, x); bounds.minY = min(bounds.minY, y)
+                bounds.maxX = max(bounds.maxX, x); bounds.maxY = max(bounds.maxY, y)
+            }
+        }
+    }
+    guard bitmap.width == outputCell, bitmap.height == outputCell,
+          bounds.maxY == baseline - 1,
+          bounds.minX > 0, bounds.maxX < outputCell - 1, bounds.minY > 0 else {
+        throw NSError(domain: "WalkSprite", code: 22,
+                      userInfo: [NSLocalizedDescriptionKey: "\(path) must be one contained 256x256 object on baseline \(baseline)"])
+    }
+    print("validated \(path): one aligned static object")
+}
+
 do {
     if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate" {
         for path in CommandLine.arguments.dropFirst(2) { try validate(path) }
@@ -453,6 +565,8 @@ do {
         for path in CommandLine.arguments.dropFirst(2) { try validateTiles(path) }
     } else if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate-textures" {
         for path in CommandLine.arguments.dropFirst(2) { try validateTexture(path) }
+    } else if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate-static-objects" {
+        for path in CommandLine.arguments.dropFirst(2) { try validateStaticObject(path) }
     } else if CommandLine.arguments.count == 8 && CommandLine.arguments[1] == "--split-actions" {
         try splitActions(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
                          names: Array(CommandLine.arguments[4...7]))
@@ -465,6 +579,9 @@ do {
     } else if CommandLine.arguments.count == 20 && CommandLine.arguments[1] == "--split-texture-grid" {
         try splitTextureGrid(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
                              names: Array(CommandLine.arguments[4...19]))
+    } else if CommandLine.arguments.count == 20 && CommandLine.arguments[1] == "--split-object-grid" {
+        try splitObjectGrid(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
+                            names: Array(CommandLine.arguments[4...19]))
     } else if CommandLine.arguments.count == 3 {
         try process(CommandLine.arguments[1], CommandLine.arguments[2])
     } else {

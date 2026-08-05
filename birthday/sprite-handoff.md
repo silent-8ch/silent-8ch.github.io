@@ -232,6 +232,14 @@ are fine.
 - All sheets must have transparent backgrounds (except sky sheets, which are
   opaque fills).
 
+The modular architecture library in `sprites/architecture/` contains 48
+transparent, aligned 256 x 256 single-frame pieces: building shells, doors,
+windows, gates, foreground occlusion overlays, bridges, gazebos, and other small
+structures. `js/sprite-architecture-pack.js` registers intended size, phase,
+collision footprint, tint support, and lazy loading. Foreground pieces are
+already assigned to the `foreground` phase. Original 4 x 4 atlases are retained
+under `sprites/architecture/sources/`.
+
 ## Important continuation notes
 
 - When prompting image generation, attach `reference-photos.png` and identify each named panel explicitly.
