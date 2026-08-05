@@ -311,6 +311,11 @@ function csTap(px, py){
     endCutscene();
     return true;
   }
+  // delegate to step-level onTap if it exists (interactive cutscenes)
+  if (cutscene.phase === 'running' && cutscene.stepIdx < cutscene.steps.length){
+    const step = cutscene.steps[cutscene.stepIdx];
+    if (step.onTap) step.onTap(cutscene, px, py);
+  }
   // absorb all taps during a cutscene
   return true;
 }
@@ -7511,6 +7516,234 @@ function csGenTripAndCatch(){
   };
 }
 
+/* 16) Group Hug */
+function csGenGroupHug(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.50;
+  const friend1 = csPickCompanion();
+  const friend2 = csPickCompanion([friend1]);
+  const name1 = friend1.charAt(0).toUpperCase() + friend1.slice(1);
+  const name2 = friend2.charAt(0).toUpperCase() + friend2.slice(1);
+
+  return {
+    id: 'gen_group_hug',
+    chars: ['krystal', friend1, friend2],
+    skipable: true,
+    steps: [
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          const p = Math.min(1, cs.stepT / 1.5);
+          const f1x = -40 + (W * 0.32 + 40) * p;
+          const f2x = W + 40 - (W + 40 - W * 0.68) * p;
+          const frame = Math.floor(cs.stepT * 4) % 4;
+          csDrawChar(friend1, f1x, fY, 'right', charH, frame);
+          csDrawChar(friend2, f2x, fY, 'left', charH, frame);
+          csDrawExpression('krystal', 'surprised', kx, fY, charH);
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend1, 'hug', W * 0.38, fY, charH);
+          csDrawExpression('krystal', 'hug', kx, fY, charH);
+          csDrawExpression(friend2, 'hug', W * 0.62, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, null, 'GROUP HUG!! 🤗');
+      }, onStart(cs){
+          try{ sfx('tap'); }catch(e){}
+      }},
+      { dur: 2.2, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend1, 'cheer', W * 0.35, fY, charH);
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawExpression(friend2, 'cheer', W * 0.65, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'I love you guys!! 💛');
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 8);
+      }},
+    ]
+  };
+}
+
+/* 17) Show and Tell */
+function csGenShowAndTell(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.40;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+
+  return {
+    id: 'gen_show_and_tell',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          const p = Math.min(1, cs.stepT / 1.5);
+          const fx = W + 40 - (W + 40 - W * 0.62) * p;
+          const frame = Math.floor(cs.stepT * 4) % 4;
+          csDrawChar(friend, fx, fY, 'left', charH, frame);
+          csDrawExpression('krystal', 'look', kx, fY, charH);
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'carry', W * 0.62, fY, charH);
+          csDrawExpression('krystal', 'look', kx, fY, charH);
+          csDrawBubble(W * 0.62, fY - charH - 4, friendName, 'Check out what I found! ✨');
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'point', W * 0.60, fY, charH);
+          csDrawExpression('krystal', 'inspect', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Oooh, let me see...');
+      }},
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'cheer', W * 0.58, fY, charH);
+          csDrawExpression('krystal', 'surprised', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "That's amazing!! 🤩");
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 4);
+      }},
+    ]
+  };
+}
+
+/* 18) Racing */
+function csGenRacing(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.35;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+  const fx = W * 0.55;
+
+  return {
+    id: 'gen_racing',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'crouch', kx, fY, charH);
+          csDrawExpression(friend, 'crouch', fx, fY, charH);
+          csDrawBubble(W * 0.45, fY - charH - 4, null, 'Ready... set...');
+      }},
+      { dur: 1.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'crouch', kx, fY, charH);
+          csDrawExpression(friend, 'crouch', fx, fY, charH);
+          csDrawBubble(W * 0.45, fY - charH - 4, null, 'GO!! 🏁');
+      }, onStart(cs){
+          try{ sfx('tap'); }catch(e){}
+      }},
+      { dur: 2.5, draw(cs){
+          csCurrentBg();
+          const p = Math.min(1, cs.stepT / 2.2);
+          const kRunX = kx + (W * 0.85 - kx) * p;
+          const fRunX = fx + (W * 0.88 - fx) * p;
+          const frame = Math.floor(cs.stepT * 6) % 4;
+          csDrawChar('krystal', kRunX, fY, 'right', charH, frame);
+          csDrawChar(friend, fRunX, fY, 'right', charH, frame);
+      }},
+      { dur: 2.2, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'laugh', W * 0.42, fY, charH);
+          csDrawExpression(friend, 'laugh', W * 0.58, fY, charH);
+          csDrawBubble(W * 0.50, fY - charH - 4, null, 'Photo finish!! 😂');
+      }, onStart(cs){
+          csHearts(cs, W * 0.50, fY - charH * 0.7, 4);
+      }},
+    ]
+  };
+}
+
+/* 19) Pushing a Door */
+function csGenPushingDoor(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.38;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+  const doorX = W * 0.50;
+
+  return {
+    id: 'gen_pushing_door',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'push', kx, fY, charH);
+          csDrawExpression(friend, 'pull', W * 0.62, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Nngh... it won\'t budge!');
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'push', kx, fY, charH);
+          csDrawExpression(friend, 'pull', W * 0.62, fY, charH);
+          csDrawBubble(W * 0.62, fY - charH - 4, friendName, 'Pull harder!!');
+      }},
+      { dur: 1.2, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'trip', kx + 15, fY, charH);
+          csDrawExpression(friend, 'trip', W * 0.65, fY, charH);
+          csDrawBubble(doorX, fY - charH - 4, null, '*WHOOSH!* 💨');
+      }, onStart(cs){
+          try{ sfx('tap'); }catch(e){}
+      }},
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'laugh', kx, fY, charH);
+          csDrawExpression(friend, 'laugh', W * 0.62, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'We did it!! 😂');
+      }, onStart(cs){
+          csHearts(cs, doorX, fY - charH * 0.7, 4);
+      }},
+    ]
+  };
+}
+
+/* 20) Looking for Something */
+function csGenLookingFor(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.38;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+  const fx = W * 0.62;
+
+  return {
+    id: 'gen_looking_for',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'search', kx, fY, charH);
+          csDrawExpression(friend, 'search', fx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Where did it go...? 🔍');
+      }},
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'look', kx - 20, fY, charH);
+          csDrawExpression(friend, 'crouch', fx, fY, charH);
+          csDrawBubble(fx, fY - charH - 4, friendName, 'Let me check under here...');
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'crouch', kx, fY, charH);
+          csDrawExpression(friend, 'surprised', fx, fY, charH);
+          csDrawBubble(fx, fY - charH - 4, friendName, 'Wait— I found it!!');
+      }, onStart(cs){
+          try{ sfx('tap'); }catch(e){}
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawExpression(friend, 'cheer', fx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'YESSS!! You found it!! 🎉');
+      }, onStart(cs){
+          csHearts(cs, W * 0.50, fY - charH * 0.7, 6);
+      }},
+    ]
+  };
+}
+
 const GENERIC_CUTSCENES = [
   csGenThinkingOutLoud,
   csGenFriendlyWave,
@@ -7527,6 +7760,11 @@ const GENERIC_CUTSCENES = [
   csGenSneakingUp,
   csGenNapTime,
   csGenTripAndCatch,
+  csGenGroupHug,
+  csGenShowAndTell,
+  csGenRacing,
+  csGenPushingDoor,
+  csGenLookingFor,
 ];
 
 /* ============================================================================
@@ -7587,6 +7825,11 @@ const CUTSCENE_CATALOG = [
   { id: 'gen_sneaking_up',       name: 'Sneaking Up',           description: 'BOO! Got you!',                                scenes: ['any'],  chars: ['krystal','?'] },
   { id: 'gen_nap_time',          name: 'Nap Time',              description: 'Sweet dreams and a cozy blanket.',             scenes: ['any'],  chars: ['krystal','?'] },
   { id: 'gen_trip_and_catch',    name: 'Trip and Catch',        description: 'Oops! Nice save though.',                      scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_group_hug',         name: 'Group Hug',            description: 'Everybody pile in!',                           scenes: ['any'],  chars: ['krystal','?','?'] },
+  { id: 'gen_show_and_tell',     name: 'Show and Tell',        description: 'Check out this cool thing!',                   scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_racing',            name: 'Racing',               description: 'On your marks... GO!',                         scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_pushing_door',      name: 'Pushing a Door',       description: 'Push! Pull! Teamwork!',                        scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_looking_for',       name: 'Looking for Something',description: 'It has to be here somewhere...',               scenes: ['any'],  chars: ['krystal','?'] },
 ];
 
 /* ============================================================================
