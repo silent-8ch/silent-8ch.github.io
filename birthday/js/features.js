@@ -117,6 +117,10 @@ const TRINKET_POOL = (()=>{
   g(['grocerystore'], ['🛒','🍎','🧾']);
   g(['bedroom'], ['🛏️','💤','📖']);
   g(['office'], ['💼','☕','📎']);
+  g(['school'], ['📚','🍎','✏️']);
+  g(['policestation'], ['🚔','⭐','📋']);
+  g(['sewer'], ['🔧','🐀','💧']);
+  g(['highrise'], ['🌃','🛋️','🍸']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];

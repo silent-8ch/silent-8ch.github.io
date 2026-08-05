@@ -68,6 +68,10 @@ const THOUGHT_SCENE = (()=>{
   g(['grocerystore'], ['🛒','🍎','😋']);
   g(['bedroom'], ['💤','🛏️','📖']);
   g(['office'], ['💼','☕','📎']);
+  g(['school'], ['📚','✏️','🍎']);
+  g(['policestation'], ['🚔','⭐','🛡️']);
+  g(['sewer'], ['🐀','💧','🔦']);
+  g(['highrise'], ['🌃','✨','🏙️']);
   return map;
 })();
 let thoughtTimer = 7;

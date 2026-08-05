@@ -345,6 +345,10 @@ const SCENE_INTERACT = (()=>{
   g(['grocerystore'], {lines:['So many choices! 🛒','What should we get? 🥕','Aisle after aisle 😋'], emoji:'🛒', hunger:5});
   g(['bedroom'], {lines:['So cozy in here 🛏️','Just want to curl up 😴','Home sweet home 💛'], emoji:'🛏️', energy:5});
   g(['office'], {lines:['Another day at work 💼','Don\'t forget your coffee ☕','Cubicle life 🖥️'], emoji:'💼', fun:4});
+  g(['school'], {lines:['School time! 📚','Learn something new 🍎','Raise your hand! ✋'], emoji:'📚', fun:5});
+  g(['policestation'], {lines:['So official in here 🚔','Look at the badge! ⭐','Safe and sound 🛡️'], emoji:'🚔', fun:4});
+  g(['sewer'], {lines:['It\'s dark down here 🕯️','What\'s that glow? 👀','Splashy echoes 💧'], emoji:'🕯️', fun:5});
+  g(['highrise'], {lines:['What a view! 🌃','The city sparkles ✨','So sleek up here 🏙️'], emoji:'🌃', love:5});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];
@@ -1706,6 +1710,30 @@ const SCENE_SPOTS = {
     {nx:0.72, ny:0.56, r:52, e:'🖥️', lines:['Another monitor 🖥️','Meeting in 5 minutes 📋','Almost done for the day 💪']},
     {nx:0.49, ny:0.32, r:48, e:'💧', lines:['The water cooler 💧','Stay hydrated! 🥤','Office gossip spot 🤭']},
     {nx:0.94, ny:0.60, r:44, e:'🪴', lines:['The office plant 🪴','Hanging in there 🌿','A touch of green 💚']},
+  ],
+  school: [
+    {nx:0.50, ny:0.22, r:56, e:'📝', lines:['The chalkboard! 📝','ABC, easy as 123 🎶','Who wants to solve it? ✋']},
+    {nx:0.82, ny:0.14, r:44, e:'🕐', lines:['The clock 🕐','Is it recess yet? 😄','Tick tock tick tock']},
+    {nx:0.84, ny:0.52, r:48, e:'🌍', lines:['A globe! 🌍','Spin it! 🥰','Where should we go? ✈️']},
+    {nx:0.40, ny:0.66, r:54, e:'📚', lines:['Student desks 📚','Pick a seat!','Sit next to me? 🥰']},
+  ],
+  policestation: [
+    {nx:0.50, ny:0.50, r:56, e:'🛡️', lines:['The front desk 🛡️','Can I help you? 🚔','Official business 📋']},
+    {nx:0.12, ny:0.24, r:52, e:'📋', lines:['The bulletin board 📋','So many notices 👀','WANTED: more snacks 😋']},
+    {nx:0.82, ny:0.14, r:48, e:'🇺🇸', lines:['The flag 🇺🇸','Standing tall and proud','Red, white, and blue']},
+    {nx:0.78, ny:0.50, r:46, e:'⭐', lines:['A shiny badge ⭐','So official!','Deputy me? 🥰']},
+  ],
+  sewer: [
+    {nx:0.50, ny:0.24, r:54, e:'🔧', lines:['Pipes overhead 🔧','Drip drip drip 💧','Don\'t touch those!']},
+    {nx:0.14, ny:0.64, r:46, e:'🐀', lines:['A little rat! 🐀','It\'s kinda cute 🥺','Scurry scurry']},
+    {nx:0.50, ny:0.50, r:52, e:'✨', lines:['A mysterious glow ✨','What is that? 👀','So eerie and pretty 🌟']},
+    {nx:0.50, ny:0.82, r:60, e:'💧', lines:['The water flows by 💧','So dark and deep','Where does it go? 🤔']},
+  ],
+  highrise: [
+    {nx:0.50, ny:0.30, r:64, e:'🌃', lines:['The city at night 🌃','So many lights ✨','Look how far you can see 😮']},
+    {nx:0.18, ny:0.60, r:50, e:'🍽️', lines:['The kitchen island 🍽️','Modern and sleek','Cook something fancy? 👨‍🍳']},
+    {nx:0.78, ny:0.62, r:52, e:'🛋️', lines:['The comfy sofa 🛋️','Sit with me? 🥰','So plush and modern']},
+    {nx:0.94, ny:0.60, r:44, e:'🪴', lines:['The tall plant 🪴','Reaching for the sky 🌿','City jungle vibes 💚']},
   ],
 };
 // nearest hotspot hit for the current scene, or null
