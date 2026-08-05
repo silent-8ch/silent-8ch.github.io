@@ -83,30 +83,24 @@ function fxNowSec(){ try{ return (performance && performance.now ? performance.n
       ctx.restore();
     });
 
-    EXTRA_TAPS.push(function(px, py){
+    // Blow a kiss — now delivered by the 💋 Kiss action button (id="kissBtn"), not a
+    // double-tap near her (that collided with the head-pat combo). Also exposed as
+    // window.blowKiss so anything else can trigger it.
+    function doKiss(){
       try{
-        if (typeof pet === 'undefined') return false;
-        if (pet.resting || pet.animLock > 0) return false;
-        if (!nearHer(px, py)) return false;                 // only care about taps by her
-        const now = fxNowSec();
-        const quick = (now - lastT) <= WINDOW;
-        const close = Math.hypot(px - lastX, py - lastY) < 64;
-        lastT = now; lastX = px; lastY = py;
-        if (quick && close){
-          lastT = 0;                                        // reset so a 3rd tap won't chain
-          spawnKiss();
-          if (typeof sfx === 'function') sfx('hug');
-          try{ pet.blush = Math.min(2.4, (pet.blush||0) + 1.6); }catch(e){}
-          if (reactCd <= 0){                                // gate the reward/speech, not the sparkle
-            reactCd = 1.4;
-            try{ state.love = clamp(state.love + 4); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
-            if (typeof say === 'function') say(pick(['Mwah! 💋','A kiss for me? 🥰','I love you too 💗','Oh, you 😊']));
-          }
-          return true;                                      // consume this (second) tap
+        if (typeof pet === 'undefined' || pet.resting || pet.animLock > 0) return;
+        spawnKiss();
+        if (typeof sfx === 'function') sfx('hug');
+        try{ pet.blush = Math.min(2.4, (pet.blush||0) + 1.6); }catch(e){}
+        if (reactCd <= 0){                                  // gate the reward/speech, not the sparkle
+          reactCd = 1.4;
+          try{ state.love = clamp(state.love + 4); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          if (typeof say === 'function') say(pick(['Mwah! 💋','A kiss for me? 🥰','I love you too 💗','Oh, you 😊']));
         }
-        return false;                                       // first tap: leave default behaviour alone
-      }catch(e){ return false; }
-    });
+      }catch(e){}
+    }
+    try{ window.blowKiss = doKiss; }catch(e){}
+    try{ const kb = document.getElementById('kissBtn'); if (kb) kb.addEventListener('click', doKiss); }catch(e){}
   }catch(e){}
 })();
 
@@ -3680,6 +3674,237 @@ function fxWalkHerTo(px, py){
         if (typeof sfx === 'function') sfx('tap');
         if (typeof fxAt === 'function') fxAt(gm.x, gm.y - 46, pick(['🍬','🍭','✨']));
         if (typeof say === 'function') say(pick(['A gumball for me? 🍬','Ooh, my favorite color! 🥰','Clink-clink! 😄','Sweet! 🍭']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 23). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Any deferred callback captures coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   52) THE BAKERY OVEN  —  in the bakery a little oven waits. Tap it to bake: the
+   window glows warm, steam curls up from the top, and a fresh treat pops out with
+   a happy "ding." Fills her up a little. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxBakeryOven(){
+  try{
+    const AT = new Set(['bakery','patisserie','gingerbreadhouse']);
+    let ov = null;                       // {x,y,bake,cd,steamT,steam:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ ov = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.80)), y: rand(H*0.68, H*0.74), bake:0, cd:0, steamT:0, steam:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ ov = null; return; }
+      if (!ov) build();
+      if (ov.cd > 0) ov.cd -= dt;
+      if (ov.bake > 0){
+        ov.bake -= dt;
+        ov.steamT -= dt;
+        if (ov.steamT <= 0){ ov.steamT = 0.13; ov.steam.push({ x: ov.x + rand(-8,8), y: ov.y - 36, vy: rand(-14,-24), t:0, life: rand(0.8,1.3), r: rand(3,6) }); }
+      }
+      for (let i=ov.steam.length-1;i>=0;i--){
+        const s = ov.steam[i];
+        s.t += dt; s.y += s.vy*dt; s.vy *= 0.99; s.x += Math.sin(s.t*3)*6*dt;
+        if (s.t >= s.life) ov.steam.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!ov || !here()) return;
+      const x = ov.x, base = ov.y, topY = base - 34, lit = ov.bake > 0;
+      ctx.save();
+      // steam first (behind the treat pop, above the oven)
+      for (const s of ov.steam){
+        const a = Math.max(0, (1 - s.t/s.life)) * 0.4;
+        ctx.fillStyle = 'rgba(240,240,245,'+a.toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+      }
+      // body
+      ctx.fillStyle = '#8a8f98';
+      if (typeof roundRect === 'function'){ roundRect(x-16, topY, 32, 34, 4); ctx.fill(); } else ctx.fillRect(x-16, topY, 32, 34);
+      // door
+      ctx.fillStyle = '#6a6f78';
+      if (typeof roundRect === 'function'){ roundRect(x-13, topY+8, 26, 22, 3); ctx.fill(); } else ctx.fillRect(x-13, topY+8, 26, 22);
+      // window
+      if (lit){
+        const g = ctx.createRadialGradient(x, topY+17, 1, x, topY+17, 12);
+        g.addColorStop(0, 'rgba(255,190,100,0.95)'); g.addColorStop(1, 'rgba(255,150,70,0.5)');
+        ctx.fillStyle = g;
+      } else ctx.fillStyle = '#3a3f48';
+      if (typeof roundRect === 'function'){ roundRect(x-9, topY+11, 18, 12, 2); ctx.fill(); } else ctx.fillRect(x-9, topY+11, 18, 12);
+      // handle + knobs
+      ctx.fillStyle = '#c9ccd2'; ctx.fillRect(x-12, topY+4, 24, 3);
+      ctx.fillStyle = '#b0b4bc'; ctx.beginPath(); ctx.arc(x-9, topY+2, 1.6, 0, 7); ctx.arc(x-3, topY+2, 1.6, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!ov || !here()) return false;
+        if (px < ov.x - 18 || px > ov.x + 18 || py < ov.y - 38 || py > ov.y + 2) return false;
+        if (ov.cd > 0) return true;
+        ov.cd = 1.4; ov.bake = 1.6; ov.steamT = 0;
+        if (typeof sfx === 'function') sfx('find');
+        // treat pops out — capture coords BEFORE any deferred callback
+        const tx = ov.x, ty = ov.y - 12;
+        if (typeof fxAt === 'function'){
+          const treat = pick(['🍪','🥐','🧁','🥧','🍞']);
+          for (let i=0;i<3;i++){ const dx = rand(-10,10), dy = rand(-6,4); setTimeout(function(){ try{ fxAt(tx+dx, ty+dy, treat); }catch(e){} }, i*120); }
+        }
+        if (typeof say === 'function') say(pick(['Mmm, fresh from the oven! 🍪','Smells amazing 🥰','Baked with love 💛','Ding! All done ✨']));
+        try{ state.hunger = clamp(state.hunger + 5); state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   53) LAUNCH A FIREWORK  —  in the fireworks scene, tap anywhere in the upper sky
+   to send a rocket streaking up; it bursts at your spot into a colored shell of
+   sparks that drift and fade. Floor taps still walk her, so only sky taps are
+   consumed. Scene-gated; particles live in managed arrays (no deferred coords).
+   -------------------------------------------------------------------------- */
+(function fxFireworks(){
+  try{
+    const AT = new Set(['fireworks','fireworksfestival','newyear']);
+    const COLORS = ['255,120,120','255,220,130','150,220,255','200,160,255','150,240,170','255,170,220'];
+    const rockets = [];                  // {x,y,ty,vy,color}
+    const sparks = [];                   // {x,y,vx,vy,color,t,life}
+    let cd = 0;
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+
+    function explode(x, y, color){
+      const n = 22 + Math.floor(Math.random()*10);
+      for (let i=0;i<n;i++){
+        const a = (i/n)*Math.PI*2 + rand(-0.1,0.1), sp = rand(40, 90);
+        sparks.push({ x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, color, t:0, life: rand(0.9,1.5) });
+        if (sparks.length > 260) sparks.shift();
+      }
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ rockets.length = 0; sparks.length = 0; return; }
+      if (cd > 0) cd -= dt;
+      for (let i=rockets.length-1;i>=0;i--){
+        const r = rockets[i];
+        r.y += r.vy*dt; r.vy += 26*dt;                 // decelerates as it climbs
+        if (r.y <= r.ty || r.vy >= 0){ explode(r.x, r.y, r.color); rockets.splice(i,1); }
+      }
+      for (let i=sparks.length-1;i>=0;i--){
+        const s = sparks[i];
+        s.t += dt; s.vx *= 0.96; s.vy = s.vy*0.96 + 40*dt; s.x += s.vx*dt; s.y += s.vy*dt;
+        if (s.t >= s.life) sparks.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!here()) return;
+      ctx.save();
+      for (const r of rockets){
+        ctx.fillStyle = 'rgba('+r.color+',0.9)';
+        ctx.beginPath(); ctx.arc(r.x, r.y, 2, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba('+r.color+',0.35)'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(r.x, r.y + 10); ctx.stroke();
+      }
+      for (const s of sparks){
+        const a = Math.max(0, 1 - s.t/s.life);
+        ctx.fillStyle = 'rgba('+s.color+','+a.toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(s.x, s.y, 1.8*a + 0.6, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!here()) return false;
+        if (py > H*0.6) return false;                  // leave floor taps for walking
+        const color = pick(COLORS);
+        rockets.push({ x: px, y: H*0.96, ty: py, vy: -Math.sqrt(Math.max(60, (H*0.96 - py))*52), color });
+        if (rockets.length > 6) rockets.shift();
+        if (typeof sfx === 'function') sfx('tap');
+        if (cd <= 0){
+          cd = 1.0;
+          if (typeof say === 'function') say(pick(['Ooooh! 🎆','So beautiful! 🥰','Again! Light another ✨','Happy birthday, my love 🎆']));
+          try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   54) GLOWING JELLYFISH  —  in the aquarium tunnel or the bioluminescent bay a
+   jellyfish drifts by now and then, its bell softly pulsing. Tap it to make it
+   flash a bright bloom of light and jet gracefully away. Scene-gated; one at a
+   time, and it drifts off on its own if left alone.
+   -------------------------------------------------------------------------- */
+(function fxJellyfish(){
+  try{
+    const SEA = new Set(['aquariumtunnel','biobay','jellyfishtank','deepsea']);
+    const HUES = ['150,200,255','180,150,255','150,240,220','255,170,220'];
+    let jf = null;                       // {x,y,vx,vy,ph,pulse,pjet,life,hue}
+    let timer = rand(4, 10);
+    function here(){ try{ return (typeof SCENES!=='undefined') && SEA.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function spawn(){ jf = { x: rand(W*0.25, W*0.75), y: rand(H*0.32, H*0.5), vx: rand(-8,8), vy: rand(-5,-10), ph: rand(0,Math.PI*2), pulse:0, pjet:0, life: rand(12,18), hue: pick(HUES) }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ jf = null; timer = rand(4,10); return; }
+      if (!jf){ timer -= dt; if (timer <= 0){ timer = rand(10,20); spawn(); } return; }
+      jf.ph += dt*2; jf.life -= dt;
+      if (jf.pulse > 0) jf.pulse -= dt;
+      const jet = 0.5 + 0.5*Math.sin(jf.ph);                    // bell contraction
+      jf.y += jf.vy*dt*(0.6 + jet*0.8);
+      jf.x += jf.vx*dt + Math.sin(jf.ph*0.5)*4*dt;
+      if (jf.pjet < 0){ jf.y += jf.pjet*dt; jf.pjet *= 0.9; if (jf.pjet > -1) jf.pjet = 0; }
+      if (jf.x < W*0.14){ jf.x = W*0.14; jf.vx = Math.abs(jf.vx); }
+      if (jf.x > W*0.86){ jf.x = W*0.86; jf.vx = -Math.abs(jf.vx); }
+      if (jf.y < -30 || jf.life <= 0) jf = null;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!jf || !here()) return;
+      const x = jf.x, y = jf.y, r = 14;
+      const squish = 0.82 + 0.18*Math.sin(jf.ph);               // bell pulse
+      const bright = jf.pulse > 0 ? 1 : (0.45 + 0.25*Math.sin(jf.ph));
+      ctx.save();
+      // glow halo
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r*2.4);
+      g.addColorStop(0, 'rgba('+jf.hue+','+(0.35*bright).toFixed(3)+')');
+      g.addColorStop(1, 'rgba('+jf.hue+',0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r*2.4, 0, 7); ctx.fill();
+      // tentacles
+      ctx.strokeStyle = 'rgba('+jf.hue+','+(0.5*bright+0.15).toFixed(3)+')'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+      for (let i=-2;i<=2;i++){
+        const tx = x + i*3;
+        ctx.beginPath(); ctx.moveTo(tx, y + r*0.4);
+        ctx.quadraticCurveTo(tx + Math.sin(jf.ph*2 + i)*4, y + r*0.4 + 9, tx + Math.sin(jf.ph*2 + i + 1)*3, y + r*0.4 + 18);
+        ctx.stroke();
+      }
+      // bell (dome)
+      ctx.fillStyle = 'rgba('+jf.hue+','+(0.4*bright+0.25).toFixed(3)+')';
+      ctx.beginPath(); ctx.ellipse(x, y, r, r*squish, 0, Math.PI, Math.PI*2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,'+(0.3*bright).toFixed(3)+')';
+      ctx.beginPath(); ctx.ellipse(x-3, y-3, r*0.3, r*0.25, 0, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!jf || !here()) return false;
+        if (Math.hypot(px - jf.x, py - jf.y) > 22) return false;
+        jf.pulse = 0.8; jf.pjet = -60;                          // flash + jet away
+        const jx = jf.x, jy = jf.y;                             // capture coords first
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') fxAt(jx, jy - 16, pick(['🪼','✨','💙']));
+        if (typeof say === 'function') say(pick(['It glows! 🪼','So graceful ✨','Like a little lantern 💙','Off it drifts 🥰']));
         try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
         return true;
       }catch(e){ return false; }

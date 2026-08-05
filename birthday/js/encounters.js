@@ -485,3 +485,199 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   FLOATING LANTERN. On night water/festival scenes a paper sky-lantern drifts
+   slowly upward, glowing warm. Tap it to send a wish up with it.
+   -------------------------------------------------------------------------- */
+(function encLantern(){
+  try{
+    const LANTERNY = new Set(['lanternfestival','harbornight','moonlitjetty','moonbeach','nightmarket',
+      'nightgarden','rooftop','rooftoppool','willowispmarsh','fireflypier','koipond','lotuspond',
+      'trainstation','marina','lighthouse','starrymeadow','moontemple','fairyring','duckpond']);
+    let lan = null, timer = 26 + Math.random()*44;
+    function nightish(){ try{ return typeof isNight==='function' ? isNight() : (currentHour() >= 19 || currentHour() < 6); }catch(e){ return true; } }
+    function canHere(){ try{ return LANTERNY.has(SCENES[currentScene]) && nightish(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (lan){
+          lan.t += dt;
+          lan.y += lan.vy*dt;
+          lan.x += Math.sin(lan.t*0.7)*10*dt;
+          lan.glow = 0.7 + 0.3*Math.sin(lan.t*3);
+          if (lan.y < -30) lan = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 34 + Math.random()*54;
+          if (canHere()){
+            lan = { x: rand(W*0.25, W*0.75), y: H*(0.72+Math.random()*0.08),
+                    vy: -rand(10,16), t:0, glow:1 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!lan) return;
+      try{
+        const x = lan.x, y = lan.y, g = lan.glow;
+        ctx.save();
+        // warm halo
+        ctx.globalAlpha = 0.22*g; ctx.fillStyle = '#ffca6b';
+        ctx.beginPath(); ctx.arc(x, y, 16, 0, 7); ctx.fill();
+        // body
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'rgba(255,150,70,'+(0.55+0.35*g)+')';
+        ctx.strokeStyle = '#b5641e'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x-6, y-7); ctx.lineTo(x+6, y-7);
+        ctx.lineTo(x+7, y+6); ctx.lineTo(x-7, y+6); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        // little flame glow at base
+        ctx.globalAlpha = g; ctx.fillStyle = '#fff2b0';
+        ctx.beginPath(); ctx.arc(x, y+3, 2.2, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!lan) return false;
+      const cx = lan.x, cy = lan.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 28*28) return false;
+      say(pick(['Up it goes 🏮 I tucked a wish for you inside',
+                'A sky lantern 🏮 my hopes for you, floating up to the stars',
+                'Watch it climb ✨ carrying how much I love you',
+                'Make a wish and let go 🏮 I\'ll wish for more days with you']));
+      fxAt(cx, cy-8, '🏮'); hearts(); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 2); refreshHUD();
+      lan.vy *= 1.5;  // let it rise a touch faster after the wish
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   AUTUMN LEAF. On autumn/woodland scenes a single leaf spirals down on the
+   breeze. Catch it before it lands for a cozy little wish.
+   -------------------------------------------------------------------------- */
+(function encAutumnLeaf(){
+  try{
+    const AUTUMNY = new Set(['autumnforest','mapleforest','orchard','cornmaze','pumpkinpatch','harvestbarn',
+      'cidermill','coveredbridge','redwoods','birchgrove','mistyforest','sugarshack','cranberryharvest',
+      'cranberrybog','wheatfield','vineyard','campsite','hedgemaze','treehouse','windmill']);
+    const LEAFC = ['#d9772e','#c0392b','#e0a636','#a8531f','#cf6b3a'];
+    let leaf = null, timer = 20 + Math.random()*38;
+    function canHere(){ try{ return AUTUMNY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (leaf){
+          leaf.t += dt;
+          leaf.y += leaf.vy*dt;
+          leaf.x += Math.sin(leaf.t*2.1)*26*dt + leaf.drift*dt;
+          leaf.spin += dt*(2.4 + Math.sin(leaf.t*2.1));
+          if (leaf.y > H*0.88) leaf = null;   // it settled — missed
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 28 + Math.random()*46;
+          if (canHere()){
+            leaf = { x: rand(W*0.2, W*0.8), y: -12, vy: rand(22,34), drift: rand(-14,14),
+                     t:0, spin: rand(0,6), col: pick(LEAFC) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!leaf) return;
+      try{
+        ctx.save();
+        ctx.translate(leaf.x, leaf.y); ctx.rotate(leaf.spin);
+        ctx.fillStyle = leaf.col;
+        ctx.beginPath(); ctx.ellipse(0, 0, 4, 7, 0, 0, 7); ctx.fill();
+        ctx.strokeStyle = 'rgba(60,30,10,0.5)'; ctx.lineWidth = 1; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(0, 8); ctx.stroke();   // vein + stem
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!leaf) return false;
+      const cx = leaf.x, cy = leaf.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 26*26) return false;
+      say(pick(['Caught it! 🍂 They say that\'s good luck — I say it\'s us',
+                'A falling leaf 🍁 quick, a cozy wish, my love',
+                'Sweater weather and you 🍂 my favorite season',
+                'One perfect leaf, right into your hands 🥰🍁']));
+      fxAt(cx, cy-6, '🍂'); burstAt('🍁', cx, cy); if (typeof sfx==='function') sfx('find');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); refreshHUD();
+      leaf = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   TUMBLEWEED. On dry desert/canyon scenes a tumbleweed bounces across on the
+   wind. Tap it as it rolls past for a playful, dusty little moment.
+   -------------------------------------------------------------------------- */
+(function encTumbleweed(){
+  try{
+    const DRY = new Set(['desert','desertoasis','sanddunes','canyon','savanna','prairiestorm','volcano',
+      'geyser','wheatfield','cornmaze']);
+    let tw = null, timer = 24 + Math.random()*42;
+    function canHere(){ try{ return DRY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (tw){
+          tw.t += dt; tw.x += tw.vx*dt;
+          tw.hop = Math.abs(Math.sin(tw.t*4))*14;   // bouncing along the ground
+          tw.spin += tw.vx*dt*0.09;
+          if (tw.x < -30 || tw.x > W+30) tw = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 32 + Math.random()*50;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            tw = { x: dir>0 ? -18 : W+18, groundY: H*0.8, hop:0,
+                   vx: dir*rand(30,46), t:0, spin:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!tw) return;
+      try{
+        const x = tw.x, y = tw.groundY - tw.hop, R = 11;
+        ctx.save();
+        ctx.translate(x, y); ctx.rotate(tw.spin);
+        ctx.strokeStyle = 'rgba(150,120,70,0.85)'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(0, 0, R, 0, 7); ctx.stroke();
+        for (let i=0;i<7;i++){
+          const a = i*0.9;
+          ctx.beginPath(); ctx.moveTo(0,0);
+          ctx.lineTo(Math.cos(a)*R, Math.sin(a)*R);
+          ctx.lineTo(Math.cos(a+0.6)*R*0.7, Math.sin(a+0.6)*R*0.7); ctx.stroke();
+        }
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!tw) return false;
+      const cx = tw.x, cy = tw.groundY - tw.hop;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 30*30) return false;
+      say(pick(['Whoa, tumbleweed! 🌵 dusty out here without you',
+                'Boing boing 🌾 catch it before it rolls to the horizon!',
+                'Just us and the wide open road, cowgirl 🤠💕',
+                'It rolled all this way just to say howdy 😄']));
+      fxAt(cx, cy-8, '💨'); if (typeof sfx==='function') sfx('tap');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); refreshHUD();
+      tw.vx *= 1.5;  // send it bouncing off with a laugh
+      return true;
+    });
+  }catch(e){}
+})();

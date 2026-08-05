@@ -91,8 +91,7 @@ stagewrap.addEventListener('pointerdown', (e)=>{
   const h = SHEETS.walk.displayH;
   const halfW = h * 0.32;
   if (px > pet.x-halfW && px < pet.x+halfW && py > pet.y-h && py < pet.y+12){
-    if (py < pet.y - h*0.55) doPet();      // tapping her head/face -> a gentle nuzzle
-    else doAction('hug');                  // tapping her body -> a hug
+    doPet();                               // tapping her -> a gentle nuzzle/pat (hugs come only from the 🤗 button)
     return;
   }
   // add-on tap handlers (js/extras.js) get first refusal; return true to consume the tap
@@ -726,6 +725,66 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.68, r:56, e:'🎳', lines:['Here comes the ball! 🎳','Roll roll roll','Knock \'em all down!']},
     {nx:0.90, ny:0.85, r:50, e:'🎳', lines:['The ball return 🎳','So many colors','Pick your lucky one 🥰']},
     {nx:0.11, ny:0.41, r:44, e:'📺', lines:['The score monitor 📺','Am I winning? 😄','Loser buys the nachos!']},
+  ],
+  mountain: [
+    {nx:0.78, ny:0.16, r:52, e:'☀️', lines:['The sun up here ☀️','So bright and thin the air','We made it to the top!']},
+    {nx:0.30, ny:0.45, r:58, e:'🏔️', lines:['Peaks all around 🏔️','So blue and endless','Look how far we can see 🥰']},
+    {nx:0.50, ny:0.56, r:60, e:'☁️', lines:['A sea of clouds ☁️','We\'re above them!','Like standing in a dream']},
+    {nx:0.50, ny:0.60, r:48, e:'🚩', lines:['The summit flag 🚩','We climbed it together','On top of the world with you 💛']},
+  ],
+  waterlily: [
+    {nx:0.50, ny:0.45, r:54, e:'🌉', lines:['A little arched bridge 🌉','Cross it with me','So storybook pretty 🥰']},
+    {nx:0.70, ny:0.53, r:52, e:'🪷', lines:['Water lilies! 🪷','Floating so serene','Pink and cream blooms']},
+    {nx:0.08, ny:0.25, r:50, e:'🌳', lines:['A weeping willow 🌳','Trailing in the water','So soft in the breeze']},
+    {nx:0.32, ny:0.50, r:50, e:'💧', lines:['The still pond 💧','Barely a ripple','So calm and quiet here 💛']},
+  ],
+  fishingdock: [
+    {nx:0.70, ny:0.38, r:54, e:'🌅', lines:['Dawn on the water 🌅','The sun\'s just rising','So peaceful this early 🥰']},
+    {nx:0.50, ny:0.85, r:56, e:'🪵', lines:['The old wooden dock 🪵','Let\'s dangle our feet','Careful of splinters!']},
+    {nx:0.16, ny:0.62, r:48, e:'🚣', lines:['A little rowboat 🚣','Shall we drift out?','Just the two of us 💛']},
+    {nx:0.76, ny:0.60, r:46, e:'🎣', lines:['A fishing rod 🎣','Any bites yet?','So patient, my love']},
+  ],
+  perfumery: [
+    {nx:0.30, ny:0.22, r:52, e:'🧴', lines:['Rows of perfume 🧴','So many little bottles','Which scent is me? 🥰']},
+    {nx:0.82, ny:0.30, r:48, e:'🪞', lines:['A gold vanity mirror 🪞','Do I look pretty?','You always say yes 💛']},
+    {nx:0.40, ny:0.55, r:46, e:'💐', lines:['Fresh flowers 💐','Smell them!','Sweet as can be']},
+    {nx:0.62, ny:0.57, r:44, e:'💜', lines:['The display bottle 💜','A dab behind the ear','Just a little spritz ✨']},
+  ],
+  stainedglass: [
+    {nx:0.23, ny:0.30, r:60, e:'🪟', lines:['The stained-glass window 🪟','Light pouring through','Every color glowing 🥰']},
+    {nx:0.58, ny:0.55, r:50, e:'🦋', lines:['A panel in progress 🦋','A little glass butterfly','So delicate and bright']},
+    {nx:0.80, ny:0.57, r:44, e:'🔥', lines:['The soldering iron 🔥','Glowing at the tip','Careful, it\'s hot!']},
+    {nx:0.50, ny:0.16, r:46, e:'🌈', lines:['A hanging sun-catcher 🌈','Swaying so gently','Scattering rainbows 💛']},
+  ],
+  forge: [
+    {nx:0.24, ny:0.55, r:54, e:'🔥', lines:['The glowing forge 🔥','So warm on my face','Sparks and embers everywhere']},
+    {nx:0.60, ny:0.60, r:52, e:'🔨', lines:['The anvil 🔨','Clang, clang, clang!','Shaping the hot iron 🥰']},
+    {nx:0.85, ny:0.30, r:46, e:'🛠️', lines:['A rack of tools 🛠️','So many hammers','You could build anything']},
+    {nx:0.68, ny:0.72, r:44, e:'💧', lines:['The quench bucket 💧','Hisss — steam!','Cooling the blade down']},
+  ],
+  redwoods: [
+    {nx:0.12, ny:0.45, r:60, e:'🌲', lines:['Such giant trees! 🌲','So tall I can\'t see the top','We\'re so tiny down here 🥰']},
+    {nx:0.40, ny:0.30, r:52, e:'✨', lines:['Sunbeams through the trees ✨','Light dancing with dust','So peaceful and holy']},
+    {nx:0.74, ny:0.88, r:50, e:'🌿', lines:['Soft ferns everywhere 🌿','A green forest carpet','So cool and shady']},
+    {nx:0.46, ny:0.92, r:46, e:'🍄', lines:['Little mushrooms 🍄','On a mossy log','Tiny red caps 💛']},
+  ],
+  trainroom: [
+    {nx:0.17, ny:0.20, r:48, e:'🪟', lines:['A sunny window 🪟','Daylight streaming in','Such a cozy hobby room 🥰']},
+    {nx:0.50, ny:0.78, r:56, e:'🚂', lines:['The little train! 🚂','Round and round it goes','Choo choo! 💨']},
+    {nx:0.82, ny:0.55, r:48, e:'🚇', lines:['A tunnel hill 🚇','It disappears inside!','Watch it come out the other side']},
+    {nx:0.12, ny:0.94, r:44, e:'🎛️', lines:['The controller 🎛️','Let me drive!','Faster? Or slower? 😄']},
+  ],
+  barbershop: [
+    {nx:0.50, ny:0.25, r:56, e:'🪞', lines:['The big wall mirror 🪞','Gold frame and all','I can see us both 🥰']},
+    {nx:0.10, ny:0.30, r:48, e:'💈', lines:['The barber pole 💈','Spinning red and blue','Round and round forever']},
+    {nx:0.50, ny:0.62, r:52, e:'💺', lines:['A red leather chair 💺','So grand and comfy','Hop up for a trim!']},
+    {nx:0.86, ny:0.62, r:44, e:'♨️', lines:['A steaming hot towel ♨️','So warm and soft','Just for you, love 💛']},
+  ],
+  riceterraces: [
+    {nx:0.66, ny:0.31, r:52, e:'🌅', lines:['Dawn over the hills 🌅','The soft morning sun','So misty and golden 🥰']},
+    {nx:0.42, ny:0.62, r:60, e:'🌾', lines:['Flooded rice paddies 🌾','Like mirrors on the steps','They hold the whole sky']},
+    {nx:0.16, ny:0.42, r:44, e:'🛖', lines:['A little farmer\'s hut 🛖','All alone up there','So quiet and simple']},
+    {nx:0.50, ny:0.22, r:48, e:'🕊️', lines:['White egrets gliding 🕊️','So graceful and low','Skimming over the water 💛']},
   ],
 };
 // nearest hotspot hit for the current scene, or null
