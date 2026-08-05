@@ -1024,6 +1024,19 @@ const CUTSCENE_MAP = {
 let csTriggerTimer = 30 + Math.random() * 30;
 function resetCsTrigger(){ csTriggerTimer = 30 + Math.random() * 30; }
 
+// Debug: force-trigger a cutscene for the current scene (press X)
+function forceCutscene(){
+  if (cutscene || birthday) return;
+  const scene = SCENES[currentScene];
+  const defs = CUTSCENE_MAP[scene];
+  if (!defs || !defs.length) {
+    if (typeof say === 'function') say('(no cutscene for this scene)');
+    return;
+  }
+  const factory = defs[Math.floor(Math.random() * defs.length)];
+  startCutscene(factory());
+}
+
 (function csTriggerSystem(){
   EXTRA_UPDATERS.push(function csRandomTrigger(dt){
     if (cutscene || birthday) return;

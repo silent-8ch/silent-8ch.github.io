@@ -912,6 +912,7 @@ document.addEventListener('keydown', e => {
   }
   if (e.key === 'b' || e.key === 'B') { if (!birthday) startBirthday(); }   // debug: birthday scene
   if (e.key === 'Escape' && birthday) endBirthday();
+  if (e.key === 'x' || e.key === 'X') { if(typeof forceCutscene==='function') forceCutscene(); }   // debug: force cutscene
 });
 
 function updateScene(dt) {
