@@ -328,6 +328,40 @@ func splitTiles(_ input: String, outputDirectory: String, names: [String]) throw
     }
 }
 
+func splitTextureGrid(_ input: String, outputDirectory: String, names: [String]) throws {
+    guard names.count == rows * columns else {
+        throw NSError(domain: "WalkSprite", code: 17,
+                      userInfo: [NSLocalizedDescriptionKey: "Exactly sixteen texture names are required"])
+    }
+    try FileManager.default.createDirectory(atPath: outputDirectory,
+                                            withIntermediateDirectories: true)
+    let source = try loadPNG(input)
+    for row in 0..<rows {
+        let sourceTop = row * source.height / rows
+        let sourceBottom = (row + 1) * source.height / rows
+        for column in 0..<columns {
+            let sourceLeft = column * source.width / columns
+            let sourceRight = (column + 1) * source.width / columns
+            var tile = Bitmap(width: outputCell, height: outputCell,
+                              pixels: [UInt8](repeating: 0, count: outputCell * outputCell * 4))
+            for y in 0..<outputCell {
+                let sy = sourceTop + y * (sourceBottom - sourceTop) / outputCell
+                for x in 0..<outputCell {
+                    let sx = sourceLeft + x * (sourceRight - sourceLeft) / outputCell
+                    let sourceOffset = (sy * source.width + sx) * 4
+                    let targetOffset = (y * outputCell + x) * 4
+                    tile.pixels[targetOffset..<(targetOffset + 4)] = source.pixels[sourceOffset..<(sourceOffset + 4)]
+                }
+            }
+            let name = names[row * columns + column]
+            let output = URL(fileURLWithPath: outputDirectory)
+                .appendingPathComponent("\(name).png").path
+            try savePNG(tile, to: output)
+            print("split texture \(name) -> \(output)")
+        }
+    }
+}
+
 func validate(_ path: String) throws {
     let bitmap = try loadPNG(path)
     guard bitmap.width == outputCell * columns, bitmap.height == outputCell * rows else {
@@ -395,6 +429,21 @@ func validateTiles(_ path: String) throws {
     print("validated \(path): 4 full-bleed opaque tiles")
 }
 
+func validateTexture(_ path: String) throws {
+    let bitmap = try loadPNG(path)
+    guard bitmap.width == outputCell, bitmap.height == outputCell else {
+        throw NSError(domain: "WalkSprite", code: 18,
+                      userInfo: [NSLocalizedDescriptionKey: "\(path) must be 256x256"])
+    }
+    let opaque = stride(from: 3, to: bitmap.pixels.count, by: 4)
+        .filter { bitmap.pixels[$0] > 250 }.count
+    guard opaque == bitmap.width * bitmap.height else {
+        throw NSError(domain: "WalkSprite", code: 19,
+                      userInfo: [NSLocalizedDescriptionKey: "\(path) static textures must be fully opaque"])
+    }
+    print("validated \(path): one full-bleed static texture")
+}
+
 do {
     if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate" {
         for path in CommandLine.arguments.dropFirst(2) { try validate(path) }
@@ -402,6 +451,8 @@ do {
         for path in CommandLine.arguments.dropFirst(2) { try validateAction(path) }
     } else if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate-tiles" {
         for path in CommandLine.arguments.dropFirst(2) { try validateTiles(path) }
+    } else if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate-textures" {
+        for path in CommandLine.arguments.dropFirst(2) { try validateTexture(path) }
     } else if CommandLine.arguments.count == 8 && CommandLine.arguments[1] == "--split-actions" {
         try splitActions(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
                          names: Array(CommandLine.arguments[4...7]))
@@ -411,6 +462,9 @@ do {
     } else if CommandLine.arguments.count == 8 && CommandLine.arguments[1] == "--split-tiles" {
         try splitTiles(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
                        names: Array(CommandLine.arguments[4...7]))
+    } else if CommandLine.arguments.count == 20 && CommandLine.arguments[1] == "--split-texture-grid" {
+        try splitTextureGrid(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
+                             names: Array(CommandLine.arguments[4...19]))
     } else if CommandLine.arguments.count == 3 {
         try process(CommandLine.arguments[1], CommandLine.arguments[2])
     } else {

@@ -175,6 +175,14 @@ clamped and quantized to hundredths, and cached by sprite, frame, color, and
 amount. Call `SpriteRenderer.clearTintCache()` after a global palette change if
 the cached variants are no longer needed.
 
+The static texture library in `sprites/textures/` contains 64 opaque 256 x 256
+single-frame assets covering natural ground, paths, floors, walls, roofs,
+structural materials, water, rugs, and decorative surfaces. They are registered
+by `js/sprite-texture-pack.js` with `cols: 1`, `fps: 0`, tint support, and lazy
+loading. Use `SpriteRenderer.preload(name)` only when a scene needs a texture
+ready before its first rendered frame. Four original 4 x 4 atlases are retained
+under `sprites/textures/sources/`.
+
 ## Important continuation notes
 
 - When prompting image generation, attach `reference-photos.png` and identify each named panel explicitly.

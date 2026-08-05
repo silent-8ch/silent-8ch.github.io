@@ -16,11 +16,10 @@
       if(!name||typeof name!=='string')throw new Error('Sprite name is required');
       if(cols*rows>4)throw new Error(`Sprite ${name} exceeds the four-frame limit`);
       if(registry.has(name))throw new Error(`Sprite ${name} is already registered`);
-      const record={...config,name,cols,rows,fps:config.fps||0,ready:false,image:null,fw:0,fh:0};
+      const record={...config,name,cols,rows,fps:config.fps||0,ready:false,loading:false,image:null,fw:0,fh:0};
       registry.set(name,record);
-      const image=new ImageCtor();
-      image.onload=()=>{record.image=image;record.fw=Math.floor(image.width/cols);record.fh=Math.floor(image.height/rows);record.ready=record.fw>0&&record.fh>0};
-      image.src=config.src;
+      record.load=()=>{if(record.ready||record.loading)return record;record.loading=true;const image=new ImageCtor();image.onload=()=>{record.image=image;record.fw=Math.floor(image.width/cols);record.fh=Math.floor(image.height/rows);record.ready=record.fw>0&&record.fh>0;record.loading=false};image.onerror=()=>{record.loading=false};image.src=config.src;return record};
+      if(!config.lazy)record.load();
       return record;
     }
     function normalize(spec,persistent){const sprite=registry.get(spec.sprite),phase=spec.phase||sprite?.phase||'actors';assertPhase(phase);return{
@@ -54,7 +53,7 @@
     function clearTintCache(){tintCache.clear()}
     function drawObject(object){
       if(object.draw){object.draw(context,object);return}
-      const sprite=registry.get(object.sprite);if(!sprite||!sprite.ready)return;
+      const sprite=registry.get(object.sprite);if(!sprite)return;if(!sprite.ready){sprite.load();if(!sprite.ready)return}
       const width=object.width||(sprite.defaultWidth||sprite.defaultSize||sprite.fw)*object.scale,height=object.height||(sprite.defaultHeight||sprite.defaultSize||sprite.fh)*object.scale;
       const frame=Math.max(0,Math.min(sprite.cols-1,object.frame|0));
       const tinted=getTintedFrame(sprite,frame,object.tint,object.tintAmount);
@@ -64,7 +63,7 @@
     function drawPhase(phase){assertPhase(phase);const scene=getScene();const list=[...objects.values(),...submitted].filter(object=>object.phase===phase&&visible(object,scene)).sort((a,b)=>((a.depth??a.y)-(b.depth??b.y))||(a.order-b.order));for(const object of list)drawObject(object)}
     function hitTest(x,y,phases=PHASES){const scene=getScene();return[...objects.values()].filter(object=>phases.includes(object.phase)&&visible(object,scene)).sort((a,b)=>((b.depth??b.y)-(a.depth??a.y))||(b.order-a.order)).find(object=>{const sprite=registry.get(object.sprite),width=object.width||(sprite?.defaultWidth||sprite?.defaultSize||sprite?.fw||0)*object.scale,height=object.height||(sprite?.defaultHeight||sprite?.defaultSize||sprite?.fh||0)*object.scale,left=object.x-width*object.anchorX,top=object.y-height*object.anchorY;return x>=left&&x<=left+width&&y>=top&&y<=top+height})||null}
     function getFootprint(value){const object=typeof value==='object'?value:objects.get(value),sprite=object&&registry.get(object.sprite),shape=sprite?.footprint;if(!object||!shape)return null;const width=shape.width*object.scale,depth=shape.depth*object.scale;return{left:object.x-width*object.anchorX,right:object.x+width*(1-object.anchorX),top:object.y-depth,bottom:object.y,width,depth}}
-    return{PHASES,register,create,remove,clearScene,beginFrame,submit,update,drawPhase,hitTest,getFootprint,clearTintCache,getSprite:name=>registry.get(name),getObject:id=>objects.get(id)};
+    return{PHASES,register,create,remove,clearScene,beginFrame,submit,update,drawPhase,hitTest,getFootprint,clearTintCache,preload:name=>registry.get(name)?.load(),getSprite:name=>registry.get(name),getObject:id=>objects.get(id)};
   }
   root.createSpriteRenderer=createSpriteRenderer;
   if(typeof ctx!=='undefined')root.SpriteRenderer=createSpriteRenderer({context:ctx,getScene:()=>typeof SCENES!=='undefined'?SCENES[currentScene]:null});

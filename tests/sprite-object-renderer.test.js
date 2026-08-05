@@ -3,9 +3,10 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 class FakeImage {
-  constructor(){ this.width=400; this.height=100; }
+  constructor(){ FakeImage.count++; this.width=400; this.height=100; }
   set src(value){ this._src=value; if(this.onload)this.onload(); }
 }
+FakeImage.count=0;
 
 const calls=[],drawArgs=[];
 const context={
@@ -31,6 +32,13 @@ const renderer=sandbox.createSpriteRenderer({context,ImageCtor:FakeImage,getScen
 renderer.register('bird',{src:'bird.png',cols:4,rows:1,fps:4});
 renderer.register('tree',{src:'tree.png',cols:4,rows:1,fps:2,defaultSize:100,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:40,depth:12},depthOffset:-2});
 renderer.register('stairs',{src:'stairs.png',cols:4,rows:1,fps:0,defaultWidth:80,defaultHeight:40,phase:'ground'});
+const lazy=renderer.register('wall',{src:'wall.png',cols:1,fps:0,lazy:true,phase:'background'});
+assert.equal(FakeImage.count,3,'lazy sprites do not allocate an image while registering');
+renderer.submit({sprite:'wall',phase:'background',x:0,y:0});
+renderer.drawPhase('background');
+assert.equal(FakeImage.count,4,'first draw loads a lazy sprite');
+assert.equal(lazy.ready,true);
+renderer.beginFrame();
 assert.throws(()=>renderer.register('too-many',{src:'bad.png',cols:3,rows:2}),/four-frame/);
 
 const back=renderer.create({sprite:'bird',phase:'background',x:10,y:30,width:20,height:20});
