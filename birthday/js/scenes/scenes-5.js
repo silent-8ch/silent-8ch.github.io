@@ -6891,10 +6891,11 @@ function drawTownSquare(){
   drawSpriteCloud(W * 0.20 + Math.sin(t * 0.08) * 10, H * 0.08, 0.9);
   drawSpriteCloud(W * 0.70 + Math.sin(t * 0.06 + 2) * 12, H * 0.12, 0.7);
 
-  // ---- tiled ground: red brick path texture (large tiles so pixel detail shows) ----
+  // ---- tiled ground: red brick path texture ----
+  SpriteRenderer.preload('redBrickPath');
   const ground = SpriteRenderer.getSprite('redBrickPath');
   if (ground && ground.ready) {
-    const ts = 200;  // large tiles — keeps chunky pixel look
+    const ts = 200;
     for (let ty = groundY; ty < H; ty += ts)
       for (let tx = 0; tx < W; tx += ts)
         ctx.drawImage(ground.image, 0, 0, ground.fw, ground.fh, tx, ty, ts, ts);
