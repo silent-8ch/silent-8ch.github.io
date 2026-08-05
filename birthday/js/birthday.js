@@ -264,6 +264,25 @@ function drawConfetti(){
 /* ---- day / night lighting driven by the real clock ---- */
 // scenes that stage their own dramatic / night lighting — skip the global wash
 const SCENE_NO_DAYNIGHT = new Set(['aurora','meteorshower','fireworks','volcano','glowwormcave','biobay','observatory','planetarium','cinema','darkroom']);
+// indoor scenes are lit by their own lamps — their brightness must NOT shift with the
+// real clock, so they skip the day/night wash and the after-dark vignette entirely.
+// (tagged "(indoor · …)" in each scene's header comment.)
+const SCENE_INDOOR = new Set([
+  'artstudio','bakery','library','aquarium','greenhouse','planetarium','musicroom','pottery','arcade',
+  'teahouse','sciencelab','balletstudio','florist','recordshop','sewingstudio','toyshop','spa',
+  'observatory','cafe','darkroom','winecellar','clockmaker','chocolateshop','diner','apothecary',
+  'catcafe','antiqueshop','magicshop','butterflydome','perfumery','stainedglass','candleshop','forge',
+  'cinema','puppettheater','icecreamparlor','bowling','trainroom','barbershop','glassblowing',
+  'terrariumshop','bookbindery','letterpress','luthier','cheeseshop','comicshop','cobbler','weaving',
+  'fencing','ballroom','chesshall','boxinggym','naturalhistory','cartographer','escaperoom',
+  'recordingstudio','aviary','candyshop','millinery','optician','petshop','nursery','ramenshop',
+  'orchidroom','jazzclub','hammam','skilodge','sushibar','potionkitchen','snowglobeshop','mochishop',
+  'aquariumtunnel','giftwrapshop','gingerbreadkitchen','jellyfishtank','cavehotspring','candyfactory',
+  'papercraftstudio','dumplinghouse','igloo','planetlab','wizardtower','fortuneteller','arcanelibrary',
+  'alchemylab','witchcottage','enchantedmirrorhall','gelateria','trainstation','bonsaigarden',
+  'harvestbarn','sugarshack','sunroom','cheesecave','quiltshop','winterchalet','herbshed',
+  'bambootearoom','reindeerbarn','cidermill',
+]);
 let dayNightForce = null;   // debug/override: null = use real clock, else 0..24
 // returns [r,g,b,a] overlay for the current time of day
 function dayNightWash(){
@@ -282,7 +301,7 @@ function dayNightWash(){
 function currentHour(){ return dayNightForce!=null ? dayNightForce : (new Date().getHours() + new Date().getMinutes()/60); }
 function isNight(){ const h = currentHour(); return h < 6 || h >= 20; }
 function applyDayNight(scene){
-  if (SCENE_NO_DAYNIGHT.has(scene)) return;
+  if (SCENE_NO_DAYNIGHT.has(scene) || SCENE_INDOOR.has(scene)) return;
   const c = dayNightWash();
   if (c[3] > 0.001){ ctx.fillStyle=`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${c[3]})`; ctx.fillRect(0,0,W,H); }
 }
@@ -296,6 +315,9 @@ function nightFactor(){
 }
 // a cozy radial darkening at the edges after dark — softens the frame like lamplight
 function applyNightVignette(scene){
+  // interiors keep a constant look — no after-dark vignette (unless they're a
+  // deliberately-dim room like the cinema, which keeps its dramatic 0.6 below).
+  if (SCENE_INDOOR.has(scene) && !SCENE_NO_DAYNIGHT.has(scene)) return;
   const f = SCENE_NO_DAYNIGHT.has(scene) ? 0.6 : nightFactor();
   if (f <= 0.001) return;
   const a = 0.34 * f;
@@ -313,12 +335,12 @@ function applyNightVignette(scene){
 // golden-hour (vineyard, savanna, marina, wheatfield, desert, sunflowers…) is left
 // out on purpose so a midday sun never fights its own sky.
 const SCENE_SKY = new Set([
-  'beach','backyard','river','cherryblossom','autumnforest','lavender','rooftop',
+  'beach','backyard','river','cherryblossom','autumnforest','lavender',
   'zengarden','tidepools','balloons','waterfall','pumpkinpatch','tulipfield','mountain',
   'waterlily','pasture','orchard','windmill','topiary','koipond','cliffs','coveredbridge',
   'canyon','alpinemeadow','frozenfalls','geyser','teaplantation','cranberrybog','icebergbay',
   'hedgemaze','cornmaze','farmersmarket','kitehill','flowermarket','sunflowermaze','poppyfield',
-  'treehouse','hummingbirdgarden','lotuspond','birchgrove','balloonride','bonsaigarden',
+  'treehouse','hummingbirdgarden','lotuspond','birchgrove','balloonride',
   'peonygarden','duckpond','beekeepergarden','citrusgrove','watermill','cranberryharvest',
   'mapleforest','skygondola','driftwoodbeach',
 ]);
