@@ -4945,3 +4945,201 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 29). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   70) THE GEYSER  —  in the geyser field a little vent bubbles on the ground. Tap
+   it to set it off: a column of water and steam jets skyward, then rains back down
+   and settles. Scene-gated; particles live in a managed array.
+   -------------------------------------------------------------------------- */
+(function fxGeyser(){
+  try{
+    const AT = new Set(['geyser','geyserfield','geyserbasin']);
+    let gy = null;                       // {x,y,erupt,cd,spawnT,jets:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ gy = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.72)), y: rand(H*0.74, H*0.80), erupt:0, cd:0, spawnT:0, jets:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ gy = null; return; }
+      if (!gy) build();
+      if (gy.cd > 0) gy.cd -= dt;
+      if (gy.erupt > 0){
+        gy.erupt -= dt; gy.spawnT -= dt;
+        if (gy.spawnT <= 0){
+          gy.spawnT = 0.04;
+          const vx0 = gy.x, vy0 = gy.y - 6;
+          for (let k=0;k<3;k++) gy.jets.push({ x: vx0 + rand(-3,3), y: vy0, vx: rand(-32,32), vy: rand(-300,-220), t:0, life: rand(1.0,1.7), steam: Math.random()<0.3 });
+          if (gy.jets.length > 140) gy.jets.splice(0, gy.jets.length-140);
+        }
+      }
+      for (let i=gy.jets.length-1;i>=0;i--){ const j = gy.jets[i]; j.t += dt; j.x += j.vx*dt; j.y += j.vy*dt; j.vy += 340*dt; if (j.t >= j.life) gy.jets.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gy || !here()) return;
+      const x = gy.x, y = gy.y;
+      ctx.save();
+      // mineral mound
+      ctx.fillStyle = '#8a7a66'; ctx.beginPath(); ctx.moveTo(x-16, y+6); ctx.quadraticCurveTo(x, y-10, x+16, y+6); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(180,200,210,0.35)'; ctx.beginPath(); ctx.ellipse(x, y+4, 15, 3, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#3a3230'; ctx.beginPath(); ctx.ellipse(x, y-4, 6, 2.2, 0, 0, 7); ctx.fill();
+      // jets
+      for (const j of gy.jets){
+        const a = Math.max(0, 1 - j.t/j.life);
+        if (j.steam){ ctx.fillStyle = 'rgba(230,235,240,'+(a*0.4).toFixed(3)+')'; ctx.beginPath(); ctx.arc(j.x, j.y, 3 + j.t*3, 0, 7); ctx.fill(); }
+        else { ctx.fillStyle = 'rgba(130,195,230,'+a.toFixed(3)+')'; ctx.beginPath(); ctx.arc(j.x, j.y, 1.6, 0, 7); ctx.fill(); }
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gy || !here()) return false;
+        if (px < gy.x - 18 || px > gy.x + 18 || py < gy.y - 14 || py > gy.y + 10) return false;
+        if (gy.cd > 0) return true;
+        gy.cd = 1.6; gy.erupt = 1.0; gy.spawnT = 0;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof say === 'function') say(pick(['Whoooosh! 💦','Up it goes! 🥰','Stand back! 😄','Nature is showing off ✨']));
+        try{ state.fun = clamp(state.fun + 4); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   71) STRUM THE GUITAR  —  in the luthier's workshop an instrument hangs finished
+   on its stand. Tap the strings to strum: they shiver into a blur and a few notes
+   ring out and drift up. Scene-gated; tucked to one side.
+   -------------------------------------------------------------------------- */
+(function fxLuthier(){
+  try{
+    const AT = new Set(['luthier','guitarshop','violinshop','instrumentmaker']);
+    let gt = null;                       // {x,y,strum,ph,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ gt = { x: Math.max(W*0.14, Math.min(W*0.5, W*0.20)), y: rand(H*0.58, H*0.64), strum:0, ph:0, cd:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ gt = null; return; }
+      if (!gt) build();
+      if (gt.cd > 0) gt.cd -= dt;
+      if (gt.strum > 0){ gt.strum -= dt; gt.ph += dt*40; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gt || !here()) return;
+      const x = gt.x, y = gt.y;
+      ctx.save();
+      // body (figure-8)
+      ctx.fillStyle = '#b5793a';
+      ctx.beginPath(); ctx.ellipse(x, y+6, 14, 16, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x, y-8, 11, 12, 0, 0, 7); ctx.fill();
+      // neck + headstock
+      ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x-3, y-40, 6, 22);
+      ctx.fillStyle = '#5a3a1a'; ctx.fillRect(x-4, y-47, 8, 7);
+      // soundhole + bridge
+      ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.arc(x, y+2, 4, 0, 7); ctx.fill();
+      ctx.fillStyle = '#5a3a1a'; ctx.fillRect(x-4, y+11, 8, 2);
+      // strings (shiver when strummed)
+      const topY = y-45, botY = y+12;
+      ctx.strokeStyle = 'rgba(235,235,225,0.85)'; ctx.lineWidth = 0.6;
+      for (let i=0;i<5;i++){
+        const sx = x-3 + i*1.5;
+        const amp = gt.strum > 0 ? Math.sin(gt.ph + i)*(gt.strum/0.8)*2 : 0;
+        ctx.beginPath(); ctx.moveTo(sx, topY); ctx.quadraticCurveTo(sx+amp, (topY+botY)/2, sx, botY); ctx.stroke();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gt || !here()) return false;
+        if (px < gt.x - 15 || px > gt.x + 15 || py < gt.y - 48 || py > gt.y + 24) return false;
+        if (gt.cd > 0) return true;
+        gt.cd = 0.6; gt.strum = 0.8; gt.ph = 0;
+        const sx = gt.x, sy = gt.y - 6;                             // capture BEFORE deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function'){ for (let i=0;i<3;i++){ const dx = rand(-8,8); setTimeout(function(){ try{ fxAt(sx+dx, sy - i*5, pick(['♪','🎸','🎵'])); }catch(e){} }, i*120); } }
+        if (typeof say === 'function') say(pick(['Play me a song 🎸','Such a sweet sound ♪','Our song? 🥰','Strum, strum ✨']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   72) POKE THE TIDE POOL  —  among the tide pools a little rocky basin holds a
+   starfish and a fringed anemone. Tap the water: ripples spread, the anemone's
+   tentacles shyly retract, and the starfish gives a wiggle. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxTidepool(){
+  try{
+    const AT = new Set(['tidepools','rockpools','tidepool']);
+    let tp = null;                       // {x,y,poke,cd,ph,ripples:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ tp = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.24)), y: rand(H*0.74, H*0.80), poke:0, cd:0, ph:0, ripples:[] }; }
+    function star(sx, sy, wig){
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(wig);
+      ctx.fillStyle = '#e5834a'; ctx.beginPath();
+      for (let k=0;k<10;k++){ const rr = (k%2===0)?5:2; const a = k/10*Math.PI*2 - Math.PI/2; ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr*0.72); }
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#c96a34'; ctx.beginPath(); ctx.arc(0, 0, 1, 0, 7); ctx.fill();
+      ctx.restore();
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ tp = null; return; }
+      if (!tp) build();
+      if (tp.cd > 0) tp.cd -= dt;
+      tp.ph += dt;
+      if (tp.poke > 0) tp.poke -= dt;
+      for (let i=tp.ripples.length-1;i>=0;i--){ tp.ripples[i].t += dt; if (tp.ripples[i].t > 1.4) tp.ripples.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!tp || !here()) return;
+      const x = tp.x, y = tp.y, retract = tp.poke > 0 ? 0.5 : 1;
+      ctx.save();
+      // rock rim
+      ctx.fillStyle = '#6a6258'; ctx.beginPath(); ctx.ellipse(x, y, 22, 11, 0, 0, 7); ctx.fill();
+      // water
+      ctx.fillStyle = 'rgba(70,150,180,0.7)'; ctx.beginPath(); ctx.ellipse(x, y, 17, 8, 0, 0, 7); ctx.fill();
+      // contents + ripples (clipped to the water)
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(x, y, 17, 8, 0, 0, 7); ctx.clip();
+      star(x-6, y+1, tp.poke > 0 ? Math.sin(tp.ph*10)*0.3 : 0);
+      // anemone
+      const ax = x+8, ay = y-1;
+      ctx.strokeStyle = '#e28aa6'; ctx.lineWidth = 1; ctx.lineCap = 'round';
+      for (let k=0;k<7;k++){ const a = k/7*Math.PI*2, len = 4*retract; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax+Math.cos(a)*len + Math.sin(tp.ph*3+k)*retract, ay+Math.sin(a)*len - 1); ctx.stroke(); }
+      ctx.fillStyle = '#d16a8a'; ctx.beginPath(); ctx.arc(ax, ay, 3, 0, 7); ctx.fill();
+      // ripples
+      for (const r of tp.ripples){ const rad = r.t*40, a = (1 - r.t/1.4)*0.5; ctx.strokeStyle = 'rgba(255,255,255,'+a.toFixed(3)+')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(r.x, r.y, rad, rad*0.5, 0, 0, 7); ctx.stroke(); }
+      ctx.restore();
+      // rim highlight
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(x, y, 17, 8, 0, 0, 7); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!tp || !here()) return false;
+        if (((px-tp.x)*(px-tp.x))/(20*20) + ((py-tp.y)*(py-tp.y))/(11*11) > 1) return false;
+        if (tp.cd > 0){ tp.ripples.push({ x: px, y: py, t:0 }); return true; }
+        tp.cd = 0.5; tp.poke = 0.8;
+        tp.ripples.push({ x: px, y: py, t:0 });
+        if (tp.ripples.length > 6) tp.ripples.shift();
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof say === 'function' && Math.random() < 0.7) say(pick(['A starfish! ⭐','It ducked away 🥰','So many little creatures ✨','Gentle now 💙']));
+        try{ state.love = clamp(state.love + 2); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

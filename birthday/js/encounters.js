@@ -1749,3 +1749,234 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   CRAB. On beach/shore scenes a little crab scuttles sideways across the sand,
+   claws up. Tap it before it burrows for a cheeky seaside moment.
+   -------------------------------------------------------------------------- */
+(function encCrab(){
+  try{
+    const SHORE = new Set(['beach','moonbeach','driftwoodbeach','tidepools','sanddunes','marina',
+      'fishingdock','lighthouse','tidalcave','biobay','coralreef','harbornight','moonlitjetty',
+      'seasidecarousel','fireflypier']);
+    let crab = null, timer = 22 + Math.random()*40;
+    function canHere(){ try{ return SHORE.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (crab){
+          crab.t += dt;
+          if (crab.pause > 0){ crab.pause -= dt; }
+          else {
+            crab.x += crab.vx*dt;
+            if (Math.random() < 0.4*dt) crab.pause = rand(0.4, 1.0);  // freeze, claws up
+          }
+          crab.legw = Math.sin(crab.t*14);
+          crab.claw = 0.5 + 0.5*Math.sin(crab.t*4);
+          if (crab.x < -18 || crab.x > W+18) crab = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*48;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            crab = { x: dir>0 ? -12 : W+12, groundY: H*0.82, pause:0, legw:0, claw:0,
+                     vx: dir*rand(20,32), dir, t:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!crab) return;
+      try{
+        const x = crab.x, y = crab.groundY, d = crab.dir;
+        ctx.save();
+        ctx.fillStyle = '#e0603c';
+        // shell
+        ctx.beginPath(); ctx.ellipse(x, y, 8, 5, 0, 0, 7); ctx.fill();
+        // legs
+        ctx.strokeStyle = '#c04e2e'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+        for (let i=-1;i<=1;i++){
+          const off = crab.legw*2;
+          ctx.beginPath(); ctx.moveTo(x + i*4, y+3); ctx.lineTo(x + i*4 - 4, y+7+off); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(x + i*4, y+3); ctx.lineTo(x + i*4 + 4, y+7-off); ctx.stroke();
+        }
+        // claws (raised)
+        const cl = 4 + crab.claw*3;
+        ctx.strokeStyle = '#e0603c'; ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.moveTo(x - 7, y-2); ctx.lineTo(x - 11, y - cl); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + 7, y-2); ctx.lineTo(x + 11, y - cl); ctx.stroke();
+        ctx.fillStyle = '#e0603c';
+        ctx.beginPath(); ctx.arc(x - 11, y - cl, 2.2, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + 11, y - cl, 2.2, 0, 7); ctx.fill();
+        // eyes on stalks
+        ctx.strokeStyle = '#c04e2e'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x-2, y-4); ctx.lineTo(x-2, y-8); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x+2, y-4); ctx.lineTo(x+2, y-8); ctx.stroke();
+        ctx.fillStyle = '#20130a';
+        ctx.beginPath(); ctx.arc(x-2, y-8, 1.2, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(x+2, y-8, 1.2, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!crab) return false;
+      const cx = crab.x, cy = crab.groundY - 4;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 26*26) return false;
+      say(pick(['A little crab! 🦀 sideways and sassy — I love him',
+                'Claws up! 🦀 don\'t worry, he\'s all bluff, like a grump who adores you',
+                'Scuttle scuttle 🦀 quick, before he digs in!',
+                'He waved a claw at you 🦀 that\'s crab for "hello, gorgeous" 😄']));
+      fxAt(cx, cy-8, '🦀'); if (typeof sfx==='function') sfx('find');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); refreshHUD();
+      crab = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   LEAPING FISH. On river/waterfall/lake scenes a fish arcs up out of the water,
+   catches the light, and splashes back. Tap it at the top of its jump for luck.
+   -------------------------------------------------------------------------- */
+(function encLeapingFish(){
+  try{
+    const RIVERY = new Set(['river','waterfall','frozenfalls','watermill','marina','fishingdock',
+      'moonlitjetty','harbornight','bayou','riceterraces','cliffs','geyser','watermill','koipond',
+      'lotuspond','duckpond','tidalcave']);
+    let fish = null, timer = 24 + Math.random()*42;
+    function canHere(){ try{ return RIVERY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (fish){
+          fish.t += dt;
+          // parabolic arc: p in [0,1]
+          fish.p += dt / fish.dur;
+          fish.x = fish.x0 + fish.dx*fish.p;
+          fish.y = fish.waterY - Math.sin(fish.p*Math.PI)*fish.height;
+          fish.ang = Math.cos(fish.p*Math.PI) * -1.1 * (fish.dx>0?1:-1);
+          if (fish.p >= 1){
+            const sx = fish.x, sy = fish.waterY;               // capture before nulling
+            for (let i=0;i<3;i++) setTimeout(()=> fxAt(sx + rand(-10,10), sy - rand(0,8), '💧'), i*50);
+            fish = null;
+          }
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 32 + Math.random()*50;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            const wy = H*(0.7+Math.random()*0.05);
+            fish = { x0: rand(W*0.25, W*0.75), waterY: wy, dx: dir*rand(50,90),
+                     height: rand(60,90), dur: rand(1.1,1.5), p:0, x:0, y:wy, ang:0, t:0, dir };
+            fish.x = fish.x0;
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!fish) return;
+      try{
+        const x = fish.x, y = fish.y, d = fish.dir;
+        ctx.save();
+        ctx.translate(x, y); ctx.rotate(fish.ang); ctx.scale(d, 1);
+        ctx.fillStyle = '#8fb8c8';
+        // body
+        ctx.beginPath(); ctx.ellipse(0, 0, 9, 4.5, 0, 0, 7); ctx.fill();
+        // tail
+        ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(-14, -4); ctx.lineTo(-14, 4); ctx.closePath(); ctx.fill();
+        // belly sheen
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.beginPath(); ctx.ellipse(1, 1.5, 5, 2, 0, 0, 7); ctx.fill();
+        // eye
+        ctx.fillStyle = '#20130a';
+        ctx.beginPath(); ctx.arc(5, -1, 1, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!fish) return false;
+      const cx = fish.x, cy = fish.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 30*30) return false;
+      say(pick(['Caught it mid-jump! 🐟 they say a leaping fish is a wish granted',
+                'Splash! 🐟 nature showing off, just for you',
+                'Silver flash in the sun ✨ blink and you\'d miss it — but you didn\'t',
+                'Up he goes! 🐟 chasing something better — I already caught mine 💗']));
+      fxAt(cx, cy-8, '✨'); hearts(); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 4); refreshHUD();
+      fish = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   MAPLE SEED. On woodland/autumn scenes a winged maple seed (samara) twirls down
+   like a tiny helicopter. Catch it before it lands for a whimsical little wish.
+   -------------------------------------------------------------------------- */
+(function encMapleSeed(){
+  try{
+    const TREEY = new Set(['mapleforest','autumnforest','redwoods','birchgrove','mistyforest','orchard',
+      'backyard','coveredbridge','treehouse','campsite','cherryblossom','sakuratunnel','windmill',
+      'hedgemaze','pasture','sugarshack','cidermill','bonsaigarden']);
+    let seed = null, timer = 20 + Math.random()*38;
+    function canHere(){ try{ return TREEY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (seed){
+          seed.t += dt;
+          seed.y += seed.vy*dt;
+          seed.x += Math.sin(seed.t*2.4)*20*dt + seed.drift*dt;
+          seed.spin += dt*14;                     // fast helicopter spin
+          if (seed.y > H*0.86) seed = null;        // landed — missed
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 28 + Math.random()*46;
+          if (canHere()){
+            seed = { x: rand(W*0.2, W*0.8), y: -12, vy: rand(18,28), drift: rand(-12,12),
+                     t:0, spin: rand(0,6) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!seed) return;
+      try{
+        ctx.save();
+        ctx.translate(seed.x, seed.y); ctx.rotate(seed.spin);
+        // seed pod
+        ctx.fillStyle = '#9a6a3c';
+        ctx.beginPath(); ctx.arc(0, 0, 3, 0, 7); ctx.fill();
+        // wing
+        ctx.fillStyle = 'rgba(200,170,110,0.85)';
+        ctx.beginPath();
+        ctx.moveTo(2, 0);
+        ctx.quadraticCurveTo(14, -3, 16, 2);
+        ctx.quadraticCurveTo(12, 4, 2, 2);
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = 'rgba(140,110,60,0.6)'; ctx.lineWidth = 0.7;
+        ctx.beginPath(); ctx.moveTo(3, 0.5); ctx.lineTo(15, 1.5); ctx.stroke();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!seed) return false;
+      const cx = seed.x, cy = seed.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 26*26) return false;
+      say(pick(['A helicopter seed! 🍁 we used to throw these as kids — catch, my love',
+                'Twirling all the way down 🚁 nature\'s little confetti',
+                'Caught it! 🌱 plant it and watch it grow — like us, a bit more each year',
+                'Round and round it spun, right to you 🍁 whimsical thing 🥰']));
+      fxAt(cx, cy-6, '🍁'); if (typeof sfx==='function') sfx('find');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); refreshHUD();
+      seed = null;
+      return true;
+    });
+  }catch(e){}
+})();
