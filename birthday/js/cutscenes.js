@@ -1919,6 +1919,534 @@ function csMusicJam(){
 }
 
 /* ============================================================================
+   CUTSCENE 11: PAINTING TOGETHER  (triggers at artstudio, pottery)
+   ============================================================================ */
+function csPaintingTogether(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.38, paulX = W * 0.62;
+
+  // draw a simple easel at (cx, baseY)
+  function drawEasel(cx, baseY, canvasContent){
+    // legs
+    ctx.strokeStyle = '#8a6a40'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(cx - 12, baseY); ctx.lineTo(cx - 6, baseY - 60); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + 12, baseY); ctx.lineTo(cx + 6, baseY - 60); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, baseY + 2); ctx.lineTo(cx, baseY - 56); ctx.stroke();
+    // shelf
+    ctx.fillStyle = '#7a5a30'; ctx.fillRect(cx - 14, baseY - 36, 28, 3);
+    // canvas
+    ctx.fillStyle = '#faf6ee'; ctx.fillRect(cx - 13, baseY - 58, 26, 24);
+    ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 0.8;
+    ctx.strokeRect(cx - 13, baseY - 58, 26, 24);
+    if (canvasContent) canvasContent(cx, baseY);
+  }
+
+  // Krystal's beautiful painting — a little landscape with a sun and flowers
+  function drawKrystalPainting(cx, baseY){
+    const px = cx - 13, py = baseY - 58;
+    // sky
+    ctx.fillStyle = '#87ceeb'; ctx.fillRect(px + 1, py + 1, 24, 10);
+    // ground
+    ctx.fillStyle = '#6aae4a'; ctx.fillRect(px + 1, py + 11, 24, 12);
+    // sun
+    ctx.fillStyle = '#ffd040'; ctx.beginPath(); ctx.arc(px + 19, py + 5, 3, 0, 7); ctx.fill();
+    // tiny flowers
+    const cols = ['#ff6080','#ffa040','#c060e0'];
+    for (let i = 0; i < 4; i++){
+      ctx.fillStyle = cols[i % cols.length];
+      ctx.beginPath(); ctx.arc(px + 5 + i * 5, py + 16, 1.5, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#3a7a2a'; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(px + 5 + i * 5, py + 17.5); ctx.lineTo(px + 5 + i * 5, py + 21); ctx.stroke();
+    }
+  }
+
+  // Paul's terrible painting — a stick figure
+  function drawPaulPainting(cx, baseY){
+    const px = cx - 13, py = baseY - 58;
+    // blank canvas with a wobbly stick figure
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
+    const mx = px + 13, my = py + 6;
+    // head
+    ctx.beginPath(); ctx.arc(mx, my, 2.5, 0, 7); ctx.stroke();
+    // body
+    ctx.beginPath(); ctx.moveTo(mx, my + 2.5); ctx.lineTo(mx, my + 11); ctx.stroke();
+    // arms (one droops)
+    ctx.beginPath(); ctx.moveTo(mx - 5, my + 6); ctx.lineTo(mx, my + 5); ctx.lineTo(mx + 6, my + 8); ctx.stroke();
+    // legs
+    ctx.beginPath(); ctx.moveTo(mx, my + 11); ctx.lineTo(mx - 4, my + 17); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(mx, my + 11); ctx.lineTo(mx + 4, my + 17); ctx.stroke();
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // warm studio interior
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#f0e4d0'); wall.addColorStop(0.5, '#e8dac4'); wall.addColorStop(1, '#ddd0b8');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // wooden floor
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#b8945a'); floor.addColorStop(1, '#a07e48');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 22){
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // window on back wall — soft light coming in
+    const winX = W * 0.50, winY = H * 0.10, winW = 36, winH = 28;
+    ctx.fillStyle = '#c8e0f0'; ctx.fillRect(winX - winW / 2, winY, winW, winH);
+    ctx.strokeStyle = '#a08060'; ctx.lineWidth = 2;
+    ctx.strokeRect(winX - winW / 2, winY, winW, winH);
+    ctx.beginPath(); ctx.moveTo(winX, winY); ctx.lineTo(winX, winY + winH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(winX - winW / 2, winY + winH / 2); ctx.lineTo(winX + winW / 2, winY + winH / 2); ctx.stroke();
+
+    // light glow from window
+    const glow = ctx.createRadialGradient(winX, winY + winH / 2, 4, winX, winY + winH / 2, 70);
+    glow.addColorStop(0, 'rgba(255,248,220,.18)'); glow.addColorStop(1, 'rgba(255,248,220,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(winX, winY + winH / 2, 70, 0, 7); ctx.fill();
+
+    // paint splotches on the floor
+    const splats = ['#ff6080','#4080e0','#40c060','#ffa040','#c060e0'];
+    for (let i = 0; i < 7; i++){
+      ctx.fillStyle = splats[i % splats.length];
+      ctx.globalAlpha = 0.15;
+      ctx.beginPath(); ctx.arc((i * 53 + 18) % W, groundY + 6 + (i * 11) % 14, 2 + (i % 3), 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawChars(){
+    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    csDrawChar('paul',    paulX,    fY, 'left',  charH, 0);
+  }
+
+  return {
+    chars: ['krystal', 'paul'],
+    skipable: true,
+    steps: [
+      // Step 1: Both painting side by side
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawChars();
+          drawEasel(krystalX + 24, fY - 4, null);
+          drawEasel(paulX - 24, fY - 4, null);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'This is going to be a masterpiece.');
+      }},
+      // Step 2: Krystal peeks at Paul's canvas
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawChars();
+          drawEasel(krystalX + 24, fY - 4, null);
+          drawEasel(paulX - 24, fY - 4, drawPaulPainting);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', '*peeks over* ...what is that? \ud83d\ude02');
+      }},
+      // Step 3: Paul defends his art
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawChars();
+          drawEasel(krystalX + 24, fY - 4, null);
+          drawEasel(paulX - 24, fY - 4, drawPaulPainting);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', "It's abstract!");
+      }},
+      // Step 4: Krystal's gentle tease
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars();
+          drawEasel(krystalX + 24, fY - 4, null);
+          drawEasel(paulX - 24, fY - 4, drawPaulPainting);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It's... something \ud83d\ude02");
+      }},
+      // Step 5: Krystal reveals hers — beautiful. Hearts.
+      { dur: 2.8, draw(cs){
+          drawBg(cs); drawChars();
+          drawEasel(krystalX + 24, fY - 4, drawKrystalPainting);
+          drawEasel(paulX - 24, fY - 4, drawPaulPainting);
+          if (cs.stepT < 1.5){
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Now look at mine \u2728');
+          } else {
+            csDrawBubble(paulX, fY - charH - 4, 'Paul', '...okay yours is way better.');
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+          csHearts(cs, paulX, fY - charH * 0.7, 4);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 12: HIDE AND SEEK  (triggers at hedgemaze, topiary, backyard)
+   ============================================================================ */
+function csHideAndSeek(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const lukeX = W * 0.50, williamX = W * 0.72, krystalX = W * 0.26;
+
+  // draw a bush (hedge shrub) at (cx, baseY)
+  function drawBush(cx, baseY, w, h){
+    w = w || 36; h = h || 28;
+    ctx.fillStyle = '#3a8a30';
+    ctx.beginPath(); ctx.ellipse(cx, baseY - h * 0.4, w * 0.5, h * 0.5, 0, 0, 7); ctx.fill();
+    // highlight
+    ctx.fillStyle = '#4aa040';
+    ctx.beginPath(); ctx.ellipse(cx - 4, baseY - h * 0.55, w * 0.25, h * 0.22, -0.3, 0, 7); ctx.fill();
+    // leaf detail dots
+    ctx.fillStyle = '#2e7a24';
+    for (let i = 0; i < 5; i++){
+      const lx = cx + Math.cos(i * 1.26) * w * 0.3;
+      const ly = baseY - h * 0.4 + Math.sin(i * 1.8) * h * 0.28;
+      ctx.beginPath(); ctx.arc(lx, ly, 1.5, 0, 7); ctx.fill();
+    }
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // bright garden sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#78c0e8'); sky.addColorStop(0.5, '#a0d8f0'); sky.addColorStop(1, '#d0eef0');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // puffy clouds
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    for (let i = 0; i < 4; i++){
+      const cx = (i * W / 3.5 + 10 + Math.sin(t * 0.06 + i * 1.3) * 6);
+      ctx.beginPath(); ctx.ellipse(cx, 18 + i * 8, 28 + i * 4, 9, 0, 0, 7); ctx.fill();
+    }
+
+    // grassy garden ground
+    const gr = ctx.createLinearGradient(0, groundY, 0, H);
+    gr.addColorStop(0, '#5aaa3a'); gr.addColorStop(1, '#3a8a28');
+    ctx.fillStyle = gr; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // grass blades on top edge
+    ctx.fillStyle = '#4a9a34';
+    for (let x = 0; x < W; x += 5){
+      const bh = 4 + Math.sin(x * 0.3 + t * 1.5) * 2;
+      ctx.fillRect(x, groundY - bh, 2, bh);
+    }
+
+    // background hedges
+    drawBush(W * 0.08, groundY + 2, 40, 32);
+    drawBush(W * 0.92, groundY + 2, 44, 34);
+
+    // fence in background
+    ctx.fillStyle = '#c8a870';
+    for (let i = 0; i < 8; i++){
+      const fx = i * W / 7;
+      ctx.fillRect(fx, groundY - 28, 3, 28);
+    }
+    ctx.fillRect(0, groundY - 20, W, 3);
+    ctx.fillRect(0, groundY - 10, W, 3);
+  }
+
+  // the hiding bush (William hides behind this)
+  const bushX = W * 0.72, bushBaseY = groundY + 4;
+
+  function drawCharsStep1(cs){
+    // Luke counting, facing away (up), others visible
+    csDrawChar('luke', lukeX, fY, 'up', charH, 0);
+    csDrawChar('william', williamX, fY, 'left', charH * 0.95, 1);
+    csDrawChar('krystal', krystalX, fY, 'right', charH, 1);
+  }
+
+  function drawCharsStep2(cs){
+    // Luke still counting. William behind bush, Krystal behind left bush.
+    csDrawChar('luke', lukeX, fY, 'up', charH, 0);
+    // William mostly hidden — draw before bush
+    csDrawChar('william', bushX, fY, 'down', charH * 0.95, 0);
+    // bush covers William
+    drawBush(bushX, bushBaseY, 42, 34);
+    // Krystal ducking behind left bush — smaller/lower
+    csDrawChar('krystal', W * 0.10, fY + 6, 'right', charH * 0.7, 0);
+    drawBush(W * 0.10, bushBaseY, 38, 30);
+  }
+
+  function drawCharsStep3(cs){
+    // Luke turned around, ready to seek
+    csDrawChar('luke', lukeX, fY, 'down', charH, 0);
+    csDrawChar('william', bushX, fY, 'down', charH * 0.95, 0);
+    drawBush(bushX, bushBaseY, 42, 34);
+    csDrawChar('krystal', W * 0.10, fY + 6, 'right', charH * 0.7, 0);
+    drawBush(W * 0.10, bushBaseY, 38, 30);
+  }
+
+  function drawCharsStep4(cs){
+    // Luke found William — William stepping out from bush
+    csDrawChar('luke', bushX - 24, fY, 'right', charH, 0);
+    csDrawChar('william', bushX + 8, fY, 'left', charH * 0.95, 0);
+    drawBush(bushX, bushBaseY, 42, 34);
+    csDrawChar('krystal', W * 0.10, fY + 6, 'right', charH * 0.7, 0);
+    drawBush(W * 0.10, bushBaseY, 38, 30);
+  }
+
+  function drawCharsStep5(cs){
+    // Krystal jumps out — everyone together
+    csDrawChar('luke', W * 0.40, fY, 'left', charH, 0);
+    csDrawChar('william', W * 0.55, fY, 'down', charH * 0.95, 0);
+    csDrawChar('krystal', W * 0.26, fY, 'right', charH, 1);
+    drawBush(bushX, bushBaseY, 42, 34);
+    drawBush(W * 0.10, bushBaseY, 38, 30);
+  }
+
+  return {
+    chars: ['krystal', 'luke', 'william'],
+    skipable: true,
+    steps: [
+      // Step 1: Luke counting against fence, others scattering
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawCharsStep1(cs);
+          csDrawBubble(lukeX, fY - charH - 4, 'Luke', '...eight, nine, ten!');
+      }},
+      // Step 2: William ducks behind bush, Krystal hides too
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawCharsStep2(cs);
+          csDrawBubble(krystalX, fY + 6 - charH * 0.7 - 4, 'Krystal', '*shh, shh!* \ud83e\udd2d');
+      }},
+      // Step 3: Luke turns around — ready or not!
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawCharsStep3(cs);
+          csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Ready or not, here I come!');
+      }},
+      // Step 4: Luke walks right to William's bush. Found!
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawCharsStep4(cs);
+          if (cs.stepT < 1.3){
+            csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Found you!');
+          } else {
+            csDrawBubble(bushX + 8, fY - charH * 0.95 - 4, 'William', 'Aw man!');
+          }
+      }},
+      // Step 5: Krystal jumps out triumphantly. Everyone laughs.
+      { dur: 3.0, draw(cs){
+          drawBg(cs); drawCharsStep5(cs);
+          if (cs.stepT < 1.6){
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "You'll never find me! \ud83d\ude04");
+          } else {
+            csDrawBubble(lukeX, fY - charH - 4, 'Luke', "You gave yourself up! \ud83d\ude02");
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 4);
+          csHearts(cs, lukeX, fY - charH * 0.7, 3);
+          csHearts(cs, williamX, fY - charH * 0.6, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 13: TEA PARTY  (triggers at teahouse, bambootearoom, cafe)
+   ============================================================================ */
+function csTeaParty(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.28, lunaX = W * 0.50, wadeX = W * 0.72;
+
+  // tea spill particle state
+  let splashDrops = [];
+  function spawnSplash(cx, cy, n){
+    for (let i = 0; i < n; i++){
+      splashDrops.push({
+        x: cx + rand(-4, 4), y: cy,
+        vx: rand(-18, 18), vy: rand(-30, -10),
+        life: 0.6 + Math.random() * 0.4,
+        maxLife: 0.6 + Math.random() * 0.4,
+        size: 1.2 + Math.random() * 1.2
+      });
+    }
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // warm tearoom interior
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#e8d8c4'); wall.addColorStop(0.5, '#f0e4d4'); wall.addColorStop(1, '#e0d0b8');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // wainscoting / lower wall panel
+    ctx.fillStyle = '#c8a878';
+    ctx.fillRect(0, groundY - 30, W, 30);
+    ctx.strokeStyle = '#b89868'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, groundY - 30); ctx.lineTo(W, groundY - 30); ctx.stroke();
+
+    // decorative shelf with teapots on back wall
+    ctx.fillStyle = '#b08858'; ctx.fillRect(W * 0.10, H * 0.14, W * 0.30, 3);
+    // tiny teapots on shelf
+    const potCols = ['#e0a0a0','#a0c0e0','#c0e0a0'];
+    for (let i = 0; i < 3; i++){
+      const px = W * 0.14 + i * W * 0.10;
+      ctx.fillStyle = potCols[i];
+      ctx.beginPath(); ctx.ellipse(px, H * 0.12, 5, 4, 0, 0, 7); ctx.fill();
+      // spout
+      ctx.strokeStyle = potCols[i]; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(px + 5, H * 0.11); ctx.lineTo(px + 8, H * 0.09); ctx.stroke();
+      // handle
+      ctx.beginPath(); ctx.arc(px - 6, H * 0.12, 3, -1, 1); ctx.stroke();
+    }
+
+    // floor — elegant wood
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#a0845a'); floor.addColorStop(1, '#8a704a');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.strokeStyle = 'rgba(0,0,0,.05)'; ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 20){
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // hanging lantern / soft light
+    const lanternX = W * 0.50, lanternY = H * 0.06;
+    ctx.strokeStyle = '#8a6a40'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(lanternX, 0); ctx.lineTo(lanternX, lanternY); ctx.stroke();
+    ctx.fillStyle = '#f0dcc0';
+    ctx.beginPath(); ctx.ellipse(lanternX, lanternY + 4, 6, 5, 0, 0, 7); ctx.fill();
+    const glow = ctx.createRadialGradient(lanternX, lanternY + 4, 2, lanternX, lanternY + 4, 50);
+    glow.addColorStop(0, 'rgba(255,240,200,.16)'); glow.addColorStop(1, 'rgba(255,240,200,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(lanternX, lanternY + 4, 50, 0, 7); ctx.fill();
+  }
+
+  // draw the tea table
+  const tableX = W * 0.50, tableY = fY - charH * 0.30;
+  function drawTable(){
+    // tabletop — oval
+    ctx.fillStyle = '#c09060';
+    ctx.beginPath(); ctx.ellipse(tableX, tableY, 52, 10, 0, 0, 7); ctx.fill();
+    // table edge
+    ctx.fillStyle = '#a07848';
+    ctx.fillRect(tableX - 52, tableY, 104, 4);
+    // legs
+    ctx.fillStyle = '#906838'; ctx.lineWidth = 1;
+    ctx.fillRect(tableX - 40, tableY + 4, 3, 16);
+    ctx.fillRect(tableX + 37, tableY + 4, 3, 16);
+  }
+
+  // draw a teacup at (cx, cy) — tiny fancy cup with saucer
+  function drawTeacup(cx, cy, spilled){
+    if (spilled){
+      // tipped over cup
+      ctx.fillStyle = '#f0e8d8';
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(1.2);
+      ctx.beginPath(); ctx.ellipse(0, 0, 4, 3, 0, 0, 7); ctx.fill();
+      ctx.restore();
+      // spill puddle
+      ctx.fillStyle = 'rgba(180,140,80,.35)';
+      ctx.beginPath(); ctx.ellipse(cx + 6, cy + 2, 8, 3, 0.2, 0, 7); ctx.fill();
+    } else {
+      // saucer
+      ctx.fillStyle = '#e8e0d0';
+      ctx.beginPath(); ctx.ellipse(cx, cy + 1, 6, 2, 0, 0, 7); ctx.fill();
+      // cup body
+      ctx.fillStyle = '#f0e8d8';
+      ctx.fillRect(cx - 3, cy - 5, 6, 5);
+      // tea inside
+      ctx.fillStyle = '#c8a060';
+      ctx.fillRect(cx - 2, cy - 4, 4, 2);
+      // tiny handle
+      ctx.strokeStyle = '#d0c8b0'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx + 4, cy - 3, 2, -1.2, 1.2); ctx.stroke();
+      // steam wisps
+      ctx.strokeStyle = 'rgba(200,200,200,.3)'; ctx.lineWidth = 0.6;
+      for (let i = 0; i < 2; i++){
+        const sx = cx - 1 + i * 2;
+        ctx.beginPath();
+        ctx.moveTo(sx, cy - 6);
+        ctx.quadraticCurveTo(sx + (i === 0 ? -2 : 2), cy - 10, sx, cy - 13);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // napkin prop
+  function drawNapkin(cx, cy){
+    ctx.fillStyle = '#f5f0e0';
+    ctx.fillRect(cx - 5, cy - 2, 10, 5);
+    ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 0.5;
+    ctx.strokeRect(cx - 5, cy - 2, 10, 5);
+    // lace edge
+    ctx.strokeStyle = 'rgba(180,160,140,.3)';
+    ctx.setLineDash([1, 1]);
+    ctx.strokeRect(cx - 4, cy - 1, 8, 3);
+    ctx.setLineDash([]);
+  }
+
+  function drawSplash(dt){
+    for (let i = splashDrops.length - 1; i >= 0; i--){
+      const d = splashDrops[i];
+      d.x += d.vx * dt; d.y += d.vy * dt;
+      d.vy += 60 * dt; // gravity
+      d.life -= dt;
+      if (d.life <= 0){ splashDrops.splice(i, 1); continue; }
+      const a = Math.min(1, d.life / d.maxLife * 2);
+      ctx.fillStyle = `rgba(180,140,80,${a.toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(d.x, d.y, d.size, 0, 7); ctx.fill();
+    }
+  }
+
+  function drawChars(){
+    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    csDrawChar('luna',    lunaX,    fY, 'down',  charH * 0.9, 0);
+    csDrawChar('wade',    wadeX,    fY, 'left',  charH * 0.95, 0);
+  }
+
+  return {
+    chars: ['krystal', 'luna', 'wade'],
+    skipable: true,
+    steps: [
+      // Step 1: Everyone sipping tea with pinkies up
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawChars(); drawTable();
+          drawTeacup(krystalX + 16, tableY - 4, false);
+          drawTeacup(lunaX, tableY - 4, false);
+          drawTeacup(wadeX - 16, tableY - 4, false);
+          drawSplash(0);
+          csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', 'Pinkies UP, everyone! \ud83e\udeb7');
+      }, update(cs, dt){ drawSplash(dt); }},
+      // Step 2: They sip — nice and fancy
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars(); drawTable();
+          drawTeacup(krystalX + 16, tableY - 4, false);
+          drawTeacup(lunaX, tableY - 4, false);
+          drawTeacup(wadeX - 16, tableY - 4, false);
+          drawSplash(0);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Oh this is lovely \u2615');
+      }, update(cs, dt){ drawSplash(dt); }},
+      // Step 3: Wade spills his tea
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(); drawTable();
+          drawTeacup(krystalX + 16, tableY - 4, false);
+          drawTeacup(lunaX, tableY - 4, false);
+          drawTeacup(wadeX - 16, tableY - 4, true);
+          drawSplash(0);
+          if (cs.stepT < 1.3){
+            csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', 'Oops...');
+          } else {
+            csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', '*GASP!* The tea! \ud83d\ude31');
+          }
+      }, onStart(cs){
+          spawnSplash(wadeX - 10, tableY - 4, 8);
+      }, update(cs, dt){ drawSplash(dt); }},
+      // Step 4: Krystal saves it with a napkin
+      { dur: 3.0, draw(cs){
+          drawBg(cs); drawChars(); drawTable();
+          drawTeacup(krystalX + 16, tableY - 4, false);
+          drawTeacup(lunaX, tableY - 4, false);
+          drawTeacup(wadeX - 16, tableY - 4, true);
+          drawNapkin(wadeX - 8, tableY - 2);
+          drawSplash(0);
+          if (cs.stepT < 1.5){
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'No tea left behind! \ud83d\udcaa');
+          } else {
+            csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', 'My hero!');
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+          csHearts(cs, lunaX, fY - charH * 0.6, 3);
+          csHearts(cs, wadeX, fY - charH * 0.6, 4);
+      }, update(cs, dt){ drawSplash(dt); }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
@@ -1944,6 +2472,14 @@ const CUTSCENE_MAP = {
   musicroom:         [csMusicJam],
   recordshop:        [csMusicJam],
   jazzclub:          [csMusicJam],
+  artstudio:         [csPaintingTogether],
+  pottery:           [csPaintingTogether],
+  hedgemaze:         [csHideAndSeek],
+  topiary:           [csHideAndSeek],
+  backyard:          [csHideAndSeek],
+  teahouse:          [csTeaParty],
+  bambootearoom:     [csTeaParty],
+  cafe:              [csTeaParty],
 };
 
 /* ============================================================================
