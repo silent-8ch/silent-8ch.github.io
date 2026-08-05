@@ -93,6 +93,12 @@ function drawBeach(){
   ctx.beginPath(); ctx.moveTo(cx, cy - 24); ctx.lineTo(cx, cy - 36); ctx.stroke();
   ctx.fillStyle = '#e07a8b';
   ctx.beginPath(); ctx.moveTo(cx, cy - 36); ctx.lineTo(cx + 10, cy - 32); ctx.lineTo(cx, cy - 28); ctx.fill();
+
+  // sprite birds gliding over the water
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.3+Math.sin(t*0.4)*30,y:H*0.26+Math.sin(t*0.6)*6,width:16,height:16,anchorY:0.5,frame:Math.floor(t*6)%4});
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.6+Math.sin(t*0.3+2)*24,y:H*0.22+Math.sin(t*0.5+1)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6+2)%4,flipX:true});
+  // umbrella stuck in the sand
+  SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.60,y:H*0.74,width:36,height:36,anchorY:1,frame:0});
 }
 
 function drawCloud(cx, cy, scale) {
@@ -667,6 +673,14 @@ function drawBackyard() {
       }
     }
   }
+
+  // sprite birds perched on the fence
+  SpriteRenderer.submit({sprite:'bird',phase:'ground',x:W*0.30,y:H*0.36-8,width:14,height:14,anchorY:1,frame:Math.floor(t*6)%4});
+  SpriteRenderer.submit({sprite:'bird',phase:'ground',x:W*0.72,y:H*0.36-8,width:14,height:14,anchorY:1,frame:Math.floor(t*6+2)%4,flipX:true});
+  // a puppy on the grass
+  SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.60,y:H*0.82,width:24,height:24,anchorY:1,frame:Math.floor(t*7)%4});
+  // butterfly near the grass
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.48+Math.sin(t*1.4)*16,y:H*0.72+Math.cos(t*1.8)*10,width:16,height:16,anchorY:0.5,frame:Math.floor(t*8)%4});
 }
 
 /* ══════════════════════ RIVER SCENE ══════════════════════ */
@@ -846,6 +860,13 @@ function drawRiver() {
     ctx.beginPath(); ctx.arc(fx, fy, 2.5, 0, 7); ctx.fill();
     ctx.fillStyle = '#3a7a22'; ctx.fillRect(fx - 0.5, fy, 1, 5);
   }
+
+  // sprite birds over the far tree line
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.4+Math.sin(t*0.35)*28,y:H*0.18+Math.sin(t*0.5)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6)%4});
+  // butterfly near the wildflowers
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.65+Math.sin(t*1.3)*18,y:H*0.72+Math.cos(t*1.6)*8,width:16,height:16,anchorY:0.5,frame:Math.floor(t*8)%4});
+  // bush along the near bank
+  SpriteRenderer.submit({sprite:'bush',phase:'ground',x:W*0.10,y:riverBot+10,width:32,height:32,anchorY:1,frame:0});
 }
 
 /* ══════════════════════ ADDITIONAL SCENES ══════════════════════
@@ -1000,6 +1021,9 @@ function drawCampsite(){
   ctx.fillStyle='#ffcf5a';
   for (let i=0;i<8;i++){ const life=(t*30+i*20)%80; const sy=fY-10-life, sx=fX+Math.sin(t*3+i)*8; ctx.globalAlpha=Math.max(0,1-life/80); ctx.fillRect(sx,sy,1.4,1.4); }
   ctx.globalAlpha=1;
+
+  // lantern near the tent entrance
+  SpriteRenderer.submit({sprite:'lantern',phase:'ground',x:W*0.34,y:groundY+60,width:18,height:18,anchorY:1,frame:Math.floor(t*3)%4});
 }
 registerScene('campsite', drawCampsite);
 
@@ -1133,6 +1157,11 @@ function drawLibrary(){
 
   // rug
   ctx.fillStyle='rgba(140,60,74,.28)'; ctx.beginPath(); ctx.ellipse(W*0.4,H*0.83,W*0.34,H*0.08,0,0,7); ctx.fill();
+
+  // book left open on the armchair
+  SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.32,y:floorY-28,width:20,height:20,anchorY:1,frame:0});
+  // cat napping by the fireplace
+  SpriteRenderer.submit({sprite:'cat',phase:'ground',x:W*0.62,y:floorY,width:22,height:22,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('library', drawLibrary);
 
@@ -1186,6 +1215,12 @@ function drawCherryBlossom(){
     ctx.save(); ctx.translate(px,py); ctx.rotate(t*2+i);
     ctx.beginPath(); ctx.ellipse(0,0,3,1.6,0,0,7); ctx.fill(); ctx.restore();
   }
+
+  // sprite butterflies fluttering among the blossoms
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.35+Math.sin(t*1.2)*20,y:groundY-20+Math.cos(t*1.5)*12,width:20,height:20,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.7+Math.sin(t*0.9+2)*24,y:groundY-30+Math.cos(t*1.3+1)*10,width:18,height:18,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
+  // a bird on the park bench
+  SpriteRenderer.submit({sprite:'bird',phase:'actors',x:W*0.46,y:groundY+30,width:16,height:16,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('cherryblossom', drawCherryBlossom);
 
@@ -1298,6 +1333,11 @@ function drawGreenhouse(){
   ctx.fillStyle='#7fb0c9'; ctx.beginPath(); ctx.ellipse(tX-6,tY-6,12,8,0,0,7); ctx.fill();
   ctx.fillRect(tX-6,tY-18,10,8);
   ctx.strokeStyle='#7fb0c9'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(tX+5,tY-8); ctx.lineTo(tX+16,tY-14); ctx.stroke();
+
+  // a butterfly drifting inside the conservatory
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.55+Math.sin(t*1.1)*22,y:H*0.40+Math.cos(t*1.4)*14,width:18,height:18,anchorY:0.5,frame:Math.floor(t*8)%4});
+  // potted plant on the floor
+  SpriteRenderer.submit({sprite:'pottedPlant',phase:'ground',x:W*0.75,y:floorY+24,width:24,height:24,anchorY:1,frame:0});
 }
 registerScene('greenhouse', drawGreenhouse);
 
@@ -1376,6 +1416,9 @@ function drawAutumnForest(){
     ctx.fillStyle=lc[i%4]; ctx.save(); ctx.translate(lx,ly); ctx.rotate(t*2.5+i);
     ctx.beginPath(); ctx.ellipse(0,0,3.5,1.8,0,0,7); ctx.fill(); ctx.restore();
   }
+
+  // a bird perched on a branch
+  SpriteRenderer.submit({sprite:'bird',phase:'actors',x:W*0.50,y:groundY+20,width:16,height:16,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('autumnforest', drawAutumnForest);
 
@@ -1545,18 +1588,16 @@ function drawLavender(){
     }
   }
 
-  // butterflies
-  const bcol=['#f2c14e','#e8628c','#ffffff','#f2a6b3'];
-  for (let i=0;i<4;i++){
-    const bx=(((W*0.2 + i*W*0.2 + Math.sin(t*0.8+i)*40 + t*10*(i%2?1:-1))%W)+W)%W;
-    const by=horizon+24 + Math.sin(t*1.5+i)*18 + i*8;
-    const flap=Math.abs(Math.sin(t*12+i))*3+1;
-    ctx.fillStyle=bcol[i];
-    ctx.save(); ctx.translate(bx,by);
-    ctx.beginPath(); ctx.ellipse(-3,0,3,flap,0,0,7); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(3,0,3,flap,0,0,7); ctx.fill();
-    ctx.restore();
+  // sprite butterflies over the lavender
+  for (let i=0;i<3;i++){
+    const bx=(((W*0.2 + i*W*0.25 + Math.sin(t*0.8+i)*40 + t*10*(i%2?1:-1))%W)+W)%W;
+    const by=horizon+24 + Math.sin(t*1.5+i)*18 + i*12;
+    SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:bx,y:by,width:20,height:20,anchorY:0.5,frame:Math.floor(t*8+i*2)%4,flipX:!!(i%2)});
   }
+
+  // clouds above the hills
+  drawSpriteCloud(W*0.2+Math.sin(t*0.1)*8,H*0.08,0.6);
+  drawSpriteCloud(W*0.7+Math.sin(t*0.08+2)*6,H*0.14,0.5);
 }
 registerScene('lavender', drawLavender);
 

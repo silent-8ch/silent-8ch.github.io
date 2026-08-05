@@ -44,6 +44,11 @@ function drawRooftop(){
   ctx.fillStyle='#3a3a44'; ctx.fillRect(tX-2,tY,4,26); ctx.beginPath(); ctx.ellipse(tX,tY,20,6,0,0,7); ctx.fill();
   ctx.fillStyle='rgba(255,210,130,.4)'; ctx.beginPath(); ctx.arc(tX,tY-5,7,0,7); ctx.fill();
   ctx.fillStyle='#ffd27f'; ctx.beginPath(); ctx.arc(tX,tY-5,2.5,0,7); ctx.fill();
+
+  // a cat resting on the deck
+  SpriteRenderer.submit({sprite:'cat',phase:'ground',x:W*0.74,y:deckY+8,width:22,height:22,anchorY:1,frame:Math.floor(t*7)%4});
+  // teacup on the table
+  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.48,y:deckY+12,width:14,height:14,anchorY:1,frame:0});
 }
 registerScene('rooftop', drawRooftop);
 
@@ -100,6 +105,10 @@ function drawTeaHouse(){
   ctx.fillStyle='#7a5a3a'; ctx.beginPath(); ctx.ellipse(boX,boY-2,12,4,0,0,7); ctx.fill();
   ctx.strokeStyle='#5a3a22'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(boX,boY-2); ctx.lineTo(boX-2,boY-16); ctx.lineTo(boX+6,boY-22); ctx.stroke();
   ctx.fillStyle='#4a7a3a'; ctx.beginPath(); ctx.ellipse(boX+6,boY-24,12,6,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(boX-6,boY-18,8,5,0,0,7); ctx.fill();
+
+  // teacups on the low table
+  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.35,y:floorY+12,width:14,height:14,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.46,y:floorY+14,width:14,height:14,anchorY:1,frame:0});
 }
 registerScene('teahouse', drawTeaHouse);
 
@@ -378,7 +387,7 @@ function drawBalloons(){
   // sky + clouds
   const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#7ec0ef'); sky.addColorStop(1,'#cdeaf7');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
-  drawCloud(W*0.2+Math.sin(t*0.1)*10,H*0.12,0.8); drawCloud(W*0.7+Math.sin(t*0.08+2)*12,H*0.20,0.6);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.1)*10,H*0.12,0.8); drawSpriteCloud(W*0.7+Math.sin(t*0.08+2)*12,H*0.20,0.6);
 
   // balloons
   function balloon(x,y,col,s){
@@ -818,6 +827,9 @@ function drawCafe(){
   ctx.fillStyle='#e8e0d4'; ctx.beginPath(); ctx.arc(tX,tY-4,4,0,7); ctx.fill();
   ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5; ctx.beginPath(); for (let k=0;k<=4;k++){ const yy=tY-8-k*4; k===0?ctx.moveTo(tX,yy):ctx.lineTo(tX+Math.sin(t*3+k)*2, yy); } ctx.stroke();
   ctx.fillStyle='#5a3a24'; ctx.fillRect(tX-34,tY-2,4,H-tY); ctx.fillRect(tX-34,tY-20,4,18); ctx.fillRect(tX-46,tY-2,14,4);
+
+  // book on the cafe table
+  SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.24,y:floorY+18,width:16,height:16,anchorY:1,frame:0});
 }
 registerScene('cafe', drawCafe);
 
@@ -856,6 +868,9 @@ function drawRainyStreet(){
 
   // rain
   ctx.strokeStyle='rgba(180,200,220,.4)'; ctx.lineWidth=1; for (let i=0;i<60;i++){ const seed2=i*53.1, rx=((seed2*1.7 + t*400)%(W+40))-20, ry=(seed2*2.3 + t*600)%H; ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx-4,ry+10); ctx.stroke(); }
+
+  // umbrella on the ground
+  SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.18,y:sidewalkY+14,width:30,height:30,anchorY:1,frame:0});
 }
 registerScene('rainystreet', drawRainyStreet);
 
@@ -1100,7 +1115,7 @@ function drawTulipField(){
 
   const sky=ctx.createLinearGradient(0,0,0,horizon); sky.addColorStop(0,'#7ec0ef'); sky.addColorStop(1,'#cdeaf7');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizon);
-  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.1,0.7); drawCloud(W*0.75+Math.sin(t*0.08+2)*8,H*0.16,0.6);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.1)*8,H*0.1,0.7); drawSpriteCloud(W*0.75+Math.sin(t*0.08+2)*8,H*0.16,0.6);
   ctx.fillStyle='#7aad5a'; ctx.fillRect(0,horizon-8,W,8);
 
   // windmill
@@ -1299,6 +1314,11 @@ function drawCatCafe(){
   // floor cushion with sleeping cat
   ctx.fillStyle='#c05fd0'; ctx.beginPath(); ctx.ellipse(W*0.24,floorY+30,26,10,0,0,7); ctx.fill();
   cat(W*0.24,floorY+26,'#8a5a3a','sleep');
+
+  // sprite cat wandering on the floor
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.50,y:floorY+20,width:22,height:22,anchorY:1,frame:Math.floor(t*7)%4});
+  // teacup on the counter
+  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.40,y:floorY-4,width:14,height:14,anchorY:1,frame:0});
 }
 registerScene('catcafe', drawCatCafe);
 

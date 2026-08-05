@@ -110,6 +110,12 @@ function drawButterflyDome(){
     ctx.fillStyle='#3a2a1a'; ctx.fillRect(-0.5,-flap*s,1,flap*2*s);
     ctx.restore();
   }
+
+  // sprite butterflies (larger, foreground)
+  SpriteRenderer.submit({sprite:'butterfly',phase:'foreground',x:W*0.25+Math.sin(t*1.0)*30,y:H*0.55+Math.cos(t*1.3)*14,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'foreground',x:W*0.75+Math.sin(t*0.8+2)*28,y:H*0.45+Math.cos(t*1.1+1)*12,width:24,height:24,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
+  // potted plant on the path
+  SpriteRenderer.submit({sprite:'pottedPlant',phase:'ground',x:W*0.88,y:floorY+16,width:24,height:24,anchorY:1,frame:0});
 }
 registerScene('butterflydome', drawButterflyDome);
 
@@ -119,7 +125,7 @@ function drawPasture(){
 
   const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#7ec0ef'); sky.addColorStop(1,'#cdeaf7');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
-  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.1,0.8); drawCloud(W*0.7+Math.sin(t*0.08+2)*10,H*0.16,0.6);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.1)*8,H*0.1,0.8); drawSpriteCloud(W*0.7+Math.sin(t*0.08+2)*10,H*0.16,0.6);
 
   ctx.fillStyle='#8ac060'; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.quadraticCurveTo(W*0.3,groundY-24,W*0.6,groundY-4); ctx.quadraticCurveTo(W*0.85,groundY-20,W,groundY-2); ctx.lineTo(W,groundY+20); ctx.lineTo(0,groundY+20); ctx.closePath(); ctx.fill();
   const g=ctx.createLinearGradient(0,groundY,0,H); g.addColorStop(0,'#7ab84a'); g.addColorStop(1,'#5a9a2a');
@@ -140,6 +146,11 @@ function drawPasture(){
     ctx.strokeStyle='#3a3a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x-3,y+7); ctx.lineTo(x-3,y+12); ctx.moveTo(x+3,y+7); ctx.lineTo(x+3,y+12); ctx.stroke();
   }
   sheep(W*0.3,H*0.6,Math.sin(t*2)*2); sheep(W*0.55,H*0.72,0); sheep(W*0.72,H*0.62,Math.sin(t*1.5+1)*2); sheep(W*0.18,H*0.82,0); sheep(W*0.85,H*0.84,Math.sin(t*2+2)*2);
+
+  // bird soaring above the pasture
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.45+Math.sin(t*0.4)*30,y:H*0.16+Math.sin(t*0.6)*6,width:16,height:16,anchorY:0.5,frame:Math.floor(t*6)%4});
+  // puppy near the fence
+  SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.42,y:H*0.78,width:24,height:24,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('pasture', drawPasture);
 
@@ -718,6 +729,11 @@ function drawSunflowers(){
   // a few drifting pollen motes catching the light
   for(let i=0;i<16;i++){ const px=(i*61+t*10)%W, py=H*0.2+((i*37+t*6)%(groundY-H*0.2));
     ctx.fillStyle='rgba(255,245,200,.5)'; ctx.fillRect(px,py,2,2); }
+
+  // sprite butterfly among the sunflowers
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.55+Math.sin(t*1.2)*20,y:H*0.50+Math.cos(t*1.5)*12,width:20,height:20,anchorY:0.5,frame:Math.floor(t*8)%4});
+  // bird in the sky
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.35+Math.sin(t*0.35)*28,y:H*0.14+Math.sin(t*0.5)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6)%4});
 }
 registerScene('sunflowers', drawSunflowers);
 

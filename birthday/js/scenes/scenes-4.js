@@ -1837,6 +1837,11 @@ function drawPetShop(){
   // shelf of pet supplies (bags/toys) low on the right
   ctx.fillStyle='#8a6a44'; ctx.fillRect(W*0.72,floorY-4,W*0.24,4);
   for(let i=0;i<4;i++){ ctx.fillStyle=['#e0692a','#4a86c0','#3a8a5a','#d0a030'][i]; ctx.fillRect(W*0.74+i*W*0.05,floorY-16,10,12); }
+
+  // sprite puppy near the pen
+  SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.30,y:floorY+16,width:24,height:24,anchorY:1,frame:Math.floor(t*7)%4});
+  // sprite cat near the shelves
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.68,y:floorY+12,width:20,height:20,anchorY:1,frame:Math.floor(t*7+2)%4});
 }
 registerScene('petshop', drawPetShop);
 

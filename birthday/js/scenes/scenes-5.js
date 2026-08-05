@@ -69,6 +69,13 @@ function drawNightMarket(){
   }
   stall(W*0.16,'#c0392b');
   stall(W*0.84,'#2a7a5a');
+
+  // sprite lanterns hanging between stalls
+  SpriteRenderer.submit({sprite:'lantern',phase:'foreground',x:W*0.38,y:H*0.18,width:20,height:20,anchorY:0.5,frame:Math.floor(t*3)%4});
+  SpriteRenderer.submit({sprite:'lantern',phase:'foreground',x:W*0.62,y:H*0.16,width:18,height:18,anchorY:0.5,frame:Math.floor(t*3+1)%4});
+  // NPC browsing the stalls
+  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.50,y:H*0.88,width:28,height:28,anchorY:1,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.42,y:H*0.86,width:22,height:22,anchorY:1,frame:Math.floor(t*8+2)%4});
 }
 registerScene('nightmarket', drawNightMarket);
 
@@ -499,7 +506,7 @@ function drawFarmersMarket(){
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
   ctx.fillStyle='#fff4b0'; ctx.beginPath(); ctx.arc(W*0.14,H*0.12,20,0,7); ctx.fill();
   ctx.fillStyle='rgba(255,244,176,.3)'; ctx.beginPath(); ctx.arc(W*0.14,H*0.12,32,0,7); ctx.fill();
-  drawCloud(W*0.55+Math.sin(t*0.1)*8,H*0.10,0.7); drawCloud(W*0.82+Math.sin(t*0.12+2)*6,H*0.16,0.5);
+  drawSpriteCloud(W*0.55+Math.sin(t*0.1)*8,H*0.10,0.7); drawSpriteCloud(W*0.82+Math.sin(t*0.12+2)*6,H*0.16,0.5);
 
   // rolling green hills behind
   ctx.fillStyle='#6aa84a'; ctx.beginPath(); ctx.moveTo(0,groundY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,groundY-26-16*Math.sin(x*0.018+1)); } ctx.lineTo(W,groundY); ctx.fill();
@@ -543,6 +550,12 @@ function drawFarmersMarket(){
   const fbx=W*0.10, fby=groundY+24;
   ctx.fillStyle='#a9742e'; ctx.beginPath(); ctx.moveTo(fbx-14,fby); ctx.lineTo(fbx+14,fby); ctx.lineTo(fbx+10,fby+16); ctx.lineTo(fbx-10,fby+16); ctx.closePath(); ctx.fill();
   for (let k=0;k<7;k++){ ctx.fillStyle=['#e26fb0','#f2d04a','#e0603a','#a06fe0'][k%4]; ctx.beginPath(); ctx.arc(fbx-10+k*3.4,fby-4-Math.sin(k+ t)*2,3,0,7); ctx.fill(); }
+
+  // NPC shoppers
+  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.50,y:H*0.88,width:28,height:28,anchorY:1,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.58,y:H*0.86,width:22,height:22,anchorY:1,frame:Math.floor(t*8+2)%4});
+  // bush on the side
+  SpriteRenderer.submit({sprite:'bush',phase:'ground',x:W*0.92,y:groundY+18,width:30,height:30,anchorY:1,frame:0});
 }
 registerScene('farmersmarket', drawFarmersMarket);
 
@@ -702,6 +715,11 @@ function drawLanternFestival(){
   }
   const cols=['#c0392b','#e0a020','#e26fb0','#5ab0e0'];
   for (let i=0;i<6;i++){ const lx=((i*63 + t*10)%(W+40))-20; const ly=waterY+16+ (i%3)*20; waterLantern(lx,ly,cols[i%cols.length]); }
+
+  // sprite lanterns in the sky
+  for (let i=0;i<3;i++){
+    SpriteRenderer.submit({sprite:'lantern',phase:'background',x:W*(0.2+i*0.3)+Math.sin(t*0.5+i)*14,y:H*0.12+i*H*0.06+Math.sin(t*0.8+i)*6,width:22,height:22,anchorY:0.5,frame:Math.floor(t*3+i)%4});
+  }
 }
 registerScene('lanternfestival', drawLanternFestival);
 
@@ -772,7 +790,7 @@ function drawSeasideCarousel(){
   const sky=ctx.createLinearGradient(0,0,0,seaY); sky.addColorStop(0,'#63b4ea'); sky.addColorStop(1,'#bfe6f5');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,seaY);
   ctx.fillStyle='#fff4b0'; ctx.beginPath(); ctx.arc(W*0.85,H*0.11,20,0,7); ctx.fill();
-  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.09,0.7); drawCloud(W*0.5+Math.sin(t*0.08+2)*6,H*0.15,0.5);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.1)*8,H*0.09,0.7); drawSpriteCloud(W*0.5+Math.sin(t*0.08+2)*6,H*0.15,0.5);
 
   // sea
   const sea=ctx.createLinearGradient(0,seaY,0,boardY); sea.addColorStop(0,'#2e8bc0'); sea.addColorStop(1,'#4aa8c8');
@@ -893,9 +911,9 @@ function drawKiteHill(){
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,hillY);
   ctx.fillStyle='#fff4b0'; ctx.beginPath(); ctx.arc(W*0.16,H*0.13,18,0,7); ctx.fill();
   // fast-moving puffy clouds
-  drawCloud((W*0.4 + t*6)%(W+80)-40,H*0.10,0.7);
-  drawCloud((W*0.8 + t*4)%(W+80)-40,H*0.20,0.55);
-  drawCloud((W*0.1 + t*5)%(W+80)-40,H*0.28,0.45);
+  drawSpriteCloud((W*0.4 + t*6)%(W+80)-40,H*0.10,0.7);
+  drawSpriteCloud((W*0.8 + t*4)%(W+80)-40,H*0.20,0.55);
+  drawSpriteCloud((W*0.1 + t*5)%(W+80)-40,H*0.28,0.45);
 
   // flying kites with tails
   function kite(kx,ky,col,sway){
@@ -946,7 +964,7 @@ function drawFlowerMarket(){
   const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#9ed0ee'); sky.addColorStop(1,'#f0e4ee');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
   ctx.fillStyle='#fff6c8'; ctx.beginPath(); ctx.arc(W*0.82,H*0.12,18,0,7); ctx.fill();
-  drawCloud(W*0.2+Math.sin(t*0.09)*8,H*0.10,0.6); drawCloud(W*0.55+Math.sin(t*0.07+2)*6,H*0.16,0.45);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.09)*8,H*0.10,0.6); drawSpriteCloud(W*0.55+Math.sin(t*0.07+2)*6,H*0.16,0.45);
 
   // pastel shopfronts behind
   const fronts=['#e7b7c4','#c4d7b0','#b9c8e2','#e6d2a6'];
@@ -992,6 +1010,11 @@ function drawFlowerMarket(){
   for (const hx of [W*0.34,W*0.62]){ ctx.strokeStyle='#6a5a3a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(hx,H*0.30+18); ctx.lineTo(hx,H*0.30+30); ctx.stroke();
     ctx.fillStyle='#8a6038'; ctx.beginPath(); ctx.arc(hx,H*0.30+34,8,0,Math.PI); ctx.fill();
     for (let k=0;k<5;k++){ ctx.fillStyle=fc[(k+2)%fc.length]; ctx.beginPath(); ctx.arc(hx-6+k*3,H*0.30+34+Math.sin(t+k)*1.5,2.4,0,7); ctx.fill(); } }
+
+  // sprite butterfly near the flowers
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.50+Math.sin(t*1.2)*20,y:H*0.60+Math.cos(t*1.5)*10,width:20,height:20,anchorY:0.5,frame:Math.floor(t*8)%4});
+  // NPC shopper
+  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.48,y:H*0.90,width:28,height:28,anchorY:1,frame:Math.floor(t*8)%4});
 }
 registerScene('flowermarket', drawFlowerMarket);
 
@@ -1313,6 +1336,12 @@ function drawHarborNight(){
   ctx.fillStyle='#1a1a22'; ctx.beginPath(); ctx.arc(W*0.30,quayY-4,5,Math.PI,0); ctx.fill(); ctx.fillRect(W*0.30-5,quayY-4,10,8);
   ctx.beginPath(); ctx.arc(W*0.70,quayY-4,5,Math.PI,0); ctx.fill(); ctx.fillRect(W*0.70-5,quayY-4,10,8);
   ctx.strokeStyle='#5a4a34'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(W*0.30,quayY-6); ctx.quadraticCurveTo(W*0.5,quayY+8,W*0.70,quayY-6); ctx.stroke();
+
+  // sprite lanterns on the quay lampposts
+  SpriteRenderer.submit({sprite:'lantern',phase:'foreground',x:W*0.10,y:quayY-54,width:18,height:18,anchorY:0.5,frame:Math.floor(t*3)%4});
+  SpriteRenderer.submit({sprite:'lantern',phase:'foreground',x:W*0.90,y:quayY-54,width:18,height:18,anchorY:0.5,frame:Math.floor(t*3+1)%4});
+  // a cat on the quay
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.55,y:quayY+12,width:20,height:20,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('harbornight', drawHarborNight);
 
@@ -1368,6 +1397,9 @@ function drawGiftWrapShop(){
   ctx.strokeStyle='#8a8a92'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.8,floorY+18); ctx.lineTo(W*0.86,floorY+26); ctx.moveTo(W*0.8,floorY+26); ctx.lineTo(W*0.86,floorY+18); ctx.stroke();
   ctx.fillStyle='#c04a6a'; ctx.beginPath(); ctx.arc(W*0.79,floorY+16,2.4,0,7); ctx.arc(W*0.79,floorY+28,2.4,0,7); ctx.fill();
   ctx.strokeStyle='#e0b040'; ctx.lineWidth=2; ctx.beginPath(); for (let k=0;k<=8;k++){ const cx=W*0.7+k*3; ctx.lineTo(cx, floorY+30+Math.sin(k*1.2)*3);} ctx.stroke();
+
+  // extra gift box on the counter
+  SpriteRenderer.submit({sprite:'giftBox',phase:'ground',x:W*0.50,y:floorY+20,width:22,height:22,anchorY:1,frame:0});
 }
 registerScene('giftwrapshop', drawGiftWrapShop);
 
@@ -1437,7 +1469,7 @@ function drawSunflowerMaze(){
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,pathY);
   ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.5,H*0.12,22,0,7); ctx.fill();
   ctx.fillStyle='rgba(255,246,176,.3)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.12,34,0,7); ctx.fill();
-  drawCloud(W*0.18+Math.sin(t*0.1)*8,H*0.10,0.6); drawCloud(W*0.82+Math.sin(t*0.08+2)*6,H*0.16,0.5);
+  drawSpriteCloud(W*0.18+Math.sin(t*0.1)*8,H*0.10,0.6); drawSpriteCloud(W*0.82+Math.sin(t*0.08+2)*6,H*0.16,0.5);
 
   // distant sunflower tops on the horizon (a green-gold band)
   ctx.fillStyle='#6a8a2e'; ctx.fillRect(0,pathY-30,W,34);
@@ -1810,7 +1842,7 @@ function drawPoppyField(){
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,fieldY);
   ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.80,H*0.13,20,0,7); ctx.fill();
   ctx.fillStyle='rgba(255,246,176,.3)'; ctx.beginPath(); ctx.arc(W*0.80,H*0.13,32,0,7); ctx.fill();
-  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.10,0.7); drawCloud(W*0.5+Math.sin(t*0.08+2)*6,H*0.18,0.5); drawCloud(W*0.9+Math.sin(t*0.12+4)*5,H*0.08,0.4);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.1)*8,H*0.10,0.7); drawSpriteCloud(W*0.5+Math.sin(t*0.08+2)*6,H*0.18,0.5); drawSpriteCloud(W*0.9+Math.sin(t*0.12+4)*5,H*0.08,0.4);
 
   // distant rolling hills
   ctx.fillStyle='#7aa84a'; ctx.beginPath(); ctx.moveTo(0,fieldY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,fieldY-24-16*Math.sin(x*0.016+1)); } ctx.lineTo(W,fieldY); ctx.fill();
@@ -2728,7 +2760,7 @@ function drawHummingbirdGarden(){
   const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#6fbce8'); sky.addColorStop(1,'#dbeecf');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
   ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.82,H*0.12,18,0,7); ctx.fill();
-  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.10,0.6); drawCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.16,0.45);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.1)*8,H*0.10,0.6); drawSpriteCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.16,0.45);
 
   // leafy hedge backdrop
   ctx.fillStyle='#3a7a3a'; ctx.fillRect(0,groundY-30,W,34);
@@ -2839,7 +2871,7 @@ function drawLotusPond(){
   const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#bfe0ee'); sky.addColorStop(1,'#f2e6d6');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
   ctx.fillStyle='rgba(255,240,200,.5)'; ctx.beginPath(); ctx.arc(W*0.24,H*0.12,26,0,7); ctx.fill();
-  drawCloud(W*0.7+Math.sin(t*0.08)*8,H*0.09,0.6);
+  drawSpriteCloud(W*0.7+Math.sin(t*0.08)*8,H*0.09,0.6);
 
   // distant reeds/bank at horizon
   ctx.fillStyle='#4a6a3a'; ctx.fillRect(0,waterY-14,W,18);
@@ -2980,7 +3012,7 @@ function drawBalloonRide(){
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizonY);
   ctx.fillStyle='#fff6c0'; ctx.beginPath(); ctx.arc(W*0.14,H*0.10,16,0,7); ctx.fill();
   // clouds at/below eye level (we're up high)
-  drawCloud(W*0.7+Math.sin(t*0.1)*10,H*0.16,0.9); drawCloud(W*0.3+Math.sin(t*0.08+2)*8,H*0.26,0.7); drawCloud(W*0.9+Math.sin(t*0.12+4)*6,H*0.34,0.6);
+  drawSpriteCloud(W*0.7+Math.sin(t*0.1)*10,H*0.16,0.9); drawSpriteCloud(W*0.3+Math.sin(t*0.08+2)*8,H*0.26,0.7); drawSpriteCloud(W*0.9+Math.sin(t*0.12+4)*6,H*0.34,0.6);
 
   // patchwork landscape far below (fields, river, tiny roads)
   const land=ctx.createLinearGradient(0,horizonY,0,H); land.addColorStop(0,'#8ab06a'); land.addColorStop(1,'#6a9a4a'); ctx.fillStyle=land; ctx.fillRect(0,horizonY,W,H-horizonY);
@@ -3121,7 +3153,7 @@ function drawPeonyGarden(){
   const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#8fcdea'); sky.addColorStop(1,'#f0e4ec');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
   ctx.fillStyle='rgba(255,246,200,.5)'; ctx.beginPath(); ctx.arc(W*0.78,H*0.13,24,0,7); ctx.fill();
-  drawCloud(W*0.22+Math.sin(t*0.1)*8,H*0.10,0.6); drawCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.16,0.45);
+  drawSpriteCloud(W*0.22+Math.sin(t*0.1)*8,H*0.10,0.6); drawSpriteCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.16,0.45);
 
   // manicured hedge + a white lattice arch at back
   ctx.fillStyle='#3a7a3a'; ctx.fillRect(0,groundY-26,W,30);
@@ -3155,7 +3187,9 @@ function drawPeonyGarden(){
 
   // drifting petals + a couple butterflies
   for (let i=0;i<14;i++){ const px=(i*47 + t*8 + Math.sin(t*0.7+i)*20)%W; const py=(i*53 + t*16)%H; ctx.fillStyle=`rgba(245,190,212,${0.5+0.3*Math.sin(t+i)})`; ctx.save(); ctx.translate(px,py); ctx.rotate(t*2+i); ctx.beginPath(); ctx.ellipse(0,0,2.4,1.4,0,0,7); ctx.fill(); ctx.restore(); }
-  for (let i=0;i<2;i++){ const bx=W*0.35+i*W*0.3+Math.sin(t*1.4+i)*16; const by=groundY-10+Math.cos(t*1.7+i)*12; const flap=Math.abs(Math.sin(t*9+i))*0.6+0.2; ctx.fillStyle=i? '#e0902a':'#c05a90'; ctx.save(); ctx.translate(bx,by); ctx.beginPath(); ctx.ellipse(-2,0,3,flap*4,0.4,0,7); ctx.ellipse(2,0,3,flap*4,-0.4,0,7); ctx.fill(); ctx.fillStyle='#333'; ctx.fillRect(-0.5,-3,1,6); ctx.restore(); }
+  // sprite butterflies among the peonies (replacing hand-drawn ones)
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.35+Math.sin(t*1.4)*16,y:groundY-10+Math.cos(t*1.7)*12,width:22,height:22,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.65+Math.sin(t*1.4+1)*16,y:groundY-4+Math.cos(t*1.7+1)*12,width:20,height:20,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
 }
 registerScene('peonygarden', drawPeonyGarden);
 
@@ -3167,7 +3201,7 @@ function drawRooftopPool(){
   const sky=ctx.createLinearGradient(0,0,0,deckY); sky.addColorStop(0,'#4a9ae0'); sky.addColorStop(1,'#bfe4f4');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,deckY);
   ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.18,H*0.12,18,0,7); ctx.fill();
-  drawCloud(W*0.6+Math.sin(t*0.09)*8,H*0.10,0.6); drawCloud(W*0.85+Math.sin(t*0.11+2)*6,H*0.18,0.45);
+  drawSpriteCloud(W*0.6+Math.sin(t*0.09)*8,H*0.10,0.6); drawSpriteCloud(W*0.85+Math.sin(t*0.11+2)*6,H*0.18,0.45);
 
   // city skyline behind an infinity edge (buildings rising to the deck line)
   let seed=5; const rnd=()=>{ seed=(seed*9301+49297)%233280; return seed/233280; };
@@ -3315,7 +3349,7 @@ function drawDuckPond(){
   const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#7ab8e6'); sky.addColorStop(1,'#d8ecd8');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
   ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.80,H*0.12,18,0,7); ctx.fill();
-  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.09,0.6); drawCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.15,0.45);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.1)*8,H*0.09,0.6); drawSpriteCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.15,0.45);
 
   // grassy far bank with a weeping willow (left)
   ctx.fillStyle='#5a9a3a'; ctx.fillRect(0,waterY-18,W,22);
@@ -3370,7 +3404,7 @@ function drawBeekeeperGarden(){
   const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#79c0ea'); sky.addColorStop(1,'#eae6c8');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
   ctx.fillStyle='#fff2a8'; ctx.beginPath(); ctx.arc(W*0.5,H*0.13,22,0,7); ctx.fill(); ctx.fillStyle='rgba(255,242,168,.3)'; ctx.beginPath(); ctx.arc(W*0.5,H*0.13,34,0,7); ctx.fill();
-  drawCloud(W*0.2+Math.sin(t*0.1)*8,H*0.10,0.55); drawCloud(W*0.82+Math.sin(t*0.09+2)*6,H*0.17,0.45);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.1)*8,H*0.10,0.55); drawSpriteCloud(W*0.82+Math.sin(t*0.09+2)*6,H*0.17,0.45);
 
   // green hills + a hedgerow
   ctx.fillStyle='#6aa84a'; ctx.beginPath(); ctx.moveTo(0,groundY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,groundY-22-14*Math.sin(x*0.016+1)); } ctx.lineTo(W,groundY); ctx.fill();
@@ -3512,7 +3546,7 @@ function drawCitrusGrove(){
   const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#6fbce8'); sky.addColorStop(1,'#f2ecc8');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
   ctx.fillStyle='#fff2a8'; ctx.beginPath(); ctx.arc(W*0.80,H*0.13,20,0,7); ctx.fill(); ctx.fillStyle='rgba(255,242,168,.3)'; ctx.beginPath(); ctx.arc(W*0.80,H*0.13,32,0,7); ctx.fill();
-  drawCloud(W*0.22+Math.sin(t*0.1)*8,H*0.10,0.55); drawCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.16,0.4);
+  drawSpriteCloud(W*0.22+Math.sin(t*0.1)*8,H*0.10,0.55); drawSpriteCloud(W*0.55+Math.sin(t*0.08+2)*6,H*0.16,0.4);
 
   // distant hills with rows of trees
   ctx.fillStyle='#7aa84a'; ctx.beginPath(); ctx.moveTo(0,groundY); for(let x=0;x<=W;x+=20){ ctx.lineTo(x,groundY-22-14*Math.sin(x*0.016+1)); } ctx.lineTo(W,groundY); ctx.fill();
@@ -3556,7 +3590,7 @@ function drawWatermill(){
   // soft countryside sky
   const sky=ctx.createLinearGradient(0,0,0,groundY); sky.addColorStop(0,'#7ab8e6'); sky.addColorStop(1,'#d8ecd0');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
-  drawCloud(W*0.25+Math.sin(t*0.09)*8,H*0.08,0.6); drawCloud(W*0.7+Math.sin(t*0.07+2)*6,H*0.12,0.5);
+  drawSpriteCloud(W*0.25+Math.sin(t*0.09)*8,H*0.08,0.6); drawSpriteCloud(W*0.7+Math.sin(t*0.07+2)*6,H*0.12,0.5);
 
   // green hillside behind
   ctx.fillStyle='#5a9a3e'; ctx.fillRect(0,groundY-14,W,H-groundY+14);
@@ -3752,7 +3786,7 @@ function drawPenguinCove(){
   const sky=ctx.createLinearGradient(0,0,0,waterY); sky.addColorStop(0,'#a8cfe6'); sky.addColorStop(1,'#e0eef2');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
   ctx.fillStyle='rgba(255,250,235,.7)'; ctx.beginPath(); ctx.arc(W*0.78,H*0.14,16,0,7); ctx.fill();
-  drawCloud(W*0.2+Math.sin(t*0.08)*8,H*0.09,0.6); drawCloud(W*0.55+Math.sin(t*0.07+2)*6,H*0.15,0.45);
+  drawSpriteCloud(W*0.2+Math.sin(t*0.08)*8,H*0.09,0.6); drawSpriteCloud(W*0.55+Math.sin(t*0.07+2)*6,H*0.15,0.45);
 
   // distant icebergs on the horizon
   ctx.fillStyle='#cfe2ee'; for (const [bx,bw,bh] of [[W*0.1,60,30],[W*0.5,80,40],[W*0.82,50,26]]){ ctx.beginPath(); ctx.moveTo(bx-bw/2,waterY); ctx.lineTo(bx-bw*0.2,waterY-bh); ctx.lineTo(bx+bw*0.1,waterY-bh*0.7); ctx.lineTo(bx+bw/2,waterY); ctx.closePath(); ctx.fill(); }
@@ -3899,7 +3933,7 @@ function drawCranberryHarvest(){
   const sky=ctx.createLinearGradient(0,0,0,bogY); sky.addColorStop(0,'#7ab8e6'); sky.addColorStop(1,'#e6dcc0');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,bogY);
   ctx.fillStyle='rgba(255,244,200,.6)'; ctx.beginPath(); ctx.arc(W*0.78,H*0.13,18,0,7); ctx.fill();
-  drawCloud(W*0.22+Math.sin(t*0.1)*8,H*0.10,0.55); drawCloud(W*0.5+Math.sin(t*0.08+2)*6,H*0.16,0.4);
+  drawSpriteCloud(W*0.22+Math.sin(t*0.1)*8,H*0.10,0.55); drawSpriteCloud(W*0.5+Math.sin(t*0.08+2)*6,H*0.16,0.4);
 
   // autumn tree line + low hills on the far bank
   ctx.fillStyle='#c06a2a'; ctx.fillRect(0,bogY-20,W,24);
@@ -4132,7 +4166,7 @@ function drawSkyGondola(){
   const sky=ctx.createLinearGradient(0,0,0,horizonY); sky.addColorStop(0,'#4a9ae2'); sky.addColorStop(1,'#bfe4f2');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizonY);
   ctx.fillStyle='#fff6b0'; ctx.beginPath(); ctx.arc(W*0.2,H*0.11,16,0,7); ctx.fill();
-  drawCloud(W*0.6+Math.sin(t*0.09)*10,H*0.10,0.7); drawCloud(W*0.85+Math.sin(t*0.11+2)*6,H*0.20,0.5);
+  drawSpriteCloud(W*0.6+Math.sin(t*0.09)*10,H*0.10,0.7); drawSpriteCloud(W*0.85+Math.sin(t*0.11+2)*6,H*0.20,0.5);
 
   // snow-capped mountain range below the cable
   ctx.fillStyle='#7a90a8'; ctx.beginPath(); ctx.moveTo(0,horizonY); for (let x=0;x<=W;x+=16){ ctx.lineTo(x,horizonY-46-40*Math.abs(Math.sin(x*0.012+1))); } ctx.lineTo(W,horizonY); ctx.fill();
@@ -4240,7 +4274,7 @@ function drawDriftwoodBeach(){
   const sky=ctx.createLinearGradient(0,0,0,seaY); sky.addColorStop(0,'#8ab4d2'); sky.addColorStop(1,'#dce8ea');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,seaY);
   ctx.fillStyle='rgba(255,250,235,.5)'; ctx.beginPath(); ctx.arc(W*0.24,H*0.14,20,0,7); ctx.fill();
-  drawCloud(W*0.5+Math.sin(t*0.12)*14,H*0.10,0.8); drawCloud(W*0.82+Math.sin(t*0.1+2)*10,H*0.18,0.6);
+  drawSpriteCloud(W*0.5+Math.sin(t*0.12)*14,H*0.10,0.8); drawSpriteCloud(W*0.82+Math.sin(t*0.1+2)*10,H*0.18,0.6);
 
   // gulls
   ctx.strokeStyle='rgba(70,80,90,.6)'; ctx.lineWidth=1.4; for (let i=0;i<4;i++){ const bx=(W*0.2+i*40+t*12)%W, by=H*0.12+i*7; ctx.beginPath(); ctx.moveTo(bx-5,by); ctx.quadraticCurveTo(bx,by-4,bx+5,by); ctx.stroke(); }
@@ -6118,6 +6152,9 @@ function drawGasStation(){
   for (let x=0;x<W;x+=40){ ctx.beginPath(); ctx.moveTo(x,groundY); ctx.lineTo(x,H); ctx.stroke(); }
   // yellow lane line
   ctx.fillStyle='rgba(200,180,60,.5)'; ctx.fillRect(0,H-6,W,2);
+
+  // NPC customer by the pumps
+  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.36,y:H*0.86,width:28,height:28,anchorY:1,frame:Math.floor(t*8)%4});
 }
 registerScene('gasstation', drawGasStation);
 
@@ -6204,6 +6241,10 @@ function drawGroceryStore(){
   for (let y=floorY+10;y<H;y+=14){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
   // floor shine
   ctx.fillStyle='rgba(255,255,255,.06)'; ctx.beginPath(); ctx.ellipse(W*0.4,floorY+30,100,20,0,0,7); ctx.fill();
+
+  // shoppers in the aisles
+  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.60,y:H*0.88,width:28,height:28,anchorY:1,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.68,y:H*0.86,width:22,height:22,anchorY:1,frame:Math.floor(t*8+2)%4});
 }
 registerScene('grocerystore', drawGroceryStore);
 
@@ -6291,6 +6332,9 @@ function drawBedroom(){
   ctx.fillStyle='#a04a4a'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.88,90,20,0,0,7); ctx.fill();
   ctx.fillStyle='#c0786a'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.88,60,13,0,0,7); ctx.fill();
   ctx.fillStyle='#a04a4a'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.88,30,7,0,0,7); ctx.fill();
+
+  // book on the nightstand
+  SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.54,y:floorY-28,width:14,height:14,anchorY:1,frame:0});
 }
 registerScene('bedroom', drawBedroom);
 
@@ -6382,6 +6426,9 @@ function drawOffice(){
   ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
   // carpet texture dots
   ctx.fillStyle='rgba(0,0,0,.05)'; for (let i=0;i<60;i++){ const px=(i*67+11)%W, py=floorY+4+((i*43+7)%(H-floorY-4)); ctx.fillRect(px,py,1.5,1.5); }
+
+  // NPC colleague at the far desk
+  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.24,y:H*0.84,width:26,height:26,anchorY:1,frame:Math.floor(t*8)%4});
 }
 registerScene('office', drawOffice);
 
@@ -6474,6 +6521,12 @@ function drawSchool(){
   for (let y=floorY+12;y<H;y+=12){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
   // floor shine
   ctx.fillStyle='rgba(255,255,255,.06)'; ctx.beginPath(); ctx.ellipse(W*0.45,floorY+24,80,16,0,0,7); ctx.fill();
+
+  // background students
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.18,y:H*0.88,width:22,height:22,anchorY:1,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.62,y:H*0.90,width:22,height:22,anchorY:1,frame:Math.floor(t*8+1)%4,flipX:true});
+  // book on a desk
+  SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.40,y:floorY-28,width:14,height:14,anchorY:1,frame:0});
 }
 registerScene('school', drawSchool);
 
