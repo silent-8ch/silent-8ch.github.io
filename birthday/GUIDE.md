@@ -2,7 +2,7 @@
 
 _Made with love, by Paul. A pocket guide to everything you can do — and the little things you might not stumble on by accident._
 
-The world has **205 places** to visit, **141 of them with hand-placed tap spots**, dozens of roaming visitors, and a special little gadget hidden in scene after scene. You truly can't break anything — poke around. 💛
+The world has **216 places** to visit, **215 of them with hand-placed tap spots**, dozens of roaming visitors, a special little gadget hidden in scene after scene, and full cutscenes that play out with characters and dialogue. You truly can't break anything — poke around. 💛
 
 ---
 
@@ -24,8 +24,47 @@ The world has **205 places** to visit, **141 of them with hand-placed tap spots*
 - **🏆 Achievements** (in ⚙️ Settings) now show a **progress bar and count** (e.g. 47 / 100 hugs) so you can see how close you are.
 - **🧺 Collection** — little trinkets she finds as you explore. **👒 Outfit** — what she wears (Auto suits the place). **🗺️ Locations** — jump anywhere and pick which places stay in the rotation.
 - **The sky is real time.** On open-air scenes the **sun arcs** east→overhead→west through the day and a **moon** crosses at night; indoor scenes stay cosily lit no matter the hour.
-- **Every scene is tappable.** Even places without a named spot below react to taps — tap the **sky**, the **middle distance**, or the **ground** for different little reactions flavored to where you are.
+- **Every scene is tappable.** Nearly every place now has **hand-placed tap spots** — objects in the scene you can poke for a unique reaction and emoji burst (see the full inventory below). Even places without a named spot react to taps — tap the **sky**, the **middle distance**, or the **ground** for different little reactions flavored to where you are.
 - **Roaming visitors** wander in on their own timers — linger in a scene and keep an eye out; many are only tappable for a moment.
+
+---
+
+## 🎬 Cutscenes (13)
+
+_Now and then, if she's idle in the right place, a little story plays out. The screen fades in, characters walk on, and they talk, tease, and share a moment together. Each cutscene is skipable (tap **Skip >>** in the top-right corner) and lasts about 20–30 seconds. They trigger randomly (~15 % chance every 30–60 s) — linger in a scene and one might start on its own._
+
+_Debug shortcut: press **X** on a keyboard to force-trigger the cutscene for the current scene (if one exists)._
+
+- **Campfire Story** — triggers at _Starry Campsite_. Characters: Krystal, Paul, Luna. They share ghost stories around the fire.
+- **Stargazing** — triggers at _Starry Meadow_ or _Observatory_. Characters: Krystal, Paul. They lie on a blanket and name the stars.
+- **Beach Sunset Picnic** — triggers at _Beach_ or _Moonlit Beach_. Characters: Krystal, Paul, Wade. A warm blanket-side evening by the water.
+- **Bakery Mishap** — triggers at _Bakery_ or _Gingerbread Kitchen_. Characters: Krystal, Luna. Flour flies and something explodes in the oven.
+- **Library Ghost** — triggers at _Cozy Library_ or _Arcane Library_. Characters: Krystal, William. A mysterious book falls off the shelf.
+- **Aquarium Wonder** — triggers at _Aquarium Hall_ or _Aquarium Tunnel_. Characters: Krystal, Luke. They spot something glowing in the tank.
+- **Rainy Day Chat** — triggers at _Rainy Street_. Characters: Krystal, Paul. A quiet moment under the awning.
+- **Flower Crown** — triggers at _Florist Shop_, _Cherry Blossoms_, _Lavender Field_, or _Peony Garden_. Characters: Krystal, Luna, Wade. They weave crowns for each other.
+- **Snow Angel Contest** — triggers at _Snowy Cabin_, _Ice Pond_, or _Frozen Waterfall_. Characters: Krystal, Paul, William. Who can make the best one?
+- **Music Jam** — triggers at _Music Room_, _Record Shop_, or _Jazz Club_. Characters: Krystal, Paul, Luke, Luna. An impromptu jam session.
+- **Painting Together** — triggers at _Art Studio_ or _Pottery Studio_. Characters: Krystal, Paul. They paint side by side.
+- **Hide and Seek** — triggers at _Hedge Maze_, _Topiary Garden_, or _Backyard_. Characters: Krystal, Luke, William. Ready or not…
+- **Tea Party** — triggers at _Tea House_, _Bamboo Tearoom_, or _Coffee Shop_. Characters: Krystal, Luna, Wade. Tiny cups, big feelings.
+
+---
+
+## 🔮 Magic & mysticism scenes (10)
+
+_A new family of enchanted places — glowing crystals, starlit gardens, ancient clockwork, and more. Each has its own hand-placed hotspots and atmosphere._
+
+- **Tarot Parlor** — candlelit cards, a crystal ball, a zodiac wheel, and a glowing potion.
+- **Enchanted Forest** — twilight glowing mushrooms, fairy doors, floating will-o'-wisps, and hidden crystals.
+- **Crystal Grotto** — giant pulsing crystal clusters, an underground lake, and bioluminescent moss.
+- **Potion Lab** — a bubbling cauldron, shelves of colorful potions, a spell book, and floating bottles.
+- **Spirit Shrine** — a red torii gate, a spirit house, a sacred tree, floating orbs, and stone lanterns.
+- **Shadow Theater** — enchanted lantern-lit shadow puppets dance on a golden-framed screen.
+- **Dreamweaver's Loom** — a loom woven with starlight threads, floating spools, and woven constellations.
+- **Astral Garden** — crystal flowers and trees grow among nebulas, with a cosmic butterfly drifting by.
+- **Star Pool** — an ancient ruin around a still pool that reflects the sky, with floating candles.
+- **Enchanted Clocktower** — a giant clock face, a swinging pendulum, enormous gears, and an hourglass.
 
 ---
 
@@ -148,7 +187,7 @@ _Many scenes hide one special interactive thing. Here's what to look for and tap
 
 ---
 
-## 📍 Hotspot inventory — what to tap in each place (141 scenes)
+## 📍 Hotspot inventory — what to tap in each place (215 scenes)
 
 _Each place below has these tappable objects (emoji = the little burst you'll see). Tap them for a unique reaction._
 
@@ -293,6 +332,80 @@ _Each place below has these tappable objects (emoji = the little burst you'll se
 - **Wheat Field** — 🌇 The big golden sun · 🌾 Rippling wheat · 👒 A ragged scarecrow · 🐦 Crows near the sun
 - **Wine Cellar** — 🍷 The wine rack · 🛢️ Oak barrels · 🕯️ A little candle · 🥂 Two glasses
 - **Zen Garden** — 🪨 A quiet stone · 🌊 Perfect ripples · 🌳 Tiny tree · 🏮 A stone lantern
+- **Tarot Parlor** — 🃏 The tarot cards · 🔮 The crystal ball · 🕯️ The candelabra · ♈ A zodiac wheel · 🧪 A glowing potion · 🔮 A crystal pendulum · 📿 Beaded curtain
+- **Enchanted Forest** — 🍄 Glowing mushrooms · 🚪 A tiny fairy door · 🏮 An old stone lantern · ✨ Floating lights · 💎 A glowing crystal · 💎 A blue crystal · 🌿 The winding path
+- **Crystal Grotto** — 💎 Giant crystal cluster · 💎 Purple crystals · 💧 An underground lake · 🌿 Bioluminescent moss
+- **Potion Lab** — ⚗️ The big cauldron · 🧪 Shelves of potions · 📖 The spell book · ✨ Floating bottles
+- **Treehouse** — 🏠 Our little cabin · ☀️ Sun through the leaves · 🪜 The rope ladder · 🪴 A little potted plant
+- **Gelateria** — 🍨 The gelato case · 📋 The chalkboard menu · 🍦 A triple-scoop cone · 🏪 The striped awning
+- **Vintage Train Station** — 🕰️ The station clock · 📟 The departure board · 🚂 The steam train · 🪑 A little bench
+- **Duck Pond** — 🌳 The weeping willow · 🦆 The ducks · 🪷 Lily pads · 🪑 The park bench
+- **Wizard Tower** — 🌙 Stars through the window · 🪐 The little orrery · 📖 The glowing spellbook · 🕯️ A floating candle
+- **Sunroom** — 🪴 So many little plants · 🌿 Trailing vines · 🪑 The wicker chair · 🌱 A big monstera
+- **Winter Chalet** — 🔥 The crackling fire · 🏔️ Snowy peaks outside · 🧸 The soft fur rug · ☕ Hot cocoa
+- **Alchemy Lab** — ♈ An alchemy chart · ⚗️ The distillation apparatus · 📖 An open grimoire · 🪨 Runestones
+- **Bamboo Tearoom** — 🍵 The iron teapot · 🎐 A bamboo wind chime · 🌸 A vase with blossoms · 🟥 A comfy cushion
+- **Beekeeper's Garden** — 🐝 A white beehive · ☀️ Warm summer sun · 🍯 A jar of honey · 💧 A little birdbath
+- **Birch Grove** — 🌳 White birch bark · 🍂 A golden canopy · 🍄 Little mushrooms · 🪵 A mossy log
+- **Bonsai Garden** — 🌳 A slanting bonsai · 🌳 A cascade bonsai · 📜 A hanging scroll · 💧 A tiny watering can
+- **Candy Factory** — 🍬 A vat of candy syrup · 🍭 Candies on the belt · 🍭 The lollipop spinner · 🔮 A gumball machine
+- **Lantern Festival** — 🌙 The crescent moon · 🏮 Sky lanterns rising · 🪷 Water lanterns · 🏘️ The little town across
+- **Lotus Pond** — 🪷 A pink lotus · 🦋 A dragonfly · 🌸 More lotus blooms · 🍃 Big lily pads
+- **Maple Forest** — ☀️ Sun through the maples · 🍁 Falling leaves · 🌉 The little footbridge · 🌳 A big old maple
+- **Moonlit Beach** — 🌕 The full moon · ✨ Moonlight on the waves · 🐚 A pretty seashell · 🔥 A little tiki lantern
+- **Moss Garden** — 🏮 The stone lantern · 💧 The water basin · 🍁 A red maple sapling · 🪨 Stepping stones
+- **Penguin Cove** — 🐧 A big penguin · 🐣 A fluffy chick · 🌊 The cold sea · ❄️ A snow mound
+- **Windmill** — 🌬️ The spinning sails · 🌷 Tulip rows · 🪿 Little geese · ☁️ Puffy clouds
+- **Puppet Theater** — 🎭 A dancing puppet · 🎭 The blue puppet · ✨ The golden arch · 👥 The audience
+- **Topiary Garden** — ⛲ The stone fountain · 🌳 A spiral topiary · 🦚 A peacock topiary · ☁️ A perfect blue sky
+- **Harbor at Night** — ⛵ A sailboat bobbing · 🔦 The little lighthouse · 💡 A warm lamppost · 🌃 Town lights on the water
+- **Gift Wrap Shop** — 🎀 Rolls of wrapping paper · 🧶 Spools of ribbon · 🎁 A wrapped present · 🎉 Little paper flags
+- **Gingerbread Kitchen** — 🏠 A gingerbread house · 🍪 Gingerbread people · 🥣 The mixing bowl · ❄️ Snow outside the window
+- **Sunflower Maze** — 🌻 Giant sunflowers · 🌻 More sunflowers · ☀️ The bright summer sun · 🐝 Busy little bees
+- **Jellyfish Tank** — 🪼 A purple jellyfish · 🪼 A big blue one · 🫧 Rising bubbles · ✨ The tank glows
+- **Cave Hot Spring** — ♨️ The warm spring · ⭐ Stars through the opening · 🏮 A stone lantern · 🧖 Fluffy little towels
+- **Ice Skating Rink** — ⛸️ The frozen rink · 🌙 The winter moon · 💡 Festival lights · ⛄ A little snowman
+- **Papercraft Studio** — 🪽 The origami cranes · 🪟 Soft daylight · 🛥️ A paper boat · 🌸 Paper flowers
+- **Poppy Field** — 🌺 Red poppies everywhere · ☀️ The warm summer sun · 🦋 A butterfly · 🌳 A lone tree on the hill
+- **Desert Oasis** — 💧 The oasis pool · ☀️ The golden hour sun · 🌴 Palm trees swaying · 🛋️ A comfy cushion
+- **Dumpling House** — 🥟 The bamboo steamers · 🏮 Red lanterns · 🥟 A plate of dumplings · 🪟 The round window
+- **Sakura Tunnel** — 🌸 A canopy of blossoms · 🌸 Petals on the path · 🪑 A little bench · 🏮 A stone lantern
+- **Hummingbird Garden** — 🐦 A hummingbird · 🍯 The nectar feeder · 🌺 Trumpet flowers · ☀️ Bright sunny garden
+- **Cozy Igloo** — 🕯️ A little ice-shelf lantern · 🌌 The entrance tunnel · 🧸 The fur rug · 🔥 The little fire bowl
+- **Misty Forest** — ☀️ Sun through the fog · 🌫️ Drifting fog · 🍄 A little red mushroom · 🪨 A mossy stone marker
+- **Fortune Teller Parlor** — 🔮 The crystal ball · 🏮 The beaded lamp · 🃏 Tarot cards · 🕯️ A flickering candle
+- **Fairy Ring** — 🍄 The mushroom ring · ✨ Fairy lights · 🌙 A moonbeam · 🌸 Glowing wildflowers
+- **Witch's Cottage** — ⚗️ The bubbling cauldron · 🐈‍⬛ A sleepy black cat · 🌙 The round window · 🧹 A broomstick
+- **Moon Temple** — 🌕 The full moon · 🏛️ The marble columns · 🔥 A blue brazier flame · ✨ Moonlight on marble
+- **Rooftop Pool** — 💧 The infinity pool · 🏖️ A lounge chair · 🏐 A beach ball · 🌴 A potted palm
+- **Cheese Cave** — 🧀 Wheels of cheese · 🧀 A cut wedge · 💡 The hanging bulb · 🛢️ An oak barrel
+- **Harvest Barn** — ☀️ Daylight through the hayloft · 🏮 A little barn lantern · 🌾 Stacked hay bales · 🎃 Plump little pumpkins
+- **Peony Garden** — 🌹 The rose-covered arch · 🌸 Big fluffy peonies · 🌺 More blooms over here · ☀️ Warm spring sunshine
+- **Sugar Shack** — ♨️ The big evaporator · 🍯 Jars of golden syrup · 🪟 Maple trees outside · 🪵 A stack of firewood
+- **Kelp Forest** — 🦦 A sea otter · 🌿 Swaying kelp fronds · 🐟 A school of fish · 🪸 A sea anemone
+- **Citrus Grove** — 🍊 A big orange tree · ☀️ Warm Mediterranean sun · 📦 A crate of oranges · 🪜 The picking ladder
+- **Watermill** — ⚙️ The water wheel · 🏠 The old stone mill · 🪷 A lily pad · 💧 The millpond
+- **Quilt Shop** — 🧵 The big patchwork quilt · 📚 Bolts of fabric · 🪡 An old sewing machine · 🧶 A basket of yarn
+- **Firefly Pier** — 🌅 The setting sun · 🏮 A pier lantern · ✨ Fireflies everywhere · 🫙 A jar of fireflies
+- **Planetary Probe Lab** — 🪐 The planet viewport · 📊 Blinking monitor banks · 🎛️ The control console · ✨ A tiny hologram
+- **Rune Circle** — 🌙 The pale moon · ✨ The rune circle · 🪨 A standing stone · 🪨 Another stone
+- **Arcane Library** — 🔮 The glowing arch · 📖 A floating grimoire · 🕯️ A floating candle · ⭐ The floor sigil
+- **Will-o'-Wisp Marsh** — 🌙 A hazy green moon · ✨ Will-o'-wisps · 🌳 A twisted dead tree · 🪷 A lily pad
+- **Enchanted Mirror Hall** — 🪞 The star mirror · 🌲 The forest mirror · 🔥 The fire mirror · ✨ The chandelier
+- **Balloon Ride** — 🎈 Our balloon overhead · 🎈 A red balloon nearby · 🌿 Patchwork fields below · ☀️ The warm morning sun
+- **Herb Drying Shed** — 🌿 Bundles of drying herbs · 🫙 Jars of dried herbs · 🪨 The mortar and pestle · 🪟 The sunny window
+- **Driftwood Beach** — 🪵 A big driftwood log · 🌊 The grey-green sea · ⭐ A little starfish · ☀️ Pale hazy sun
+- **Spirit Shrine** — ⛩️ The red torii gate · 🙏 The little spirit house · 🌳 The sacred tree · ✨ Floating spirit orbs · 🏮 The stone lantern
+- **Shadow Theater** — 💃 The dancing shadow · 🐦 A shadow bird · 🔥 The enchanted lantern · 🪑 A velvet cushion · 🎭 The carved frame
+- **Dreamweaver's Loom** — 🧵 The glowing loom · 🧶 A floating spool · ⭐ The woven constellation · 🕯️ The little candle · ✨ A floating spool of light
+- **Astral Garden** — 💎 A crystal flower · 🌌 The nebula above us · 🌳 The crystal tree · 🦋 A cosmic butterfly · 🏛️ The little stone arch
+- **Cranberry Harvest** — ☀️ Autumn sunshine · 🔴 A sea of cranberries · 📦 Crates on the dock · 🏠 The little red barn
+- **Tidal Cave** — 🌊 The cave mouth · ⭐ A little starfish · 💧 Dark still water · 🪨 Dripping stalactites
+- **Reindeer Barn** — 🦌 The reindeer · 🏮 The hanging lantern · 🪟 Snow outside the window · 🪣 The feed bucket
+- **Sky Gondola** — 🚡 Our little gondola · 🏔️ Snowy peaks below · ☀️ The alpine sun · 🌲 Forests far below
+- **Cider Mill** — 🍎 The cider press · 🛢️ Stacked oak barrels · 🪟 The orchard outside · 🧺 A bushel of apples
+- **Star Pool** — 🌙 The reflections in the water · 🌙 The crescent moon · 🕯️ A floating candle · 🏛️ The ancient column · ✨ A firefly
+- **Enchanted Clocktower** — ⏰ The giant clock face · 🔔 The pendulum swings · ⚙️ Enormous gears turning · ⏳ An hourglass · 🪟 Moonlight through the window
 
 ---
 
