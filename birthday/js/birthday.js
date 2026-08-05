@@ -513,13 +513,21 @@ function render(){
   if (started && currentScene !== lastLabeledScene){ lastLabeledScene = currentScene; showPlace(sceneLabel(scene)); }
   const draw = SCENE_RENDERERS[scene];
   if (draw){
+    SpriteRenderer.beginFrame();
     draw();
-    if (!SCENE_SELF_PET.has(scene)) drawPet();   // scenes that don't place her themselves
+    SpriteRenderer.drawPhase('background');
+    SpriteRenderer.drawPhase('ground');
+    if (!SCENE_SELF_PET.has(scene)){
+      SpriteRenderer.submit({ phase:'actors', scene, x:pet.x, y:pet.y, draw:drawPet });
+    }
+    SpriteRenderer.drawPhase('actors');
+    SpriteRenderer.drawPhase('foreground');
     applyDayNight(scene);                        // global time-of-day tint over scene + pet
     drawCelestial(scene);                        // the one sun/moon, arcing with the real clock
     applyNightVignette(scene);                   // cozy edge-darkening after dark
     drawShootingStar();                          // rare bright streak across the night sky
     for (const f of EXTRA_DRAWERS){ try{ f(); }catch(e){} }   // add-on overlays (js/extras.js)
+    SpriteRenderer.drawPhase('overlay');
   }
   // sleep sequence: black wash over everything as she drifts off and wakes
   if (restFade > 0){ ctx.fillStyle = `rgba(0,0,0,${restFade})`; ctx.fillRect(0,0,W,H); }

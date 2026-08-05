@@ -146,6 +146,7 @@ function loop(ts){
     updateStar(dt);
     updateShootingStar(dt);
     updatePet(dt);
+    SpriteRenderer.update(dt);
     for (const f of EXTRA_UPDATERS){ try{ f(dt); }catch(e){} }   // add-on features (js/extras.js)
     // refresh bars periodically (cheap)
     hudAccum += dt; if (hudAccum > 0.25){ refreshHUD(); checkAchievements(); hudAccum = 0; }

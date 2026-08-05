@@ -134,6 +134,19 @@ Generated 4 x 4 source atlases are retained in `sprites/expressions/sources/`.
 Use `sprite-lab.html` to preview all expression, walking, and clapping sheets,
 change playback speed/mode, scrub frames, and inspect frame boundaries.
 
+## Shared scene sprite renderer
+
+`js/sprite-objects.js` owns future animals, props, scenery, and background people.
+It enforces a maximum of four frames per registered sheet and renders in five
+ordered phases: `background`, `ground`, depth-sorted `actors`, `foreground`, and
+`overlay`. Actor depth defaults to the object's foot `y` coordinate; use an
+explicit `depth` only when a scene needs a fixed override.
+
+Register art once with `SpriteRenderer.register(name, config)`, create persistent
+scene objects with `SpriteRenderer.create(spec)`, or submit temporary drawables
+from a scene renderer with `SpriteRenderer.submit(spec)`. Persistent objects are
+automatically filtered to the scene where they were created.
+
 ## Important continuation notes
 
 - When prompting image generation, attach `reference-photos.png` and identify each named panel explicitly.
