@@ -7048,7 +7048,7 @@ function drawTownSquare(){
     const sitY = nearBench ? benchSitY : chairSitY;
     SpriteRenderer.submit({ phase:'actors', x:sitX, y:sitY, draw: function(ctx2) {
       csLoadExpression('krystal', 'sit');
-      csDrawExpression('krystal', 'sit', sitX, sitY, 130, 0);
+      csDrawExpression('krystal', 'sit', sitX, sitY, 130, 3);
     }});
   } else {
     SpriteRenderer.submit({ phase:'actors', x:pet.x, y:pet.y, draw:drawPet });
