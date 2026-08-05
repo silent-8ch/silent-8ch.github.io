@@ -168,6 +168,13 @@ shorelines and riverbanks use four animation frames, while static edges use
 four positional variants. Original atlases are retained as
 `sprites/objects/sources/terrain-*-pack.png`.
 
+All registered sprites support optional cached color tinting. Pass `tint` and
+`tintAmount` (0–1) to `SpriteRenderer.create()` or `SpriteRenderer.submit()`;
+for example `{sprite:'tree', tint:'#6f86b8', tintAmount:.3}`. Tint intensity is
+clamped and quantized to hundredths, and cached by sprite, frame, color, and
+amount. Call `SpriteRenderer.clearTintCache()` after a global palette change if
+the cached variants are no longer needed.
+
 ## Important continuation notes
 
 - When prompting image generation, attach `reference-photos.png` and identify each named panel explicitly.

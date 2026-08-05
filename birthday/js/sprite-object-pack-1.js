@@ -44,23 +44,6 @@
     flowerWindow:  {src:base+'flower-window.png',cols:4,fps:2.5,defaultSize:108,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:86,depth:16},depthOffset:0},
     pennantFlags:  {src:base+'pennant-flags.png',cols:4,fps:4,defaultSize:82,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:22,depth:12},depthOffset:0},
     waterRipple:   {src:base+'water-ripple.png',cols:4,fps:5,defaultSize:68,phase:'ground',anchorX:.5,anchorY:.5,footprint:{width:60,depth:20},depthOffset:-10},
-    /* ground / surface tiles (1024×256, 4 frames of 256×256) */
-    beachSand:     {src:base+'beach-sand.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    cobblestone:   {src:base+'cobblestone.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    dirtPath:      {src:base+'dirt-path.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    dockEdge:      {src:base+'dock-edge.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    flagstone:     {src:base+'flagstone.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    forestGrass:   {src:base+'forest-grass.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    grassCurbEdge: {src:base+'grass-curb-edge.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    grassDirtEdge: {src:base+'grass-dirt-edge.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    meadowGrass:   {src:base+'meadow-grass.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    pathBorder:    {src:base+'path-border.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    riverbankEdge: {src:base+'riverbank-edge.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    sandShoreline: {src:base+'sand-shoreline.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    stoneStairs:   {src:base+'stone-stairs.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    terracottaTile:{src:base+'terracotta-tile.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    woodFloor:     {src:base+'wood-floor.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
-    woodStairs:    {src:base+'wood-stairs.png',cols:4,fps:2,defaultSize:160,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:140,depth:18},depthOffset:0},
   };
   for(const [name,config] of Object.entries(assets)) SpriteRenderer.register(name,config);
 })();

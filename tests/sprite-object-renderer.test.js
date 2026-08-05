@@ -13,12 +13,21 @@ const context={
   save(){}, restore(){}, translate(){}, scale(){},
   drawImage(...args){ calls.push('sprite'); drawArgs.push(args); },
 };
+const tintContexts=[];
+function createCanvas(width,height){
+  const tintContext={
+    width,height,globalAlpha:1,globalCompositeOperation:'source-over',fillStyle:null,draws:0,fills:0,
+    clearRect(){},drawImage(){this.draws++},fillRect(){this.fills++},
+  };
+  tintContexts.push(tintContext);
+  return{width,height,getContext:()=>tintContext};
+}
 const sandbox=vm.createContext({globalThis:null,Image:FakeImage,Map,Object,Error,Math});
 sandbox.globalThis=sandbox;
 vm.runInContext(fs.readFileSync('birthday/js/sprite-objects.js','utf8'),sandbox);
 
 let scene='garden';
-const renderer=sandbox.createSpriteRenderer({context,ImageCtor:FakeImage,getScene:()=>scene});
+const renderer=sandbox.createSpriteRenderer({context,ImageCtor:FakeImage,getScene:()=>scene,createCanvas,tintCacheLimit:2});
 renderer.register('bird',{src:'bird.png',cols:4,rows:1,fps:4});
 renderer.register('tree',{src:'tree.png',cols:4,rows:1,fps:2,defaultSize:100,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:40,depth:12},depthOffset:-2});
 renderer.register('stairs',{src:'stairs.png',cols:4,rows:1,fps:0,defaultWidth:80,defaultHeight:40,phase:'ground'});
@@ -44,6 +53,18 @@ assert.deepEqual(calls,['sprite','far','near','sprite'],'phases and actor depth 
 renderer.update(.26);
 assert.equal(back.frame,1,'registered fps advances persistent sprites');
 assert.equal(renderer.hitTest(10,70)?.id,front.id,'hit testing returns the topmost matching object');
+const tinted=renderer.create({sprite:'bird',phase:'overlay',x:20,y:20,tint:'#4466aa',tintAmount:.354});
+renderer.create({sprite:'bird',phase:'overlay',x:40,y:20,tint:'#4466aa',tintAmount:.35});
+assert.equal(tinted.tintAmount,.35,'tint intensity is clamped and quantized for stable cache keys');
+calls.length=0; renderer.drawPhase('overlay'); renderer.drawPhase('overlay');
+assert.equal(tintContexts.length,1,'matching sprite, frame, tint, and intensity reuse one cached canvas');
+assert.equal(tintContexts[0].draws,1);
+assert.equal(tintContexts[0].fills,1);
+assert.equal(tintContexts[0].globalAlpha,1);
+tinted.frame=2; renderer.drawPhase('overlay');
+assert.equal(tintContexts.length,2,'a different frame creates a distinct tinted cache entry');
+renderer.clearTintCache(); renderer.drawPhase('overlay');
+assert.equal(tintContexts.length,4,'clearing the tint cache rebuilds the active frame entries');
 scene='beach'; calls.length=0; renderer.drawPhase('actors');
 assert.deepEqual(calls,[],'objects stay in their assigned scene');
 renderer.clearScene('garden');
