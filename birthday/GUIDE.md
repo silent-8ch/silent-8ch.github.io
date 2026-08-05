@@ -29,7 +29,7 @@ The world has **216 places** to visit, **215 of them with hand-placed tap spots*
 
 ---
 
-## 🎬 Cutscenes (16)
+## 🎬 Cutscenes (19)
 
 _Now and then, if she's idle in the right place, a little story plays out. The screen fades in, characters walk on, and they talk, tease, and share a moment together. Each cutscene is skipable (tap **Skip >>** in the top-right corner) and lasts about 20–30 seconds. They trigger randomly (~15 % chance every 30–60 s) — linger in a scene and one might start on its own._
 
@@ -51,6 +51,9 @@ _Debug shortcut: press **X** on a keyboard to force-trigger the cutscene for the
 - **Sunset Balloon Ride** — triggers at _Balloon Ride_, _Balloon Festival_, or _Kite Hill_. Characters: Krystal, Paul. Floating over patchwork fields at golden hour.
 - **Cooking Disaster** — triggers at _Diner_, _Dumpling House_, or _Ramen Shop_. Characters: Krystal, Wade, William. Too much spice, too many tears, time for pizza.
 - **Tide Pool Discovery** — triggers at _Tide Pools_ or _Coral Reef_. Characters: Krystal, Luke, Luna. Starfish, hermit crabs, and a shell worth keeping.
+- **Pillow Fort** — triggers at _Treehouse_, _Sunroom_, or _Cozy Igloo_. Characters: Krystal, Wade, Luke. Building a pillow fort together — Wade stacks too high and it collapses on him. Everyone laughing under a pile of pillows.
+- **Dance Lesson** — triggers at _Ballet Studio_ or _Ballroom_. Characters: Krystal, Paul. Paul tries to dance and steps on her foot. She teaches him, he nails one move, and they spin together with hearts.
+- **Firefly Catching** — triggers at _Firefly Meadow_, _Firefly Pier_, or _Night Garden_. Characters: Krystal, Luna, William. Catching fireflies in jars at night. Luna's jar is empty so Krystal shares hers. They release them all in a burst of lights.
 
 ---
 

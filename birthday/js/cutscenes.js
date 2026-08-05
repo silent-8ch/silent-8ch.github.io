@@ -3168,6 +3168,459 @@ function csTidePoolDiscovery(){
 }
 
 /* ============================================================================
+   CUTSCENE 17: PILLOW FORT  (triggers at treehouse, sunroom, igloo)
+   ============================================================================ */
+function csPillowFort(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.28, wadeX = W * 0.50, lukeX = W * 0.72;
+
+  // draw a pillow at (cx, cy) with a given colour and rotation
+  function drawPillow(cx, cy, col, rot, w, h){
+    w = w || 20; h = h || 14;
+    ctx.save();
+    ctx.translate(cx, cy); ctx.rotate(rot || 0);
+    ctx.fillStyle = col || '#e8d0f0';
+    roundRect(-w / 2, -h / 2, w, h, 4); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.10)'; ctx.lineWidth = 0.8;
+    roundRect(-w / 2, -h / 2, w, h, 4); ctx.stroke();
+    // seam line
+    ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(-w / 2 + 3, 0); ctx.lineTo(w / 2 - 3, 0); ctx.stroke();
+    ctx.restore();
+  }
+
+  // draw a pillow fort wall (stacked pillows)
+  function drawFortWall(cx, baseY, pillows){
+    const cols = ['#e8d0f0','#d0e0f8','#f8e0c8','#c8f0d8','#f0d0d8'];
+    for (let i = 0; i < pillows; i++){
+      const py = baseY - i * 12;
+      const wobble = Math.sin(i * 2.1) * 0.15;
+      drawPillow(cx + Math.sin(i * 1.7) * 3, py, cols[i % cols.length], wobble, 24, 12);
+    }
+  }
+
+  // scattered collapsed pillows
+  function drawCollapsedPillows(cx, baseY){
+    const cols = ['#e8d0f0','#d0e0f8','#f8e0c8','#c8f0d8','#f0d0d8','#f0e8c0'];
+    for (let i = 0; i < 8; i++){
+      const px = cx + Math.cos(i * 0.9) * 28 - 14;
+      const py = baseY - 4 + Math.sin(i * 1.3) * 6;
+      const rot = (i * 0.7) - 1.4;
+      drawPillow(px, py, cols[i % cols.length], rot, 18 + (i % 3) * 4, 11);
+    }
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // warm indoor — cozy golden room
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#f5e8d0'); wall.addColorStop(0.5, '#eedcc0'); wall.addColorStop(1, '#e4d0b0');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // wooden floor
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#c09860'); floor.addColorStop(1, '#a88050');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.strokeStyle = 'rgba(0,0,0,.05)'; ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 20){
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // window with warm light
+    const winX = W * 0.50, winY = H * 0.08, winW = 34, winH = 26;
+    ctx.fillStyle = '#d0e8f8'; ctx.fillRect(winX - winW / 2, winY, winW, winH);
+    ctx.strokeStyle = '#a08060'; ctx.lineWidth = 2;
+    ctx.strokeRect(winX - winW / 2, winY, winW, winH);
+    ctx.beginPath(); ctx.moveTo(winX, winY); ctx.lineTo(winX, winY + winH); ctx.stroke();
+
+    // soft glow
+    const glow = ctx.createRadialGradient(winX, winY + winH / 2, 4, winX, winY + winH / 2, 60);
+    glow.addColorStop(0, 'rgba(255,240,200,.14)'); glow.addColorStop(1, 'rgba(255,240,200,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(winX, winY + winH / 2, 60, 0, 7); ctx.fill();
+
+    // blanket on the floor (base for fort)
+    ctx.fillStyle = 'rgba(180,140,200,.18)';
+    ctx.beginPath();
+    ctx.ellipse(W * 0.50, groundY + 6, W * 0.30, 8, 0, 0, 7);
+    ctx.fill();
+  }
+
+  return {
+    chars: ['krystal', 'wade', 'luke'],
+    skipable: true,
+    steps: [
+      // Step 1: Building the fort — everyone stacking pillows
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawFortWall(W * 0.38, fY + 4, 3);
+          drawFortWall(W * 0.58, fY + 4, 2);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawChar('wade', wadeX, fY, 'right', charH, Math.floor(cs.totalT * 4) % 4);
+          csDrawExpression('luke', 'cheer', lukeX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'This is going to be the best fort ever!');
+      }},
+      // Step 2: Wade stacks too high — tower wobbles
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawFortWall(W * 0.38, fY + 4, 4);
+          drawFortWall(W * 0.58, fY + 4, 5 + Math.floor(cs.stepT));
+          csDrawExpression('luke', 'scared', lukeX, fY, charH);
+          csDrawExpression('wade', 'cheer', wadeX, fY, charH);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawBubble(wadeX, fY - charH - 4, 'Wade', 'Just one more... okay maybe two more...');
+      }},
+      // Step 3: It collapses on Wade!
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawCollapsedPillows(W * 0.50, fY + 4);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawExpression('luke', 'surprised', lukeX, fY, charH);
+          // Wade is buried — just show his hand poking out
+          ctx.fillStyle = '#c8a070';
+          ctx.beginPath(); ctx.arc(wadeX + 6, fY - 8, 3, 0, 7); ctx.fill();
+          csDrawBubble(wadeX, fY - 20, 'Wade', "...I'm okay! \ud83d\ude05");
+      }},
+      // Step 4: Everyone laughing under the pillow pile — cozy and silly
+      { dur: 3.2, draw(cs){
+          drawBg(cs);
+          drawCollapsedPillows(W * 0.50, fY + 4);
+          if (cs.stepT < 1.6){
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+            csDrawExpression('wade', 'embarrassed', wadeX, fY, charH);
+            csDrawExpression('luke', 'laugh', lukeX, fY, charH);
+            csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Your face! \ud83d\ude02');
+          } else {
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+            csDrawExpression('wade', 'laugh', wadeX, fY, charH);
+            csDrawExpression('luke', 'laugh', lukeX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Best fort ever \ud83d\udc9b");
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+          csHearts(cs, wadeX, fY - charH * 0.7, 3);
+          csHearts(cs, lukeX, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 18: DANCE LESSON  (triggers at balletstudio, ballroom)
+   ============================================================================ */
+function csDanceLesson(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.38, paulX = W * 0.62;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // elegant ballroom / studio interior
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#f0e0d0'); wall.addColorStop(0.5, '#e8d8c8'); wall.addColorStop(1, '#dcd0c0');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // polished floor
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#c8a870'); floor.addColorStop(1, '#b09060');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+    // floor reflection sheen
+    ctx.fillStyle = 'rgba(255,255,255,.06)';
+    ctx.fillRect(0, groundY, W, 4);
+
+    // mirror on back wall
+    const mx = W * 0.50, my = H * 0.08, mw = 50, mh = 36;
+    ctx.fillStyle = '#d8e8f0'; ctx.fillRect(mx - mw / 2, my, mw, mh);
+    ctx.strokeStyle = '#c0a060'; ctx.lineWidth = 2.5;
+    ctx.strokeRect(mx - mw / 2, my, mw, mh);
+    // mirror glow
+    ctx.fillStyle = 'rgba(255,255,255,.12)';
+    ctx.fillRect(mx - mw / 2 + 3, my + 3, mw / 3, mh - 6);
+
+    // chandelier
+    ctx.fillStyle = '#e0d0a0';
+    ctx.beginPath(); ctx.arc(W * 0.50, 6, 6, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#c8b880'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W * 0.50, 0); ctx.lineTo(W * 0.50, 6); ctx.stroke();
+    // dangling crystals
+    for (let i = -2; i <= 2; i++){
+      ctx.fillStyle = 'rgba(255,248,220,.6)';
+      ctx.beginPath(); ctx.arc(W * 0.50 + i * 4, 14, 1.2, 0, 7); ctx.fill();
+    }
+
+    // barre on wall
+    ctx.strokeStyle = '#a08060'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(W * 0.10, groundY - 30); ctx.lineTo(W * 0.30, groundY - 30); ctx.stroke();
+  }
+
+  // floating music notes
+  function drawNotes(cs){
+    ctx.fillStyle = 'rgba(200,160,100,.35)';
+    ctx.font = '10px serif';
+    const notes = ['\u266a','\u266b','\u2669'];
+    for (let i = 0; i < 3; i++){
+      const nx = W * 0.20 + i * W * 0.25;
+      const ny = H * 0.30 + Math.sin(cs.totalT * 1.2 + i * 2) * 12;
+      ctx.fillText(notes[i % 3], nx, ny);
+    }
+  }
+
+  // floating hearts for the spin
+  function drawFloatingHearts(cs){
+    ctx.font = '11px serif';
+    const cx = (krystalX + paulX) / 2;
+    for (let i = 0; i < 5; i++){
+      const angle = cs.totalT * 1.5 + i * 1.26;
+      const r = 24 + i * 6;
+      const hx = cx + Math.cos(angle) * r;
+      const hy = fY - charH * 0.5 + Math.sin(angle) * r * 0.5;
+      ctx.globalAlpha = 0.4 + Math.sin(cs.totalT * 2 + i) * 0.2;
+      ctx.fillStyle = '#e06080';
+      ctx.fillText('\u2764', hx, hy);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  return {
+    chars: ['krystal', 'paul'],
+    skipable: true,
+    steps: [
+      // Step 1: Paul trying to dance — terrible
+      { dur: 2.4, draw(cs){
+          drawBg(cs); drawNotes(cs);
+          csDrawExpression('paul', 'think', paulX, fY, charH);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', "Okay, I think I've got this...");
+      }},
+      // Step 2: He steps on her foot
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawNotes(cs);
+          csDrawExpression('paul', 'embarrassed', paulX, fY, charH);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Ow! That was my foot! \ud83d\ude33');
+      }},
+      // Step 3: Krystal teaches him — he gets one move right
+      { dur: 2.6, draw(cs){
+          drawBg(cs); drawNotes(cs);
+          if (cs.stepT < 1.3){
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('paul', 'think', paulX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Like this — one, two, step!');
+          } else {
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('paul', 'cheer', paulX, fY, charH);
+            csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Wait... I did it?!');
+          }
+      }},
+      // Step 4: They spin together — hearts — romantic
+      { dur: 2.4, draw(cs){
+          drawBg(cs); drawNotes(cs); drawFloatingHearts(cs);
+          const cx = (krystalX + paulX) / 2;
+          const spinOff = Math.cos(cs.stepT * 2.5) * 18;
+          csDrawExpression('krystal', 'cheer', cx - spinOff, fY, charH);
+          csDrawExpression('paul', 'cheer', cx + spinOff, fY, charH);
+          csDrawBubble(cx, fY - charH - 14, 'Krystal', "You're a natural \u2764\ufe0f");
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 6);
+          csHearts(cs, paulX, fY - charH * 0.7, 6);
+      }},
+      // Step 5: Final moment — both laughing, warm
+      { dur: 2.4, draw(cs){
+          drawBg(cs); drawNotes(cs);
+          csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+          csDrawExpression('paul', 'laugh', paulX, fY, charH);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', "Same time tomorrow? \ud83d\ude0a");
+      }, onStart(cs){
+          csHearts(cs, (krystalX + paulX) / 2, fY - charH * 0.7, 4);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 19: FIREFLY CATCHING  (triggers at fireflies, fireflypier, nightgarden)
+   ============================================================================ */
+function csFireflyCatching(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.26, lunaX = W * 0.50, williamX = W * 0.74;
+
+  // draw drifting fireflies in the air
+  function drawFireflies(cs, count, seed){
+    for (let i = 0; i < count; i++){
+      const fx = W * 0.10 + ((i * 37 + (seed || 0)) % (W * 0.80));
+      const fy = H * 0.12 + ((i * 23 + (seed || 0)) % (H * 0.45));
+      const pulse = 0.4 + Math.sin(cs.totalT * 3 + i * 1.7) * 0.4;
+      const glow = ctx.createRadialGradient(fx, fy, 0, fx, fy, 5);
+      glow.addColorStop(0, 'rgba(255,240,100,' + pulse + ')');
+      glow.addColorStop(1, 'rgba(255,240,100,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(fx, fy, 5, 0, 7); ctx.fill();
+      // core dot
+      ctx.fillStyle = 'rgba(255,250,150,' + Math.min(1, pulse + 0.3) + ')';
+      ctx.beginPath(); ctx.arc(fx, fy, 1.2, 0, 7); ctx.fill();
+    }
+  }
+
+  // draw a jar (with or without fireflies inside)
+  function drawJar(cx, baseY, hasFly, flyCol){
+    // glass body
+    ctx.strokeStyle = 'rgba(200,220,240,.6)'; ctx.lineWidth = 1.2;
+    ctx.fillStyle = 'rgba(200,220,240,.12)';
+    roundRect(cx - 6, baseY - 16, 12, 16, 3); ctx.fill();
+    roundRect(cx - 6, baseY - 16, 12, 16, 3); ctx.stroke();
+    // lid
+    ctx.fillStyle = '#8a7a60'; ctx.fillRect(cx - 7, baseY - 18, 14, 3);
+    if (hasFly){
+      const glow = ctx.createRadialGradient(cx, baseY - 10, 0, cx, baseY - 10, 5);
+      glow.addColorStop(0, flyCol || 'rgba(255,240,100,.6)');
+      glow.addColorStop(1, 'rgba(255,240,100,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(cx, baseY - 10, 5, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,250,150,.8)';
+      ctx.beginPath(); ctx.arc(cx, baseY - 10, 1.2, 0, 7); ctx.fill();
+    }
+  }
+
+  // firefly burst — lots of them released
+  function drawReleaseBurst(cs){
+    const cx = (krystalX + lunaX + williamX) / 3;
+    const cy = fY - charH * 0.5;
+    for (let i = 0; i < 14; i++){
+      const angle = i * 0.45 + cs.stepT * 0.5;
+      const r = 10 + cs.stepT * 18 + i * 3;
+      const fx = cx + Math.cos(angle) * r;
+      const fy = cy + Math.sin(angle) * r * 0.6 - cs.stepT * 8;
+      const pulse = 0.5 + Math.sin(cs.totalT * 4 + i * 1.3) * 0.4;
+      const glow = ctx.createRadialGradient(fx, fy, 0, fx, fy, 4);
+      glow.addColorStop(0, 'rgba(255,240,100,' + pulse + ')');
+      glow.addColorStop(1, 'rgba(255,240,100,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(fx, fy, 4, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,250,150,' + Math.min(1, pulse + 0.2) + ')';
+      ctx.beginPath(); ctx.arc(fx, fy, 1, 0, 7); ctx.fill();
+    }
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // night sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#0a1028'); sky.addColorStop(0.4, '#142040'); sky.addColorStop(1, '#1a3050');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // stars
+    ctx.fillStyle = 'rgba(255,255,255,.5)';
+    for (let i = 0; i < 20; i++){
+      const sx = (i * 67 + 11) % W;
+      const sy = (i * 41 + 7) % (groundY * 0.5);
+      const twinkle = 0.3 + Math.sin(t * 2 + i * 1.1) * 0.3;
+      ctx.globalAlpha = twinkle;
+      ctx.beginPath(); ctx.arc(sx, sy, 0.8, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // crescent moon
+    ctx.fillStyle = '#f0e8c0';
+    ctx.beginPath(); ctx.arc(W * 0.82, H * 0.10, 10, 0, 7); ctx.fill();
+    ctx.fillStyle = '#142040';
+    ctx.beginPath(); ctx.arc(W * 0.82 + 4, H * 0.10 - 1, 9, 0, 7); ctx.fill();
+
+    // dark grass ground
+    const gr = ctx.createLinearGradient(0, groundY, 0, H);
+    gr.addColorStop(0, '#1a4020'); gr.addColorStop(1, '#0e2a14');
+    ctx.fillStyle = gr; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // grass blades
+    ctx.fillStyle = '#1e4a28';
+    for (let x = 0; x < W; x += 5){
+      const bh = 3 + Math.sin(x * 0.4 + t * 0.8) * 1.5;
+      ctx.fillRect(x, groundY - bh, 1.5, bh);
+    }
+
+    // dark trees silhouette in background
+    for (let i = 0; i < 4; i++){
+      const tx = i * W / 3 + 10;
+      ctx.fillStyle = '#0a1a10';
+      ctx.beginPath();
+      ctx.moveTo(tx - 14, groundY);
+      ctx.lineTo(tx, groundY - 40 - i * 5);
+      ctx.lineTo(tx + 14, groundY);
+      ctx.fill();
+    }
+  }
+
+  return {
+    chars: ['krystal', 'luna', 'william'],
+    skipable: true,
+    steps: [
+      // Step 1: Night scene — fireflies everywhere, everyone looking around
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawFireflies(cs, 10, 0);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawExpression('luna', 'cheer', lunaX, fY, charH);
+          csDrawChar('william', williamX, fY, 'left', charH, Math.floor(cs.totalT * 3) % 4);
+          csDrawBubble(lunaX, fY - charH - 4, 'Luna', 'Look at them all! \u2728');
+      }},
+      // Step 2: William catches one — cheer!
+      { dur: 2.4, draw(cs){
+          drawBg(cs); drawFireflies(cs, 7, 42);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawExpression('luna', 'surprised', lunaX, fY, charH);
+          csDrawExpression('william', 'cheer', williamX, fY, charH);
+          drawJar(williamX + 14, fY - charH * 0.3, true);
+          csDrawBubble(williamX, fY - charH - 4, 'William', 'I got one! I got one! \ud83d\ude04');
+      }},
+      // Step 3: Luna's jar is empty — sad. Krystal shares hers.
+      { dur: 2.8, draw(cs){
+          drawBg(cs); drawFireflies(cs, 6, 88);
+          drawJar(williamX + 14, fY - charH * 0.3, true);
+          if (cs.stepT < 1.4){
+            csDrawExpression('luna', 'sad', lunaX, fY, charH);
+            csDrawExpression('krystal', 'think', krystalX, fY, charH);
+            csDrawChar('william', williamX, fY, 'left', charH, 0);
+            drawJar(lunaX + 14, fY - charH * 0.3, false);
+            csDrawBubble(lunaX, fY - charH - 4, 'Luna', "Mine keeps getting away...");
+          } else {
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('luna', 'surprised', lunaX, fY, charH);
+            csDrawChar('william', williamX, fY, 'left', charH, 0);
+            drawJar(lunaX + 14, fY - charH * 0.3, true, 'rgba(255,220,100,.5)');
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Here — we can share mine \ud83d\udc9b');
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 4);
+          csHearts(cs, lunaX, fY - charH * 0.7, 3);
+      }},
+      // Step 4: They release them all — burst of lights
+      { dur: 3.6, draw(cs){
+          drawBg(cs);
+          drawReleaseBurst(cs);
+          drawFireflies(cs, 4, 130);
+          if (cs.stepT < 1.8){
+            csDrawExpression('william', 'cheer', williamX, fY, charH);
+            csDrawExpression('luna', 'cheer', lunaX, fY, charH);
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawBubble(williamX, fY - charH - 4, 'William', 'On three — let them go!');
+          } else {
+            csDrawExpression('william', 'wave', williamX, fY, charH);
+            csDrawExpression('luna', 'cheer', lunaX, fY, charH);
+            csDrawExpression('krystal', 'wave', krystalX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Fly free, little lights \u2728");
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+          csHearts(cs, lunaX, fY - charH * 0.7, 4);
+          csHearts(cs, williamX, fY - charH * 0.7, 4);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
@@ -3209,6 +3662,14 @@ const CUTSCENE_MAP = {
   ramenshop:         [csCookingDisaster],
   tidepools:         [csTidePoolDiscovery],
   coralreef:         [csTidePoolDiscovery],
+  treehouse:         [csPillowFort],
+  sunroom:           [csPillowFort],
+  igloo:             [csPillowFort],
+  balletstudio:      [csDanceLesson],
+  ballroom:          [csDanceLesson],
+  fireflies:         [csFireflyCatching],
+  fireflypier:       [csFireflyCatching],
+  nightgarden:       [csFireflyCatching],
 };
 
 /* ============================================================================
