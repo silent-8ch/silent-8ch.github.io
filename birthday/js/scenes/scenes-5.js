@@ -6878,66 +6878,63 @@ registerScene('highrise', drawHighrise);
 /* ── TOWN SQUARE (outdoor · sprite-only) ── */
 function drawTownSquare(){
   const t = sceneTime;
-  const groundY = H * 0.58;   // horizon line
+  const groundY = H * 0.52;   // horizon — pushed up to give more ground room
 
-  // ---- sky ----
+  // ---- sky (canvas gradient) ----
   const sky = ctx.createLinearGradient(0, 0, 0, groundY);
   sky.addColorStop(0, '#5a9ed6');
   sky.addColorStop(1, '#a8d4f0');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, W, groundY);
 
-  // ---- tiled cobblestone ground — canvas fill for seamless coverage ----
-  // Use the cobblestone sprite stretched to fill the entire ground area
-  const cobble = SpriteRenderer.getSprite('cobblestone');
-  if (cobble && cobble.ready) {
-    // Tile the ground fully: draw sprite frame 0 stretched across full width
-    const groundH = H - groundY;
-    const tileSize = 140;
-    for (let ty = groundY; ty < H; ty += tileSize) {
-      for (let tx = 0; tx < W; tx += tileSize) {
-        const drawW = Math.min(tileSize, W - tx);
-        const drawH = Math.min(tileSize, H - ty);
-        ctx.drawImage(cobble.image, 0, 0, cobble.fw, cobble.fh, tx, ty, drawW, drawH);
-      }
-    }
+  // ---- clouds ----
+  drawSpriteCloud(W * 0.20 + Math.sin(t * 0.08) * 10, H * 0.08, 0.9);
+  drawSpriteCloud(W * 0.70 + Math.sin(t * 0.06 + 2) * 12, H * 0.12, 0.7);
+
+  // ---- tiled ground: red brick path texture ----
+  const ground = SpriteRenderer.getSprite('redBrickPath');
+  if (ground && ground.ready) {
+    const ts = 90;
+    for (let ty = groundY; ty < H; ty += ts)
+      for (let tx = 0; tx < W; tx += ts)
+        ctx.drawImage(ground.image, 0, 0, ground.fw, ground.fh, tx, ty, ts, ts);
   } else {
-    // Fallback solid color
-    ctx.fillStyle = '#9a8a7a';
+    ctx.fillStyle = '#9a7a6a';
     ctx.fillRect(0, groundY, W, H - groundY);
   }
 
-  // ---- clouds ----
-  drawSpriteCloud(W * 0.20 + Math.sin(t * 0.08) * 10, H * 0.10, 0.9);
-  drawSpriteCloud(W * 0.70 + Math.sin(t * 0.06 + 2) * 12, H * 0.14, 0.7);
+  // ---- background buildings (architecture sprites) ----
+  // Left building: plaster wall + shingle roof + shop window + storefront door
+  SpriteRenderer.submit({sprite:'plasterWallCorner', phase:'background', x:W * 0.12, y:groundY + 4, frame:0});
+  SpriteRenderer.submit({sprite:'shingleEave', phase:'background', x:W * 0.12, y:groundY - 68, frame:0});
+  SpriteRenderer.submit({sprite:'shopWindow', phase:'background', x:W * 0.06, y:groundY - 10, frame:0});
+  SpriteRenderer.submit({sprite:'storefrontDoor', phase:'background', x:W * 0.20, y:groundY + 2, frame:0});
+  SpriteRenderer.submit({sprite:'storefrontCanopy', phase:'foreground', x:W * 0.12, y:groundY - 20, frame:0});
 
-  // ---- background buildings (canvas) ----
-  ctx.fillStyle = '#c8b8a0';
-  ctx.fillRect(-10, groundY - 90, 110, 90);
-  ctx.fillRect(W - 110, groundY - 80, 120, 80);
-  ctx.fillStyle = '#b0a088';
-  ctx.fillRect(110, groundY - 70, 80, 70);
-  ctx.fillStyle = '#8ac0e0';
-  for (let bx = 4; bx < 90; bx += 22) {
-    ctx.fillRect(bx, groundY - 78, 12, 14);
-    ctx.fillRect(bx, groundY - 52, 12, 14);
-  }
-  for (let bx = W - 100; bx < W - 4; bx += 24) {
-    ctx.fillRect(bx, groundY - 68, 14, 14);
-    ctx.fillRect(bx, groundY - 40, 14, 14);
-  }
+  // Right building: brick wall + tile roof + arched window + arched door
+  SpriteRenderer.submit({sprite:'brickWallCorner', phase:'background', x:W * 0.88, y:groundY + 4, frame:0});
+  SpriteRenderer.submit({sprite:'tileEave', phase:'background', x:W * 0.88, y:groundY - 68, frame:0});
+  SpriteRenderer.submit({sprite:'archedWindow', phase:'background', x:W * 0.82, y:groundY - 16, frame:0});
+  SpriteRenderer.submit({sprite:'archedDoor', phase:'background', x:W * 0.94, y:groundY + 2, frame:0});
+  SpriteRenderer.submit({sprite:'flowerBoxWindow', phase:'background', x:W * 0.94, y:groundY - 16, frame:0});
 
-  // ---- props (static, frame:0) ----
+  // Center background: stone well
+  SpriteRenderer.submit({sprite:'stoneWell', x:W * 0.50, y:groundY + 18, frame:0});
+
+  // ---- trees (tall, edges) ----
   SpriteRenderer.submit({sprite:'tree', x:W * 0.04, y:groundY + 24, frame:0});
   SpriteRenderer.submit({sprite:'tree', x:W * 0.96, y:groundY + 24, frame:0});
-  SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.22, y:groundY + 24, frame:0});
-  SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.78, y:groundY + 24, frame:0});
-  SpriteRenderer.submit({sprite:'parkBench', x:W * 0.14, y:groundY + 60, frame:0});
-  SpriteRenderer.submit({sprite:'cafeTable', x:W * 0.74, y:groundY + 52, frame:0});
-  SpriteRenderer.submit({sprite:'fence', x:W * 0.42, y:groundY + 8, frame:0});
-  SpriteRenderer.submit({sprite:'signpost', x:W * 0.54, y:groundY + 16, frame:0});
-  SpriteRenderer.submit({sprite:'floweringBush', x:W * 0.88, y:groundY + 30, frame:0});
-  SpriteRenderer.submit({sprite:'mailbox', x:W * 0.34, y:groundY + 42, frame:0});
+
+  // ---- props ----
+  SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.26, y:groundY + 28, frame:0});
+  SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.74, y:groundY + 28, frame:0});
+  SpriteRenderer.submit({sprite:'parkBench', x:W * 0.16, y:groundY + 60, frame:0});
+  SpriteRenderer.submit({sprite:'cafeTable', x:W * 0.72, y:groundY + 56, frame:0});
+  SpriteRenderer.submit({sprite:'ironGate', x:W * 0.42, y:groundY + 10, frame:0});
+  SpriteRenderer.submit({sprite:'signpost', x:W * 0.56, y:groundY + 18, frame:0});
+  SpriteRenderer.submit({sprite:'floweringBush', x:W * 0.86, y:groundY + 34, frame:0});
+  SpriteRenderer.submit({sprite:'mailbox', x:W * 0.34, y:groundY + 44, frame:0});
+  SpriteRenderer.submit({sprite:'pottedPlant', x:W * 0.64, y:groundY + 58, frame:0});
 
   // ---- NPCs walking across screen in a loop (Krystal-scale: 120-130px) ----
   // Adult walks left to right, loops off-screen (same height as Krystal)
