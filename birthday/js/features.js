@@ -121,6 +121,7 @@ const TRINKET_POOL = (()=>{
   g(['policestation'], ['🚔','⭐','📋']);
   g(['sewer'], ['🔧','🐀','💧']);
   g(['highrise'], ['🌃','🛋️','🍸']);
+  g(['townsquare'], ['🏘️','☕','🪧']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];

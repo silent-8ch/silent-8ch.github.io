@@ -349,6 +349,7 @@ const SCENE_INTERACT = (()=>{
   g(['policestation'], {lines:['So official in here 🚔','Look at the badge! ⭐','Safe and sound 🛡️'], emoji:'🚔', fun:4});
   g(['sewer'], {lines:['It\'s dark down here 🕯️','What\'s that glow? 👀','Splashy echoes 💧'], emoji:'🕯️', fun:5});
   g(['highrise'], {lines:['What a view! 🌃','The city sparkles ✨','So sleek up here 🏙️'], emoji:'🌃', love:5});
+  g(['townsquare'], {lines:['The town square! 🏘️','So much to see ✨','I love people watching 🥰'], emoji:'🏘️', fun:5});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];
@@ -1734,6 +1735,13 @@ const SCENE_SPOTS = {
     {nx:0.18, ny:0.60, r:50, e:'🍽️', lines:['The kitchen island 🍽️','Modern and sleek','Cook something fancy? 👨‍🍳']},
     {nx:0.78, ny:0.62, r:52, e:'🛋️', lines:['The comfy sofa 🛋️','Sit with me? 🥰','So plush and modern']},
     {nx:0.94, ny:0.60, r:44, e:'🪴', lines:['The tall plant 🪴','Reaching for the sky 🌿','City jungle vibes 💚']},
+  ],
+  townsquare: [
+    {nx:0.50, ny:0.55, r:50, e:'🪧', lines:['The old signpost 🪧','Which way to adventure?','Every direction looks fun! 🥰']},
+    {nx:0.72, ny:0.75, r:56, e:'☕', lines:['The cafe table! ☕','Sit and watch the world go by','A latte and a love 💛']},
+    {nx:0.16, ny:0.80, r:52, e:'🪑', lines:['The park bench 🪑','Rest your feet a while','Best seat in the square 🥰']},
+    {nx:0.22, ny:0.60, r:48, e:'🏮', lines:['An old streetlamp 🏮','It\'ll glow at dusk','So warm and golden ✨']},
+    {nx:0.68, ny:0.82, r:44, e:'🐱', lines:['A lazy cat! 🐱','It barely opens one eye','Must be nice 😄']},
   ],
 };
 // nearest hotspot hit for the current scene, or null

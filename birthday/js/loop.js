@@ -72,6 +72,7 @@ const THOUGHT_SCENE = (()=>{
   g(['policestation'], ['🚔','⭐','🛡️']);
   g(['sewer'], ['🐀','💧','🔦']);
   g(['highrise'], ['🌃','✨','🏙️']);
+  g(['townsquare'], ['🏘️','☕','🐱']);
   return map;
 })();
 let thoughtTimer = 7;
