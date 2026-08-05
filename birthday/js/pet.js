@@ -1402,6 +1402,54 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.24, r:48, e:'🫧', lines:['Rising bubbles 🫧','Floating to the top','Pop, pop, pop']},
     {nx:0.50, ny:0.70, r:52, e:'✨', lines:['The tank glows ✨','Blue and purple light','So magical in the dark 🥰']},
   ],
+  cavehotspring: [
+    {nx:0.50, ny:0.50, r:65, e:'♨️', lines:['The warm spring ♨️','So soothing in here','Soak with me a while 🥰']},
+    {nx:0.50, ny:0.08, r:50, e:'⭐', lines:['Stars through the opening ⭐','A little window to the sky','So secret and beautiful']},
+    {nx:0.12, ny:0.50, r:46, e:'🏮', lines:['A stone lantern 🏮','Glowing so warmly','Our own hidden light 💛']},
+    {nx:0.86, ny:0.50, r:44, e:'🧖', lines:['Fluffy little towels 🧖','So soft and ready','Wrap me up after? 🥰']},
+  ],
+  iceskatingrink: [
+    {nx:0.50, ny:0.68, r:60, e:'⛸️', lines:['The frozen rink! ⛸️','Skate with me? 🥰','Hold my hand, don\'t let go']},
+    {nx:0.82, ny:0.12, r:46, e:'🌙', lines:['The winter moon 🌙','Watching us spin','So pretty tonight 💛']},
+    {nx:0.50, ny:0.48, r:50, e:'💡', lines:['Festival lights 💡','Twinkling all around','So festive and sparkly 🥰']},
+    {nx:0.86, ny:0.90, r:48, e:'⛄', lines:['A little snowman ⛄','With his carrot nose','He\'s watching us skate 😄']},
+  ],
+  papercraftstudio: [
+    {nx:0.50, ny:0.10, r:55, e:'🪽', lines:['The origami cranes 🪽','Swaying so gently','I wish we could fly too 🥰']},
+    {nx:0.16, ny:0.28, r:50, e:'🪟', lines:['Soft daylight 🪟','Streaming through the window','Perfect for folding 💛']},
+    {nx:0.50, ny:0.72, r:52, e:'🛥️', lines:['A paper boat! 🛥️','Sitting on the desk','Let\'s sail it somewhere 🥰']},
+    {nx:0.80, ny:0.22, r:46, e:'🌸', lines:['Paper flowers 🌸','So delicate and bright','You made those? So pretty!']},
+  ],
+  poppyfield: [
+    {nx:0.50, ny:0.65, r:60, e:'🌺', lines:['Red poppies everywhere 🌺','Swaying in the breeze','Like a scarlet sea 🥰']},
+    {nx:0.80, ny:0.13, r:48, e:'☀️', lines:['The warm summer sun ☀️','Shining on the petals','Such a perfect day 💛']},
+    {nx:0.40, ny:0.44, r:48, e:'🦋', lines:['A butterfly! 🦋','Fluttering through the poppies','So free and happy 🥰']},
+    {nx:0.18, ny:0.44, r:44, e:'🌳', lines:['A lone tree on the hill 🌳','Standing watch over the field','So peaceful up there']},
+  ],
+  desertoasis: [
+    {nx:0.50, ny:0.68, r:58, e:'💧', lines:['The oasis pool 💧','So cool and clear','Dip our toes in? 🥰']},
+    {nx:0.72, ny:0.24, r:50, e:'☀️', lines:['The golden hour sun ☀️','Everything glows amber','So warm and dreamy 💛']},
+    {nx:0.14, ny:0.40, r:48, e:'🌴', lines:['Palm trees swaying 🌴','Shading the water','Our little paradise 🥰']},
+    {nx:0.20, ny:0.90, r:44, e:'🛋️', lines:['A comfy cushion 🛋️','Laid out just for us','Rest here a while']},
+  ],
+  dumplinghouse: [
+    {nx:0.50, ny:0.68, r:55, e:'🥟', lines:['The bamboo steamers 🥟','So much steam rising','What\'s inside? 😋']},
+    {nx:0.74, ny:0.12, r:48, e:'🏮', lines:['Red lanterns 🏮','Glowing so warmly','So cozy in here 🥰']},
+    {nx:0.18, ny:0.76, r:50, e:'🥟', lines:['A plate of dumplings! 🥟','Golden little parcels','One for you, one for me 💛']},
+    {nx:0.16, ny:0.16, r:44, e:'🪟', lines:['The round window 🪟','Such a pretty lattice','So old and beautiful']},
+  ],
+  sakuratunnel: [
+    {nx:0.50, ny:0.06, r:58, e:'🌸', lines:['A canopy of blossoms 🌸','Pink as far as I can see','Like a dream we\'re walking through 🥰']},
+    {nx:0.50, ny:0.60, r:55, e:'🌸', lines:['Petals on the path 🌸','A soft pink carpet','Let\'s gather some 💛']},
+    {nx:0.12, ny:0.86, r:46, e:'🪑', lines:['A little bench 🪑','Rest here with me?','Watch the petals fall 🥰']},
+    {nx:0.88, ny:0.88, r:44, e:'🏮', lines:['A stone lantern 🏮','Warm in the dusk','Guiding our way home']},
+  ],
+  hummingbirdgarden: [
+    {nx:0.28, ny:0.34, r:50, e:'🐦', lines:['A hummingbird! 🐦','Hovering so fast','Its wings are a blur 🥰']},
+    {nx:0.50, ny:0.16, r:48, e:'🍯', lines:['The nectar feeder 🍯','Bright red and sweet','They love it up there 💛']},
+    {nx:0.10, ny:0.56, r:50, e:'🌺', lines:['Trumpet flowers 🌺','So vibrant and tall','Blooming for the birds 🥰']},
+    {nx:0.82, ny:0.12, r:46, e:'☀️', lines:['Bright sunny garden ☀️','So warm and buzzy','A perfect afternoon']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
