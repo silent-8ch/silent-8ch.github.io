@@ -1,7 +1,7 @@
 const PEOPLE = ['krystal','luna','wade','paul','luke','william'];
 const LABELS = {krystal:'Krystal',luna:'Luna',wade:'Wade',paul:'Paul',luke:'Luke',william:'William'};
-const EXPRESSIONS = ['laugh','scared','surprised','cheer','sad','embarrassed','think','wave'];
-const TITLE = {walk:'Walk',clap:'Clap',laugh:'Laugh',scared:'Scared',surprised:'Surprised',cheer:'Cheer',sad:'Sad / sigh',embarrassed:'Embarrassed',think:'Think / idea',wave:'Wave',eat:'Eat',draw:'Draw',cry:'Cry'};
+const EXPRESSIONS = ['laugh','scared','surprised','cheer','sad','embarrassed','think','wave','talk','nod','shake','shrug','point','beckon','search','inspect'];
+const TITLE = {walk:'Walk',clap:'Clap',laugh:'Laugh',scared:'Scared',surprised:'Surprised',cheer:'Cheer',sad:'Sad / sigh',embarrassed:'Embarrassed',think:'Think / idea',wave:'Wave',talk:'Talk / explain',nod:'Nod / agree',shake:'Shake head',shrug:'Shrug',point:'Point',beckon:'Beckon / follow',search:'Look / search',inspect:'Pick up / inspect',eat:'Eat',draw:'Draw',cry:'Cry'};
 
 function sheetsFor(person){
   const sheets = [
