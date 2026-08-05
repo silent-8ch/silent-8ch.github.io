@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Birthday Sprite Lab</title>
+  <link rel="stylesheet" href="css/sprite-lab.css">
+</head>
+<body>
+  <header>
+    <div><span class="eyebrow">DEBUG TOOL</span><h1>Sprite Lab</h1></div>
+    <a href="8-3.html?debug=1">Open game ↗</a>
+  </header>
+
+  <main>
+    <section class="stagePanel">
+      <div class="stageHead">
+        <div><strong id="stageTitle">Krystal · Laugh</strong><span id="sheetMeta"></span></div>
+        <span id="loadState">Loading…</span>
+      </div>
+      <div class="stage"><canvas id="preview" width="320" height="320"></canvas></div>
+      <div class="transport">
+        <button id="playPause" type="button">Pause</button>
+        <button id="restart" type="button">Restart</button>
+        <label>Frame <input id="frame" type="range" min="0" max="3" value="0"><output id="frameOut">1 / 4</output></label>
+      </div>
+    </section>
+
+    <aside class="controls">
+      <label>Person<select id="person"></select></label>
+      <label>Animation<select id="animation"></select></label>
+      <label id="directionWrap">Direction<select id="direction">
+        <option value="0">Down / front</option><option value="1">Left</option>
+        <option value="2">Right</option><option value="3">Up / back</option>
+      </select></label>
+      <label>Playback<select id="mode">
+        <option value="loop">Loop</option><option value="pingpong">Ping-pong</option>
+        <option value="once">Once</option>
+      </select></label>
+      <label>Speed <span><output id="speedOut">8</output> fps</span>
+        <input id="speed" type="range" min="1" max="20" value="8">
+      </label>
+      <label>Scale <span><output id="scaleOut">1.00</output>×</span>
+        <input id="scale" type="range" min="50" max="150" value="100">
+      </label>
+      <label class="check"><input id="baseline" type="checkbox" checked> Show frame bounds and baseline</label>
+    </aside>
+
+    <section class="library">
+      <div class="libraryHead"><div><span class="eyebrow">ASSET LIBRARY</span><h2 id="libraryTitle">Krystal sheets</h2></div><span>Click a sheet to preview it</span></div>
+      <div id="sheetGrid" class="sheetGrid"></div>
+    </section>
+  </main>
+  <script src="js/sprite-lab.js"></script>
+</body>
+</html>

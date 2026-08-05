@@ -120,6 +120,17 @@ swift tools/process-walk-sprites.swift INPUT.png OUTPUT.png
 - Drawing in an open sketchbook: `k-drawing.png`
 - Crying: `k-crying.png`
 
+## Four-frame expression library
+
+Every person has eight front-facing, transparent 1024 x 256 sheets under
+`sprites/expressions/<name>/`: `laugh`, `scared`, `surprised`, `cheer`, `sad`,
+`embarrassed`, `think`, and `wave`. Each sheet contains four aligned 256 x 256
+cells with feet pinned to pixel 236. Generated 4 x 4 source atlases are retained
+in `sprites/expressions/sources/`.
+
+Use `sprite-lab.html` to preview all expression, walking, and clapping sheets,
+change playback speed/mode, scrub frames, and inspect frame boundaries.
+
 ## Important continuation notes
 
 - When prompting image generation, attach `reference-photos.png` and identify each named panel explicitly.

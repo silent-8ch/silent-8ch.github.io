@@ -147,6 +147,27 @@ func frameBounds(_ bitmap: Bitmap, column: Int, row: Int) -> Bounds? {
     return bounds.maxX >= 0 ? bounds : nil
 }
 
+func savePNG(_ bitmap: Bitmap, to output: String) throws {
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    let provider = CGDataProvider(data: Data(bitmap.pixels) as CFData)!
+    let image = CGImage(width: bitmap.width, height: bitmap.height,
+                        bitsPerComponent: 8, bitsPerPixel: 32,
+                        bytesPerRow: bitmap.width * 4, space: colorSpace,
+                        bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                        provider: provider, decode: nil, shouldInterpolate: false,
+                        intent: .defaultIntent)!
+    let outputURL = URL(fileURLWithPath: output) as CFURL
+    guard let destination = CGImageDestinationCreateWithURL(outputURL, "public.png" as CFString, 1, nil) else {
+        throw NSError(domain: "WalkSprite", code: 5,
+                      userInfo: [NSLocalizedDescriptionKey: "Cannot create \(output)"])
+    }
+    CGImageDestinationAddImage(destination, image, nil)
+    guard CGImageDestinationFinalize(destination) else {
+        throw NSError(domain: "WalkSprite", code: 6,
+                      userInfo: [NSLocalizedDescriptionKey: "Cannot save \(output)"])
+    }
+}
+
 func process(_ input: String, _ output: String) throws {
     var source = try loadPNG(input)
     removeChromaKey(&source)
@@ -200,25 +221,34 @@ func process(_ input: String, _ output: String) throws {
         }
     }
 
-    let colorSpace = CGColorSpaceCreateDeviceRGB()
-    let provider = CGDataProvider(data: Data(result.pixels) as CFData)!
-    let image = CGImage(width: result.width, height: result.height,
-                        bitsPerComponent: 8, bitsPerPixel: 32,
-                        bytesPerRow: result.width * 4, space: colorSpace,
-                        bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
-                        provider: provider, decode: nil, shouldInterpolate: false,
-                        intent: .defaultIntent)!
-    let outputURL = URL(fileURLWithPath: output) as CFURL
-    guard let destination = CGImageDestinationCreateWithURL(outputURL, "public.png" as CFString, 1, nil) else {
-        throw NSError(domain: "WalkSprite", code: 5,
-                      userInfo: [NSLocalizedDescriptionKey: "Cannot create \(output)"])
-    }
-    CGImageDestinationAddImage(destination, image, nil)
-    guard CGImageDestinationFinalize(destination) else {
-        throw NSError(domain: "WalkSprite", code: 6,
-                      userInfo: [NSLocalizedDescriptionKey: "Cannot save \(output)"])
-    }
+    try savePNG(result, to: output)
     print("processed \(input) -> \(output) (scale \(String(format: "%.3f", scale)))")
+}
+
+func splitActions(_ input: String, outputDirectory: String, names: [String]) throws {
+    guard names.count == rows else {
+        throw NSError(domain: "WalkSprite", code: 11,
+                      userInfo: [NSLocalizedDescriptionKey: "Exactly four action names are required"])
+    }
+    try FileManager.default.createDirectory(atPath: outputDirectory,
+                                            withIntermediateDirectories: true)
+    let atlasPath = URL(fileURLWithPath: outputDirectory)
+        .appendingPathComponent(".processed-atlas.png").path
+    try process(input, atlasPath)
+    let atlas = try loadPNG(atlasPath)
+    for row in 0..<rows {
+        var sheet = Bitmap(width: atlas.width, height: outputCell,
+                           pixels: [UInt8](repeating: 0, count: atlas.width * outputCell * 4))
+        let sourceStart = row * outputCell * atlas.width * 4
+        let sourceEnd = sourceStart + sheet.pixels.count
+        sheet.pixels.replaceSubrange(0..<sheet.pixels.count,
+                                     with: atlas.pixels[sourceStart..<sourceEnd])
+        let output = URL(fileURLWithPath: outputDirectory)
+            .appendingPathComponent("\(names[row]).png").path
+        try savePNG(sheet, to: output)
+        print("split \(names[row]) -> \(output)")
+    }
+    try? FileManager.default.removeItem(atPath: atlasPath)
 }
 
 func validate(_ path: String) throws {
@@ -246,9 +276,41 @@ func validate(_ path: String) throws {
     print("validated \(path): 16 contained frames, baseline \(baseline)")
 }
 
+func validateAction(_ path: String) throws {
+    let bitmap = try loadPNG(path)
+    guard bitmap.width == outputCell * columns, bitmap.height == outputCell else {
+        throw NSError(domain: "WalkSprite", code: 12,
+                      userInfo: [NSLocalizedDescriptionKey: "\(path) must be 1024x256"])
+    }
+    for column in 0..<columns {
+        let startX = column * outputCell
+        var minX = outputCell, minY = outputCell, maxX = -1, maxY = -1
+        for y in 0..<outputCell {
+            for x in 0..<outputCell {
+                let offset = (y * bitmap.width + startX + x) * 4
+                if bitmap.pixels[offset + 3] > 8 {
+                    minX = min(minX, x); minY = min(minY, y)
+                    maxX = max(maxX, x); maxY = max(maxY, y)
+                }
+            }
+        }
+        guard maxX >= 0, maxY == baseline - 1,
+              minX > 0, maxX < outputCell - 1, minY > 0 else {
+            throw NSError(domain: "WalkSprite", code: 13,
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid action frame in \(path), column \(column)"])
+        }
+    }
+    print("validated \(path): 4 contained frames, baseline \(baseline)")
+}
+
 do {
     if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate" {
         for path in CommandLine.arguments.dropFirst(2) { try validate(path) }
+    } else if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate-actions" {
+        for path in CommandLine.arguments.dropFirst(2) { try validateAction(path) }
+    } else if CommandLine.arguments.count == 8 && CommandLine.arguments[1] == "--split-actions" {
+        try splitActions(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
+                         names: Array(CommandLine.arguments[4...7]))
     } else if CommandLine.arguments.count == 3 {
         try process(CommandLine.arguments[1], CommandLine.arguments[2])
     } else {
