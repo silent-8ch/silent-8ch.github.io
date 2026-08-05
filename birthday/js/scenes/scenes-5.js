@@ -6961,11 +6961,78 @@ function drawTownSquare(){
     frame:Math.floor(t * 8) % 4
   });
 
-  const catMove = (t % 6 > 5);
-  SpriteRenderer.submit({sprite:'cat', x:W * 0.70, y:groundY + 68, frame: catMove ? Math.floor(t * 7) % 4 : 0});
+  // Cat & dog chase cycle (~20s loop):
+  //  0-6s:  both run right across screen (cat leads, dog chases)
+  //  6-8s:  cat runs to left tree, climbs up
+  //  8-14s: cat in tree, dog at base barking (bouncing)
+  // 14-16s: cat climbs down
+  // 16-20s: both run left across screen, then loop
+  const chaseT = t % 20;
+  const treeX = W * 0.04;   // left tree x
+  const treeTopY = groundY - 80;  // up in the tree
+  const floorY = groundY + 72;    // ground level for animals
 
-  const puppyMove = (t % 5 > 3.5);
-  SpriteRenderer.submit({sprite:'puppy', x:W * 0.18, y:groundY + 78, frame: puppyMove ? Math.floor(t * 7) % 4 : 0});
+  let catX, catY, catFrame, catFlip, dogX, dogY, dogFrame, dogFlip;
+
+  if (chaseT < 6) {
+    // Phase 1: chase right across screen
+    const p = chaseT / 6;
+    catX = -40 + p * (W + 80);
+    catY = floorY;
+    catFrame = Math.floor(t * 9) % 4;
+    catFlip = false;
+    dogX = catX - 50;
+    dogY = floorY + 6;
+    dogFrame = Math.floor(t * 8) % 4;
+    dogFlip = false;
+  } else if (chaseT < 8) {
+    // Phase 2: cat runs to tree and climbs up
+    const p = (chaseT - 6) / 2;
+    catX = W + 40 - p * (W + 40 - treeX);  // run back to tree
+    catY = floorY - p * (floorY - treeTopY);  // climb up
+    catFrame = Math.floor(t * 9) % 4;
+    catFlip = true;
+    // Dog runs to tree base
+    dogX = W + 40 - p * (W + 40 - treeX - 30);
+    dogY = floorY + 6;
+    dogFrame = Math.floor(t * 8) % 4;
+    dogFlip = true;
+  } else if (chaseT < 14) {
+    // Phase 3: cat sits in tree, dog barks at base
+    catX = treeX;
+    catY = treeTopY;
+    catFrame = 0;  // sitting still
+    catFlip = false;
+    dogX = treeX + 30;
+    dogY = floorY + 6 + Math.abs(Math.sin(t * 6)) * 6;  // bouncing/barking
+    dogFrame = Math.floor(t * 10) % 4;
+    dogFlip = true;
+  } else if (chaseT < 16) {
+    // Phase 4: cat climbs down
+    const p = (chaseT - 14) / 2;
+    catX = treeX;
+    catY = treeTopY + p * (floorY - treeTopY);
+    catFrame = Math.floor(t * 7) % 4;
+    catFlip = false;
+    dogX = treeX + 30;
+    dogY = floorY + 6;
+    dogFrame = Math.floor(t * 5) % 4;  // excited
+    dogFlip = true;
+  } else {
+    // Phase 5: both run left across screen
+    const p = (chaseT - 16) / 4;
+    catX = treeX + 10 - p * (W + 80);
+    catY = floorY;
+    catFrame = Math.floor(t * 9) % 4;
+    catFlip = true;
+    dogX = catX + 50;
+    dogY = floorY + 6;
+    dogFrame = Math.floor(t * 8) % 4;
+    dogFlip = true;
+  }
+
+  SpriteRenderer.submit({sprite:'cat', x:catX, y:catY, frame:catFrame, flipX:catFlip});
+  SpriteRenderer.submit({sprite:'puppy', x:dogX, y:dogY, frame:dogFrame, flipX:dogFlip});
 
   // ---- Krystal depth-sorted with everything ----
   SpriteRenderer.submit({ phase:'actors', x:pet.x, y:pet.y, draw:drawPet });
