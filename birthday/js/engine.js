@@ -59,6 +59,7 @@ const pet = {
    over the scene each frame. EXTRA_TAPS: fn(px,py) on a stage tap — return true
    to consume the tap (skip the default walk-to-spot). All are wrapped in try/catch. */
 const EXTRA_UPDATERS = [], EXTRA_DRAWERS = [], EXTRA_TAPS = [];
+const DEBUG_MODE = new URLSearchParams(window.location.search).has('debug');
 
 /* ---------- cheat: ?pchkfa — full bars for 24h, no decay ---------- */
 let cheatActive = false, cheatExpires = 0;

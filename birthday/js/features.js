@@ -925,6 +925,7 @@ document.addEventListener('keydown', e => {
 });
 
 function updateScene(dt) {
+  if (DEBUG_MODE) return;  // no auto scene changes in debug mode
   sceneChangeTimer -= dt;
   if (sceneChangeTimer <= 0) { randomScene(); sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }
 }

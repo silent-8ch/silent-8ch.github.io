@@ -8827,7 +8827,7 @@ function forceCutscene(){
 
 (function csTriggerSystem(){
   EXTRA_UPDATERS.push(function csRandomTrigger(dt){
-    if (cutscene || birthday) return;
+    if (cutscene || birthday || DEBUG_MODE) return;
     csTriggerTimer -= dt;
     if (csTriggerTimer > 0) return;
     csTriggerTimer = 20 + Math.random() * 20;   // reset to 20-40 seconds
