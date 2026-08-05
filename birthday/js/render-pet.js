@@ -1,5 +1,35 @@
 /* pet rendering: drawPet, drawHugGroup, drawPlaceholder, utils  —  part of the Birthday virtual-pet game (8-3.html). Loaded as a classic script; shares global scope. */
 
+/* ---------- Krystal mood-based expression sprites ----------
+   When idle (not moving, not acting, not resting, not crying), swap her walk
+   standing pose for an expression sprite that reflects her mood. Each expression
+   is a 4-frame horizontal strip (1024x256). Lazily loaded, shared with cutscene
+   expression system if present. */
+const petExprSprites = {};
+const PET_EXPR_LIST = ['cheer','sad','think','wave','laugh'];
+function petLoadExpression(expr){
+  const key = 'krystal:' + expr;
+  if (petExprSprites[key]) return;
+  const img = new Image();
+  const rec = { img, ready: false, fw: 0, fh: 0 };
+  petExprSprites[key] = rec;
+  img.onload = () => { rec.fw = Math.floor(img.width / 4); rec.fh = img.height; rec.ready = true; rec.img = img; };
+  img.src = 'sprites/expressions/krystal/' + expr + '.png';
+}
+for (const expr of PET_EXPR_LIST) petLoadExpression(expr);
+
+/* Pick the mood expression to show when Krystal is idle. Returns null for
+   "normal" mood (just use the walk sheet standing frame). */
+function petMoodExpression(){
+  const m = moodScore();
+  const e = state.energy ?? 100;
+  if (e < 18) return null;        // sleepy state already handled by rest system
+  if (m > 80) return 'cheer';     // delighted
+  if (m > 60) return 'wave';      // happy — friendly wave idle
+  if (m < 20) return 'sad';       // sad
+  return null;                    // normal range — use default walk pose
+}
+
 function drawPet(){
   const acting = pet.animLock > 0;
 
@@ -12,6 +42,7 @@ function drawPet(){
 
   // choose which sheet, row and frame to draw
   let sh, row, frame;
+  let useExpression = null;    // if set, draw an expression sprite instead of the sheet
   if (acting && (pet.action==='eat' || pet.action==='draw') && sheets[pet.action] && sheets[pet.action].ready){
     sh = sheets[pet.action];                         // dedicated action animation
     row = 0;
@@ -24,6 +55,15 @@ function drawPet(){
     sh = sheets.walk;
     row = sh.cfg.rowMap[acting ? 'down' : pet.dir] ?? 0;   // face forward while acting
     frame = (!acting && pet.moving) ? (pet.frame % sh.cfg.cols) : 0;
+    // when idle and not moving, check for mood-based expression
+    if (!acting && !pet.moving && !pet.resting && !pet.restPhase){
+      const expr = petMoodExpression();
+      if (expr){
+        const key = 'krystal:' + expr;
+        const sp = petExprSprites[key];
+        if (sp && sp.ready) useExpression = { sp, expr };
+      }
+    }
   } else {
     // art still loading -> placeholder so the game is playable
     const size = 84;
@@ -47,11 +87,21 @@ function drawPet(){
   // while resting she rotates toward horizontal (lying down), pivoting at her feet
   const lying = pet.restAngle > 0.001;
   if (lying){ ctx.save(); ctx.translate(feetX, feetY); ctx.rotate(-pet.restAngle); ctx.translate(-feetX, -feetY); }
-  ctx.drawImage(
-    sh.canvas,
-    frame*sh.fw, row*sh.fh, sh.fw, sh.fh,
-    feetX - dispW/2, feetY - dispH - bob, dispW, dispH
-  );
+
+  if (useExpression){
+    // draw expression sprite instead of walk sheet
+    const sp = useExpression.sp;
+    const exprFrame = Math.floor(pet.bob * 6) % 4;  // animate using bob timer
+    const ew = dispH * (sp.fw / sp.fh);
+    ctx.drawImage(sp.img, exprFrame * sp.fw, 0, sp.fw, sp.fh,
+      feetX - ew / 2, feetY - dispH - bob, ew, dispH);
+  } else {
+    ctx.drawImage(
+      sh.canvas,
+      frame*sh.fw, row*sh.fh, sh.fw, sh.fh,
+      feetX - dispW/2, feetY - dispH - bob, dispW, dispH
+    );
+  }
   if (lying){ ctx.restore(); }
 
   // accessory on her head (skip while she's crying or mid-nap so it doesn't clash)

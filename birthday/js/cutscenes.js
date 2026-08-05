@@ -50,6 +50,50 @@ function csDrawChar(name, x, feetY, dir, h, frame){
     x - w / 2, feetY - h, w, h);
 }
 
+/* ---------- Expression sprites ----------
+   Each expression PNG is a 4-frame horizontal strip (1024x256, so 256x256 per frame).
+   Lazily loaded, keyed by "name:expression" (e.g. "krystal:laugh"). */
+const EXPR_LIST = ['cheer','embarrassed','laugh','sad','scared','surprised','think','wave'];
+const csExprSprites = {};
+
+function csLoadExpression(name, expression){
+  const key = name + ':' + expression;
+  if (csExprSprites[key]) return;
+  const img = new Image();
+  const rec = { img, ready: false, fw: 0, fh: 0 };
+  csExprSprites[key] = rec;
+  img.onload = () => { rec.fw = Math.floor(img.width / 4); rec.fh = img.height; rec.ready = true; rec.img = img; };
+  img.src = 'sprites/expressions/' + name + '/' + expression + '.png';
+}
+
+/* Pre-load all expressions for a character (called alongside csLoadSprite). */
+function csLoadExpressions(name){
+  for (const expr of EXPR_LIST) csLoadExpression(name, expr);
+}
+
+/* Draw a character using their expression sprite instead of the walk sheet.
+   name: 'krystal', expression: 'laugh', x/feetY/h same as csDrawChar.
+   frame: animation frame 0-3 (defaults to animated based on cs.totalT). */
+function csDrawExpression(name, expression, x, feetY, h, frame){
+  const key = name + ':' + expression;
+  const sp = csExprSprites[key];
+  if (!sp || !sp.ready){
+    // fallback to walk sprite standing pose
+    csDrawChar(name, x, feetY, 'down', h, 0);
+    return;
+  }
+  h = h || 90;
+  if (frame == null){
+    // auto-animate at ~6 fps using totalT from the active cutscene
+    const t = cutscene ? cutscene.totalT : 0;
+    frame = Math.floor(t * 6) % 4;
+  }
+  const w = h * (sp.fw / sp.fh);
+  const col = frame % 4;
+  ctx.drawImage(sp.img, col * sp.fw, 0, sp.fw, sp.fh,
+    x - w / 2, feetY - h, w, h);
+}
+
 /* Draw a speech bubble on canvas. x,y is the tail point (above the character's head).
    speaker is the name shown in bold; text is the line. */
 function csDrawBubble(x, y, speaker, text){
@@ -116,8 +160,8 @@ function csSkipHit(px, py){
 /* ---- lifecycle ---- */
 function startCutscene(def){
   if (cutscene || birthday) return;
-  // pre-load sprites we'll need
-  if (def.chars) def.chars.forEach(n => csLoadSprite(n));
+  // pre-load sprites we'll need (walk + expressions)
+  if (def.chars) def.chars.forEach(n => { csLoadSprite(n); csLoadExpressions(n); });
   cutscene = {
     def: def,
     steps: def.steps,
@@ -358,9 +402,12 @@ function csCampfireStory(){
           drawBg(cs); drawChars();
           csDrawBubble(paul.x, paul.feetY - charH - 4, 'Paul', 'Want to hear a scary story?');
       }},
-      // Step 2: Luna responds.
+      // Step 2: Luna responds — cheer expression (excited)
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs);
+          csDrawChar('paul',    paul.x,    paul.feetY,    'right', charH, 0);
+          csDrawChar('krystal', krystal.x, krystal.feetY, 'left',  charH, 0);
+          csDrawExpression('luna', 'cheer', luna.x, luna.feetY, charH * 0.9);
           csDrawBubble(luna.x, luna.feetY - charH * 0.9 - 4, 'Luna', 'Yes! Tell us!');
       }},
       // Step 3: Paul narrates.
@@ -368,14 +415,20 @@ function csCampfireStory(){
           drawBg(cs); drawChars();
           csDrawBubble(paul.x, paul.feetY - charH - 4, 'Paul', 'Once upon a time... in a dark forest...');
       }},
-      // Step 4: Krystal on the edge of her seat.
+      // Step 4: Krystal on the edge of her seat — think expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs);
+          csDrawChar('paul',    paul.x,    paul.feetY,    'right', charH, 0);
+          csDrawExpression('krystal', 'think', krystal.x, krystal.feetY, charH);
+          csDrawChar('luna',    luna.x,    luna.feetY,     'down',  charH * 0.9, 0);
           csDrawBubble(krystal.x, krystal.feetY - charH - 4, 'Krystal', 'Then what happened?!');
       }},
-      // Step 5: BOO! Screen flash.
+      // Step 5: BOO! Screen flash — scared expressions on Krystal and Luna
       { dur: 1.5, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs);
+          csDrawExpression('paul', 'cheer', paul.x, paul.feetY, charH);
+          csDrawExpression('krystal', 'scared', krystal.x, krystal.feetY, charH);
+          csDrawExpression('luna', 'scared', luna.x, luna.feetY, charH * 0.9);
           csDrawBubble(paul.x, paul.feetY - charH - 4, 'Paul', '...BOO!');
           // white flash that decays
           if (cs.stepT < 0.35){
@@ -386,9 +439,11 @@ function csCampfireStory(){
       }, onStart(cs){ try{ sfx('tap'); }catch(e){} }},
       // Step 6: Everyone laughs. Hearts.
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs);
+          csDrawExpression('paul', 'laugh', paul.x, paul.feetY, charH);
+          csDrawExpression('krystal', 'laugh', krystal.x, krystal.feetY, charH);
+          csDrawExpression('luna', 'laugh', luna.x, luna.feetY, charH * 0.9);
           csDrawBubble(krystal.x, krystal.feetY - charH - 4, 'Krystal', 'You got me! \ud83d\ude02');
-          // draw hearts
       }, onStart(cs){
           csHearts(cs, paul.x, paul.feetY - charH * 0.7, 4);
           csHearts(cs, krystal.x, krystal.feetY - charH * 0.7, 5);
@@ -515,9 +570,16 @@ function csStargazing(){
       { dur: 2.5, draw(cs){
           drawBg(cs); drawBlanketAndChars(cs);
       }},
-      // Step 2: Krystal speaks.
+      // Step 2: Krystal speaks — think expression (contemplative)
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawBlanketAndChars(cs);
+          drawBg(cs);
+          // blanket
+          ctx.fillStyle = '#6e4a7a'; roundRect(blanketX - 56, blanketY - 4, 112, 18, 4); ctx.fill();
+          ctx.fillStyle = '#8a5e9a'; roundRect(blanketX - 52, blanketY - 2, 104, 14, 3); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+          for (let i = 0; i < 5; i++){ const lx = blanketX - 44 + i * 22; ctx.beginPath(); ctx.moveTo(lx, blanketY - 2); ctx.lineTo(lx, blanketY + 12); ctx.stroke(); }
+          csDrawChar('paul', paulX, blanketY - 2, 'up', charH * 0.85, 0);
+          csDrawExpression('krystal', 'think', krystalX, blanketY - 2, charH * 0.85);
           csDrawBubble(krystalX, blanketY - charH * 0.85 - 6, 'Krystal', 'Look at all the stars...');
       }},
       // Step 3: Paul points. Shooting star crosses.
@@ -533,9 +595,15 @@ function csStargazing(){
             len: 36, speed: 220
           };
       }},
-      // Step 4: The star brightens. Krystal reacts.
+      // Step 4: The star brightens. Krystal reacts — surprised expression
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawBlanketAndChars(cs);
+          drawBg(cs);
+          ctx.fillStyle = '#6e4a7a'; roundRect(blanketX - 56, blanketY - 4, 112, 18, 4); ctx.fill();
+          ctx.fillStyle = '#8a5e9a'; roundRect(blanketX - 52, blanketY - 2, 104, 14, 3); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+          for (let i = 0; i < 5; i++){ const lx = blanketX - 44 + i * 22; ctx.beginPath(); ctx.moveTo(lx, blanketY - 2); ctx.lineTo(lx, blanketY + 12); ctx.stroke(); }
+          csDrawChar('paul', paulX, blanketY - 2, 'up', charH * 0.85, 0);
+          csDrawExpression('krystal', 'surprised', krystalX, blanketY - 2, charH * 0.85);
           csDrawBubble(krystalX, blanketY - charH * 0.85 - 6, 'Krystal', 'Really? \ud83e\udd70');
       }},
       // Step 5: Paul's line.
@@ -543,9 +611,15 @@ function csStargazing(){
           drawBg(cs); drawBlanketAndChars(cs);
           csDrawBubble(paulX, blanketY - charH * 0.85 - 6, 'Paul', 'The brightest one. Always.');
       }},
-      // Step 6: Hearts float up. Both smile.
+      // Step 6: Hearts float up. Both cheer.
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawBlanketAndChars(cs);
+          drawBg(cs);
+          ctx.fillStyle = '#6e4a7a'; roundRect(blanketX - 56, blanketY - 4, 112, 18, 4); ctx.fill();
+          ctx.fillStyle = '#8a5e9a'; roundRect(blanketX - 52, blanketY - 2, 104, 14, 3); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+          for (let i = 0; i < 5; i++){ const lx = blanketX - 44 + i * 22; ctx.beginPath(); ctx.moveTo(lx, blanketY - 2); ctx.lineTo(lx, blanketY + 12); ctx.stroke(); }
+          csDrawExpression('paul', 'cheer', paulX, blanketY - 2, charH * 0.85);
+          csDrawExpression('krystal', 'cheer', krystalX, blanketY - 2, charH * 0.85);
       }, onStart(cs){
           csHearts(cs, paulX, blanketY - charH * 0.6, 5);
           csHearts(cs, krystalX, blanketY - charH * 0.6, 6);
@@ -640,39 +714,47 @@ function csBeachSunsetPicnic(){
     chars: ['krystal', 'paul', 'wade'],
     skipable: true,
     steps: [
-      // Step 1: Quiet scene — golden hour, everyone on the blanket
+      // Step 1: Quiet scene — golden hour, everyone on the blanket — think expression on Krystal
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs);
+          csDrawChar('paul',    paul.x,    paul.feetY,    'right', charH, 0);
+          csDrawExpression('krystal', 'think', krystal.x, krystal.feetY, charH);
+          csDrawChar('wade',    wade.x,    wade.feetY,    'left',  charH * 0.95, 0);
           csDrawBubble(krystal.x, krystal.feetY - charH - 4, 'Krystal', "This sunset is so pretty...");
       }},
-      // Step 2: Wade breaks the peace
+      // Step 2: Wade breaks the peace — wave expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs);
+          csDrawChar('paul',    paul.x,    paul.feetY,    'right', charH, 0);
+          csDrawChar('krystal', krystal.x, krystal.feetY, 'down',  charH, 0);
+          csDrawExpression('wade', 'wave', wade.x, wade.feetY, charH * 0.95);
           csDrawBubble(wade.x, wade.feetY - charH * 0.95 - 4, 'Wade', 'Know what else is pretty? This sandwich.');
       }},
       // Step 3: Everyone laughs
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs);
+          csDrawExpression('paul', 'laugh', paul.x, paul.feetY, charH);
+          csDrawExpression('krystal', 'laugh', krystal.x, krystal.feetY, charH);
+          csDrawExpression('wade', 'laugh', wade.x, wade.feetY, charH * 0.95);
           csDrawBubble(paul.x, paul.feetY - charH - 4, 'Paul', 'Wade, you are unbelievable 😂');
       }},
-      // Step 4: Krystal leans on Paul — cozy moment
+      // Step 4: Krystal leans on Paul — cozy moment, cheer expression
       { dur: 2.0, draw(cs){
           drawBg(cs);
-          // draw Krystal slightly closer to Paul to suggest leaning
-          csDrawChar('paul',    paul.x,          paul.feetY,    'right', charH, 0);
-          csDrawChar('krystal', krystal.x - 18,  krystal.feetY, 'left',  charH, 0);
+          csDrawExpression('paul', 'cheer', paul.x, paul.feetY, charH);
+          csDrawExpression('krystal', 'cheer', krystal.x - 18, krystal.feetY, charH);
           csDrawChar('wade',    wade.x,          wade.feetY,    'left',  charH * 0.95, 0);
           csDrawBubble(krystal.x - 18, krystal.feetY - charH - 4, 'Krystal', "I could stay here forever 🥰");
       }, onStart(cs){
           csHearts(cs, paul.x, paul.feetY - charH * 0.7, 4);
           csHearts(cs, krystal.x - 18, krystal.feetY - charH * 0.7, 5);
       }},
-      // Step 5: Warm closing — hearts float, sun dips lower
+      // Step 5: Warm closing — Wade waves, everyone happy
       { dur: 2.0, draw(cs){
           drawBg(cs);
-          csDrawChar('paul',    paul.x,          paul.feetY,    'right', charH, 0);
-          csDrawChar('krystal', krystal.x - 18,  krystal.feetY, 'left',  charH, 0);
-          csDrawChar('wade',    wade.x,          wade.feetY,    'left',  charH * 0.95, 0);
+          csDrawExpression('paul', 'cheer', paul.x, paul.feetY, charH);
+          csDrawExpression('krystal', 'cheer', krystal.x - 18, krystal.feetY, charH);
+          csDrawExpression('wade', 'wave', wade.x, wade.feetY, charH * 0.95);
           csDrawBubble(wade.x, wade.feetY - charH * 0.95 - 4, 'Wade', "...okay yeah, this is nice too.");
       }, onStart(cs){
           csHearts(cs, wade.x, wade.feetY - charH * 0.6, 3);
@@ -762,14 +844,17 @@ function csBakeryMishap(){
     }
   }
 
-  function drawChars(covered){
-    csDrawChar('krystal', krystalX, counterY + charH * 0.15, 'right', charH, 0);
-    csDrawChar('luna',    lunaX,    counterY + charH * 0.15, 'left',  charH * 0.9, 0);
+  function drawChars(covered, exprK, exprL){
+    const cY = counterY + charH * 0.15;
+    if (exprK) csDrawExpression('krystal', exprK, krystalX, cY, charH);
+    else csDrawChar('krystal', krystalX, cY, 'right', charH, 0);
+    if (exprL) csDrawExpression('luna', exprL, lunaX, cY, charH * 0.9);
+    else csDrawChar('luna', lunaX, cY, 'left', charH * 0.9, 0);
     // if covered in flour, overlay a translucent white layer on the characters
     if (covered){
       ctx.fillStyle = 'rgba(255,250,240,.28)';
-      ctx.fillRect(krystalX - 22, counterY + charH * 0.15 - charH, 44, charH);
-      ctx.fillRect(lunaX - 20, counterY + charH * 0.15 - charH * 0.9, 40, charH * 0.9);
+      ctx.fillRect(krystalX - 22, cY - charH, 44, charH);
+      ctx.fillRect(lunaX - 20, cY - charH * 0.9, 40, charH * 0.9);
     }
   }
 
@@ -777,19 +862,19 @@ function csBakeryMishap(){
     chars: ['krystal', 'luna'],
     skipable: true,
     steps: [
-      // Step 1: Setting the scene — mixing batter
+      // Step 1: Setting the scene — mixing batter — think expression
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(false);
+          drawBg(cs); drawChars(false, 'think', null);
           csDrawBubble(krystalX, counterY + charH * 0.15 - charH - 4, 'Krystal', "Okay, just a little more flour...");
       }},
-      // Step 2: Luna goes for it
+      // Step 2: Luna goes for it — cheer expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars(false);
+          drawBg(cs); drawChars(false, null, 'cheer');
           csDrawBubble(lunaX, counterY + charH * 0.15 - charH * 0.9 - 4, 'Luna', "I got it! Stand back!");
       }},
-      // Step 3: BOOM — flour explosion!
+      // Step 3: BOOM — flour explosion! — surprised expressions
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(true); drawFlour(cs, 0);
+          drawBg(cs); drawChars(true, 'surprised', 'surprised'); drawFlour(cs, 0);
           // white flash on explosion start
           if (cs.stepT < 0.3){
             const flash = Math.max(0, 1 - cs.stepT / 0.3);
@@ -802,16 +887,16 @@ function csBakeryMishap(){
       }, update(cs, dt){
           drawFlour(cs, dt);
       }},
-      // Step 4: Aftermath — both covered, laughing
+      // Step 4: Aftermath — both covered, Luna laughing
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(true); drawFlour(cs, 0);
+          drawBg(cs); drawChars(true, 'surprised', 'laugh'); drawFlour(cs, 0);
           csDrawBubble(lunaX, counterY + charH * 0.15 - charH * 0.9 - 4, 'Luna', "Nailed it!");
       }, update(cs, dt){
           drawFlour(cs, dt);
       }},
-      // Step 5: Krystal's reaction — hearts
+      // Step 5: Krystal laughs too — hearts
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(true); drawFlour(cs, 0);
+          drawBg(cs); drawChars(true, 'laugh', 'laugh'); drawFlour(cs, 0);
           csDrawBubble(krystalX, counterY + charH * 0.15 - charH - 4, 'Krystal', "We're a mess! \ud83d\ude02");
       }, onStart(cs){
           csHearts(cs, krystalX, counterY - charH * 0.5, 4);
@@ -948,14 +1033,18 @@ function csLibraryGhost(){
     ctx.beginPath(); ctx.arc(ox, oy, 3, 0, 7); ctx.fill();
   }
 
-  function drawChars(williamHiding){
+  function drawChars(williamHiding, exprK, exprW){
     if (williamHiding){
       // William behind Krystal — draw him slightly behind and peeking
-      csDrawChar('william', krystalX + 16, fY + 2, 'left', charH * 0.85, 0);
-      csDrawChar('krystal', krystalX, fY, 'up', charH, 0);
+      if (exprW) csDrawExpression('william', exprW, krystalX + 16, fY + 2, charH * 0.85);
+      else csDrawChar('william', krystalX + 16, fY + 2, 'left', charH * 0.85, 0);
+      if (exprK) csDrawExpression('krystal', exprK, krystalX, fY, charH);
+      else csDrawChar('krystal', krystalX, fY, 'up', charH, 0);
     } else {
-      csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
-      csDrawChar('william', williamX, fY, 'left',  charH * 0.95, 0);
+      if (exprK) csDrawExpression('krystal', exprK, krystalX, fY, charH);
+      else csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+      if (exprW) csDrawExpression('william', exprW, williamX, fY, charH * 0.95);
+      else csDrawChar('william', williamX, fY, 'left',  charH * 0.95, 0);
     }
   }
 
@@ -963,14 +1052,14 @@ function csLibraryGhost(){
     chars: ['krystal', 'william'],
     skipable: true,
     steps: [
-      // Step 1: Quiet library — peaceful moment
+      // Step 1: Quiet library — peaceful moment — think expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars(false);
+          drawBg(cs); drawChars(false, 'think', null);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It's so quiet in here...");
       }},
-      // Step 2: A book falls off the shelf!
+      // Step 2: A book falls off the shelf! — surprised expressions
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawFallingBook(cs); drawChars(false);
+          drawBg(cs); drawFallingBook(cs); drawChars(false, 'surprised', 'surprised');
           if (cs.stepT > 0.5){
             csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', "What was THAT?!");
           }
@@ -978,14 +1067,14 @@ function csLibraryGhost(){
           fallingBook = { x: W - 36, startY: H * 0.20, dur: 0.5, start: cs.totalT };
           try{ sfx('tap'); }catch(e){}
       }},
-      // Step 3: Krystal reacts
+      // Step 3: Krystal reacts — surprised expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawFallingBook(cs); drawChars(false);
+          drawBg(cs); drawFallingBook(cs); drawChars(false, 'surprised', 'scared');
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Did you see that?!");
       }},
-      // Step 4: Ghost orb drifts across — William hides behind Krystal
+      // Step 4: Ghost orb drifts across — William scared, hides behind Krystal
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawGhostOrb(cs); drawFallingBook(cs); drawChars(true);
+          drawBg(cs); drawGhostOrb(cs); drawFallingBook(cs); drawChars(true, 'surprised', 'scared');
           if (cs.stepT > 0.8){
             csDrawBubble(krystalX + 16, fY - charH * 0.85 - 4, 'William', "I'm not scared... you're scared!");
           }
@@ -994,7 +1083,7 @@ function csLibraryGhost(){
       }},
       // Step 5: Krystal laughs it off
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawGhostOrb(cs); drawFallingBook(cs); drawChars(true);
+          drawBg(cs); drawGhostOrb(cs); drawFallingBook(cs); drawChars(true, 'laugh', 'embarrassed');
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It's just the wind... right? \ud83d\udc40");
       }, onStart(cs){
           csHearts(cs, krystalX, fY - charH * 0.7, 3);
@@ -1160,33 +1249,35 @@ function csAquariumWonder(){
     ctx.beginPath(); ctx.ellipse(wx, groundY - 4, 50, 6, 0, 0, 7); ctx.fill();
   }
 
-  function drawChars(){
-    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
-    csDrawChar('luke',    lukeX,    fY, 'left',  charH * 0.95, 0);
+  function drawChars(exprK, exprL){
+    if (exprK) csDrawExpression('krystal', exprK, krystalX, fY, charH);
+    else csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    if (exprL) csDrawExpression('luke', exprL, lukeX, fY, charH * 0.95);
+    else csDrawChar('luke', lukeX, fY, 'left', charH * 0.95, 0);
   }
 
   return {
     chars: ['krystal', 'luke'],
     skipable: true,
     steps: [
-      // Step 1: Both watching fish
+      // Step 1: Both watching fish — cheer expression on Krystal
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawJellies(cs); drawChars();
+          drawBg(cs); drawJellies(cs); drawChars('cheer', null);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Look at all the fish! 🐠");
       }},
-      // Step 2: Luke spots a jellyfish
+      // Step 2: Luke spots a jellyfish — surprised expression
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawJellies(cs); drawChars();
+          drawBg(cs); drawJellies(cs); drawChars(null, 'surprised');
           csDrawBubble(lukeX, fY - charH * 0.95 - 4, 'Luke', "Whoa, a jellyfish! Look!");
       }},
-      // Step 3: Krystal is amazed
+      // Step 3: Krystal is amazed — surprised expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawJellies(cs); drawChars();
+          drawBg(cs); drawJellies(cs); drawChars('surprised', 'cheer');
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It glows! So pretty 🪼✨");
       }},
-      // Step 4: Whale shark appears overhead
+      // Step 4: Whale shark appears overhead — surprised both
       { dur: 3.0, draw(cs){
-          drawBg(cs); drawJellies(cs); drawWhaleShark(cs); drawChars();
+          drawBg(cs); drawJellies(cs); drawWhaleShark(cs); drawChars('surprised', 'surprised');
           if (cs.stepT > 1.0){
             csDrawBubble(W * 0.50, fY - charH - 4, null, 'Woooow! 🐋');
           }
@@ -1195,9 +1286,9 @@ function csAquariumWonder(){
           whaleShark.x = -100;
           whaleShark.y = H * 0.14;
       }},
-      // Step 5: Both in awe, hearts
+      // Step 5: Both in awe — cheer expressions, hearts
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawJellies(cs); drawWhaleShark(cs); drawChars();
+          drawBg(cs); drawJellies(cs); drawWhaleShark(cs); drawChars('cheer', 'cheer');
           csDrawBubble(lukeX, fY - charH * 0.95 - 4, 'Luke', "That was AWESOME! 😍");
       }, onStart(cs){
           csHearts(cs, krystalX, fY - charH * 0.7, 5);
@@ -1332,40 +1423,42 @@ function csRainyDayChat(){
     ctx.beginPath(); ctx.arc(cx + 4, topY + 48, 4, 0, Math.PI); ctx.stroke();
   }
 
-  function drawChars(snuggle){
+  function drawCharsExpr(snuggle, exprP, exprK){
     const offset = snuggle ? -8 : 0;
-    csDrawChar('paul',    paulX,           fY, 'right', charH, 0);
-    csDrawChar('krystal', krystalX + offset, fY, 'left',  charH, 0);
+    if (exprP) csDrawExpression('paul', exprP, paulX, fY, charH);
+    else csDrawChar('paul', paulX, fY, 'right', charH, 0);
+    if (exprK) csDrawExpression('krystal', exprK, krystalX + offset, fY, charH);
+    else csDrawChar('krystal', krystalX + offset, fY, 'left', charH, 0);
   }
 
   return {
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
-      // Step 1: Standing under umbrella, rain falling
+      // Step 1: Standing under umbrella, rain falling — surprised at rain
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(false);
+          drawBg(cs); drawCharsExpr(false, null, 'surprised');
           drawUmbrella(W * 0.50, fY - charH - 12);
           drawRain(cs, 0);
           csDrawBubble(krystalX, fY - charH - 28, 'Krystal', "It's really coming down! 🌧️");
       }, update(cs, dt){ drawRain(cs, dt); }},
-      // Step 2: Paul speaks
+      // Step 2: Paul speaks — cheer expression
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(false);
+          drawBg(cs); drawCharsExpr(false, 'cheer', null);
           drawUmbrella(W * 0.50, fY - charH - 12);
           drawRain(cs, 0);
           csDrawBubble(paulX, fY - charH - 28, 'Paul', "I love rainy days with you.");
       }, update(cs, dt){ drawRain(cs, dt); }},
-      // Step 3: Krystal reacts warmly
+      // Step 3: Krystal reacts warmly — embarrassed expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars(false);
+          drawBg(cs); drawCharsExpr(false, 'cheer', 'embarrassed');
           drawUmbrella(W * 0.50, fY - charH - 12);
           drawRain(cs, 0);
           csDrawBubble(krystalX, fY - charH - 28, 'Krystal', "You always say the sweetest things 🥰");
       }, update(cs, dt){ drawRain(cs, dt); }},
-      // Step 4: Krystal snuggles closer, cozy moment
+      // Step 4: Krystal snuggles closer — cheer expressions
       { dur: 3.0, draw(cs){
-          drawBg(cs); drawChars(true);
+          drawBg(cs); drawCharsExpr(true, 'cheer', 'cheer');
           drawUmbrella(W * 0.50, fY - charH - 12);
           drawRain(cs, 0);
           if (cs.stepT < 1.5){
@@ -1377,7 +1470,7 @@ function csRainyDayChat(){
       }, update(cs, dt){ drawRain(cs, dt); }},
       // Step 5: Peaceful ending — just rain sounds and closeness
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(true);
+          drawBg(cs); drawCharsExpr(true, 'cheer', 'cheer');
           drawUmbrella(W * 0.50, fY - charH - 12);
           drawRain(cs, 0);
       }, update(cs, dt){ drawRain(cs, dt); }},
@@ -1495,10 +1588,13 @@ function csFlowerCrown(){
     }
   }
 
-  function drawChars(krystalCrown, wadeCrown){
-    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
-    csDrawChar('luna',    lunaX,    fY, 'down',  charH * 0.9, 0);
-    csDrawChar('wade',    wadeX,    fY, 'left',  charH * 0.95, 0);
+  function drawCharsExpr(krystalCrown, wadeCrown, exprK, exprL, exprW){
+    if (exprK) csDrawExpression('krystal', exprK, krystalX, fY, charH);
+    else csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    if (exprL) csDrawExpression('luna', exprL, lunaX, fY, charH * 0.9);
+    else csDrawChar('luna', lunaX, fY, 'down', charH * 0.9, 0);
+    if (exprW) csDrawExpression('wade', exprW, wadeX, fY, charH * 0.95);
+    else csDrawChar('wade', wadeX, fY, 'left', charH * 0.95, 0);
     if (krystalCrown) drawCrown(krystalX, fY - charH - 2, false);
     if (wadeCrown) drawCrown(wadeX, fY - charH * 0.95 - 2, true);
   }
@@ -1507,36 +1603,39 @@ function csFlowerCrown(){
     chars: ['krystal', 'luna', 'wade'],
     skipable: true,
     steps: [
-      // Step 1: Luna is crafting flower crowns
+      // Step 1: Luna is crafting flower crowns — think expression
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawChars(false, false); drawPetals(0);
+          drawBg(cs); drawCharsExpr(false, false, null, 'think', null); drawPetals(0);
           csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', 'Almost done with this one...');
       }, update(cs, dt){ drawPetals(dt); }},
-      // Step 2: Luna places the crown on Krystal
+      // Step 2: Luna places the crown on Krystal — cheer expression on Luna
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawChars(true, false); drawPetals(0);
+          drawBg(cs); drawCharsExpr(true, false, 'surprised', 'cheer', null); drawPetals(0);
           csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', 'There! A crown for a queen!');
       }, onStart(cs){
           spawnPetals(krystalX, fY - charH, 10);
       }, update(cs, dt){ drawPetals(dt); }},
-      // Step 3: Krystal reacts
+      // Step 3: Krystal reacts — cheer expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars(true, false); drawPetals(0);
+          drawBg(cs); drawCharsExpr(true, false, 'cheer', 'cheer', null); drawPetals(0);
           csDrawBubble(krystalX, fY - charH - 14, 'Krystal', 'I love it so much! \ud83e\udd70');
       }, update(cs, dt){ drawPetals(dt); }},
-      // Step 4: Wade wants one
+      // Step 4: Wade wants one — wave expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars(true, false); drawPetals(0);
+          drawBg(cs); drawCharsExpr(true, false, 'cheer', null, 'wave'); drawPetals(0);
           csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', 'Hey, where\u2019s MY crown?!');
       }, update(cs, dt){ drawPetals(dt); }},
       // Step 5: Luna makes Wade a tiny one. Everyone laughs.
       { dur: 2.8, draw(cs){
-          drawBg(cs); drawChars(true, true); drawPetals(0);
+          drawBg(cs);
           if (cs.stepT < 1.6){
+            drawCharsExpr(true, true, 'cheer', 'cheer', 'surprised');
             csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', 'Here\u2019s a little one just for you!');
           } else {
+            drawCharsExpr(true, true, 'laugh', 'laugh', 'embarrassed');
             csDrawBubble(krystalX, fY - charH - 14, 'Krystal', 'You look adorable! \ud83d\ude02');
           }
+          drawPetals(0);
       }, onStart(cs){
           spawnPetals(wadeX, fY - charH * 0.9, 8);
           csHearts(cs, krystalX, fY - charH * 0.7, 4);
@@ -1653,65 +1752,68 @@ function csSnowAngelContest(){
     ctx.restore();
   }
 
-  function drawChars(paulFallen){
-    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+  function drawChars(paulFallen, exprK, exprP, exprW){
+    if (exprK) csDrawExpression('krystal', exprK, krystalX, fY, charH);
+    else csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
     if (paulFallen){
       // Paul on the ground — draw facing up, smaller, lower
-      csDrawChar('paul', paulX, fY + 20, 'up', charH * 0.6, 0);
+      if (exprP) csDrawExpression('paul', exprP, paulX, fY + 20, charH * 0.6);
+      else csDrawChar('paul', paulX, fY + 20, 'up', charH * 0.6, 0);
     } else {
-      csDrawChar('paul', paulX, fY, 'down', charH, 0);
+      if (exprP) csDrawExpression('paul', exprP, paulX, fY, charH);
+      else csDrawChar('paul', paulX, fY, 'down', charH, 0);
     }
-    csDrawChar('william', williamX, fY, 'left', charH * 0.95, 0);
+    if (exprW) csDrawExpression('william', exprW, williamX, fY, charH * 0.95);
+    else csDrawChar('william', williamX, fY, 'left', charH * 0.95, 0);
   }
 
   return {
     chars: ['krystal', 'paul', 'william'],
     skipable: true,
     steps: [
-      // Step 1: Fresh snow, everyone excited
+      // Step 1: Fresh snow, everyone excited — cheer expressions
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars(false);
+          drawBg(cs); drawChars(false, 'cheer', null, 'cheer');
           csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', 'Snow angel contest! Watch this!');
       }},
-      // Step 2: William makes a perfect snow angel
+      // Step 2: William makes a perfect snow angel — surprised on Krystal
       { dur: 2.2, draw(cs){
           drawBg(cs);
           drawSnowAngel(williamX, groundY + 14, 'perfect');
-          drawChars(false);
+          drawChars(false, 'surprised', null, 'cheer');
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Wow, that\u2019s actually perfect!');
       }},
-      // Step 3: Paul tries... and face-plants
+      // Step 3: Paul tries... and face-plants — embarrassed on Paul, laugh on others
       { dur: 2.2, draw(cs){
           drawBg(cs);
           drawSnowAngel(williamX, groundY + 14, 'perfect');
           drawSnowAngel(paulX, groundY + 16, 'messy');
-          drawChars(true);
+          drawChars(true, 'laugh', 'embarrassed', 'laugh');
           csDrawBubble(paulX, fY + 20 - charH * 0.6 - 4, 'Paul', 'Nailed it! ...ow.');
       }, onStart(cs){
           try{ sfx('tap'); }catch(e){}
       }},
-      // Step 4: Krystal laughs and helps Paul up
+      // Step 4: Krystal laughs and helps Paul up — cheer on Krystal, embarrassed Paul
       { dur: 2.5, draw(cs){
           drawBg(cs);
           drawSnowAngel(williamX, groundY + 14, 'perfect');
           drawSnowAngel(paulX, groundY + 16, 'messy');
-          // Krystal closer to Paul — helping him up
-          csDrawChar('krystal', paulX - 20, fY, 'right', charH, 1);
-          csDrawChar('paul', paulX, fY, 'left', charH, 0);
-          csDrawChar('william', williamX, fY, 'left', charH * 0.95, 0);
+          csDrawExpression('krystal', 'laugh', paulX - 20, fY, charH);
+          csDrawExpression('paul', 'embarrassed', paulX, fY, charH);
+          csDrawExpression('william', 'laugh', williamX, fY, charH * 0.95);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Come here, you goof \u2764\ufe0f');
       }, onStart(cs){
           csHearts(cs, krystalX, fY - charH * 0.7, 5);
           csHearts(cs, paulX, fY - charH * 0.7, 4);
       }},
-      // Step 5: William proud, everyone warm
+      // Step 5: William proud — cheer expression, everyone warm
       { dur: 2.5, draw(cs){
           drawBg(cs);
           drawSnowAngel(williamX, groundY + 14, 'perfect');
           drawSnowAngel(paulX, groundY + 16, 'messy');
-          csDrawChar('krystal', paulX - 20, fY, 'right', charH, 0);
-          csDrawChar('paul', paulX, fY, 'left', charH, 0);
-          csDrawChar('william', williamX, fY, 'left', charH * 0.95, 0);
+          csDrawExpression('krystal', 'cheer', paulX - 20, fY, charH);
+          csDrawExpression('paul', 'cheer', paulX, fY, charH);
+          csDrawExpression('william', 'cheer', williamX, fY, charH * 0.95);
           csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', 'I clearly won. \ud83d\ude0e');
       }, onStart(cs){
           csHearts(cs, williamX, fY - charH * 0.6, 3);
@@ -1857,25 +1959,29 @@ function csMusicJam(){
     ctx.globalAlpha = 1;
   }
 
-  function drawChars(){
-    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
-    csDrawChar('paul',    paulX,    fY, 'down',  charH, 0);
-    csDrawChar('luke',    lukeX,    fY, 'down',  charH * 0.95, 0);
-    csDrawChar('luna',    lunaX,    fY, 'left',  charH * 0.9, 0);
+  function drawCharsExpr(exprK, exprP, exprLk, exprLn){
+    if (exprK) csDrawExpression('krystal', exprK, krystalX, fY, charH);
+    else csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    if (exprP) csDrawExpression('paul', exprP, paulX, fY, charH);
+    else csDrawChar('paul', paulX, fY, 'down', charH, 0);
+    if (exprLk) csDrawExpression('luke', exprLk, lukeX, fY, charH * 0.95);
+    else csDrawChar('luke', lukeX, fY, 'down', charH * 0.95, 0);
+    if (exprLn) csDrawExpression('luna', exprLn, lunaX, fY, charH * 0.9);
+    else csDrawChar('luna', lunaX, fY, 'left', charH * 0.9, 0);
   }
 
   return {
     chars: ['krystal', 'paul', 'luke', 'luna'],
     skipable: true,
     steps: [
-      // Step 1: Everyone picking up instruments
+      // Step 1: Everyone picking up instruments — cheer expression on Paul
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+          drawBg(cs); drawCharsExpr(null, 'cheer', null, null); drawInstruments(cs); drawNotes(0);
           csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Alright everyone, let\u2019s jam!');
       }, update(cs, dt){ drawNotes(dt); }},
-      // Step 2: They start playing — notes rise
+      // Step 2: They start playing — cheer expressions, notes rise
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+          drawBg(cs); drawCharsExpr('cheer', 'cheer', 'cheer', 'cheer'); drawInstruments(cs); drawNotes(0);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Here we go! \ud83c\udfb6');
       }, onStart(cs){
           spawnNotes(paulX, fY - charH * 0.6, 4);
@@ -1883,26 +1989,26 @@ function csMusicJam(){
           spawnNotes(lunaX, fY - charH * 0.5, 3);
           spawnNotes(lukeX, fY - charH * 0.6, 3);
       }, update(cs, dt){ drawNotes(dt); }},
-      // Step 3: In full groove — more notes
+      // Step 3: In full groove — cheer expressions, more notes
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+          drawBg(cs); drawCharsExpr('cheer', 'cheer', 'cheer', 'cheer'); drawInstruments(cs); drawNotes(0);
       }, onStart(cs){
           spawnNotes(paulX, fY - charH * 0.5, 5);
           spawnNotes(lunaX, fY - charH * 0.5, 4);
           spawnNotes(krystalX, fY - charH * 0.5, 4);
           spawnNotes(lukeX, fY - charH * 0.5, 5);
       }, update(cs, dt){ drawNotes(dt); }},
-      // Step 4: Luke plays something ridiculous
+      // Step 4: Luke plays something ridiculous — wave expression on Luke
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+          drawBg(cs); drawCharsExpr('cheer', 'cheer', 'wave', 'cheer'); drawInstruments(cs); drawNotes(0);
           csDrawBubble(lukeX, fY - charH * 0.95 - 4, 'Luke', '*plays the silliest solo ever*');
       }, onStart(cs){
           // big burst of notes from Luke
           spawnNotes(lukeX, fY - charH * 0.7, 10);
       }, update(cs, dt){ drawNotes(dt); }},
-      // Step 5: Everyone cracks up
+      // Step 5: Everyone cracks up — laugh expressions
       { dur: 2.8, draw(cs){
-          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+          drawBg(cs); drawCharsExpr('laugh', 'laugh', 'embarrassed', 'laugh'); drawInstruments(cs); drawNotes(0);
           if (cs.stepT < 1.5){
             csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'WHAT was that?! \ud83d\ude02');
           } else {
@@ -2018,53 +2124,57 @@ function csPaintingTogether(){
     ctx.globalAlpha = 1;
   }
 
-  function drawChars(){
-    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
-    csDrawChar('paul',    paulX,    fY, 'left',  charH, 0);
+  function drawCharsExpr(exprK, exprP){
+    if (exprK) csDrawExpression('krystal', exprK, krystalX, fY, charH);
+    else csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    if (exprP) csDrawExpression('paul', exprP, paulX, fY, charH);
+    else csDrawChar('paul', paulX, fY, 'left', charH, 0);
   }
 
   return {
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
-      // Step 1: Both painting side by side
+      // Step 1: Both painting side by side — think expression on Paul
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs); drawCharsExpr(null, 'think');
           drawEasel(krystalX + 24, fY - 4, null);
           drawEasel(paulX - 24, fY - 4, null);
           csDrawBubble(paulX, fY - charH - 4, 'Paul', 'This is going to be a masterpiece.');
       }},
-      // Step 2: Krystal peeks at Paul's canvas
+      // Step 2: Krystal peeks at Paul's canvas — laugh expression
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs); drawCharsExpr('laugh', 'embarrassed');
           drawEasel(krystalX + 24, fY - 4, null);
           drawEasel(paulX - 24, fY - 4, drawPaulPainting);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', '*peeks over* ...what is that? \ud83d\ude02');
       }},
-      // Step 3: Paul defends his art
+      // Step 3: Paul defends his art — embarrassed expression
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs); drawCharsExpr('laugh', 'embarrassed');
           drawEasel(krystalX + 24, fY - 4, null);
           drawEasel(paulX - 24, fY - 4, drawPaulPainting);
           csDrawBubble(paulX, fY - charH - 4, 'Paul', "It's abstract!");
       }},
-      // Step 4: Krystal's gentle tease
+      // Step 4: Krystal's gentle tease — laugh
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs); drawCharsExpr('laugh', 'sad');
           drawEasel(krystalX + 24, fY - 4, null);
           drawEasel(paulX - 24, fY - 4, drawPaulPainting);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It's... something \ud83d\ude02");
       }},
-      // Step 5: Krystal reveals hers — beautiful. Hearts.
+      // Step 5: Krystal reveals hers — Paul surprised, then cheer. Hearts.
       { dur: 2.8, draw(cs){
-          drawBg(cs); drawChars();
-          drawEasel(krystalX + 24, fY - 4, drawKrystalPainting);
-          drawEasel(paulX - 24, fY - 4, drawPaulPainting);
+          drawBg(cs);
           if (cs.stepT < 1.5){
+            drawCharsExpr('cheer', 'surprised');
             csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Now look at mine \u2728');
           } else {
+            drawCharsExpr('cheer', 'cheer');
             csDrawBubble(paulX, fY - charH - 4, 'Paul', '...okay yours is way better.');
           }
+          drawEasel(krystalX + 24, fY - 4, drawKrystalPainting);
+          drawEasel(paulX - 24, fY - 4, drawPaulPainting);
       }, onStart(cs){
           csHearts(cs, krystalX, fY - charH * 0.7, 5);
           csHearts(cs, paulX, fY - charH * 0.7, 4);
@@ -2143,27 +2253,24 @@ function csHideAndSeek(){
   const bushX = W * 0.72, bushBaseY = groundY + 4;
 
   function drawCharsStep1(cs){
-    // Luke counting, facing away (up), others visible
+    // Luke counting, facing away (up), others visible — scared (rushing to hide)
     csDrawChar('luke', lukeX, fY, 'up', charH, 0);
-    csDrawChar('william', williamX, fY, 'left', charH * 0.95, 1);
-    csDrawChar('krystal', krystalX, fY, 'right', charH, 1);
+    csDrawExpression('william', 'scared', williamX, fY, charH * 0.95);
+    csDrawExpression('krystal', 'scared', krystalX, fY, charH);
   }
 
   function drawCharsStep2(cs){
     // Luke still counting. William behind bush, Krystal behind left bush.
     csDrawChar('luke', lukeX, fY, 'up', charH, 0);
-    // William mostly hidden — draw before bush
     csDrawChar('william', bushX, fY, 'down', charH * 0.95, 0);
-    // bush covers William
     drawBush(bushX, bushBaseY, 42, 34);
-    // Krystal ducking behind left bush — smaller/lower
     csDrawChar('krystal', W * 0.10, fY + 6, 'right', charH * 0.7, 0);
     drawBush(W * 0.10, bushBaseY, 38, 30);
   }
 
   function drawCharsStep3(cs){
-    // Luke turned around, ready to seek
-    csDrawChar('luke', lukeX, fY, 'down', charH, 0);
+    // Luke turned around, ready to seek — cheer expression
+    csDrawExpression('luke', 'cheer', lukeX, fY, charH);
     csDrawChar('william', bushX, fY, 'down', charH * 0.95, 0);
     drawBush(bushX, bushBaseY, 42, 34);
     csDrawChar('krystal', W * 0.10, fY + 6, 'right', charH * 0.7, 0);
@@ -2171,19 +2278,19 @@ function csHideAndSeek(){
   }
 
   function drawCharsStep4(cs){
-    // Luke found William — William stepping out from bush
-    csDrawChar('luke', bushX - 24, fY, 'right', charH, 0);
-    csDrawChar('william', bushX + 8, fY, 'left', charH * 0.95, 0);
+    // Luke found William — cheer on Luke, embarrassed on William
+    csDrawExpression('luke', 'cheer', bushX - 24, fY, charH);
+    csDrawExpression('william', 'embarrassed', bushX + 8, fY, charH * 0.95);
     drawBush(bushX, bushBaseY, 42, 34);
     csDrawChar('krystal', W * 0.10, fY + 6, 'right', charH * 0.7, 0);
     drawBush(W * 0.10, bushBaseY, 38, 30);
   }
 
   function drawCharsStep5(cs){
-    // Krystal jumps out — everyone together
-    csDrawChar('luke', W * 0.40, fY, 'left', charH, 0);
-    csDrawChar('william', W * 0.55, fY, 'down', charH * 0.95, 0);
-    csDrawChar('krystal', W * 0.26, fY, 'right', charH, 1);
+    // Krystal jumps out — everyone laughing
+    csDrawExpression('luke', 'laugh', W * 0.40, fY, charH);
+    csDrawExpression('william', 'laugh', W * 0.55, fY, charH * 0.95);
+    csDrawExpression('krystal', 'cheer', W * 0.26, fY, charH);
     drawBush(bushX, bushBaseY, 42, 34);
     drawBush(W * 0.10, bushBaseY, 38, 30);
   }
@@ -2381,37 +2488,46 @@ function csTeaParty(){
     }
   }
 
-  function drawChars(){
-    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
-    csDrawChar('luna',    lunaX,    fY, 'down',  charH * 0.9, 0);
-    csDrawChar('wade',    wadeX,    fY, 'left',  charH * 0.95, 0);
+  function drawCharsExpr(exprK, exprL, exprW){
+    if (exprK) csDrawExpression('krystal', exprK, krystalX, fY, charH);
+    else csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    if (exprL) csDrawExpression('luna', exprL, lunaX, fY, charH * 0.9);
+    else csDrawChar('luna', lunaX, fY, 'down', charH * 0.9, 0);
+    if (exprW) csDrawExpression('wade', exprW, wadeX, fY, charH * 0.95);
+    else csDrawChar('wade', wadeX, fY, 'left', charH * 0.95, 0);
   }
 
   return {
     chars: ['krystal', 'luna', 'wade'],
     skipable: true,
     steps: [
-      // Step 1: Everyone sipping tea with pinkies up
+      // Step 1: Everyone sipping tea — cheer expression on Luna
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawChars(); drawTable();
+          drawBg(cs); drawCharsExpr(null, 'cheer', null); drawTable();
           drawTeacup(krystalX + 16, tableY - 4, false);
           drawTeacup(lunaX, tableY - 4, false);
           drawTeacup(wadeX - 16, tableY - 4, false);
           drawSplash(0);
           csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', 'Pinkies UP, everyone! \ud83e\udeb7');
       }, update(cs, dt){ drawSplash(dt); }},
-      // Step 2: They sip — nice and fancy
+      // Step 2: They sip — nice and fancy — cheer on Krystal
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars(); drawTable();
+          drawBg(cs); drawCharsExpr('cheer', 'cheer', null); drawTable();
           drawTeacup(krystalX + 16, tableY - 4, false);
           drawTeacup(lunaX, tableY - 4, false);
           drawTeacup(wadeX - 16, tableY - 4, false);
           drawSplash(0);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Oh this is lovely \u2615');
       }, update(cs, dt){ drawSplash(dt); }},
-      // Step 3: Wade spills his tea
+      // Step 3: Wade spills his tea — embarrassed Wade, surprised Luna
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars(); drawTable();
+          drawBg(cs);
+          if (cs.stepT < 1.3){
+            drawCharsExpr('surprised', null, 'embarrassed');
+          } else {
+            drawCharsExpr('surprised', 'surprised', 'embarrassed');
+          }
+          drawTable();
           drawTeacup(krystalX + 16, tableY - 4, false);
           drawTeacup(lunaX, tableY - 4, false);
           drawTeacup(wadeX - 16, tableY - 4, true);
@@ -2424,9 +2540,15 @@ function csTeaParty(){
       }, onStart(cs){
           spawnSplash(wadeX - 10, tableY - 4, 8);
       }, update(cs, dt){ drawSplash(dt); }},
-      // Step 4: Krystal saves it with a napkin
+      // Step 4: Krystal saves it — cheer on Krystal, relieved Wade
       { dur: 3.0, draw(cs){
-          drawBg(cs); drawChars(); drawTable();
+          drawBg(cs);
+          if (cs.stepT < 1.5){
+            drawCharsExpr('cheer', 'laugh', 'sad');
+          } else {
+            drawCharsExpr('laugh', 'laugh', 'cheer');
+          }
+          drawTable();
           drawTeacup(krystalX + 16, tableY - 4, false);
           drawTeacup(lunaX, tableY - 4, false);
           drawTeacup(wadeX - 16, tableY - 4, true);
