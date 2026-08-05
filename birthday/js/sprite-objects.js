@@ -20,10 +20,10 @@
       image.src=config.src;
       return record;
     }
-    function normalize(spec,persistent){const phase=spec.phase||'actors';assertPhase(phase);return{
+    function normalize(spec,persistent){const sprite=registry.get(spec.sprite),phase=spec.phase||sprite?.phase||'actors';assertPhase(phase);return{
       id:persistent?nextId++:null,sprite:spec.sprite||null,draw:spec.draw||null,scene:spec.scene??getScene(),phase,
-      x:spec.x||0,y:spec.y||0,depth:spec.depth,width:spec.width,height:spec.height,scale:spec.scale??1,
-      anchorX:spec.anchorX??.5,anchorY:spec.anchorY??1,flipX:!!spec.flipX,alpha:spec.alpha??1,
+      x:spec.x||0,y:spec.y||0,depth:spec.depth??((spec.y||0)+(sprite?.depthOffset||0)),width:spec.width,height:spec.height,scale:spec.scale??1,
+      anchorX:spec.anchorX??sprite?.anchorX??.5,anchorY:spec.anchorY??sprite?.anchorY??1,flipX:!!spec.flipX,alpha:spec.alpha??1,
       frame:spec.frame??0,elapsed:0,playing:spec.playing!==false,loop:spec.loop!==false,
       visible:spec.visible!==false,order:order++,data:spec.data||null};}
     function create(spec){const object=normalize(spec,true);objects.set(object.id,object);return object}
@@ -43,7 +43,8 @@
     }
     function drawPhase(phase){assertPhase(phase);const scene=getScene();const list=[...objects.values(),...submitted].filter(object=>object.phase===phase&&visible(object,scene)).sort((a,b)=>((a.depth??a.y)-(b.depth??b.y))||(a.order-b.order));for(const object of list)drawObject(object)}
     function hitTest(x,y,phases=PHASES){const scene=getScene();return[...objects.values()].filter(object=>phases.includes(object.phase)&&visible(object,scene)).sort((a,b)=>((b.depth??b.y)-(a.depth??a.y))||(b.order-a.order)).find(object=>{const sprite=registry.get(object.sprite),width=object.width||(sprite?.defaultSize||sprite?.fw||0)*object.scale,height=object.height||(sprite?.defaultSize||sprite?.fh||0)*object.scale,left=object.x-width*object.anchorX,top=object.y-height*object.anchorY;return x>=left&&x<=left+width&&y>=top&&y<=top+height})||null}
-    return{PHASES,register,create,remove,clearScene,beginFrame,submit,update,drawPhase,hitTest,getSprite:name=>registry.get(name),getObject:id=>objects.get(id)};
+    function getFootprint(value){const object=typeof value==='object'?value:objects.get(value),sprite=object&&registry.get(object.sprite),shape=sprite?.footprint;if(!object||!shape)return null;const width=shape.width*object.scale,depth=shape.depth*object.scale;return{left:object.x-width*object.anchorX,right:object.x+width*(1-object.anchorX),top:object.y-depth,bottom:object.y,width,depth}}
+    return{PHASES,register,create,remove,clearScene,beginFrame,submit,update,drawPhase,hitTest,getFootprint,getSprite:name=>registry.get(name),getObject:id=>objects.get(id)};
   }
   root.createSpriteRenderer=createSpriteRenderer;
   if(typeof ctx!=='undefined')root.SpriteRenderer=createSpriteRenderer({context:ctx,getScene:()=>typeof SCENES!=='undefined'?SCENES[currentScene]:null});

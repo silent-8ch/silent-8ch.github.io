@@ -147,10 +147,19 @@ scene objects with `SpriteRenderer.create(spec)`, or submit temporary drawables
 from a scene renderer with `SpriteRenderer.submit(spec)`. Persistent objects are
 automatically filtered to the scene where they were created.
 
-The first shared object pack lives in `sprites/objects/` and registers `cloud`,
-`lantern`, `butterfly`, `bird`, `npcAdult`, `npcChild`, `puppy`, and `cat` through
-`js/sprite-object-pack-1.js`. Beach, backyard, and river clouds have been migrated
-from canvas primitives to the animated cloud sheet.
+The shared object pack lives in `sprites/objects/` and contains 40 registered
+sprites. Its environment set includes trees, flowering bushes, wildflowers,
+grass, benches, cafe furniture, signposts, fences, streetlamps, mailboxes, trash
+cans, market awnings, doorways, flower windows, pennant flags, and water ripples.
+Each environment entry in `js/sprite-object-pack-1.js` carries its intended
+`defaultSize`, render `phase`, ground anchor, collision `footprint`, and
+`depthOffset`; scenes should use those defaults instead of manually adjusting
+the source image dimensions. `SpriteRenderer.getFootprint(object)` returns the
+scaled world-space collision rectangle.
+
+Environment sheets are transparent 1024 x 256 PNGs with four aligned 256 px
+frames. Their original 4 x 4 generated atlases are retained in
+`sprites/objects/sources/environment-*-pack.png`.
 
 ## Important continuation notes
 

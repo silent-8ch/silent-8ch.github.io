@@ -20,10 +20,15 @@ vm.runInContext(fs.readFileSync('birthday/js/sprite-objects.js','utf8'),sandbox)
 let scene='garden';
 const renderer=sandbox.createSpriteRenderer({context,ImageCtor:FakeImage,getScene:()=>scene});
 renderer.register('bird',{src:'bird.png',cols:4,rows:1,fps:4});
+renderer.register('tree',{src:'tree.png',cols:4,rows:1,fps:2,defaultSize:100,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:40,depth:12},depthOffset:-2});
 assert.throws(()=>renderer.register('too-many',{src:'bad.png',cols:3,rows:2}),/four-frame/);
 
 const back=renderer.create({sprite:'bird',phase:'background',x:10,y:30,width:20,height:20});
 const front=renderer.create({sprite:'bird',phase:'actors',x:10,y:80,width:20,height:20});
+const tree=renderer.create({sprite:'tree',x:50,y:60});
+assert.equal(tree.phase,'ground','sprite phase is used when an object does not override it');
+assert.equal(tree.depth,58,'sprite depth offset is applied automatically');
+assert.deepEqual({...renderer.getFootprint(tree)},{left:30,right:70,top:48,bottom:60,width:40,depth:12});
 renderer.submit({phase:'actors',scene:'garden',x:10,y:40,draw:()=>calls.push('near')});
 renderer.submit({phase:'actors',scene:'garden',x:10,y:20,draw:()=>calls.push('far')});
 renderer.drawPhase('background');
