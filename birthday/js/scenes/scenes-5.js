@@ -6928,8 +6928,8 @@ function drawTownSquare(){
   }
 
   // ---- props (static, frame:0) ----
-  SpriteRenderer.submit({sprite:'tree', x:W * 0.04, y:groundY + 4, frame:0});
-  SpriteRenderer.submit({sprite:'tree', x:W * 0.96, y:groundY + 4, frame:0});
+  SpriteRenderer.submit({sprite:'tree', x:W * 0.04, y:groundY + 24, frame:0});
+  SpriteRenderer.submit({sprite:'tree', x:W * 0.96, y:groundY + 24, frame:0});
   SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.22, y:groundY + 24, frame:0});
   SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.78, y:groundY + 24, frame:0});
   SpriteRenderer.submit({sprite:'parkBench', x:W * 0.14, y:groundY + 60, frame:0});
