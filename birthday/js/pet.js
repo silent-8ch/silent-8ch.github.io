@@ -1548,6 +1548,54 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.55, r:56, e:'✨', lines:['Fireflies everywhere ✨','Blinking over the water','Like fallen stars floating 🥰']},
     {nx:0.86, ny:0.90, r:46, e:'🫙', lines:['A jar of fireflies 🫙','Glowing on the dock','Our own little lantern 💛']},
   ],
+  planetlab: [
+    {nx:0.50, ny:0.30, r:68, e:'🪐', lines:['The planet viewport! 🪐','A ringed gas giant 😮','I can see it spinning 🥰']},
+    {nx:0.10, ny:0.26, r:52, e:'📊', lines:['Blinking monitor banks 📊','So many readouts','What does this graph mean? 😄']},
+    {nx:0.50, ny:0.76, r:50, e:'🎛️', lines:['The control console 🎛️','So many little buttons','Which one launches the probe? 🥰']},
+    {nx:0.50, ny:0.55, r:46, e:'✨', lines:['A tiny hologram ✨','Floating above the desk','Our own little planet 💛']},
+  ],
+  runecircle: [
+    {nx:0.50, ny:0.18, r:52, e:'🌙', lines:['The pale moon 🌙','Shining over the stones','So bright tonight 🥰']},
+    {nx:0.50, ny:0.84, r:60, e:'✨', lines:['The rune circle! ✨','Glowing blue on the ground','Step inside with me? 💛']},
+    {nx:0.16, ny:0.60, r:48, e:'🪨', lines:['A standing stone 🪨','A rune carved in it','It pulses with light 🥰']},
+    {nx:0.84, ny:0.60, r:48, e:'🪨', lines:['Another stone 🪨','Ancient and tall','Who put them here? ✨']},
+  ],
+  arcanelibrary: [
+    {nx:0.50, ny:0.30, r:58, e:'🔮', lines:['The glowing arch 🔮','Light at the end of the aisle','So mysterious and deep 🥰']},
+    {nx:0.30, ny:0.30, r:50, e:'📖', lines:['A floating grimoire! 📖','Its pages are flapping','It wants to be read 💛']},
+    {nx:0.14, ny:0.20, r:46, e:'🕯️', lines:['A floating candle 🕯️','Bobbing in the air','Real magic, love ✨']},
+    {nx:0.50, ny:0.90, r:54, e:'⭐', lines:['The floor sigil ⭐','A glowing star pattern','Don\'t stand in the middle! 🥰']},
+  ],
+  willowispmarsh: [
+    {nx:0.74, ny:0.16, r:48, e:'🌙', lines:['A hazy green moon 🌙','Barely breaking the mist','So eerie and lovely 🥰']},
+    {nx:0.50, ny:0.44, r:56, e:'✨', lines:['Will-o\'-wisps! ✨','Glowing and drifting','Follow them? Or stay close? 💛']},
+    {nx:0.14, ny:0.40, r:50, e:'🌳', lines:['A twisted dead tree 🌳','Reaching into the fog','A little spooky, hold me 🥰']},
+    {nx:0.30, ny:0.70, r:46, e:'🪷', lines:['A lily pad 🪷','Floating on the dark water','Even here, something grows 💚']},
+  ],
+  enchantedmirrorhall: [
+    {nx:0.50, ny:0.36, r:56, e:'🪞', lines:['The star mirror 🪞','A whole galaxy inside','I see us among the stars 🥰']},
+    {nx:0.22, ny:0.36, r:48, e:'🌲', lines:['The forest mirror 🌲','Green light flickering','Another world in there 💛']},
+    {nx:0.78, ny:0.36, r:48, e:'🔥', lines:['The fire mirror 🔥','Flames dancing inside','So warm to look at 🥰']},
+    {nx:0.50, ny:0.12, r:44, e:'✨', lines:['The chandelier ✨','Tiny candles glowing','So grand and golden 💛']},
+  ],
+  balloonride: [
+    {nx:0.50, ny:0.06, r:62, e:'🎈', lines:['Our balloon overhead! 🎈','Red and gold stripes','I can feel the burner 🥰']},
+    {nx:0.66, ny:0.22, r:48, e:'🎈', lines:['A red balloon nearby 🎈','Drifting beside us','Wave to them! 👋']},
+    {nx:0.50, ny:0.62, r:56, e:'🌿', lines:['Patchwork fields below 🌿','So tiny from up here','We\'re really flying 💛']},
+    {nx:0.14, ny:0.10, r:46, e:'☀️', lines:['The warm morning sun ☀️','Shining on everything','What a view with you 🥰']},
+  ],
+  herbshed: [
+    {nx:0.50, ny:0.20, r:58, e:'🌿', lines:['Bundles of drying herbs 🌿','Hanging from the beam','Smells like a garden in here 🥰']},
+    {nx:0.16, ny:0.44, r:50, e:'🫙', lines:['Jars of dried herbs 🫙','Each one labeled','Which one\'s the lavender? 💛']},
+    {nx:0.50, ny:0.70, r:48, e:'🪨', lines:['The mortar and pestle 🪨','Grinding something fragrant','Making a little blend 🥰']},
+    {nx:0.72, ny:0.16, r:52, e:'🪟', lines:['The sunny window 🪟','Warm light streaming in','So cozy in this shed 💛']},
+  ],
+  driftwoodbeach: [
+    {nx:0.72, ny:0.86, r:56, e:'🪵', lines:['A big driftwood log 🪵','Sun-bleached and smooth','Sit on it with me? 🥰']},
+    {nx:0.50, ny:0.50, r:58, e:'🌊', lines:['The grey-green sea 🌊','Waves rolling in gently','Listen to them breathe 💛']},
+    {nx:0.60, ny:0.92, r:44, e:'⭐', lines:['A little starfish ⭐','Washed up on the sand','So pretty and orange 🥰']},
+    {nx:0.24, ny:0.14, r:48, e:'☀️', lines:['Pale hazy sun ☀️','Soft light on the water','Such a quiet beach day 💛']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
