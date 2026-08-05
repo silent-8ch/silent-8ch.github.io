@@ -13,7 +13,7 @@
   const lib = document.createElement('div');
   lib.id = 'spriteLibrary';
   lib.style.cssText = `
-    position:fixed; left:0; top:0; width:320px; height:100vh; overflow-y:auto;
+    position:fixed; left:0; top:0; width:480px; height:100vh; overflow-y:auto;
     background:#1a1a1a; color:#fff; border-right:1px solid #333;
     font-size:11px; font-family:sans-serif; z-index:9998; display:none;
   `;
@@ -121,7 +121,7 @@
     }
 
     const cvs = document.createElement('canvas');
-    const previewSize = 200;
+    const previewSize = 400;
     cvs.width = previewSize;
     cvs.height = previewSize;
     cvs.style.cssText = 'border:1px solid #333;background:#0a0a0a;cursor:crosshair;';
