@@ -46,9 +46,9 @@ function drawRooftop(){
   ctx.fillStyle='#ffd27f'; ctx.beginPath(); ctx.arc(tX,tY-5,2.5,0,7); ctx.fill();
 
   // a cat resting on the deck
-  SpriteRenderer.submit({sprite:'cat',phase:'ground',x:W*0.74,y:deckY+8,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'cat',phase:'ground',x:W*0.74,y:deckY+8,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4}); /* large — prominent */
   // teacup on the table
-  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.48,y:deckY+12,width:22,height:22,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.48,y:deckY+12,anchorY:1,frame:0});
 }
 registerScene('rooftop', drawRooftop);
 
@@ -107,8 +107,8 @@ function drawTeaHouse(){
   ctx.fillStyle='#4a7a3a'; ctx.beginPath(); ctx.ellipse(boX+6,boY-24,12,6,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(boX-6,boY-18,8,5,0,0,7); ctx.fill();
 
   // teacups on the low table
-  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.35,y:floorY+12,width:22,height:22,anchorY:1,frame:0});
-  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.46,y:floorY+14,width:22,height:22,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.35,y:floorY+12,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.46,y:floorY+14,anchorY:1,frame:0});
 }
 registerScene('teahouse', drawTeaHouse);
 
@@ -163,6 +163,9 @@ function drawZenGarden(){
   ctx.strokeStyle='rgba(160,150,120,.5)'; ctx.lineWidth=1;
   for (let i=0;i<5;i++){ const ry=H*0.64+i*10; ctx.beginPath(); for (let x=0;x<=W;x+=6){ x===0?ctx.moveTo(x,ry):ctx.lineTo(x, ry+Math.sin(x*0.08+i)*2); } ctx.stroke(); }
   ctx.fillStyle='#b0a894'; for (const s of [[W*0.5,H*0.82],[W*0.6,H*0.88],[W*0.68,H*0.83]]){ ctx.beginPath(); ctx.ellipse(s[0],s[1],11,5,0,0,7); ctx.fill(); }
+
+  // butterfly drifting over the raked gravel
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.45+Math.sin(t*0.9)*22,y:H*0.52+Math.cos(t*1.2)*8,anchorY:0.5,frame:Math.floor(t*8)%4});
 }
 registerScene('zengarden', drawZenGarden);
 
@@ -212,6 +215,9 @@ function drawScienceLab(){
   const rkX=W*0.72, tc=['#f2a6b3','#9ad57f','#f2c14e'];
   ctx.fillStyle='#7a5a3a'; ctx.fillRect(rkX-16,benchY-6,32,6);
   for (let i=0;i<3;i++){ ctx.fillStyle='#cfe0e8'; ctx.fillRect(rkX-12+i*10,benchY-22,6,22); ctx.fillStyle=tc[i]; ctx.fillRect(rkX-12+i*10,benchY-12,6,12); }
+
+  // lab notebook on the bench
+  SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.84,y:benchY,anchorY:1,frame:0});
 }
 registerScene('sciencelab', drawScienceLab);
 
@@ -299,12 +305,16 @@ function drawBalletStudio(){
   const brY=floorY-34;
   ctx.strokeStyle='#7a4a26'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(W*0.14,brY); ctx.lineTo(W*0.14,floorY); ctx.moveTo(W*0.5,brY); ctx.lineTo(W*0.5,floorY); ctx.stroke();
   ctx.strokeStyle='#a06a3a'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(W*0.10,brY); ctx.lineTo(W*0.54,brY); ctx.stroke(); ctx.lineCap='butt';
+
+  // cat watching from the side of the room
+  const t = sceneTime;
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.80,y:floorY+14,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('balletstudio', drawBalletStudio);
 
 /* ── VINEYARD AT DUSK (outdoor · evening) ── */
 function drawVineyard(){
-  const horizon = H*0.40;
+  const t = sceneTime, horizon = H*0.40;
 
   // dusk sky + low sun
   const sky=ctx.createLinearGradient(0,0,0,horizon); sky.addColorStop(0,'#6a4a8a'); sky.addColorStop(0.5,'#e08a5a'); sky.addColorStop(1,'#f2c28a');
@@ -336,6 +346,11 @@ function drawVineyard(){
     ctx.fillStyle='#7a4a22'; ctx.beginPath(); ctx.ellipse(x,y-20,14,4,0,0,7); ctx.fill();
   }
   barrel(W*0.85,H*0.90); barrel(W*0.12,H*0.86);
+
+  // bird perched on a fence post
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.40,y:horizon+8,width:16,height:16,anchorY:1,frame:Math.floor(t*6)%4}); /* small — distant */
+  // butterfly drifting over the vines
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.55+Math.sin(t*1.1)*20,y:H*0.60+Math.cos(t*1.4)*10,anchorY:0.5,frame:Math.floor(t*8)%4});
 }
 registerScene('vineyard', drawVineyard);
 
@@ -381,6 +396,10 @@ function drawFlorist(){
   ctx.fillStyle='#e8628c'; ctx.beginPath(); ctx.arc(cX+4,cTop-28,4,0,7); ctx.arc(cX+11,cTop-26,4,0,7); ctx.arc(cX+7,cTop-33,4,0,7); ctx.fill();
   ctx.fillStyle='#e84a6a'; ctx.beginPath(); ctx.arc(cX-18,cTop-6,5,0,7); ctx.fill();
   ctx.fillStyle='#4a90d9'; ctx.beginPath(); ctx.arc(cX-8,cTop-6,5,0,7); ctx.fill();
+
+  // butterfly near the hanging flowers
+  const t = sceneTime;
+  SpriteRenderer.submit({sprite:'butterfly',phase:'foreground',x:W*0.42+Math.sin(t*1.0)*18,y:H*0.24+Math.cos(t*1.3)*10,anchorY:0.5,frame:Math.floor(t*8)%4});
 }
 registerScene('florist', drawFlorist);
 
@@ -448,6 +467,9 @@ function drawRecordShop(){
   ctx.strokeStyle='#555'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(tX-4,tY+13,8,t*3,t*3+5); ctx.stroke();
   ctx.fillStyle='#e0504a'; ctx.beginPath(); ctx.arc(tX-4,tY+13,3,0,7); ctx.fill();
   ctx.strokeStyle='#888'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(tX+14,tY+4); ctx.lineTo(tX+2,tY+12); ctx.stroke();
+
+  // cat lounging beside the record bins
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.72,y:floorY+16,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('recordshop', drawRecordShop);
 
@@ -485,6 +507,9 @@ function drawWaterfall(){
   // ferns
   ctx.strokeStyle='#3a7a3a'; ctx.lineWidth=2;
   for (const fx of [W*0.08,W*0.92]){ for (let k=0;k<5;k++){ const a=-1.4+k*0.6; ctx.beginPath(); ctx.moveTo(fx,H); ctx.quadraticCurveTo(fx+Math.cos(a)*20,H-30,fx+Math.cos(a)*30,H-52); ctx.stroke(); } }
+
+  // butterfly near the mossy bank
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.60+Math.sin(t*1.2)*16,y:shoreY-10+Math.cos(t*1.5)*8,anchorY:0.5,frame:Math.floor(t*8)%4});
 }
 registerScene('waterfall', drawWaterfall);
 
@@ -525,6 +550,10 @@ function drawSewingStudio(){
   ctx.fillStyle='#3a2a1a'; ctx.fillRect(dX-2,dB,4,H-dB);
   ctx.fillStyle='#d8b8a0'; ctx.beginPath(); ctx.moveTo(dX-14,dB-6); ctx.quadraticCurveTo(dX-16,dB-40,dX-6,dB-52); ctx.lineTo(dX+6,dB-52); ctx.quadraticCurveTo(dX+16,dB-40,dX+14,dB-6); ctx.closePath(); ctx.fill();
   ctx.fillStyle='#c8a890'; ctx.fillRect(dX-3,dB-60,6,8);
+
+  // cat resting near the fabric bolts
+  const t = sceneTime;
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.18,y:floorY+16,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('sewingstudio', drawSewingStudio);
 
@@ -838,7 +867,7 @@ function drawCafe(){
   ctx.fillStyle='#5a3a24'; ctx.fillRect(tX-34,tY-2,4,H-tY); ctx.fillRect(tX-34,tY-20,4,18); ctx.fillRect(tX-46,tY-2,14,4);
 
   // book on the cafe table
-  SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.24,y:floorY+18,width:30,height:30,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.24,y:floorY+18,anchorY:1,frame:0});
 }
 registerScene('cafe', drawCafe);
 
@@ -879,7 +908,7 @@ function drawRainyStreet(){
   ctx.strokeStyle='rgba(180,200,220,.4)'; ctx.lineWidth=1; for (let i=0;i<60;i++){ const seed2=i*53.1, rx=((seed2*1.7 + t*400)%(W+40))-20, ry=(seed2*2.3 + t*600)%H; ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx-4,ry+10); ctx.stroke(); }
 
   // umbrella on the ground
-  SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.18,y:sidewalkY+14,width:65,height:65,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.18,y:sidewalkY+14,anchorY:1,frame:0});
 }
 registerScene('rainystreet', drawRainyStreet);
 
@@ -1325,9 +1354,9 @@ function drawCatCafe(){
   cat(W*0.24,floorY+26,'#8a5a3a','sleep');
 
   // sprite cat wandering on the floor
-  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.50,y:floorY+20,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.50,y:floorY+20,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4}); /* large — prominent */
   // teacup on the counter
-  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.40,y:floorY-4,width:22,height:22,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.40,y:floorY-4,anchorY:1,frame:0});
   // kittens playing on the floor
   SpriteRenderer.submit({sprite:'kittens',phase:'actors',x:W*0.72,y:floorY+24,anchorY:1,frame:Math.floor(t*6)%4});
 }

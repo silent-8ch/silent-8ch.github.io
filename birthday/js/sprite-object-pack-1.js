@@ -51,7 +51,7 @@
 function drawSpriteCloud(x,y,scale=1){
   SpriteRenderer.submit({
     sprite:'cloud',phase:'background',x,y,depth:y,
-    width:82*scale,height:82*scale,anchorY:.5,
+    scale,anchorY:.5,
     frame:Math.floor(sceneTime*1.5)%4,
   });
 }

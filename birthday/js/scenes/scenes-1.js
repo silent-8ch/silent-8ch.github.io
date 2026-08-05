@@ -95,10 +95,10 @@ function drawBeach(){
   ctx.beginPath(); ctx.moveTo(cx, cy - 36); ctx.lineTo(cx + 10, cy - 32); ctx.lineTo(cx, cy - 28); ctx.fill();
 
   // sprite birds gliding over the water
-  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.3+Math.sin(t*0.4)*30,y:H*0.26+Math.sin(t*0.6)*6,width:16,height:16,anchorY:0.5,frame:Math.floor(t*6)%4});
-  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.6+Math.sin(t*0.3+2)*24,y:H*0.22+Math.sin(t*0.5+1)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6+2)%4,flipX:true});
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.3+Math.sin(t*0.4)*30,y:H*0.26+Math.sin(t*0.6)*6,width:16,height:16,anchorY:0.5,frame:Math.floor(t*6)%4}); /* small — distant */
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.6+Math.sin(t*0.3+2)*24,y:H*0.22+Math.sin(t*0.5+1)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6+2)%4,flipX:true}); /* small — distant */
   // umbrella stuck in the sand
-  SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.60,y:H*0.74,width:65,height:65,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.60,y:H*0.74,anchorY:1,frame:0});
   // crab scuttling on the sand
   SpriteRenderer.submit({sprite:'crab',phase:'actors',x:W*0.42+Math.sin(t*1.2)*18,y:H*0.88,anchorY:1,frame:Math.floor(t*7)%4});
 }
@@ -677,12 +677,12 @@ function drawBackyard() {
   }
 
   // sprite birds perched on the fence
-  SpriteRenderer.submit({sprite:'bird',phase:'ground',x:W*0.30,y:H*0.36-8,width:35,height:35,anchorY:1,frame:Math.floor(t*6)%4});
-  SpriteRenderer.submit({sprite:'bird',phase:'ground',x:W*0.72,y:H*0.36-8,width:35,height:35,anchorY:1,frame:Math.floor(t*6+2)%4,flipX:true});
+  SpriteRenderer.submit({sprite:'bird',phase:'ground',x:W*0.30,y:H*0.36-8,anchorY:1,frame:Math.floor(t*6)%4});
+  SpriteRenderer.submit({sprite:'bird',phase:'ground',x:W*0.72,y:H*0.36-8,anchorY:1,frame:Math.floor(t*6+2)%4,flipX:true});
   // a puppy on the grass
-  SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.60,y:H*0.82,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.60,y:H*0.82,anchorY:1,frame:Math.floor(t*7)%4});
   // butterfly near the grass
-  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.48+Math.sin(t*1.4)*16,y:H*0.72+Math.cos(t*1.8)*10,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.48+Math.sin(t*1.4)*16,y:H*0.72+Math.cos(t*1.8)*10,anchorY:0.5,frame:Math.floor(t*8)%4});
   // parrot perched on the fence
   SpriteRenderer.submit({sprite:'parrot',phase:'ground',x:W*0.52,y:H*0.36-8,anchorY:1,frame:Math.floor(t*7)%4});
   // bunny nibbling on the grass
@@ -868,11 +868,11 @@ function drawRiver() {
   }
 
   // sprite birds over the far tree line
-  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.4+Math.sin(t*0.35)*28,y:H*0.18+Math.sin(t*0.5)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6)%4});
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.4+Math.sin(t*0.35)*28,y:H*0.18+Math.sin(t*0.5)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6)%4}); /* small — distant */
   // butterfly near the wildflowers
-  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.65+Math.sin(t*1.3)*18,y:H*0.72+Math.cos(t*1.6)*8,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.65+Math.sin(t*1.3)*18,y:H*0.72+Math.cos(t*1.6)*8,anchorY:0.5,frame:Math.floor(t*8)%4});
   // bush along the near bank
-  SpriteRenderer.submit({sprite:'bush',phase:'ground',x:W*0.10,y:riverBot+10,width:55,height:55,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'bush',phase:'ground',x:W*0.10,y:riverBot+10,anchorY:1,frame:0});
 }
 
 /* ══════════════════════ ADDITIONAL SCENES ══════════════════════
@@ -958,6 +958,9 @@ function drawArtStudio(){
   ctx.fillStyle='#b5651d'; roundRect(plx-10,ply,20,18,2); ctx.fill();
   ctx.fillStyle='#3a9a3a';
   for(let i=0;i<5;i++){ const a=-1.4+i*0.55; ctx.save(); ctx.translate(plx,ply); ctx.rotate(a+Math.sin(t*0.8+i)*0.05); ctx.beginPath(); ctx.ellipse(0,-16,4,16,0,0,7); ctx.fill(); ctx.restore(); }
+
+  // cat napping near the easel
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.26,y:floorY+14,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('artstudio', drawArtStudio);
 
@@ -1029,7 +1032,9 @@ function drawCampsite(){
   ctx.globalAlpha=1;
 
   // lantern near the tent entrance
-  SpriteRenderer.submit({sprite:'lantern',phase:'ground',x:W*0.34,y:groundY+60,width:32,height:32,anchorY:1,frame:Math.floor(t*3)%4});
+  SpriteRenderer.submit({sprite:'lantern',phase:'ground',x:W*0.34,y:groundY+60,anchorY:1,frame:Math.floor(t*3)%4});
+  // fireflies drifting above the campsite
+  SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.60+Math.sin(t*0.6)*18,y:groundY+20+Math.sin(t*0.9)*12,anchorY:0.5,frame:Math.floor(t*5)%4});
 }
 registerScene('campsite', drawCampsite);
 
@@ -1101,6 +1106,9 @@ function drawBakery(){
     for (let k=0;k<=10;k++){ const yy=syy-k*4; const xx=sxx+Math.sin(t*3+k*0.7)*4*(k/10); if(k===0)ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy); }
     ctx.stroke();
   }
+
+  // kittens napping near the oven
+  SpriteRenderer.submit({sprite:'kittens',phase:'actors',x:W*0.68,y:floorY+20,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('bakery', drawBakery);
 
@@ -1165,9 +1173,9 @@ function drawLibrary(){
   ctx.fillStyle='rgba(140,60,74,.28)'; ctx.beginPath(); ctx.ellipse(W*0.4,H*0.83,W*0.34,H*0.08,0,0,7); ctx.fill();
 
   // book left open on the armchair
-  SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.32,y:floorY-28,width:30,height:30,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.32,y:floorY-28,anchorY:1,frame:0});
   // cat napping by the fireplace
-  SpriteRenderer.submit({sprite:'cat',phase:'ground',x:W*0.62,y:floorY,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'cat',phase:'ground',x:W*0.62,y:floorY,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4}); /* large — prominent */
 }
 registerScene('library', drawLibrary);
 
@@ -1223,10 +1231,10 @@ function drawCherryBlossom(){
   }
 
   // sprite butterflies fluttering among the blossoms
-  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.35+Math.sin(t*1.2)*20,y:groundY-20+Math.cos(t*1.5)*12,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8)%4});
-  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.7+Math.sin(t*0.9+2)*24,y:groundY-30+Math.cos(t*1.3+1)*10,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.35+Math.sin(t*1.2)*20,y:groundY-20+Math.cos(t*1.5)*12,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.7+Math.sin(t*0.9+2)*24,y:groundY-30+Math.cos(t*1.3+1)*10,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
   // a bird on the park bench
-  SpriteRenderer.submit({sprite:'bird',phase:'actors',x:W*0.46,y:groundY+30,width:35,height:35,anchorY:1,frame:Math.floor(t*6)%4});
+  SpriteRenderer.submit({sprite:'bird',phase:'actors',x:W*0.46,y:groundY+30,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('cherryblossom', drawCherryBlossom);
 
@@ -1346,9 +1354,9 @@ function drawGreenhouse(){
   ctx.strokeStyle='#7fb0c9'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(tX+5,tY-8); ctx.lineTo(tX+16,tY-14); ctx.stroke();
 
   // a butterfly drifting inside the conservatory
-  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.55+Math.sin(t*1.1)*22,y:H*0.40+Math.cos(t*1.4)*14,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.55+Math.sin(t*1.1)*22,y:H*0.40+Math.cos(t*1.4)*14,anchorY:0.5,frame:Math.floor(t*8)%4});
   // potted plant on the floor
-  SpriteRenderer.submit({sprite:'pottedPlant',phase:'ground',x:W*0.75,y:floorY+24,width:45,height:45,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'pottedPlant',phase:'ground',x:W*0.75,y:floorY+24,anchorY:1,frame:0});
 }
 registerScene('greenhouse', drawGreenhouse);
 
@@ -1386,6 +1394,9 @@ function drawPlanetarium(){
   // reclined seat silhouettes in the foreground
   ctx.fillStyle='#1a1f2b';
   for (const sx of [W*0.16,W*0.84]){ ctx.beginPath(); ctx.moveTo(sx-16,H); ctx.lineTo(sx-10,py+6); ctx.lineTo(sx+10,py+6); ctx.lineTo(sx+16,H); ctx.closePath(); ctx.fill(); }
+
+  // cat sitting among the seats
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.38,y:H*0.92,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('planetarium', drawPlanetarium);
 
@@ -1429,7 +1440,7 @@ function drawAutumnForest(){
   }
 
   // a bird perched on a branch
-  SpriteRenderer.submit({sprite:'bird',phase:'actors',x:W*0.50,y:groundY+20,width:35,height:35,anchorY:1,frame:Math.floor(t*6)%4});
+  SpriteRenderer.submit({sprite:'bird',phase:'actors',x:W*0.50,y:groundY+20,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('autumnforest', drawAutumnForest);
 
@@ -1484,6 +1495,9 @@ function drawMusicRoom(){
   const span=floorY*0.7;
   for (let i=0;i<8;i++){ const life=(t*18+i*30)%span, nx=(i*61+20)%W, ny=floorY-20-life; ctx.globalAlpha=Math.max(0,1-life/span); ctx.fillText(i%2?'♪':'♫', nx+Math.sin(t+i)*6, ny); }
   ctx.globalAlpha=1; ctx.textAlign='left';
+
+  // cat curled up on the floor near the cello
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.22,y:floorY+16,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('musicroom', drawMusicRoom);
 
@@ -1569,6 +1583,9 @@ function drawPottery(){
   ctx.fillStyle='#c98a5a'; ctx.beginPath(); ctx.ellipse(wX,wY-34,8,3,0,0,7); ctx.fill();
   // stool
   ctx.fillStyle='#5a3a22'; ctx.fillRect(wX-54,wY+2,20,4); ctx.fillRect(wX-52,wY+6,3,16); ctx.fillRect(wX-38,wY+6,3,16);
+
+  // cat warming itself near the kiln
+  SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.72,y:floorY+14,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('pottery', drawPottery);
 
@@ -1603,7 +1620,7 @@ function drawLavender(){
   for (let i=0;i<3;i++){
     const bx=(((W*0.2 + i*W*0.25 + Math.sin(t*0.8+i)*40 + t*10*(i%2?1:-1))%W)+W)%W;
     const by=horizon+24 + Math.sin(t*1.5+i)*18 + i*12;
-    SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:bx,y:by,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8+i*2)%4,flipX:!!(i%2)});
+    SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:bx,y:by,anchorY:0.5,frame:Math.floor(t*8+i*2)%4,flipX:!!(i%2)});
   }
 
   // clouds above the hills
@@ -1652,5 +1669,8 @@ function drawArcade(){
   ctx.fillStyle=`rgba(255,220,80,${0.6+0.4*Math.sin(t*6)})`; for (let i=0;i<5;i++){ ctx.beginPath(); ctx.arc(pX-14+i*7,pTop+12+((i%2)*10),2.5,0,7); ctx.fill(); }
   ctx.fillStyle='#e04a2e'; ctx.fillRect(pX-26,pTop-24,52,24);
   ctx.fillStyle=`rgba(80,220,255,${0.6+0.4*Math.sin(t*4+1)})`; ctx.fillRect(pX-20,pTop-18,40,12);
+
+  // kid playing at a cabinet
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.40,y:H*0.92,anchorY:1,frame:Math.floor(t*8)%4});
 }
 registerScene('arcade', drawArcade);

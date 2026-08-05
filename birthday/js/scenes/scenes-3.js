@@ -112,10 +112,10 @@ function drawButterflyDome(){
   }
 
   // sprite butterflies (larger, foreground)
-  SpriteRenderer.submit({sprite:'butterfly',phase:'foreground',x:W*0.25+Math.sin(t*1.0)*30,y:H*0.55+Math.cos(t*1.3)*14,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8)%4});
-  SpriteRenderer.submit({sprite:'butterfly',phase:'foreground',x:W*0.75+Math.sin(t*0.8+2)*28,y:H*0.45+Math.cos(t*1.1+1)*12,width:24,height:24,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'foreground',x:W*0.25+Math.sin(t*1.0)*30,y:H*0.55+Math.cos(t*1.3)*14,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'foreground',x:W*0.75+Math.sin(t*0.8+2)*28,y:H*0.45+Math.cos(t*1.1+1)*12,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
   // potted plant on the path
-  SpriteRenderer.submit({sprite:'pottedPlant',phase:'ground',x:W*0.88,y:floorY+16,width:45,height:45,anchorY:1,frame:0});
+  SpriteRenderer.submit({sprite:'pottedPlant',phase:'ground',x:W*0.88,y:floorY+16,anchorY:1,frame:0});
 }
 registerScene('butterflydome', drawButterflyDome);
 
@@ -148,9 +148,9 @@ function drawPasture(){
   sheep(W*0.3,H*0.6,Math.sin(t*2)*2); sheep(W*0.55,H*0.72,0); sheep(W*0.72,H*0.62,Math.sin(t*1.5+1)*2); sheep(W*0.18,H*0.82,0); sheep(W*0.85,H*0.84,Math.sin(t*2+2)*2);
 
   // bird soaring above the pasture
-  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.45+Math.sin(t*0.4)*30,y:H*0.16+Math.sin(t*0.6)*6,width:16,height:16,anchorY:0.5,frame:Math.floor(t*6)%4});
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.45+Math.sin(t*0.4)*30,y:H*0.16+Math.sin(t*0.6)*6,width:16,height:16,anchorY:0.5,frame:Math.floor(t*6)%4}); /* small — distant */
   // puppy near the fence
-  SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.42,y:H*0.78,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.42,y:H*0.78,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('pasture', drawPasture);
 
@@ -731,9 +731,9 @@ function drawSunflowers(){
     ctx.fillStyle='rgba(255,245,200,.5)'; ctx.fillRect(px,py,2,2); }
 
   // sprite butterfly among the sunflowers
-  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.55+Math.sin(t*1.2)*20,y:H*0.50+Math.cos(t*1.5)*12,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.55+Math.sin(t*1.2)*20,y:H*0.50+Math.cos(t*1.5)*12,anchorY:0.5,frame:Math.floor(t*8)%4});
   // bird in the sky
-  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.35+Math.sin(t*0.35)*28,y:H*0.14+Math.sin(t*0.5)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6)%4});
+  SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.35+Math.sin(t*0.35)*28,y:H*0.14+Math.sin(t*0.5)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6)%4}); /* small — distant */
 }
 registerScene('sunflowers', drawSunflowers);
 
