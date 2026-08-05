@@ -335,6 +335,8 @@ const SCENE_INTERACT = (()=>{
   g(['potionlab'], {lines:['What shall we brew? 🧪','It\'s bubbling away ⚗️','So many ingredients! 🌿'], emoji:'🧪', fun:5});
   g(['spiritshrine'], {lines:['The spirits are peaceful here 🙏','Ofuda glowing softly ✨','I feel something ancient and kind 💛'], emoji:'⛩️', love:5});
   g(['shadowtheater'], {lines:['The shadows are dancing! 🎭','Look, they\'re alive ✨','So magical in the lantern light 🕯️'], emoji:'🎭', fun:5});
+  g(['dreamweaverloom'], {lines:['The threads are glowing! 🧵','I see constellations in the fabric ✨','So beautiful, like weaving starlight 🌙'], emoji:'🧵', love:5});
+  g(['astralgarden'], {lines:['Flowers growing among the stars! 🌸','We\'re floating in space 🌌','Everything sparkles here ✨'], emoji:'🌌', fun:5});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];
@@ -1614,6 +1616,50 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.68, r:54, e:'🔥', lines:['The enchanted lantern 🔥','Its flame brings the shadows alive','So magical and warm ✨']},
     {nx:0.18, ny:0.82, r:46, e:'🪑', lines:['A velvet cushion 🪑','Sit with me for the show','Best seats in the house 🥰']},
     {nx:0.50, ny:0.04, r:50, e:'🎭', lines:['The carved frame 🎭','Golden corners sparkling','Like a window to another world 💛']},
+  ],
+  dreamweaverloom: [
+    {nx:0.50, ny:0.40, r:60, e:'🧵', lines:['The glowing loom 🧵','Threads of pure starlight','The tapestry is showing us something 💛']},
+    {nx:0.07, ny:0.24, r:46, e:'🧶', lines:['A floating spool! 🧶','The thread glows so warm','Each color is a different dream ✨']},
+    {nx:0.50, ny:0.34, r:50, e:'⭐', lines:['The woven constellation ⭐','Stars appear in the fabric','A map of somewhere magical 🥰']},
+    {nx:0.18, ny:0.76, r:44, e:'🕯️', lines:['The little candle 🕯️','Its light dances for us','So warm and cozy down here 💛']},
+    {nx:0.50, ny:0.08, r:48, e:'✨', lines:['A floating spool of light ✨','Drifting through the air','Trailing threads of stardust 🥰']},
+  ],
+  astralgarden: [
+    {nx:0.36, ny:0.54, r:56, e:'💎', lines:['A crystal flower! 💎','Its petals catch the starlight','So beautiful and delicate 🥰']},
+    {nx:0.50, ny:0.14, r:52, e:'🌌', lines:['The nebula above us 🌌','Swirls of purple and blue','Like a painting in the sky 💛']},
+    {nx:0.82, ny:0.54, r:48, e:'🌳', lines:['The crystal tree 🌳','Its leaves shimmer with light','Growing among the stars ✨']},
+    {nx:0.50, ny:0.42, r:58, e:'🦋', lines:['A cosmic butterfly! 🦋','Its wings glow like nebulas','So graceful floating by 🥰']},
+    {nx:0.18, ny:0.52, r:46, e:'🏛️', lines:['The little stone arch 🏛️','Ancient runes are glowing','A doorway to where? 💛']},
+  ],
+  cranberryharvest: [
+    {nx:0.78, ny:0.13, r:50, e:'☀️', lines:['Autumn sunshine ☀️','So crisp and golden','Perfect harvest weather 🥰']},
+    {nx:0.50, ny:0.60, r:62, e:'🔴', lines:['A sea of cranberries! 🔴','Floating so bright red','Like a scarlet carpet 🥰']},
+    {nx:0.14, ny:0.88, r:50, e:'📦', lines:['Crates on the dock 📦','Full of fresh berries','We picked so many today 💛']},
+    {nx:0.08, ny:0.35, r:48, e:'🏠', lines:['The little red barn 🏠','So rustic and charming','Smells like harvest time 🍂']},
+  ],
+  tidalcave: [
+    {nx:0.50, ny:0.36, r:60, e:'🌊', lines:['The cave mouth! 🌊','Turquoise sea shining through','So bright and beautiful 🥰']},
+    {nx:0.12, ny:0.90, r:46, e:'⭐', lines:['A little starfish ⭐','Clinging to the wet rock','So orange and pretty 💛']},
+    {nx:0.50, ny:0.76, r:55, e:'💧', lines:['Dark still water 💧','Reflecting the glow','So mysterious in here 🥰']},
+    {nx:0.30, ny:0.10, r:48, e:'🪨', lines:['Dripping stalactites 🪨','Plip plop plip','So ancient and cool']},
+  ],
+  reindeerbarn: [
+    {nx:0.62, ny:0.50, r:56, e:'🦌', lines:['The reindeer! 🦌','So gentle and calm','Can I pet its nose? 🥰']},
+    {nx:0.50, ny:0.20, r:48, e:'🏮', lines:['The hanging lantern 🏮','Such a warm little glow','So cozy in the barn 💛']},
+    {nx:0.16, ny:0.28, r:52, e:'🪟', lines:['Snow outside the window 🪟','Stars in the cold night','Glad we\'re in here together 🥰']},
+    {nx:0.14, ny:0.90, r:46, e:'🪣', lines:['The feed bucket 🪣','Full of oats and hay','The reindeer loves dinnertime']},
+  ],
+  skygondola: [
+    {nx:0.42, ny:0.34, r:58, e:'🚡', lines:['Our little gondola! 🚡','Swaying so gently','I can see everything from here 🥰']},
+    {nx:0.50, ny:0.42, r:56, e:'🏔️', lines:['Snowy peaks below 🏔️','So sharp and white','The whole world is tiny 💛']},
+    {nx:0.20, ny:0.11, r:48, e:'☀️', lines:['The alpine sun ☀️','So bright up here','I feel like we\'re flying 🥰']},
+    {nx:0.60, ny:0.56, r:50, e:'🌲', lines:['Forests far below 🌲','Like a green blanket','So quiet from up here']},
+  ],
+  cidermill: [
+    {nx:0.50, ny:0.50, r:56, e:'🍎', lines:['The cider press! 🍎','Squeezing the apples','Smells so sweet in here 🥰']},
+    {nx:0.86, ny:0.68, r:50, e:'🛢️', lines:['Stacked oak barrels 🛢️','Aging the cider','So rustic and warm 💛']},
+    {nx:0.16, ny:0.30, r:52, e:'🪟', lines:['The orchard outside 🪟','Apple trees through the door','I can smell the blossoms 🥰']},
+    {nx:0.16, ny:0.90, r:48, e:'🧺', lines:['A bushel of apples 🧺','Red and round and perfect','One for you, one for me 🍎']},
   ],
 };
 // nearest hotspot hit for the current scene, or null
