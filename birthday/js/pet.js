@@ -4,6 +4,7 @@
 let cooldown = 0;
 function doAction(kind){
   if (cooldown > 0) return;
+  if (kind !== 'hug' && pet.action === 'hug') hugRunners = [];
   cooldown = 0.6;
   sfx(kind);
   const ck = {feed:'feeds',draw:'draws',hug:'hugs',rest:'rests'}[kind];
@@ -61,11 +62,12 @@ function doAction(kind){
   }
   if (kind === 'hug' ){
     state.love = clamp(state.love + CONFIG.gains.hug); state.fun = clamp(state.fun+8);
-    // fresh hug starts a new group; pressing again mid-hug adds another hugger
+    // A fresh hug starts a new group. Each press sends another person running
+    // in; they join the static hug pile only when they reach Krystal.
     const midHug = pet.animLock > 0 && pet.action === 'hug';
-    if (!midHug) hugGroup = [];
-    addHugger();
-    playAnim('hug', HUG_DURATION);   // (re)start / extend the hug so you can pile on
+    if (!midHug){ hugGroup = []; hugRunners = []; }
+    const startedRunner = addHugger();
+    playAnim('hug', startedRunner ? HUG_RUN_DURATION : HUG_DURATION);
     say(pick(LINES.hug)); hearts();
   }
   pet.wanderTimer = 0.4;   // resume wandering shortly after the action
@@ -1545,4 +1547,3 @@ function throwUpFx(){
     }, i * 120);
   }
 }
-

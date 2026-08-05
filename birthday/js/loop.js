@@ -162,11 +162,15 @@ function updatePet(dt){
 
   // scripted action (eat/draw/hug) — stand facing forward and play the action art
   if (pet.animLock > 0){
+    if (pet.action === 'hug') updateHugRunners(dt);
     pet.animLock -= dt;
     pet.moving = false;
     const s = SHEETS[pet.action] || SHEETS.walk;   // eat/draw have their own sheets
     if (pet.frameLock === null) advanceFrame(dt, s.fps, s.cols);
-    if (pet.animLock <= 0){ pet.action = null; pet.frame = 0; pet.frameTime = 0; pet.frameLock = null; }
+    if (pet.animLock <= 0){
+      hugRunners = [];
+      pet.action = null; pet.frame = 0; pet.frameTime = 0; pet.frameLock = null;
+    }
     return;
   }
 
@@ -243,6 +247,40 @@ function updatePet(dt){
   }
 }
 
+function updateHugRunners(dt){
+  const arrived = [];
+  for (const runner of hugRunners){
+    const rank = Math.floor(runner.slot / 2);
+    const targetOffset = runner.side * (HUG_BASE_GAP + rank * HUG_SIDE_STEP);
+    const targetX = pet.x + targetOffset;
+    const dx = targetX - runner.x;
+    const step = HUG_RUN_SPEED * dt;
+
+    runner.y += (pet.y - runner.y) * Math.min(1, dt * 8);
+    runner.frameTime += dt;
+    while (runner.frameTime >= 1 / 12){
+      runner.frameTime -= 1 / 12;
+      runner.frame = (runner.frame + 1) % 4;
+    }
+
+    if (Math.abs(dx) <= step + 2){
+      runner.x = targetX;
+      arrived.push(runner);
+    } else {
+      runner.x += Math.sign(dx) * step;
+    }
+  }
+  if (arrived.length){
+    arrived.sort((a,b)=>a.slot-b.slot);
+    const names = new Set(arrived.map(runner=>runner.name));
+    hugRunners = hugRunners.filter(runner => !names.has(runner.name));
+    for (const runner of arrived){
+      if (!hugGroup.includes(runner.name)) hugGroup.push(runner.name);
+    }
+    hearts();
+  }
+}
+
 function advanceFrame(dt, fps, cols){
   pet.frameTime += dt;
   const spf = 1 / fps;
@@ -268,4 +306,3 @@ let sceneChangeTimer = 60; // seconds
 // added later default to on.
 let disabledScenes = (function(){ try{ const r=localStorage.getItem('bpet_disabled'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveDisabled(){ try{ localStorage.setItem('bpet_disabled', JSON.stringify([...disabledScenes])); }catch(e){} }
-

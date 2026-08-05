@@ -70,6 +70,7 @@ function startBirthday(){
     candles.push({ col:k%cols, row:Math.floor(k/cols), lit:true, flick:rand(0,6.28), smoke:0, sx:0, sy:0 });
   }
   birthday = { t:0, candles, cols, energy:0, blow:0, done:false, doneT:0, confetti:[] };
+  hugRunners = [];
   hugGroup = [...HUG_POOL];                             // everyone gathers around Krystal
   playHappyBirthday();
   initMic();
@@ -522,4 +523,3 @@ function render(){
   // sleep sequence: black wash over everything as she drifts off and wakes
   if (restFade > 0){ ctx.fillStyle = `rgba(0,0,0,${restFade})`; ctx.fillRect(0,0,W,H); }
 }
-

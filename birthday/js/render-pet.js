@@ -6,6 +6,7 @@ function drawPet(){
   // hugging draws a whole group (Krystal + others), so handle it up front
   if (acting && pet.action === 'hug' && sheets.hugs1 && sheets.hugs1.ready){
     drawHugGroup();
+    drawHugRunners();
     return;
   }
 
@@ -73,6 +74,25 @@ function drawPet(){
   if (acting && pet.action==='hug'){
     ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('💗', feetX, feetY - dispH + 4 + Math.sin(pet.bob*5)*3);
+  }
+}
+
+function drawHugRunners(){
+  for (const runner of hugRunners){
+    const sh = sheets[runner.sheet];
+    if (!sh || !sh.ready) continue;
+    const dispH = sh.cfg.displayH;
+    const dispW = dispH * sh.fw / sh.fh;
+    const feetY = runner.y + (sh.cfg.footInset || 0) * dispH;
+    const direction = runner.side > 0 ? 'left' : 'right';
+    const row = sh.cfg.rowMap[direction];
+
+    ctx.fillStyle = 'rgba(0,0,0,.14)';
+    ctx.beginPath();
+    ctx.ellipse(runner.x, runner.y-4, dispW*0.27, dispH*0.04, 0, 0, 7);
+    ctx.fill();
+    ctx.drawImage(sh.canvas, runner.frame*sh.fw, row*sh.fh, sh.fw, sh.fh,
+      runner.x-dispW/2, feetY-dispH, dispW, dispH);
   }
 }
 

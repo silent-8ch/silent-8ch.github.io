@@ -48,6 +48,16 @@ const SHEETS = {
   // so overlaying quarters at the same rect makes them line up into a hug.
   hugs1:{ src:"hugs1.png",      cols:4, rows:1, fps:1, displayH:158, footInset:0.02 },
   hugs2:{ src:"hugs2.png",      cols:4, rows:1, fps:1, displayH:158, footInset:0.02 },
+  paulWalk:   { src:"sprites/walking-all/paul-walk.png",   cols:4, rows:4, fps:12, displayH:150, footInset:0.08,
+                rowMap:{ down:0, left:1, right:2, up:3 } },
+  lunaWalk:   { src:"sprites/walking-all/luna-walk.png",   cols:4, rows:4, fps:12, displayH:150, footInset:0.08,
+                rowMap:{ down:0, left:1, right:2, up:3 } },
+  wadeWalk:   { src:"sprites/walking-all/wade-walk.png",   cols:4, rows:4, fps:12, displayH:150, footInset:0.08,
+                rowMap:{ down:0, left:1, right:2, up:3 } },
+  lukeWalk:   { src:"sprites/walking-all/luke-walk.png",   cols:4, rows:4, fps:12, displayH:150, footInset:0.08,
+                rowMap:{ down:0, left:1, right:2, up:3 } },
+  williamWalk:{ src:"sprites/walking-all/william-walk.png",cols:4, rows:4, fps:12, displayH:150, footInset:0.08,
+                rowMap:{ down:0, left:1, right:2, up:3 } },
 };
 
 /* ----------------------------------------------------------------------------
@@ -73,12 +83,31 @@ const HUG_SIDE_STEP    = 30;   // px between people stacked on the same side of 
 const HUG_SQUEEZE_AMP  = 0.16; // how much the group compresses at the squeeze peak
 const HUG_SQUEEZE_FREQ = 5;    // squeeze pulse speed (radians/sec)
 const HUG_DURATION     = 2.4;  // each hug press (re)sets the timer to this many seconds
+const HUG_RUN_SPEED    = 190;  // canvas pixels/sec while a hugger runs in
+const HUG_RUN_DURATION = 3.4;  // enough time to cross the full stage and still hug
 let hugGroup = [];             // names of the "other" people currently hugging Krystal
+let hugRunners = [];           // people currently running in from off screen
 
 function addHugger(){
-  if (hugGroup.length >= HUG_MAX_OTHERS) return;
-  const avail = HUG_POOL.filter(p => !hugGroup.includes(p));   // no duplicates
-  if (avail.length) hugGroup.push(pick(avail));                // pick a random newcomer
+  if (hugGroup.length + hugRunners.length >= HUG_MAX_OTHERS) return false;
+  const active = new Set([...hugGroup, ...hugRunners.map(r=>r.name)]);
+  const avail = HUG_POOL.filter(name => !active.has(name));
+  if (!avail.length) return false;
+
+  const name = pick(avail);
+  const order = hugGroup.length + hugRunners.length;
+  const side = (order % 2 === 0) ? 1 : -1;             // first arrives from right, then left
+  hugRunners.push({
+    name,
+    sheet: `${name}Walk`,
+    slot: order,
+    side,
+    x: side > 0 ? W + 55 : -55,
+    y: pet.y,
+    frame: 0,
+    frameTime: 0,
+  });
+  return true;
 }
 
 /* Things she "says" — pulled at random per action/mood. Personalize freely. */
