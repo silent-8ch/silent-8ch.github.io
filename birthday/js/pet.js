@@ -1240,6 +1240,30 @@ const SCENE_SPOTS = {
     {nx:0.08, ny:0.60, r:44, e:'📖', lines:['The spell book 📖','Ancient recipes inside','Read me one? 🥰']},
     {nx:0.20, ny:0.16, r:46, e:'✨', lines:['Floating bottles! ✨','Hovering in mid-air','Real magic, right here 💜']},
   ],
+  treehouse: [
+    {nx:0.45, ny:0.22, r:52, e:'🏠', lines:['Our little cabin 🏠','So cozy up in the tree','I could live here forever 🥰']},
+    {nx:0.50, ny:0.16, r:46, e:'☀️', lines:['Sun through the leaves ☀️','Warm dappled light','So golden and dreamy ✨']},
+    {nx:0.20, ny:0.85, r:50, e:'🪜', lines:['The rope ladder 🪜','Climb up after me!','Careful, it sways 😄']},
+    {nx:0.74, ny:0.90, r:46, e:'🪴', lines:['A little potted plant 🪴','Growing way up here','Even the leaves love it 💛']},
+  ],
+  gelateria: [
+    {nx:0.55, ny:0.64, r:58, e:'🍨', lines:['The gelato case! 🍨','So many flavors','One scoop or three? 😋']},
+    {nx:0.17, ny:0.24, r:48, e:'📋', lines:['The chalkboard menu 📋','So many choices','What sounds good to you? 🥰']},
+    {nx:0.12, ny:0.90, r:44, e:'🍦', lines:['A triple-scoop cone! 🍦','With a cherry on top','Share it with me? 💛']},
+    {nx:0.50, ny:0.04, r:46, e:'🏪', lines:['The striped awning 🏪','Green and white stripes','So charming from outside ✨']},
+  ],
+  trainstation: [
+    {nx:0.50, ny:0.34, r:48, e:'🕰️', lines:['The station clock 🕰️','Tick tock, the hands turn','We have time, love 🥰']},
+    {nx:0.19, ny:0.37, r:52, e:'📟', lines:['The departure board 📟','Flickering destinations','Where shall we go? ✨']},
+    {nx:0.60, ny:0.60, r:58, e:'🚂', lines:['The steam train! 🚂','All aboard, my love','Let\'s ride it somewhere far 💛']},
+    {nx:0.16, ny:0.88, r:46, e:'🪑', lines:['A little bench 🪑','Wait here with me','Our train will come soon 🥰']},
+  ],
+  duckpond: [
+    {nx:0.14, ny:0.46, r:52, e:'🌳', lines:['The weeping willow 🌳','Drooping so gracefully','So cool under its shade 🥰']},
+    {nx:0.45, ny:0.55, r:56, e:'🦆', lines:['The ducks! 🦆','Paddling along with babies','So sweet and waddly 💛']},
+    {nx:0.30, ny:0.68, r:44, e:'🪷', lines:['Lily pads 🪷','Floating so peacefully','A little frog maybe? 🐸']},
+    {nx:0.14, ny:0.90, r:46, e:'🪑', lines:['The park bench 🪑','Sit with me a while','Toss some crumbs to the ducks 🥰']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
