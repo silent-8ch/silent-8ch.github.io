@@ -145,16 +145,35 @@
       const dx = (previewSize - dw) / 2, dy = (previewSize - dh) / 2;
       const col = frame % s.cols;
       pctx.drawImage(s.image, col * s.fw, 0, s.fw, s.fh, dx, dy, dw, dh);
-      // Anchor point crosshair
-      const ancX = dx + dw * (s.anchorX ?? 0.5);
-      const ancY = dy + dh * (s.anchorY ?? 1);
-      pctx.strokeStyle = '#ef5350';
+      // Anchor point — large visible crosshair + ground line + label
+      const ax = s.anchorX ?? 0.5, ay = s.anchorY ?? 1;
+      const ancX = dx + dw * ax;
+      const ancY = dy + dh * ay;
+      // Ground line (full width at anchor Y)
+      pctx.strokeStyle = 'rgba(239,83,80,0.3)';
       pctx.lineWidth = 1;
-      pctx.beginPath(); pctx.moveTo(ancX - 8, ancY); pctx.lineTo(ancX + 8, ancY); pctx.stroke();
-      pctx.beginPath(); pctx.moveTo(ancX, ancY - 8); pctx.lineTo(ancX, ancY + 8); pctx.stroke();
+      pctx.setLineDash([4, 4]);
+      pctx.beginPath(); pctx.moveTo(0, ancY); pctx.lineTo(previewSize, ancY); pctx.stroke();
+      // Vertical center line
+      pctx.beginPath(); pctx.moveTo(ancX, 0); pctx.lineTo(ancX, previewSize); pctx.stroke();
+      pctx.setLineDash([]);
+      // Crosshair at anchor
+      pctx.strokeStyle = '#ef5350';
+      pctx.lineWidth = 2;
+      pctx.beginPath(); pctx.moveTo(ancX - 12, ancY); pctx.lineTo(ancX + 12, ancY); pctx.stroke();
+      pctx.beginPath(); pctx.moveTo(ancX, ancY - 12); pctx.lineTo(ancX, ancY + 12); pctx.stroke();
+      // Circle around anchor
+      pctx.lineWidth = 1.5;
+      pctx.beginPath(); pctx.arc(ancX, ancY, 6, 0, Math.PI * 2); pctx.stroke();
+      // Label
+      pctx.fillStyle = '#ef5350';
+      pctx.font = 'bold 11px monospace';
+      pctx.textAlign = 'left';
+      pctx.fillText(`anchor (${ax}, ${ay})`, ancX + 10, ancY - 10);
       // Frame counter
       pctx.fillStyle = '#555';
       pctx.font = '9px monospace';
+      pctx.textAlign = 'left';
       pctx.fillText(`frame ${col}/${s.cols}`, 4, previewSize - 4);
 
       if (s.cols > 1 && s.fps > 0) {
