@@ -89,6 +89,9 @@ stagewrap.addEventListener('pointerdown', (e)=>{
     else blowOutOne(px, py);                                // blow out the nearest candle to the tap
     return;
   }
+  // Roaming characters may cross Krystal's hitbox, so let their visible sprite
+  // consume the tap before treating it as a pet/nuzzle.
+  for (const f of CHARACTER_TAPS){ try{ if (f(px, py)) return; }catch(e){} }
   // sprite occupies roughly a box above the feet point (pet.x, pet.y)
   const h = SHEETS.walk.displayH;
   const halfW = h * 0.32;

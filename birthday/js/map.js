@@ -81,6 +81,10 @@ const SCENE_LABELS = {
   spiritshrine:'Spirit Shrine', shadowtheater:'Shadow Theater',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
+const FAMILY_LOCATION_DEBUG = (()=>{
+  const value = new URLSearchParams(window.location.search).get('debug');
+  return value !== null && value !== '0' && value.toLowerCase() !== 'false' && value.toLowerCase() !== 'off';
+})();
 function buildPassport(){
   const el=document.getElementById('mapPassport'); if(!el) return;
   const pct = Math.round(visited.size/SCENES.length*100);
@@ -92,6 +96,8 @@ function buildPassport(){
 function buildMapList(){
   buildPassport();
   const list=document.getElementById('mapList'); list.innerHTML='';
+  const familyByScene = FAMILY_LOCATION_DEBUG && typeof getFamilyHideoutLocations === 'function'
+    ? getFamilyHideoutLocations() : {};
   // show alphabetically by name (order no longer matters — every change is random);
   // keep each scene's real index so jumping to it still works
   const rows = SCENES.map((name,idx)=>({ name, idx, label: sceneLabel(name) }))
@@ -102,7 +108,15 @@ function buildMapList(){
     cb.addEventListener('change',()=>{ if(cb.checked) disabledScenes.delete(name); else disabledScenes.add(name); saveDisabled(); });
     const nm=document.createElement('span'); nm.className='mn'+(visited.has(name)?' seen':''); nm.textContent=label;
     nm.addEventListener('click',()=>{ currentScene=idx; sceneChangeTimer=60; closeMap(); });
-    row.appendChild(cb); row.appendChild(nm); list.appendChild(row);
+    row.appendChild(cb); row.appendChild(nm);
+    const family = familyByScene[name] || [];
+    if (family.length){
+      const reveal=document.createElement('span'); reveal.className='mapFamilyDebug';
+      reveal.textContent='👀 '+family.join(', ');
+      reveal.title='Debug: family hiding here';
+      row.appendChild(reveal);
+    }
+    list.appendChild(row);
   });
 }
 function openMap(){ buildMapList(); document.getElementById('mapPanel').classList.remove('hide'); }
@@ -136,4 +150,3 @@ document.getElementById('padSave').addEventListener('click', padSaveDrawing);
 })();
 document.getElementById('mapAll').addEventListener('click', ()=>{ disabledScenes.clear(); saveDisabled(); buildMapList(); });
 document.getElementById('mapNone').addEventListener('click', ()=>{ disabledScenes = new Set(SCENES); saveDisabled(); buildMapList(); });
-

@@ -59,6 +59,7 @@ const pet = {
    over the scene each frame. EXTRA_TAPS: fn(px,py) on a stage tap — return true
    to consume the tap (skip the default walk-to-spot). All are wrapped in try/catch. */
 const EXTRA_UPDATERS = [], EXTRA_DRAWERS = [], EXTRA_TAPS = [];
+const CHARACTER_TAPS = [];  // visible roaming characters get priority over Krystal's tap box
 
 /* ---------- save / load ---------- */
 function load(){
@@ -113,4 +114,3 @@ let debugCry = false;
 function isCrying(){
   return debugCry || (state.hunger < 15 && state.fun < 15 && state.love < 15);
 }
-
