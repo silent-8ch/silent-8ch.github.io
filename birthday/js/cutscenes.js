@@ -1386,6 +1386,539 @@ function csRainyDayChat(){
 }
 
 /* ============================================================================
+   CUTSCENE 8: FLOWER CROWN  (triggers at florist, cherryblossom, lavender, peonygarden)
+   ============================================================================ */
+function csFlowerCrown(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const lunaX = W * 0.50, krystalX = W * 0.34, wadeX = W * 0.68;
+
+  // floating petal particles
+  let petals = [];
+  function spawnPetals(cx, cy, n){
+    const cols = ['#ffb7c5','#f5a0b0','#ffd1dc','#e8a0c0','#fff0f5'];
+    for (let i = 0; i < n; i++){
+      petals.push({
+        x: cx + rand(-20, 20), y: cy + rand(-6, 6),
+        vx: rand(-12, 12), vy: rand(-25, -50),
+        rot: Math.random() * 6.28, vr: rand(-3, 3),
+        life: 1.4 + Math.random() * 1.0,
+        maxLife: 1.4 + Math.random() * 1.0,
+        size: 2.5 + Math.random() * 2,
+        col: cols[Math.floor(Math.random() * cols.length)]
+      });
+    }
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // soft spring sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#a8d8f0'); sky.addColorStop(0.5, '#d0e8f4'); sky.addColorStop(1, '#e8f4e8');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // puffy clouds
+    ctx.fillStyle = 'rgba(255,255,255,.5)';
+    for (let i = 0; i < 3; i++){
+      const cx = (i * W / 2.5 + 20 + Math.sin(t * 0.08 + i) * 6);
+      const cy = 22 + i * 14;
+      ctx.beginPath(); ctx.ellipse(cx, cy, 32 + i * 6, 10, 0, 0, 7); ctx.fill();
+    }
+
+    // grassy meadow ground
+    const gr = ctx.createLinearGradient(0, groundY, 0, H);
+    gr.addColorStop(0, '#6aae4a'); gr.addColorStop(1, '#4a8e3a');
+    ctx.fillStyle = gr; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // scattered wildflowers on the ground
+    const flowerCols = ['#ff6090','#ffa040','#ffd040','#9060e0','#ff80b0'];
+    for (let i = 0; i < 18; i++){
+      const fx = (i * 43 + 12) % W;
+      const fy = groundY + 4 + (i * 17) % 20;
+      ctx.fillStyle = flowerCols[i % flowerCols.length];
+      ctx.beginPath(); ctx.arc(fx, fy, 2, 0, 7); ctx.fill();
+      // tiny stem
+      ctx.strokeStyle = '#3a7a2a'; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(fx, fy + 2); ctx.lineTo(fx, fy + 6); ctx.stroke();
+    }
+
+    // flower bushes left and right
+    for (let side = 0; side < 2; side++){
+      const bx = side === 0 ? W * 0.08 : W * 0.90;
+      ctx.fillStyle = '#3a8a30';
+      ctx.beginPath(); ctx.ellipse(bx, groundY - 4, 22, 18, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#ff80a0';
+      for (let j = 0; j < 6; j++){
+        const px = bx + Math.cos(j * 1.05) * 14;
+        const py = groundY - 8 + Math.sin(j * 1.5) * 10;
+        ctx.beginPath(); ctx.arc(px, py, 3, 0, 7); ctx.fill();
+      }
+    }
+  }
+
+  function drawPetals(dt){
+    for (let i = petals.length - 1; i >= 0; i--){
+      const p = petals[i];
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vy += 18 * dt; // gentle gravity
+      p.rot += p.vr * dt;
+      p.life -= dt;
+      if (p.life <= 0){ petals.splice(i, 1); continue; }
+      const a = Math.min(1, p.life / p.maxLife * 1.6);
+      ctx.save();
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.col; ctx.globalAlpha = a;
+      ctx.beginPath(); ctx.ellipse(0, 0, p.size, p.size * 0.5, 0, 0, 7); ctx.fill();
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // draw a simple flower crown on a character's head
+  function drawCrown(cx, topY, tiny){
+    const r = tiny ? 8 : 12;
+    const cols = ['#ff6080','#ffa040','#ffd040','#a060d0','#ff80b0'];
+    // vine arc
+    ctx.strokeStyle = '#3a8a30'; ctx.lineWidth = tiny ? 1.2 : 1.8;
+    ctx.beginPath(); ctx.arc(cx, topY + 2, r, Math.PI, 0); ctx.stroke();
+    // flowers along the arc
+    const n = tiny ? 3 : 5;
+    for (let i = 0; i < n; i++){
+      const ang = Math.PI + (i / (n - 1)) * Math.PI;
+      const fx = cx + Math.cos(ang) * r;
+      const fy = topY + 2 + Math.sin(ang) * r;
+      ctx.fillStyle = cols[i % cols.length];
+      ctx.beginPath(); ctx.arc(fx, fy, tiny ? 2 : 3, 0, 7); ctx.fill();
+      ctx.fillStyle = '#ffe060';
+      ctx.beginPath(); ctx.arc(fx, fy, tiny ? 0.8 : 1.2, 0, 7); ctx.fill();
+    }
+  }
+
+  function drawChars(krystalCrown, wadeCrown){
+    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    csDrawChar('luna',    lunaX,    fY, 'down',  charH * 0.9, 0);
+    csDrawChar('wade',    wadeX,    fY, 'left',  charH * 0.95, 0);
+    if (krystalCrown) drawCrown(krystalX, fY - charH - 2, false);
+    if (wadeCrown) drawCrown(wadeX, fY - charH * 0.95 - 2, true);
+  }
+
+  return {
+    chars: ['krystal', 'luna', 'wade'],
+    skipable: true,
+    steps: [
+      // Step 1: Luna is crafting flower crowns
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawChars(false, false); drawPetals(0);
+          csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', 'Almost done with this one...');
+      }, update(cs, dt){ drawPetals(dt); }},
+      // Step 2: Luna places the crown on Krystal
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawChars(true, false); drawPetals(0);
+          csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', 'There! A crown for a queen!');
+      }, onStart(cs){
+          spawnPetals(krystalX, fY - charH, 10);
+      }, update(cs, dt){ drawPetals(dt); }},
+      // Step 3: Krystal reacts
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars(true, false); drawPetals(0);
+          csDrawBubble(krystalX, fY - charH - 14, 'Krystal', 'I love it so much! \ud83e\udd70');
+      }, update(cs, dt){ drawPetals(dt); }},
+      // Step 4: Wade wants one
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars(true, false); drawPetals(0);
+          csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', 'Hey, where\u2019s MY crown?!');
+      }, update(cs, dt){ drawPetals(dt); }},
+      // Step 5: Luna makes Wade a tiny one. Everyone laughs.
+      { dur: 2.8, draw(cs){
+          drawBg(cs); drawChars(true, true); drawPetals(0);
+          if (cs.stepT < 1.6){
+            csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', 'Here\u2019s a little one just for you!');
+          } else {
+            csDrawBubble(krystalX, fY - charH - 14, 'Krystal', 'You look adorable! \ud83d\ude02');
+          }
+      }, onStart(cs){
+          spawnPetals(wadeX, fY - charH * 0.9, 8);
+          csHearts(cs, krystalX, fY - charH * 0.7, 4);
+          csHearts(cs, lunaX, fY - charH * 0.6, 3);
+          csHearts(cs, wadeX, fY - charH * 0.6, 4);
+      }, update(cs, dt){ drawPetals(dt); }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 9: SNOW ANGEL CONTEST  (triggers at snowycabin, icepond, frozenfalls)
+   ============================================================================ */
+function csSnowAngelContest(){
+  const groundY = H * 0.68;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.28, paulX = W * 0.50, williamX = W * 0.72;
+
+  // snowflake particles
+  const snowflakes = [];
+  for (let i = 0; i < 40; i++){
+    snowflakes.push({
+      x: Math.random() * W, y: Math.random() * H,
+      speed: 15 + Math.random() * 20,
+      drift: rand(-8, 8),
+      size: 1 + Math.random() * 2,
+      phase: Math.random() * 6.28
+    });
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // pale winter sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#b0c4d8'); sky.addColorStop(0.6, '#d0dce8'); sky.addColorStop(1, '#e0e8f0');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // distant snowy mountains
+    ctx.fillStyle = '#c8d4e0';
+    ctx.beginPath(); ctx.moveTo(0, groundY);
+    ctx.lineTo(W * 0.15, groundY - 50); ctx.lineTo(W * 0.30, groundY - 30);
+    ctx.lineTo(W * 0.50, groundY - 65); ctx.lineTo(W * 0.70, groundY - 35);
+    ctx.lineTo(W * 0.85, groundY - 55); ctx.lineTo(W, groundY - 25);
+    ctx.lineTo(W, groundY); ctx.closePath(); ctx.fill();
+    // snow peaks
+    ctx.fillStyle = '#e8f0f8';
+    ctx.beginPath(); ctx.moveTo(W * 0.13, groundY - 45);
+    ctx.lineTo(W * 0.15, groundY - 50); ctx.lineTo(W * 0.17, groundY - 44); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(W * 0.48, groundY - 60);
+    ctx.lineTo(W * 0.50, groundY - 65); ctx.lineTo(W * 0.52, groundY - 58); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(W * 0.83, groundY - 50);
+    ctx.lineTo(W * 0.85, groundY - 55); ctx.lineTo(W * 0.87, groundY - 48); ctx.fill();
+
+    // snowy pine trees
+    ctx.fillStyle = '#2a5040';
+    for (let i = 0; i < 6; i++){
+      const px = i * W / 5 + 10;
+      const ph = 20 + ((i * 13) % 16);
+      drawPine(px, groundY + 2, ph);
+    }
+    // snow on pines
+    ctx.fillStyle = 'rgba(240,245,255,.4)';
+    for (let i = 0; i < 6; i++){
+      const px = i * W / 5 + 10;
+      const ph = 20 + ((i * 13) % 16);
+      ctx.beginPath();
+      ctx.moveTo(px - 4, groundY + 2 - ph * 0.5);
+      ctx.lineTo(px, groundY + 2 - ph);
+      ctx.lineTo(px + 4, groundY + 2 - ph * 0.5);
+      ctx.closePath(); ctx.fill();
+    }
+
+    // snow-covered ground
+    const snow = ctx.createLinearGradient(0, groundY, 0, H);
+    snow.addColorStop(0, '#eef2f8'); snow.addColorStop(1, '#d8e0ea');
+    ctx.fillStyle = snow; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // subtle snow drifts
+    ctx.fillStyle = 'rgba(255,255,255,.3)';
+    ctx.beginPath(); ctx.moveTo(0, groundY + 6);
+    for (let x = 0; x <= W; x += 20) ctx.lineTo(x, groundY + 4 + Math.sin(x * 0.04 + 0.5) * 3);
+    ctx.lineTo(W, groundY + 12); ctx.lineTo(0, groundY + 12); ctx.closePath(); ctx.fill();
+
+    // falling snow
+    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    for (const s of snowflakes){
+      const sx = (s.x + Math.sin(t * 0.7 + s.phase) * s.drift + t * s.drift * 0.2) % W;
+      const sy = (s.y + s.speed * t) % H;
+      ctx.beginPath(); ctx.arc(sx < 0 ? sx + W : sx, sy, s.size, 0, 7); ctx.fill();
+    }
+  }
+
+  // draw a snow angel impression in the snow
+  function drawSnowAngel(cx, cy, quality){
+    ctx.save();
+    // body impression
+    ctx.fillStyle = 'rgba(200,210,225,.6)';
+    ctx.beginPath(); ctx.ellipse(cx, cy + 2, 10, 16, 0, 0, 7); ctx.fill();
+    // wing impressions
+    if (quality === 'perfect'){
+      ctx.fillStyle = 'rgba(200,210,225,.5)';
+      ctx.beginPath(); ctx.ellipse(cx - 18, cy, 12, 6, -0.3, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 18, cy, 12, 6, 0.3, 0, 7); ctx.fill();
+    } else {
+      // messy — lopsided wings, smudge marks
+      ctx.fillStyle = 'rgba(190,200,215,.5)';
+      ctx.beginPath(); ctx.ellipse(cx - 16, cy + 4, 14, 5, -0.6, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 20, cy - 2, 10, 7, 0.5, 0, 7); ctx.fill();
+      // hand drag marks
+      ctx.strokeStyle = 'rgba(180,190,210,.4)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx + 22, cy + 6); ctx.lineTo(cx + 30, cy + 12); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawChars(paulFallen){
+    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    if (paulFallen){
+      // Paul on the ground — draw facing up, smaller, lower
+      csDrawChar('paul', paulX, fY + 20, 'up', charH * 0.6, 0);
+    } else {
+      csDrawChar('paul', paulX, fY, 'down', charH, 0);
+    }
+    csDrawChar('william', williamX, fY, 'left', charH * 0.95, 0);
+  }
+
+  return {
+    chars: ['krystal', 'paul', 'william'],
+    skipable: true,
+    steps: [
+      // Step 1: Fresh snow, everyone excited
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars(false);
+          csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', 'Snow angel contest! Watch this!');
+      }},
+      // Step 2: William makes a perfect snow angel
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawSnowAngel(williamX, groundY + 14, 'perfect');
+          drawChars(false);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Wow, that\u2019s actually perfect!');
+      }},
+      // Step 3: Paul tries... and face-plants
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawSnowAngel(williamX, groundY + 14, 'perfect');
+          drawSnowAngel(paulX, groundY + 16, 'messy');
+          drawChars(true);
+          csDrawBubble(paulX, fY + 20 - charH * 0.6 - 4, 'Paul', 'Nailed it! ...ow.');
+      }, onStart(cs){
+          try{ sfx('tap'); }catch(e){}
+      }},
+      // Step 4: Krystal laughs and helps Paul up
+      { dur: 2.5, draw(cs){
+          drawBg(cs);
+          drawSnowAngel(williamX, groundY + 14, 'perfect');
+          drawSnowAngel(paulX, groundY + 16, 'messy');
+          // Krystal closer to Paul — helping him up
+          csDrawChar('krystal', paulX - 20, fY, 'right', charH, 1);
+          csDrawChar('paul', paulX, fY, 'left', charH, 0);
+          csDrawChar('william', williamX, fY, 'left', charH * 0.95, 0);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Come here, you goof \u2764\ufe0f');
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+          csHearts(cs, paulX, fY - charH * 0.7, 4);
+      }},
+      // Step 5: William proud, everyone warm
+      { dur: 2.5, draw(cs){
+          drawBg(cs);
+          drawSnowAngel(williamX, groundY + 14, 'perfect');
+          drawSnowAngel(paulX, groundY + 16, 'messy');
+          csDrawChar('krystal', paulX - 20, fY, 'right', charH, 0);
+          csDrawChar('paul', paulX, fY, 'left', charH, 0);
+          csDrawChar('william', williamX, fY, 'left', charH * 0.95, 0);
+          csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', 'I clearly won. \ud83d\ude0e');
+      }, onStart(cs){
+          csHearts(cs, williamX, fY - charH * 0.6, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 10: MUSIC JAM  (triggers at musicroom, recordshop, jazzclub)
+   ============================================================================ */
+function csMusicJam(){
+  const groundY = H * 0.72;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.20, paulX = W * 0.40, lukeX = W * 0.60, lunaX = W * 0.80;
+
+  // floating music notes
+  let notes = [];
+  const noteChars = ['\u266a','\u266b','\u2669','\u266c'];
+  function spawnNotes(cx, cy, n){
+    for (let i = 0; i < n; i++){
+      notes.push({
+        x: cx + rand(-16, 16), y: cy,
+        vx: rand(-10, 10), vy: rand(-35, -60),
+        life: 1.6 + Math.random() * 1.2,
+        maxLife: 1.6 + Math.random() * 1.2,
+        ch: noteChars[Math.floor(Math.random() * noteChars.length)],
+        size: 12 + Math.floor(Math.random() * 6),
+        col: ['#ff6090','#6090ff','#60d060','#ffa040','#c060e0'][Math.floor(Math.random() * 5)]
+      });
+    }
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // warm room interior
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#2a1a30'); wall.addColorStop(0.5, '#3a2240'); wall.addColorStop(1, '#4a2a4a');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // wood floor
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#5a4030'); floor.addColorStop(1, '#4a3424');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+    // planks
+    ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 26){
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // stage lights / colored spots
+    const spotCols = ['rgba(255,100,120,.12)','rgba(100,120,255,.12)','rgba(120,255,100,.12)'];
+    for (let i = 0; i < 3; i++){
+      const sx = W * 0.25 + i * W * 0.25;
+      const pulse = 0.7 + 0.3 * Math.sin(t * 2.5 + i * 2.1);
+      const sg = ctx.createRadialGradient(sx, 0, 0, sx, groundY * 0.5, 70 * pulse);
+      sg.addColorStop(0, spotCols[i]); sg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = sg; ctx.fillRect(sx - 70, 0, 140, groundY);
+    }
+
+    // amp / speaker on the left wall
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(6, groundY - 32, 22, 32, 2); ctx.fill();
+    ctx.fillStyle = '#2a2a2a';
+    ctx.beginPath(); ctx.arc(17, groundY - 16, 8, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.arc(17, groundY - 16, 5, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.arc(17, groundY - 16, 3, 0, 7); ctx.stroke();
+
+    // poster on the wall
+    ctx.fillStyle = '#c04060';
+    roundRect(W - 38, H * 0.12, 24, 30, 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = '6px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('ROCK', W - 26, H * 0.12 + 16);
+    ctx.fillText('ON', W - 26, H * 0.12 + 24);
+  }
+
+  // draw simple instruments near characters
+  function drawInstruments(cs){
+    // Krystal — tambourine (small circle at hand level)
+    const tambX = krystalX + 14, tambY = fY - charH * 0.4;
+    ctx.strokeStyle = '#c8a040'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(tambX, tambY, 6, 0, 7); ctx.stroke();
+    ctx.fillStyle = '#e8c860';
+    for (let i = 0; i < 4; i++){
+      const a = i * 1.57;
+      ctx.beginPath(); ctx.arc(tambX + Math.cos(a) * 6, tambY + Math.sin(a) * 6, 1.5, 0, 7); ctx.fill();
+    }
+
+    // Paul — guitar (simple shape)
+    const gx = paulX + 16, gy = fY - charH * 0.45;
+    ctx.fillStyle = '#a06030';
+    ctx.beginPath(); ctx.ellipse(gx, gy + 6, 7, 10, 0.2, 0, 7); ctx.fill();
+    ctx.fillStyle = '#c08040';
+    ctx.beginPath(); ctx.ellipse(gx, gy + 6, 5, 7, 0.2, 0, 7); ctx.fill();
+    // neck
+    ctx.fillStyle = '#804020'; ctx.fillRect(gx - 1.5, gy - 16, 3, 16);
+    // strings
+    ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 0.5;
+    for (let i = 0; i < 3; i++){
+      ctx.beginPath(); ctx.moveTo(gx - 1 + i, gy - 14); ctx.lineTo(gx - 1 + i, gy + 10); ctx.stroke();
+    }
+
+    // Luke — trumpet (simple shape)
+    const tx = lukeX + 14, ty = fY - charH * 0.55;
+    ctx.fillStyle = '#d4a840';
+    ctx.fillRect(tx - 10, ty, 20, 4);
+    // bell
+    ctx.beginPath(); ctx.moveTo(tx + 10, ty - 2); ctx.lineTo(tx + 18, ty - 6);
+    ctx.lineTo(tx + 18, ty + 10); ctx.lineTo(tx + 10, ty + 6); ctx.closePath(); ctx.fill();
+    // valves
+    ctx.fillStyle = '#b89030';
+    for (let i = 0; i < 3; i++) ctx.fillRect(tx - 4 + i * 5, ty - 4, 2, 4);
+
+    // Luna — keyboard (flat rectangle)
+    const kx = lunaX - 4, ky = fY - charH * 0.38;
+    ctx.fillStyle = '#222'; roundRect(kx - 14, ky, 28, 8, 1); ctx.fill();
+    // white keys
+    ctx.fillStyle = '#eee';
+    for (let i = 0; i < 7; i++) ctx.fillRect(kx - 12 + i * 3.6, ky + 1, 3, 5);
+    // black keys
+    ctx.fillStyle = '#333';
+    for (let i = 0; i < 5; i++){
+      if (i === 2) continue; // skip one for realism
+      ctx.fillRect(kx - 10.5 + i * 3.6, ky + 1, 2, 3);
+    }
+  }
+
+  function drawNotes(dt){
+    for (let i = notes.length - 1; i >= 0; i--){
+      const n = notes[i];
+      n.x += n.vx * dt; n.y += n.vy * dt;
+      n.vx += rand(-4, 4) * dt; // wobble
+      n.life -= dt;
+      if (n.life <= 0){ notes.splice(i, 1); continue; }
+      const a = Math.min(1, n.life / n.maxLife * 2);
+      ctx.font = n.size + 'px serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = n.col; ctx.globalAlpha = a;
+      ctx.fillText(n.ch, n.x, n.y);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawChars(){
+    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    csDrawChar('paul',    paulX,    fY, 'down',  charH, 0);
+    csDrawChar('luke',    lukeX,    fY, 'down',  charH * 0.95, 0);
+    csDrawChar('luna',    lunaX,    fY, 'left',  charH * 0.9, 0);
+  }
+
+  return {
+    chars: ['krystal', 'paul', 'luke', 'luna'],
+    skipable: true,
+    steps: [
+      // Step 1: Everyone picking up instruments
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Alright everyone, let\u2019s jam!');
+      }, update(cs, dt){ drawNotes(dt); }},
+      // Step 2: They start playing — notes rise
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Here we go! \ud83c\udfb6');
+      }, onStart(cs){
+          spawnNotes(paulX, fY - charH * 0.6, 4);
+          spawnNotes(krystalX, fY - charH * 0.6, 3);
+          spawnNotes(lunaX, fY - charH * 0.5, 3);
+          spawnNotes(lukeX, fY - charH * 0.6, 3);
+      }, update(cs, dt){ drawNotes(dt); }},
+      // Step 3: In full groove — more notes
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+      }, onStart(cs){
+          spawnNotes(paulX, fY - charH * 0.5, 5);
+          spawnNotes(lunaX, fY - charH * 0.5, 4);
+          spawnNotes(krystalX, fY - charH * 0.5, 4);
+          spawnNotes(lukeX, fY - charH * 0.5, 5);
+      }, update(cs, dt){ drawNotes(dt); }},
+      // Step 4: Luke plays something ridiculous
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+          csDrawBubble(lukeX, fY - charH * 0.95 - 4, 'Luke', '*plays the silliest solo ever*');
+      }, onStart(cs){
+          // big burst of notes from Luke
+          spawnNotes(lukeX, fY - charH * 0.7, 10);
+      }, update(cs, dt){ drawNotes(dt); }},
+      // Step 5: Everyone cracks up
+      { dur: 2.8, draw(cs){
+          drawBg(cs); drawChars(); drawInstruments(cs); drawNotes(0);
+          if (cs.stepT < 1.5){
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'WHAT was that?! \ud83d\ude02');
+          } else {
+            csDrawBubble(lunaX, fY - charH * 0.9 - 4, 'Luna', 'I can\u2019t breathe! \ud83d\ude02');
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 4);
+          csHearts(cs, paulX, fY - charH * 0.7, 3);
+          csHearts(cs, lukeX, fY - charH * 0.6, 4);
+          csHearts(cs, lunaX, fY - charH * 0.5, 3);
+      }, update(cs, dt){ drawNotes(dt); }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
@@ -1401,6 +1934,16 @@ const CUTSCENE_MAP = {
   aquarium:          [csAquariumWonder],
   aquariumtunnel:    [csAquariumWonder],
   rainystreet:       [csRainyDayChat],
+  florist:           [csFlowerCrown],
+  cherryblossom:     [csFlowerCrown],
+  lavender:          [csFlowerCrown],
+  peonygarden:       [csFlowerCrown],
+  snowycabin:        [csSnowAngelContest],
+  icepond:           [csSnowAngelContest],
+  frozenfalls:       [csSnowAngelContest],
+  musicroom:         [csMusicJam],
+  recordshop:        [csMusicJam],
+  jazzclub:          [csMusicJam],
 };
 
 /* ============================================================================
