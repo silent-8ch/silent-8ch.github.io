@@ -29,7 +29,7 @@ The world has **216 places** to visit, **215 of them with hand-placed tap spots*
 
 ---
 
-## 🎬 Cutscenes (31)
+## 🎬 Cutscenes (34)
 
 _Now and then, if she's idle in the right place, a little story plays out. The screen fades in, characters walk on, and they talk, tease, and share a moment together. Each cutscene is skipable (tap **Skip >>** in the top-right corner) and lasts about 20–30 seconds. They trigger randomly (~15 % chance every 30–60 s) — linger in a scene and one might start on its own._
 
@@ -66,6 +66,9 @@ _Debug shortcut: press **X** on a keyboard to force-trigger the cutscene for the
 - **Karaoke Night** — triggers at _Jazz Club_, _Record Shop_, or _Carnival_. Characters: Krystal, Paul, Luna, Wade. Wade takes the mic first — he's terrible but confident. Everyone cringes. Luna goes next and nails it — everyone's surprised then cheers. Krystal and Paul do a duet with hearts floating up while Wade holds a "10/10" sign.
 - **Puddle Jumping** — triggers at _Rainy Street_, _Waterfall_, or _River_. Characters: Krystal, Luke, William. Rainy day. Luke cannonballs into a huge puddle — splash everywhere. William tries to stay dry ("no way"). Krystal grabs his hand and all three jump together — massive splash. Everyone soaked and laughing.
 - **Constellation Drawing** — triggers at _Observatory_, _Planetarium_, or _Aurora Tundra_. Characters: Krystal, Paul. Night sky full of stars. Krystal traces a constellation — Paul asks what it is and she says "I just made it up." Paul traces his own — it's a heart shape. The stars connect and glow. Krystal cheers, hearts everywhere.
+- **Lantern Release** — triggers at _Lantern Festival_, _Night Market_, or _Harbor at Night_. Characters: Krystal, Paul, Luna, Wade, Luke, William. Everyone holds paper lanterns by a lake at night. They light them one by one, each saying something heartfelt. All release together — lanterns float upward, glowing, reflected in the water. Krystal: "I love all of you so much." Hearts everywhere.
+- **Board Game Night** — triggers at _Treehouse_, _Snowy Cabin_, or _Cozy Igloo_. Characters: Krystal, Paul, Wade, Luke. Around a table with a board game. Wade is losing badly. Luke lands on Wade's spot — Wade: "NOOO!" Everyone laughs. Krystal wins. Paul: "She always wins." Wade demands a rematch.
+- **Sunrise Yoga** — triggers at _Beach_, _Alpine Meadow_, or _Rooftop Pool_. Characters: Krystal, Luna. Early morning, soft pink sky. Both doing yoga poses. Luna wobbles and falls (embarrassed). Krystal holds a perfect pose. Luna tries again and they both hold a pose together. Peaceful and warm.
 
 ---
 
