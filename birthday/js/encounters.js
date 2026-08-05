@@ -900,3 +900,202 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   SEAGULL. On beach/coastal scenes a gull glides across the sky with slow wing
+   beats, calling. Tap it as it passes for a breezy seaside moment.
+   -------------------------------------------------------------------------- */
+(function encSeagull(){
+  try{
+    const COASTAL = new Set(['beach','moonbeach','driftwoodbeach','marina','harbornight','lighthouse',
+      'fishingdock','moonlitjetty','tidepools','cliffs','sanddunes','seasidecarousel','fireflypier',
+      'icebergbay','tidalcave','rooftoppool','desertoasis']);
+    let gull = null, timer = 24 + Math.random()*42;
+    function canHere(){ try{ return COASTAL.has(SCENES[currentScene]) && !isNight(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (gull){
+          gull.t += dt; gull.x += gull.vx*dt;
+          gull.y = gull.baseY + Math.sin(gull.t*0.6)*10;
+          gull.flap = Math.sin(gull.t*3.2);
+          if (gull.x < -40 || gull.x > W+40) gull = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 32 + Math.random()*50;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            const by = H*(0.2+Math.random()*0.15);
+            gull = { x: dir>0 ? -26 : W+26, baseY: by, y: by, vx: dir*rand(20,30), dir, t:0, flap:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!gull) return;
+      try{
+        const x = gull.x, y = gull.y, up = gull.flap*7;
+        ctx.save();
+        ctx.strokeStyle = '#f4f6f8'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x-11, y + up);
+        ctx.quadraticCurveTo(x-4, y - 4, x, y);
+        ctx.quadraticCurveTo(x+4, y - 4, x+11, y + up);
+        ctx.stroke();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!gull) return false;
+      const cx = gull.x, cy = gull.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 30*30) return false;
+      say(pick(['A seagull! 🕊️ salt air, warm sun, and you — perfect',
+                'Off it soars over the waves 🌊 wish I could bottle this day',
+                'Cheeky thing — hide the fries! 🍟😄',
+                'Free as anything up there 🕊️ but I\'d never fly from you 💗']));
+      fxAt(cx, cy-8, '🕊️'); if (typeof sfx==='function') sfx('day');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); refreshHUD();
+      gull.vx *= 1.4;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   BUMBLEBEE. On flowery/garden scenes a fuzzy bee bumbles from bloom to bloom,
+   hovering with a busy little wobble. Tap it (gently!) for a sweet, honeyed wish.
+   -------------------------------------------------------------------------- */
+(function encBee(){
+  try{
+    const BLOOMY = new Set(['florist','flowermarket','greenhouse','tulipfield','lavender','poppyfield',
+      'peonygarden','sunflowers','sunflowermaze','hummingbirdgarden','cherryblossom','citrusgrove',
+      'beekeepergarden','orchard','vineyard','herbshed','sunroom','topiary','pasture','clover',
+      'nursery','bonsaigarden','teaplantation']);
+    let bee = null, timer = 18 + Math.random()*34;
+    function canHere(){ try{ return BLOOMY.has(SCENES[currentScene]) && !isNight(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (bee){
+          bee.t += dt; bee.life -= dt;
+          bee.x += bee.vx*dt + Math.sin(bee.t*5)*10*dt;
+          bee.y += Math.cos(bee.t*4)*12*dt;
+          if (bee.y < H*0.4) bee.y = H*0.4; if (bee.y > H*0.75) bee.y = H*0.75;
+          bee.wing = Math.abs(Math.sin(bee.t*18));
+          if (bee.life <= 0 || bee.x < -20 || bee.x > W+20) bee = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 26 + Math.random()*44;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            bee = { x: dir>0 ? -14 : W+14, y: H*(0.5+Math.random()*0.18),
+                    vx: dir*rand(12,20), t:0, wing:0, life: rand(9,15) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!bee) return;
+      try{
+        const x = bee.x, y = bee.y;
+        ctx.save();
+        // wings
+        ctx.globalAlpha = 0.5 + 0.3*bee.wing; ctx.fillStyle = '#e8f2ff';
+        ctx.beginPath(); ctx.ellipse(x-2, y-5, 4, 2.5, -0.5, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x+2, y-5, 4, 2.5, 0.5, 0, 7); ctx.fill();
+        // body
+        ctx.globalAlpha = 1; ctx.fillStyle = '#e8b53a';
+        ctx.beginPath(); ctx.ellipse(x, y, 6, 4.5, 0, 0, 7); ctx.fill();
+        // stripes
+        ctx.strokeStyle = '#2a1c08'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(x-2, y-4); ctx.lineTo(x-2, y+4); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x+2, y-4); ctx.lineTo(x+2, y+4); ctx.stroke();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!bee) return false;
+      const cx = bee.x, cy = bee.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 24*24) return false;
+      say(pick(['A busy little bee 🐝 you\'re the sweetest thing in this garden',
+                'Bzzz 🐝 off to make honey — nearly as sweet as you 🍯',
+                'Hello, fuzzy friend 🐝 thank you for the flowers, my love',
+                'She works so hard for a little sweetness 🍯 worth it, like us']));
+      fxAt(cx, cy-8, '🍯'); burstAt('🐝', cx, cy); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); refreshHUD();
+      bee = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   SOAP BUBBLE. On spa/bath/cozy-water scenes a shimmering bubble drifts upward,
+   catching rainbow light. Tap to pop it for a giggle and a soft wish.
+   -------------------------------------------------------------------------- */
+(function encBubble(){
+  try{
+    const SUDSY = new Set(['spa','hammam','hotspring','cavehotspring','rooftoppool','bamboo','bambootearoom',
+      'aquarium','aquariumtunnel','jellyfishtank','kelpforest','coralreef','biobay','waterlily','pottery',
+      'candyfactory','icecreamparlor','gelateria','sunroom','nursery','toyshop']);
+    let bub = null, timer = 18 + Math.random()*34;
+    function canHere(){ try{ return SUDSY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (bub){
+          bub.t += dt;
+          bub.y += bub.vy*dt;
+          bub.x += Math.sin(bub.t*1.6)*12*dt;
+          bub.wob = 1 + Math.sin(bub.t*4)*0.08;
+          if (bub.y < -20) bub = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 24 + Math.random()*42;
+          if (canHere()){
+            bub = { x: rand(W*0.2, W*0.8), y: H*(0.72+Math.random()*0.08),
+                    vy: -rand(14,22), r: rand(8,14), t:0, wob:1 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!bub) return;
+      try{
+        const x = bub.x, y = bub.y, r = bub.r*bub.wob;
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = 'rgba(180,220,255,0.9)'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke();
+        // faint rainbow sheen
+        ctx.globalAlpha = 0.18; ctx.fillStyle = '#d6b8ff';
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+        // highlight
+        ctx.globalAlpha = 0.85; ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(x - r*0.35, y - r*0.35, r*0.22, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!bub) return false;
+      const cx = bub.x, cy = bub.y, rr = bub.r*bub.wob + 6;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > rr*rr) return false;
+      say(pick(['Pop! 🫧 got it — your giggle is my favorite sound',
+                'A little rainbow bubble 🌈 delicate and lovely, like this moment',
+                'Boop 🫧 I could watch these float with you all day',
+                'Careful, it\'s fragile ✨ some things you just hold gently — like my heart with you']));
+      // pop sparkle — capture coords first (bub may be null before timeouts fire)
+      for (let i=0;i<3;i++) setTimeout(()=> fxAt(cx + rand(-12,12), cy + rand(-12,12), '🫧'), i*60);
+      if (typeof sfx==='function') sfx('tap');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); refreshHUD();
+      bub = null;
+      return true;
+    });
+  }catch(e){}
+})();

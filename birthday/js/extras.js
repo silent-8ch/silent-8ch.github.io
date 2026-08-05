@@ -4045,3 +4045,224 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 25). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   58) BOWL A STRIKE  —  in the bowling alley a little lane runs off to one side.
+   Tap it to roll the ball down and scatter the pins with a satisfying strike. The
+   pins tumble, then reset for another go. Scene-gated; tucked to the side.
+   -------------------------------------------------------------------------- */
+(function fxBowling(){
+  try{
+    const AT = new Set(['bowling','bowlingalley']);
+    let bw = null;                       // {y,x0,pinX,ball,pins:[],cd,resetT,knocked}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function makePins(){
+      const layout = [ [0,0],[-5,-4],[5,-4],[-10,-8],[0,-8],[10,-8] ];
+      return layout.map(function(o){ return { ox:o[0], oy:o[1], fx:0, fy:0, rot:0, vx:0, vy:0, rv:0, down:false }; });
+    }
+    function build(){
+      const y = rand(H*0.74, H*0.80);
+      const x0 = Math.max(W*0.48, Math.min(W*0.62, W*0.58));
+      const pinX = Math.min(W*0.9, x0 + Math.max(90, W*0.26));
+      bw = { y, x0, pinX, ball:null, pins: makePins(), cd:0, resetT:0, knocked:false };
+    }
+    function drawPin(px, py, rot){
+      ctx.save(); ctx.translate(px, py); ctx.rotate(rot);
+      ctx.fillStyle = '#f5f5f5';
+      ctx.beginPath(); ctx.ellipse(0, -3, 2.1, 3.2, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-2.4, 4); ctx.quadraticCurveTo(0, -2, 2.4, 4); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#e05a5a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-1.8, -1.5); ctx.lineTo(1.8, -1.5); ctx.stroke();
+      ctx.restore();
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ bw = null; return; }
+      if (!bw) build();
+      if (bw.cd > 0) bw.cd -= dt;
+      if (bw.resetT > 0){ bw.resetT -= dt; if (bw.resetT <= 0){ for (const p of bw.pins){ p.fx=0; p.fy=0; p.rot=0; p.vx=0; p.vy=0; p.down=false; } } }
+      if (bw.ball){
+        const b = bw.ball; b.x += b.vx*dt; b.rot += b.vx*dt*0.12;
+        if (b.x >= bw.pinX - 8 && !bw.knocked){
+          bw.knocked = true;
+          const cx = bw.pinX, cy = bw.y - 8;                     // capture coords first
+          for (const p of bw.pins){ p.down = true; p.vx = (Math.random()*80+30); p.vy = -(Math.random()*70+30); p.rv = rand(-7,7); }
+          if (typeof burstAt === 'function') burstAt(pick(['🎳','✨','💥']), cx, cy);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['Strike! 🎳','Down they go! 😄','Nice roll! 🥰','All of them! ✨']));
+          try{ state.fun = clamp(state.fun + 5); state.energy = clamp(state.energy + 2); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          bw.ball = null; bw.resetT = 1.6;
+        } else if (b.x > W + 20){ bw.ball = null; }
+      }
+      for (const p of bw.pins){ if (p.down){ p.fx += p.vx*dt; p.fy += p.vy*dt; p.vy += 200*dt; p.rot += p.rv*dt; } }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!bw || !here()) return;
+      const y = bw.y;
+      ctx.save();
+      // lane (a slim parallelogram)
+      ctx.fillStyle = '#caa26a';
+      ctx.beginPath(); ctx.moveTo(bw.x0-16, y+6); ctx.lineTo(bw.pinX+18, y+6); ctx.lineTo(bw.pinX+12, y-14); ctx.lineTo(bw.x0-10, y-14); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(120,80,40,0.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(bw.x0-10, y-14); ctx.lineTo(bw.pinX+12, y-14); ctx.moveTo(bw.x0-16, y+6); ctx.lineTo(bw.pinX+18, y+6); ctx.stroke();
+      // pins
+      for (const p of bw.pins) drawPin(bw.pinX + p.ox + p.fx, y - 6 + p.oy + p.fy, p.rot);
+      // ball
+      if (bw.ball){
+        const bx = bw.ball.x, by = y - 2;
+        ctx.fillStyle = 'rgba(0,0,0,0.16)'; ctx.beginPath(); ctx.ellipse(bx, by+4, 6, 2, 0, 0, 7); ctx.fill();
+        ctx.save(); ctx.translate(bx, by); ctx.rotate(bw.ball.rot);
+        ctx.fillStyle = '#3a4a8a'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.beginPath(); ctx.arc(-1.6, -1.6, 0.9, 0, 7); ctx.arc(1.6, -1.6, 0.9, 0, 7); ctx.arc(0, 1.6, 0.9, 0, 7); ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!bw || !here()) return false;
+        if (px < bw.x0 - 16 || px > bw.pinX + 18 || py < bw.y - 22 || py > bw.y + 10) return false;
+        if (bw.ball || bw.resetT > 0 || bw.cd > 0) return true;   // busy — consume quietly
+        bw.cd = 0.3; bw.knocked = false; bw.ball = { x: bw.x0, vx: rand(180,225), rot:0 };
+        if (typeof sfx === 'function') sfx('tap');
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   59) GLOWWORM RIPPLE  —  in the glowworm cave a scatter of tiny lights dots the
+   ceiling. Tap the ceiling to send a ripple through them: worms flare brighter in
+   an expanding wave, like touching still water. Scene-gated; stays up in the roof
+   band so it never covers her, and only ceiling taps are consumed.
+   -------------------------------------------------------------------------- */
+(function fxGlowworms(){
+  try{
+    let worms = null;                    // array of {x,y,ph}
+    const ripples = [];                  // {x,y,t}
+    let T = 0;
+    function here(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'glowwormcave'; }catch(e){ return false; } }
+    function build(){
+      worms = [];
+      for (let i=0;i<16;i++) worms.push({ x: rand(W*0.12, W*0.88), y: rand(H*0.07, H*0.30), ph: rand(0,Math.PI*2) });
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ worms = null; ripples.length = 0; return; }
+      if (!worms) build();
+      T += dt;
+      for (let i=ripples.length-1;i>=0;i--){ ripples[i].t += dt; if (ripples[i].t > 1.5) ripples.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!worms || !here()) return;
+      ctx.save();
+      for (const w of worms){
+        let boost = 0;
+        for (const r of ripples){
+          const d = Math.hypot(w.x - r.x, w.y - r.y);
+          const front = r.t * 210;
+          if (Math.abs(d - front) < 26) boost += (1 - r.t/1.5) * 0.9;
+        }
+        const glow = Math.min(1.2, 0.35 + 0.25*Math.sin(T*2 + w.ph) + boost);
+        const g = ctx.createRadialGradient(w.x, w.y, 0, w.x, w.y, 7);
+        g.addColorStop(0, 'rgba(170,255,190,'+(0.75*glow).toFixed(3)+')');
+        g.addColorStop(1, 'rgba(120,220,255,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(w.x, w.y, 7, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(210,255,225,'+Math.min(1,0.5+boost).toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(w.x, w.y, 1.2, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!worms || !here()) return false;
+        if (py > H*0.36) return false;                 // only ceiling taps; floor taps still walk her
+        ripples.push({ x: px, y: py, t:0 });
+        if (ripples.length > 5) ripples.shift();
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof say === 'function' && Math.random() < 0.6) say(pick(['Ooh, they shimmer! ✨','Like tiny stars 🥰','Touch and they glow 💚','So magical down here 🌌']));
+        try{ state.love = clamp(state.love + 2); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   60) THE STORYBOOK  —  in the library a little book rests on a stand. Tap it to
+   open: the pages flip and a sweet line drifts up on a heart — a tiny love note
+   tucked between the pages. Closes itself again after a moment. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxStorybook(){
+  try{
+    const AT = new Set(['library','cozylibrary','bookbindery','bookshop','bookstore']);
+    const NOTES = ['"…and they lived, happily, together." 💛','Chapter one: the day I met you. 🥰','Every story is better with you in it. 📖','P.S. I love you. Always have. ✨','Our favorite page is still being written. 💫'];
+    let bk = null;                       // {x,y,open,flip,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ bk = { x: Math.max(W*0.14, Math.min(W*0.5, W*0.20)), y: rand(H*0.70, H*0.76), open:0, flip:0, cd:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ bk = null; return; }
+      if (!bk) build();
+      if (bk.cd > 0) bk.cd -= dt;
+      if (bk.open > 0){ bk.open -= dt; bk.flip += dt*6; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!bk || !here()) return;
+      const x = bk.x, y = bk.y;
+      ctx.save();
+      // little stand
+      ctx.strokeStyle = '#6a5030'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x-10, y+6); ctx.lineTo(x-4, y-2); ctx.moveTo(x+10, y+6); ctx.lineTo(x+4, y-2); ctx.stroke();
+      if (bk.open <= 0){
+        // closed book, slightly angled
+        ctx.fillStyle = '#8a3b4a'; ctx.beginPath();
+        ctx.moveTo(x-13, y-2); ctx.lineTo(x+13, y-4); ctx.lineTo(x+13, y+2); ctx.lineTo(x-13, y+4); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#f0e6d0'; ctx.fillRect(x-12, y-1, 24, 3);            // page edges
+        ctx.strokeStyle = '#e0b04a'; ctx.lineWidth = 1;                        // gilt title line
+        ctx.beginPath(); ctx.moveTo(x-6, y-2.5); ctx.lineTo(x+6, y-3.2); ctx.stroke();
+      } else {
+        // open book: two pages + spine + a flipping page
+        ctx.fillStyle = '#faf3e2';
+        ctx.beginPath(); ctx.moveTo(x, y-4); ctx.lineTo(x-14, y-2); ctx.lineTo(x-13, y+5); ctx.lineTo(x, y+3); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x, y-4); ctx.lineTo(x+14, y-2); ctx.lineTo(x+13, y+5); ctx.lineTo(x, y+3); ctx.closePath(); ctx.fill();
+        // faint text lines
+        ctx.strokeStyle = 'rgba(120,100,80,0.4)'; ctx.lineWidth = 0.6;
+        for (let i=0;i<3;i++){ const ly = y-1+i*1.6; ctx.beginPath(); ctx.moveTo(x-11, ly); ctx.lineTo(x-2, ly+0.4); ctx.moveTo(x+2, ly+0.2); ctx.lineTo(x+11, ly-0.2); ctx.stroke(); }
+        // flipping page
+        const fp = 0.5 + 0.5*Math.sin(bk.flip);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.beginPath(); ctx.moveTo(x, y-4); ctx.lineTo(x - 14*fp, y-3 - 2*fp); ctx.lineTo(x - 13*fp, y+3); ctx.lineTo(x, y+3); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#8a3b4a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y-5); ctx.lineTo(x, y+4); ctx.stroke();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!bk || !here()) return false;
+        if (px < bk.x - 15 || px > bk.x + 15 || py < bk.y - 12 || py > bk.y + 10) return false;
+        if (bk.cd > 0) return true;
+        bk.cd = 2.0; bk.open = 1.8; bk.flip = 0;
+        const bx = bk.x, by = bk.y - 8;                            // capture BEFORE deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function'){ for (let i=0;i<3;i++){ const dx = rand(-8,8), dy = rand(-4,4); setTimeout(function(){ try{ fxAt(bx+dx, by+dy, pick(['💛','📖','✨'])); }catch(e){} }, i*130); } }
+        if (Math.random() < 0.6 && typeof showToast === 'function') showToast('📖','From the storybook', pick(NOTES));
+        else if (typeof say === 'function') say(pick(['Once upon a time… 📖','A little love note ✨','Read to me? 🥰','I dog-eared this page for you 💛']));
+        try{ state.love = clamp(state.love + 4); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

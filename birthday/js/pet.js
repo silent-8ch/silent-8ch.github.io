@@ -846,6 +846,66 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.55, r:52, e:'🖨️', lines:['The cast-iron press 🖨️','Clack — it stamps the page!','Such a satisfying thunk']},
     {nx:0.86, ny:0.60, r:46, e:'🎨', lines:['Cans of ink 🎨','Every rich color','Let\'s print you a card 🥰']},
   ],
+  glowwormcave: [
+    {nx:0.40, ny:0.22, r:58, e:'✨', lines:['The glowworms! ✨','Like stars on the ceiling','So magical and blue-green 🥰']},
+    {nx:0.70, ny:0.16, r:48, e:'🪨', lines:['Pointy stalactites 🪨','Hanging like teeth','Mind your head, love']},
+    {nx:0.50, ny:0.82, r:56, e:'💧', lines:['The black river 💧','So still and silent','It mirrors all the lights']},
+    {nx:0.50, ny:0.68, r:46, e:'🛶', lines:['A little drifting boat 🛶','Gliding through the dark','Row us through the glow 💛']},
+  ],
+  luthier: [
+    {nx:0.25, ny:0.20, r:54, e:'🎻', lines:['Violins hanging up 🎻','So beautifully made','Play me something? 🥰']},
+    {nx:0.40, ny:0.55, r:50, e:'🪚', lines:['One being carved 🪚','Pale unfinished wood','Such patient hands']},
+    {nx:0.24, ny:0.62, r:44, e:'🪵', lines:['Curly wood shavings 🪵','Like little ribbons','They smell so fresh']},
+    {nx:0.86, ny:0.58, r:44, e:'🎨', lines:['A pot of varnish 🎨','Warm amber glow','Makes the wood sing 💛']},
+  ],
+  coveredbridge: [
+    {nx:0.50, ny:0.55, r:60, e:'🌉', lines:['The red covered bridge 🌉','So cozy and quaint','Let\'s cross it together 🥰']},
+    {nx:0.15, ny:0.55, r:52, e:'🍁', lines:['Blazing autumn trees 🍁','Every warm color','Fall is my favorite 💛']},
+    {nx:0.50, ny:0.86, r:52, e:'💧', lines:['The little stream 💧','Babbling underneath','So clear and cool']},
+    {nx:0.72, ny:0.80, r:46, e:'🍂', lines:['Leaves on the water 🍂','Drifting downstream','Where do they float to?']},
+  ],
+  cheeseshop: [
+    {nx:0.22, ny:0.26, r:54, e:'🧀', lines:['Shelves of cheese wheels 🧀','Aging so nicely','Which one shall we try? 🥰']},
+    {nx:0.70, ny:0.28, r:48, e:'🧀', lines:['Hanging cured cheeses 🧀','Teardrop shapes','So funny how they dangle']},
+    {nx:0.55, ny:0.53, r:44, e:'🍇', lines:['Grapes on the board 🍇','Perfect with cheese','A little picnic? 💛']},
+    {nx:0.35, ny:0.60, r:50, e:'🧀', lines:['The deli case 🧀','So many wedges!','I love the blue-veined one']},
+  ],
+  canyon: [
+    {nx:0.20, ny:0.45, r:56, e:'🪨', lines:['Towering red walls 🪨','Layers of ancient rock','So grand and quiet 🥰']},
+    {nx:0.50, ny:0.88, r:52, e:'💧', lines:['The river far below 💧','A thin green ribbon','So far down there!']},
+    {nx:0.55, ny:0.35, r:48, e:'🦅', lines:['Hawks circling 🦅','Riding the warm air','Round and round they wheel']},
+    {nx:0.74, ny:0.66, r:44, e:'🌵', lines:['A lone cactus 🌵','Clinging to the ledge','So tough and stubborn 💛']},
+  ],
+  comicshop: [
+    {nx:0.50, ny:0.07, r:48, e:'💥', lines:['The COMICS sign! 💥','Pow! Zap!','So bold and fun 🥰']},
+    {nx:0.25, ny:0.25, r:52, e:'📚', lines:['A wall of cover art 📚','So many heroes','Which one\'s your favorite?']},
+    {nx:0.50, ny:0.55, r:52, e:'📖', lines:['The spinner rack 📖','Round and round it goes','Pick one to read together 💛']},
+    {nx:0.22, ny:0.60, r:46, e:'🦸', lines:['A cardboard hero 🦸','Standing so brave','Rescue me? 😄']},
+  ],
+  alpinemeadow: [
+    {nx:0.44, ny:0.20, r:56, e:'🏔️', lines:['Snowy peaks 🏔️','So sharp and white','Breathtaking up here 🥰']},
+    {nx:0.30, ny:0.62, r:52, e:'🐄', lines:['Little cows grazing 🐄','Their bells go ding','So content and calm']},
+    {nx:0.18, ny:0.66, r:48, e:'🌼', lines:['Meadow wildflowers 🌼','A whole carpet of them','Let\'s lie down here 💛']},
+    {nx:0.90, ny:0.60, r:44, e:'🏡', lines:['A tiny chalet 🏡','Cozy on the hillside','Our little getaway? 🥰']},
+  ],
+  cobbler: [
+    {nx:0.25, ny:0.25, r:54, e:'👞', lines:['Shelves of shoes 👞','All neatly paired','Handmade, every one 🥰']},
+    {nx:0.42, ny:0.58, r:50, e:'🔨', lines:['A shoe on the last 🔨','Tap tap tap the tacks','Almost resoled!']},
+    {nx:0.82, ny:0.16, r:44, e:'🪟', lines:['A little window 🪟','Warm light streaming in','So cozy in here 💛']},
+    {nx:0.20, ny:0.66, r:44, e:'🧵', lines:['Spools of waxed thread 🧵','And a sharp little awl','Such careful work']},
+  ],
+  wheatfield: [
+    {nx:0.72, ny:0.42, r:56, e:'🌇', lines:['The big golden sun 🌇','Sinking so low','Everything glows amber 🥰']},
+    {nx:0.45, ny:0.72, r:60, e:'🌾', lines:['Rippling wheat 🌾','Waving in the wind','Soft as a golden sea 💛']},
+    {nx:0.24, ny:0.72, r:48, e:'👒', lines:['A ragged scarecrow 👒','Straw poking out','He looks a bit lonely']},
+    {nx:0.62, ny:0.24, r:44, e:'🐦', lines:['Crows near the sun 🐦','Wheeling and cawing','Off to somewhere warm']},
+  ],
+  weaving: [
+    {nx:0.45, ny:0.16, r:52, e:'🧶', lines:['Skeins of yarn 🧶','Every bright color','So soft and squishy 🥰']},
+    {nx:0.83, ny:0.25, r:50, e:'🖼️', lines:['A finished tapestry 🖼️','Woven by hand','Look at that pattern 💛']},
+    {nx:0.50, ny:0.58, r:54, e:'🧵', lines:['The big floor loom 🧵','Clack, clack, clack','The shuttle flies across']},
+    {nx:0.19, ny:0.90, r:44, e:'🧺', lines:['A basket of yarn balls 🧺','So round and cozy','The cat would love these 🐱']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
