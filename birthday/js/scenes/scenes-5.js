@@ -6878,105 +6878,96 @@ registerScene('highrise', drawHighrise);
 /* ── TOWN SQUARE (outdoor · sprite-only) ── */
 function drawTownSquare(){
   const t = sceneTime;
-  const groundY = H * 0.62;   // horizon / ground line
+  const groundY = H * 0.58;   // horizon line
 
-  // ---- sky (only canvas drawing — everything else is sprites) ----
+  // ---- sky ----
   const sky = ctx.createLinearGradient(0, 0, 0, groundY);
   sky.addColorStop(0, '#5a9ed6');
   sky.addColorStop(1, '#a8d4f0');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, W, groundY);
 
-  // ---- tiled cobblestone ground — stretch across full width ----
-  // Submit multiple cobblestone tiles edge-to-edge to cover the ground
-  const tileW = 120;  // display width per tile
-  const tileH = 120;
-  for (let tx = tileW / 2; tx < W + tileW; tx += tileW) {
-    SpriteRenderer.submit({
-      sprite:'cobblestone', x:tx, y:groundY,
-      width:tileW, height:tileH, anchorY:0, frame:0
-    });
+  // ---- tiled cobblestone ground — canvas fill for seamless coverage ----
+  // Use the cobblestone sprite stretched to fill the entire ground area
+  const cobble = SpriteRenderer.getSprite('cobblestone');
+  if (cobble && cobble.ready) {
+    // Tile the ground fully: draw sprite frame 0 stretched across full width
+    const groundH = H - groundY;
+    const tileSize = 140;
+    for (let ty = groundY; ty < H; ty += tileSize) {
+      for (let tx = 0; tx < W; tx += tileSize) {
+        const drawW = Math.min(tileSize, W - tx);
+        const drawH = Math.min(tileSize, H - ty);
+        ctx.drawImage(cobble.image, 0, 0, cobble.fw, cobble.fh, tx, ty, drawW, drawH);
+      }
+    }
+  } else {
+    // Fallback solid color
+    ctx.fillStyle = '#9a8a7a';
+    ctx.fillRect(0, groundY, W, H - groundY);
   }
 
-  // ---- clouds (background, animated) ----
+  // ---- clouds ----
   drawSpriteCloud(W * 0.20 + Math.sin(t * 0.08) * 10, H * 0.10, 0.9);
   drawSpriteCloud(W * 0.70 + Math.sin(t * 0.06 + 2) * 12, H * 0.14, 0.7);
 
-  // ---- background buildings (canvas — simple silhouettes behind sprites) ----
+  // ---- background buildings (canvas) ----
   ctx.fillStyle = '#c8b8a0';
-  ctx.fillRect(0, groundY - 80, 90, 80);
-  ctx.fillRect(W - 100, groundY - 70, 100, 70);
+  ctx.fillRect(-10, groundY - 90, 110, 90);
+  ctx.fillRect(W - 110, groundY - 80, 120, 80);
   ctx.fillStyle = '#b0a088';
-  ctx.fillRect(100, groundY - 60, 70, 60);
-  ctx.fillRect(W - 200, groundY - 50, 80, 50);
-  // windows
+  ctx.fillRect(110, groundY - 70, 80, 70);
   ctx.fillStyle = '#8ac0e0';
-  for (let bx = 10; bx < 80; bx += 22) {
-    ctx.fillRect(bx, groundY - 68, 12, 14);
-    ctx.fillRect(bx, groundY - 44, 12, 14);
+  for (let bx = 4; bx < 90; bx += 22) {
+    ctx.fillRect(bx, groundY - 78, 12, 14);
+    ctx.fillRect(bx, groundY - 52, 12, 14);
   }
-  for (let bx = W - 90; bx < W - 10; bx += 24) {
-    ctx.fillRect(bx, groundY - 58, 14, 14);
-    ctx.fillRect(bx, groundY - 34, 14, 14);
+  for (let bx = W - 100; bx < W - 4; bx += 24) {
+    ctx.fillRect(bx, groundY - 68, 14, 14);
+    ctx.fillRect(bx, groundY - 40, 14, 14);
   }
 
-  // ---- environment sprites (static, frame:0) ----
-  // Trees at the edges — tall, behind the action
-  SpriteRenderer.submit({sprite:'tree', x:W * 0.06, y:groundY, frame:0});
-  SpriteRenderer.submit({sprite:'tree', x:W * 0.94, y:groundY, frame:0});
+  // ---- props (static, frame:0) ----
+  SpriteRenderer.submit({sprite:'tree', x:W * 0.04, y:groundY + 4, frame:0});
+  SpriteRenderer.submit({sprite:'tree', x:W * 0.96, y:groundY + 4, frame:0});
+  SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.22, y:groundY + 24, frame:0});
+  SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.78, y:groundY + 24, frame:0});
+  SpriteRenderer.submit({sprite:'parkBench', x:W * 0.14, y:groundY + 60, frame:0});
+  SpriteRenderer.submit({sprite:'cafeTable', x:W * 0.74, y:groundY + 52, frame:0});
+  SpriteRenderer.submit({sprite:'fence', x:W * 0.42, y:groundY + 8, frame:0});
+  SpriteRenderer.submit({sprite:'signpost', x:W * 0.54, y:groundY + 16, frame:0});
+  SpriteRenderer.submit({sprite:'floweringBush', x:W * 0.88, y:groundY + 30, frame:0});
+  SpriteRenderer.submit({sprite:'mailbox', x:W * 0.34, y:groundY + 42, frame:0});
 
-  // Streetlamps
-  SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.22, y:groundY + 20, frame:0});
-  SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.78, y:groundY + 20, frame:0});
+  // ---- NPCs walking across screen in a loop (Krystal-scale: 120-130px) ----
+  // Adult walks left to right, loops off-screen
+  const npc1X = ((t * 22) % (W + 160)) - 80;  // ~22px/sec
+  SpriteRenderer.submit({sprite:'npcAdult', x:npc1X, y:groundY + 76,
+    width:120, height:120, frame:Math.floor(t * 4) % 4});
 
-  // Park bench (left side)
-  SpriteRenderer.submit({sprite:'parkBench', x:W * 0.16, y:groundY + 60, frame:0});
+  // Child walks right to left, loops
+  const npc2X = W + 80 - ((t * 18) % (W + 160));  // ~18px/sec, opposite direction
+  SpriteRenderer.submit({sprite:'npcChild', x:npc2X, y:groundY + 84,
+    width:100, height:100, frame:Math.floor(t * 4 + 1) % 4, flipX:true});
 
-  // Cafe table with chairs (right side)
-  SpriteRenderer.submit({sprite:'cafeTable', x:W * 0.72, y:groundY + 50, frame:0});
+  // ---- animals ----
+  const birdFlap = (t % 8 > 6.5);
+  SpriteRenderer.submit({sprite:'bird', x:W * 0.54, y:groundY - 4, frame: birdFlap ? Math.floor(t * 6) % 4 : 1});
 
-  // Fence segment behind the bench area
-  SpriteRenderer.submit({sprite:'fence', x:W * 0.38, y:groundY + 10, frame:0});
-
-  // Signpost near center
-  SpriteRenderer.submit({sprite:'signpost', x:W * 0.50, y:groundY + 15, frame:0});
-
-  // Flowering bush near the cafe
-  SpriteRenderer.submit({sprite:'floweringBush', x:W * 0.86, y:groundY + 30, frame:Math.floor(t * 2.5) % 4});
-
-  // Mailbox
-  SpriteRenderer.submit({sprite:'mailbox', x:W * 0.32, y:groundY + 40, frame:0});
-
-  // Potted plant near cafe
-  SpriteRenderer.submit({sprite:'pottedPlant', x:W * 0.64, y:groundY + 55, frame:0});
-
-  // ---- animated sprites ----
-  // NPCs walking through (full height, same scale as Krystal)
-  SpriteRenderer.submit({sprite:'npcAdult', x:W * 0.42, y:groundY + 70, frame:Math.floor(t * 8) % 4});
-  SpriteRenderer.submit({sprite:'npcChild', x:W * 0.56, y:groundY + 80, frame:Math.floor(t * 8 + 2) % 4, flipX:true});
-
-  // Bird perched on the signpost (static until it takes off)
-  const birdFlap = (t % 8 > 6.5); // flaps briefly every 8 seconds
-  SpriteRenderer.submit({sprite:'bird', x:W * 0.50, y:groundY - 2, frame: birdFlap ? Math.floor(t * 6) % 4 : 1});
-
-  // Butterfly drifting near the flowering bush
   SpriteRenderer.submit({
-    sprite:'butterfly',
-    x:W * 0.82 + Math.sin(t * 1.2) * 18,
-    y:groundY + 20 + Math.cos(t * 1.5) * 10,
-    anchorY:0.5,
+    sprite:'butterfly', anchorY:0.5,
+    x:W * 0.84 + Math.sin(t * 1.2) * 18,
+    y:groundY + 18 + Math.cos(t * 1.5) * 10,
     frame:Math.floor(t * 8) % 4
   });
 
-  // Cat sitting near the cafe (mostly still, tail flicks occasionally)
   const catMove = (t % 6 > 5);
-  SpriteRenderer.submit({sprite:'cat', x:W * 0.68, y:groundY + 65, frame: catMove ? Math.floor(t * 7) % 4 : 0});
+  SpriteRenderer.submit({sprite:'cat', x:W * 0.70, y:groundY + 68, frame: catMove ? Math.floor(t * 7) % 4 : 0});
 
-  // Puppy near the bench
   const puppyMove = (t % 5 > 3.5);
-  SpriteRenderer.submit({sprite:'puppy', x:W * 0.20, y:groundY + 75, frame: puppyMove ? Math.floor(t * 7) % 4 : 0});
+  SpriteRenderer.submit({sprite:'puppy', x:W * 0.18, y:groundY + 78, frame: puppyMove ? Math.floor(t * 7) % 4 : 0});
 
-  // Krystal — submitted as an actor so she depth-sorts with everything
+  // ---- Krystal depth-sorted with everything ----
   SpriteRenderer.submit({ phase:'actors', x:pet.x, y:pet.y, draw:drawPet });
 }
 registerScene('townsquare', drawTownSquare, true);
