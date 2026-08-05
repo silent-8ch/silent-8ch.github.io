@@ -1500,6 +1500,54 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.18, r:44, e:'💡', lines:['The hanging bulb 💡','Warm and flickering','So cozy down here 💛']},
     {nx:0.14, ny:0.90, r:46, e:'🛢️', lines:['An oak barrel 🛢️','Smells like aged wood','I wonder what\'s inside 🥰']},
   ],
+  harvestbarn: [
+    {nx:0.50, ny:0.09, r:52, e:'☀️', lines:['Daylight through the hayloft ☀️','Warm golden beams','Dust dancing in the light 🥰']},
+    {nx:0.16, ny:0.22, r:46, e:'🏮', lines:['A little barn lantern 🏮','Glowing so warmly','Smells like hay and honey 💛']},
+    {nx:0.76, ny:0.72, r:54, e:'🌾', lines:['Stacked hay bales 🌾','So soft and golden','Let\'s sit on one together 🥰']},
+    {nx:0.14, ny:0.90, r:48, e:'🎃', lines:['Plump little pumpkins 🎃','All lined up and orange','Let\'s carve one tonight 💛']},
+  ],
+  peonygarden: [
+    {nx:0.50, ny:0.30, r:56, e:'🌹', lines:['The rose-covered arch 🌹','Climbing all over it','Walk through it with me? 🥰']},
+    {nx:0.14, ny:0.78, r:54, e:'🌸', lines:['Big fluffy peonies 🌸','So pink and ruffled','Like cotton-candy clouds 💛']},
+    {nx:0.86, ny:0.80, r:54, e:'🌺', lines:['More blooms over here 🌺','Every shade of pink','I want to bury my face in them 🥰']},
+    {nx:0.78, ny:0.13, r:46, e:'☀️', lines:['Warm spring sunshine ☀️','Perfect peony weather','What a gorgeous day 💛']},
+  ],
+  sugarshack: [
+    {nx:0.66, ny:0.62, r:56, e:'♨️', lines:['The big evaporator ♨️','Boiling down the sap','Smells so sweet in here 😋']},
+    {nx:0.20, ny:0.50, r:50, e:'🍯', lines:['Jars of golden syrup 🍯','Every amber shade','Taste this year\'s batch? 🥰']},
+    {nx:0.24, ny:0.28, r:52, e:'🪟', lines:['Maple trees outside 🪟','With little tap buckets','The sap is running! 💛']},
+    {nx:0.88, ny:0.94, r:46, e:'🪵', lines:['A stack of firewood 🪵','Keeps the evaporator going','So warm and cracky 🥰']},
+  ],
+  kelpforest: [
+    {nx:0.40, ny:0.16, r:56, e:'🦦', lines:['A sea otter! 🦦','Floating on its back','It\'s holding a little shell 🥰']},
+    {nx:0.10, ny:0.40, r:54, e:'🌿', lines:['Swaying kelp fronds 🌿','So tall and wavy','Like an underwater forest 💛']},
+    {nx:0.55, ny:0.30, r:50, e:'🐟', lines:['A school of fish! 🐟','All swimming together','So shiny and quick 🥰']},
+    {nx:0.35, ny:0.86, r:46, e:'🪸', lines:['A sea anemone 🪸','Waving its little arms','So colorful down here 💛']},
+  ],
+  citrusgrove: [
+    {nx:0.14, ny:0.52, r:58, e:'🍊', lines:['A big orange tree 🍊','Full of ripe fruit','Pick one for me? 🥰']},
+    {nx:0.80, ny:0.13, r:48, e:'☀️', lines:['Warm Mediterranean sun ☀️','So golden and bright','I love this kind of day 💛']},
+    {nx:0.64, ny:0.66, r:50, e:'📦', lines:['A crate of oranges 📦','Freshly picked!','They smell incredible 😋']},
+    {nx:0.26, ny:0.56, r:46, e:'🪜', lines:['The picking ladder 🪜','Leaning against the tree','Hold it for me? 🥰']},
+  ],
+  watermill: [
+    {nx:0.72, ny:0.45, r:56, e:'⚙️', lines:['The water wheel ⚙️','Turning round and round','So mesmerizing to watch 🥰']},
+    {nx:0.44, ny:0.40, r:52, e:'🏠', lines:['The old stone mill 🏠','So sturdy and charming','I bet it\'s cozy inside 💛']},
+    {nx:0.24, ny:0.80, r:48, e:'🪷', lines:['A lily pad! 🪷','Floating on the stream','Is a frog hiding under it? 🐸']},
+    {nx:0.50, ny:0.70, r:54, e:'💧', lines:['The millpond 💧','So calm and clear','Listen to the water 🥰']},
+  ],
+  quiltshop: [
+    {nx:0.50, ny:0.27, r:58, e:'🧵', lines:['The big patchwork quilt 🧵','So many little squares','Every one a different color 🥰']},
+    {nx:0.12, ny:0.30, r:50, e:'📚', lines:['Bolts of fabric 📚','Every pattern and hue','Which one for our project? 💛']},
+    {nx:0.16, ny:0.86, r:50, e:'🪡', lines:['An old sewing machine 🪡','Clack clack clack','Let me stitch something for you 🥰']},
+    {nx:0.86, ny:0.92, r:46, e:'🧶', lines:['A basket of yarn 🧶','So round and colorful','The softest skeins 💛']},
+  ],
+  fireflypier: [
+    {nx:0.50, ny:0.46, r:54, e:'🌅', lines:['The setting sun 🌅','Melting into the lake','Everything turns golden 🥰']},
+    {nx:0.12, ny:0.58, r:48, e:'🏮', lines:['A pier lantern 🏮','Glowing warm and amber','Our little beacon tonight 💛']},
+    {nx:0.50, ny:0.55, r:56, e:'✨', lines:['Fireflies everywhere ✨','Blinking over the water','Like fallen stars floating 🥰']},
+    {nx:0.86, ny:0.90, r:46, e:'🫙', lines:['A jar of fireflies 🫙','Glowing on the dock','Our own little lantern 💛']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
