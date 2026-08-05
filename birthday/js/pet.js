@@ -1318,6 +1318,42 @@ const SCENE_SPOTS = {
     {nx:0.84, ny:0.30, r:48, e:'🍭', lines:['The lollipop spinner 🍭','Round and round it goes','Hypnotizing! 💛']},
     {nx:0.50, ny:0.30, r:46, e:'🔮', lines:['A gumball machine 🔮','So many colors inside','Got a coin for me? 😄']},
   ],
+  lanternfestival: [
+    {nx:0.82, ny:0.12, r:48, e:'🌙', lines:['The crescent moon 🌙','Watching over the river','So quiet and silver 🥰']},
+    {nx:0.40, ny:0.30, r:58, e:'🏮', lines:['Sky lanterns rising 🏮','Floating up like wishes','Make one for us 💛']},
+    {nx:0.50, ny:0.68, r:56, e:'🪷', lines:['Water lanterns 🪷','Drifting with the current','Each one holds a prayer 🥰']},
+    {nx:0.30, ny:0.56, r:48, e:'🏘️', lines:['The little town across 🏘️','Windows glowing warm','Everyone came out tonight']},
+  ],
+  lotuspond: [
+    {nx:0.24, ny:0.42, r:54, e:'🪷', lines:['A pink lotus 🪷','So perfect and delicate','Like a little crown 🥰']},
+    {nx:0.40, ny:0.34, r:48, e:'🦋', lines:['A dragonfly! 🦋','Darting over the water','So quick and shiny 💛']},
+    {nx:0.80, ny:0.40, r:50, e:'🌸', lines:['More lotus blooms 🌸','Floating so gracefully','This pond is magic 🥰']},
+    {nx:0.20, ny:0.80, r:52, e:'🍃', lines:['Big lily pads 🍃','Could a frog be hiding? 🐸','So round and green']},
+  ],
+  mapleforest: [
+    {nx:0.50, ny:0.14, r:52, e:'☀️', lines:['Sun through the maples ☀️','Golden light everywhere','So warm and dreamy 🥰']},
+    {nx:0.30, ny:0.50, r:56, e:'🍁', lines:['Falling leaves 🍁','Catch one for luck!','They spin like dancers 💛']},
+    {nx:0.50, ny:0.72, r:52, e:'🌉', lines:['The little footbridge 🌉','Leaves piled on top','Cross it with me? 🥰']},
+    {nx:0.06, ny:0.40, r:48, e:'🌳', lines:['A big old maple 🌳','So many colors up there','It\'s showing off for us']},
+  ],
+  moonbeach: [
+    {nx:0.50, ny:0.16, r:54, e:'🌕', lines:['The full moon 🌕','So big and bright tonight','It feels like a dream 🥰']},
+    {nx:0.50, ny:0.50, r:58, e:'✨', lines:['Moonlight on the waves ✨','A silver path on the sea','Walk it with me? 💛']},
+    {nx:0.14, ny:0.90, r:46, e:'🐚', lines:['A pretty seashell 🐚','Still warm from the sand','Hold it to your ear 🥰']},
+    {nx:0.10, ny:0.88, r:48, e:'🔥', lines:['A little tiki lantern 🔥','Flickering in the breeze','Our own tiny lighthouse']},
+  ],
+  mossgarden: [
+    {nx:0.82, ny:0.55, r:52, e:'🏮', lines:['The stone lantern 🏮','Glowing so softly','Covered in moss 🥰']},
+    {nx:0.16, ny:0.62, r:50, e:'💧', lines:['The water basin 💧','Drip, drip from the spout','So calming to listen 💛']},
+    {nx:0.50, ny:0.44, r:48, e:'🍁', lines:['A red maple sapling 🍁','So small and brave','A splash of color 🥰']},
+    {nx:0.50, ny:0.70, r:54, e:'🪨', lines:['Stepping stones 🪨','Hop with me!','Careful on the moss']},
+  ],
+  penguincove: [
+    {nx:0.16, ny:0.80, r:54, e:'🐧', lines:['A big penguin! 🐧','Standing so proud','Waddle waddle 🥰']},
+    {nx:0.22, ny:0.82, r:46, e:'🐣', lines:['A fluffy chick! 🐣','So round and grey','Staying close to mom 💛']},
+    {nx:0.50, ny:0.50, r:56, e:'🌊', lines:['The cold sea 🌊','One just jumped in!','Splash! So brave 🥰']},
+    {nx:0.86, ny:0.56, r:50, e:'❄️', lines:['A snow mound ❄️','Sparkly and white','Cold but so pretty']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
