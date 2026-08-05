@@ -147,6 +147,11 @@ scene objects with `SpriteRenderer.create(spec)`, or submit temporary drawables
 from a scene renderer with `SpriteRenderer.submit(spec)`. Persistent objects are
 automatically filtered to the scene where they were created.
 
+The first shared object pack lives in `sprites/objects/` and registers `cloud`,
+`lantern`, `butterfly`, `bird`, `npcAdult`, `npcChild`, `puppy`, and `cat` through
+`js/sprite-object-pack-1.js`. Beach, backyard, and river clouds have been migrated
+from canvas primitives to the animated cloud sheet.
+
 ## Important continuation notes
 
 - When prompting image generation, attach `reference-photos.png` and identify each named panel explicitly.

@@ -20,9 +20,9 @@ function drawBeach(){
   // (sun is now the global clock-driven one — see drawCelestial in birthday.js)
 
   // Clouds
-  drawCloud(W * 0.15 + Math.sin(t * 0.15) * 8, H * 0.08, 0.9);
-  drawCloud(W * 0.55 + Math.sin(t * 0.1 + 2) * 10, H * 0.14, 0.7);
-  drawCloud(W * 0.85 + Math.sin(t * 0.12 + 4) * 6, H * 0.06, 0.5);
+  drawSpriteCloud(W * 0.15 + Math.sin(t * 0.15) * 8, H * 0.08, 0.9);
+  drawSpriteCloud(W * 0.55 + Math.sin(t * 0.1 + 2) * 10, H * 0.14, 0.7);
+  drawSpriteCloud(W * 0.85 + Math.sin(t * 0.12 + 4) * 6, H * 0.06, 0.5);
 
   // Ocean
   const oceanTop = H * 0.38;
@@ -487,8 +487,8 @@ function drawBackyard() {
   ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H * 0.5);
 
   // Clouds
-  drawCloud(W * 0.2 + Math.sin(t * 0.1) * 6, H * 0.08, 0.8);
-  drawCloud(W * 0.65 + Math.sin(t * 0.07 + 3) * 8, H * 0.12, 0.6);
+  drawSpriteCloud(W * 0.2 + Math.sin(t * 0.1) * 6, H * 0.08, 0.8);
+  drawSpriteCloud(W * 0.65 + Math.sin(t * 0.07 + 3) * 8, H * 0.12, 0.6);
 
   // Houses behind fence — wide, half hidden by fence, cropped off screen edges
   // Left house (extends off left edge)
@@ -705,8 +705,8 @@ function drawRiver() {
   ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H * 0.35);
 
   // Clouds
-  drawCloud(W * 0.25 + Math.sin(t * 0.08) * 10, H * 0.07, 0.7);
-  drawCloud(W * 0.7 + Math.sin(t * 0.06 + 2) * 8, H * 0.11, 0.9);
+  drawSpriteCloud(W * 0.25 + Math.sin(t * 0.08) * 10, H * 0.07, 0.7);
+  drawSpriteCloud(W * 0.7 + Math.sin(t * 0.06 + 2) * 8, H * 0.11, 0.9);
 
   // Far tree line
   ctx.fillStyle = '#2a6a2a';

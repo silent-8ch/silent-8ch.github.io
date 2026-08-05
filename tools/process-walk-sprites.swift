@@ -56,11 +56,23 @@ func isChromaKey(_ r: UInt8, _ g: UInt8, _ b: UInt8) -> Bool {
 }
 
 func removeChromaKey(_ bitmap: inout Bitmap) {
+    let corners = [0, bitmap.width - 1,
+                   (bitmap.height - 1) * bitmap.width,
+                   bitmap.height * bitmap.width - 1]
+    let transparentCorners = corners.filter { bitmap.pixels[$0 * 4 + 3] <= 8 }.count
+    if transparentCorners >= 3 { return } // already keyed; preserve green subject pixels
+    let cornerOffset = corners[0] * 4
+    let magentaKey = bitmap.pixels[cornerOffset] > 180 &&
+                     bitmap.pixels[cornerOffset + 2] > 180 &&
+                     bitmap.pixels[cornerOffset + 1] < 100
     for offset in stride(from: 0, to: bitmap.pixels.count, by: 4) {
         let r = bitmap.pixels[offset]
         let g = bitmap.pixels[offset + 1]
         let b = bitmap.pixels[offset + 2]
-        if isChromaKey(r, g, b) {
+        let remove = magentaKey
+            ? Int(r) > 150 && Int(b) > 150 && Int(r) - Int(g) > 70 && Int(b) - Int(g) > 70
+            : isChromaKey(r, g, b)
+        if remove {
             bitmap.pixels[offset] = 0
             bitmap.pixels[offset + 1] = 0
             bitmap.pixels[offset + 2] = 0
@@ -147,6 +159,30 @@ func frameBounds(_ bitmap: Bitmap, column: Int, row: Int) -> Bounds? {
     return bounds.maxX >= 0 ? bounds : nil
 }
 
+func alignFrameToBaseline(_ bitmap: inout Bitmap, column: Int, row: Int) {
+    guard let bounds = frameBounds(bitmap, column: column, row: row) else { return }
+    let shiftY = baseline - 1 - bounds.maxY
+    if shiftY == 0 { return }
+    let originX = column * outputCell, originY = row * outputCell
+    var cell = [UInt8](repeating: 0, count: outputCell * outputCell * 4)
+    for y in 0..<outputCell {
+        let targetY = y + shiftY
+        if targetY < 0 || targetY >= outputCell { continue }
+        for x in 0..<outputCell {
+            let sourceOffset = ((originY + y) * bitmap.width + originX + x) * 4
+            let targetOffset = (targetY * outputCell + x) * 4
+            cell[targetOffset..<(targetOffset + 4)] = bitmap.pixels[sourceOffset..<(sourceOffset + 4)]
+        }
+    }
+    for y in 0..<outputCell {
+        for x in 0..<outputCell {
+            let sourceOffset = (y * outputCell + x) * 4
+            let targetOffset = ((originY + y) * bitmap.width + originX + x) * 4
+            bitmap.pixels[targetOffset..<(targetOffset + 4)] = cell[sourceOffset..<(sourceOffset + 4)]
+        }
+    }
+}
+
 func savePNG(_ bitmap: Bitmap, to output: String) throws {
     let colorSpace = CGColorSpaceCreateDeviceRGB()
     let provider = CGDataProvider(data: Data(bitmap.pixels) as CFData)!
@@ -208,9 +244,11 @@ func process(_ input: String, _ output: String) throws {
             let sourceOriginY = row * source.height / rows
 
             for y in 0..<targetHeight {
-                let sourceY = min(frame.height - 1, Int(Double(y) / scale))
+                let sourceY = targetHeight > 1
+                    ? y * (frame.height - 1) / (targetHeight - 1) : 0
                 for x in 0..<targetWidth {
-                    let sourceX = min(frame.width - 1, Int(Double(x) / scale))
+                    let sourceX = targetWidth > 1
+                        ? x * (frame.width - 1) / (targetWidth - 1) : 0
                     let sx = sourceOriginX + frame.minX + sourceX
                     let sy = sourceOriginY + frame.minY + sourceY
                     let sourceOffset = (sy * source.width + sx) * 4
@@ -219,6 +257,10 @@ func process(_ input: String, _ output: String) throws {
                 }
             }
         }
+    }
+
+    for row in 0..<rows {
+        for column in 0..<columns { alignFrameToBaseline(&result, column: column, row: row) }
     }
 
     try savePNG(result, to: output)
@@ -297,7 +339,7 @@ func validateAction(_ path: String) throws {
         guard maxX >= 0, maxY == baseline - 1,
               minX > 0, maxX < outputCell - 1, minY > 0 else {
             throw NSError(domain: "WalkSprite", code: 13,
-                          userInfo: [NSLocalizedDescriptionKey: "Invalid action frame in \(path), column \(column)"])
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid action frame in \(path), column \(column) (bounds \(minX),\(minY)-\(maxX),\(maxY))"])
         }
     }
     print("validated \(path): 4 contained frames, baseline \(baseline)")
