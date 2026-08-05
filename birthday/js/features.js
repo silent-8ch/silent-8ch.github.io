@@ -109,6 +109,8 @@ const TRINKET_POOL = (()=>{
   g(['potionlab'], ['🧪','⚗️','🌿']);
   g(['spiritshrine'], ['⛩️','🙏','✨']);
   g(['shadowtheater'], ['🎭','🕯️','🎪']);
+  g(['dreamweaverloom'], ['🧵','✨','🌙']);
+  g(['astralgarden'], ['🌌','💎','🦋']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];

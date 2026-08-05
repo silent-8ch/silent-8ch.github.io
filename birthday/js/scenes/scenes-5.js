@@ -5328,3 +5328,331 @@ function drawShadowTheater(){
   }
 }
 registerScene('shadowtheater', drawShadowTheater);
+
+/* ── DREAMWEAVER'S LOOM (indoor · mystical weaving room · threads of light) ── */
+function drawDreamweaverLoom(){
+  const t = sceneTime, floorY = H*0.72;
+
+  // deep indigo walls with subtle shimmer
+  const wall=ctx.createLinearGradient(0,0,0,floorY);
+  wall.addColorStop(0,'#12082a'); wall.addColorStop(0.5,'#1e1040'); wall.addColorStop(1,'#2a1650');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+
+  // faint constellation patterns etched into the walls
+  ctx.strokeStyle='rgba(160,140,220,.12)'; ctx.lineWidth=0.8;
+  const consts=[[0.08,0.14,0.14,0.22,0.20,0.16,0.26,0.24],[0.72,0.10,0.78,0.18,0.84,0.12,0.80,0.26],[0.90,0.34,0.94,0.42,0.88,0.50]];
+  for (const c of consts){ ctx.beginPath(); for (let i=0;i<c.length;i+=2){ i===0?ctx.moveTo(c[i]*W,c[i+1]*floorY):ctx.lineTo(c[i]*W,c[i+1]*floorY); } ctx.stroke();
+    for (let i=0;i<c.length;i+=2){ ctx.fillStyle=`rgba(200,180,255,${0.3+0.2*Math.sin(t*1.2+i)})`; ctx.beginPath(); ctx.arc(c[i]*W,c[i+1]*floorY,1.6,0,7); ctx.fill(); } }
+
+  // soft ambient glow from the loom center
+  const glow=ctx.createRadialGradient(W*0.50,H*0.40,10,W*0.50,H*0.40,160);
+  glow.addColorStop(0,'rgba(180,140,255,.12)'); glow.addColorStop(0.5,'rgba(120,80,200,.05)'); glow.addColorStop(1,'rgba(120,80,200,0)');
+  ctx.fillStyle=glow; ctx.fillRect(0,0,W,floorY);
+
+  // the great loom — wooden frame
+  const lx=W*0.26, rx=W*0.74, ly=H*0.16, by=H*0.62;
+  ctx.strokeStyle='#4a3228'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx,by); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(rx,ly); ctx.lineTo(rx,by); ctx.stroke();
+  // top and bottom crossbars
+  ctx.lineWidth=4; ctx.strokeStyle='#5a3e2e';
+  ctx.beginPath(); ctx.moveTo(lx-6,ly); ctx.lineTo(rx+6,ly); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(lx-4,by); ctx.lineTo(rx+4,by); ctx.stroke();
+  // decorative carved ends on posts
+  ctx.fillStyle='#6a4a34'; ctx.beginPath(); ctx.arc(lx,ly-4,6,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(rx,ly-4,6,0,7); ctx.fill();
+
+  // warp threads — glowing vertical lines of light
+  for (let i=0;i<16;i++){
+    const tx=lx+12+i*((rx-lx-24)/15);
+    const hue=(i*23+t*15)%360;
+    ctx.strokeStyle=`hsla(${hue},70%,70%,${0.3+0.15*Math.sin(t*2+i*0.5)})`;
+    ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(tx,ly+6); ctx.lineTo(tx,by-4); ctx.stroke();
+    // tiny sparkle traveling along each thread
+    const sparkY=ly+10+((t*30+i*37)%(by-ly-20));
+    ctx.fillStyle=`hsla(${hue},80%,85%,${0.6+0.4*Math.sin(t*4+i)})`;
+    ctx.beginPath(); ctx.arc(tx,sparkY,1.8,0,7); ctx.fill();
+  }
+
+  // woven tapestry forming in the center — constellation pattern in fabric
+  const tapW=(rx-lx)*0.6, tapH=(by-ly)*0.5;
+  const tapX=W*0.5-tapW/2, tapY=H*0.28;
+  ctx.fillStyle='rgba(30,15,60,.6)'; ctx.fillRect(tapX,tapY,tapW,tapH);
+  // woven horizontal bands with subtle color
+  for (let y=0;y<tapH;y+=3){
+    const prog=y/tapH;
+    ctx.fillStyle=`hsla(${260+prog*60},50%,${40+20*Math.sin(t+y*0.1)}%,${prog<0.9?0.25:0.05})`;
+    ctx.fillRect(tapX,tapY+y,tapW,2);
+  }
+  // constellation pattern appearing in the tapestry
+  const stars=[[0.2,0.2],[0.4,0.15],[0.6,0.3],[0.35,0.5],[0.7,0.55],[0.5,0.7],[0.8,0.4],[0.15,0.65],[0.55,0.45]];
+  ctx.strokeStyle=`rgba(220,200,255,${0.2+0.15*Math.sin(t*0.8)})`; ctx.lineWidth=0.8;
+  ctx.beginPath(); for (let i=0;i<stars.length;i++){ const sx=tapX+stars[i][0]*tapW, sy=tapY+stars[i][1]*tapH; i===0?ctx.moveTo(sx,sy):ctx.lineTo(sx,sy); } ctx.stroke();
+  for (const s of stars){
+    const sx=tapX+s[0]*tapW, sy=tapY+s[1]*tapH;
+    ctx.fillStyle=`rgba(230,210,255,${0.5+0.3*Math.sin(t*1.5+s[0]*10+s[1]*7)})`;
+    ctx.beginPath(); ctx.arc(sx,sy,2,0,7); ctx.fill();
+  }
+
+  // floating thread spools on shelves along the walls
+  function spool(sx,sy,hue){
+    // spool body
+    ctx.fillStyle=`hsl(${hue},50%,35%)`; ctx.fillRect(sx-6,sy-8,12,16);
+    // thread wound around it
+    ctx.fillStyle=`hsla(${hue},65%,65%,${0.7+0.2*Math.sin(t*1.8+sx)})`;
+    ctx.fillRect(sx-5,sy-6,10,12);
+    // top and bottom caps
+    ctx.fillStyle='#5a4030'; ctx.fillRect(sx-7,sy-9,14,3); ctx.fillRect(sx-7,sy+6,14,3);
+    // glow
+    ctx.fillStyle=`hsla(${hue},60%,70%,.15)`;
+    ctx.beginPath(); ctx.arc(sx,sy,14,0,7); ctx.fill();
+  }
+  // left shelf
+  ctx.fillStyle='#3a2820'; ctx.fillRect(W*0.04,H*0.30,W*0.14,4);
+  spool(W*0.07,H*0.24,280); spool(W*0.14,H*0.24,220);
+  // right shelf
+  ctx.fillStyle='#3a2820'; ctx.fillRect(W*0.82,H*0.30,W*0.14,4);
+  spool(W*0.86,H*0.24,320); spool(W*0.93,H*0.24,180);
+
+  // floating spools drifting gently in the air (magical)
+  for (let i=0;i<3;i++){
+    const fx=W*0.3+i*W*0.2+Math.sin(t*0.6+i*2)*12;
+    const fy=H*0.08+Math.sin(t*0.8+i*1.5)*8+i*6;
+    ctx.save(); ctx.translate(fx,fy); ctx.rotate(Math.sin(t*0.5+i)*0.2);
+    const hue=(i*90+160)%360;
+    ctx.fillStyle=`hsla(${hue},55%,60%,0.7)`; ctx.fillRect(-4,-6,8,12);
+    ctx.fillStyle='#4a3428'; ctx.fillRect(-5,-7,10,2); ctx.fillRect(-5,5,10,2);
+    // trailing thread wisps
+    ctx.strokeStyle=`hsla(${hue},65%,70%,${0.4+0.2*Math.sin(t*2+i)})`;
+    ctx.lineWidth=0.8; ctx.beginPath(); ctx.moveTo(0,6);
+    for (let k=1;k<=8;k++){ ctx.lineTo(Math.sin(t*2+k*0.5+i)*6, 6+k*5); } ctx.stroke();
+    ctx.restore();
+  }
+
+  // drifting light motes
+  for (let i=0;i<20;i++){
+    const mx=(i*67+t*12)%(W*0.9)+W*0.05, my=(i*43+Math.sin(t*0.7+i)*18)%(floorY*0.85);
+    const hue=(i*30+t*10)%360;
+    ctx.fillStyle=`hsla(${hue},60%,75%,${0.12+0.1*Math.sin(t*1.5+i)})`;
+    ctx.beginPath(); ctx.arc(mx,my,1.2,0,7); ctx.fill();
+  }
+
+  // stone floor with a warm rug
+  const fl=ctx.createLinearGradient(0,floorY,0,H);
+  fl.addColorStop(0,'#2a2038'); fl.addColorStop(1,'#1a1228');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  // flagstone seams
+  ctx.strokeStyle='rgba(0,0,0,.3)'; ctx.lineWidth=1;
+  for (let y=floorY+12;y<H;y+=14){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  for (let y=floorY+12;y<H;y+=14){ for (let x=((y/14|0)%2)*18;x<W;x+=36){ ctx.beginPath(); ctx.moveTo(x,y-14); ctx.lineTo(x,y); ctx.stroke(); } }
+  // woven rug on the floor (center)
+  ctx.fillStyle='rgba(80,40,100,.35)'; roundRect(W*0.28,floorY+4,W*0.44,H-floorY-8,3); ctx.fill();
+  ctx.strokeStyle='rgba(180,140,220,.2)'; ctx.lineWidth=1;
+  roundRect(W*0.30,floorY+6,W*0.40,H-floorY-12,2); ctx.stroke();
+  // rug pattern — simple repeating diamonds
+  for (let x=W*0.34;x<W*0.66;x+=16){ for (let y=floorY+10;y<H-8;y+=12){
+    ctx.fillStyle=`rgba(160,120,200,${0.12+0.06*Math.sin(x+y)})`;
+    ctx.beginPath(); ctx.moveTo(x,y-4); ctx.lineTo(x+5,y); ctx.lineTo(x,y+4); ctx.lineTo(x-5,y); ctx.closePath(); ctx.fill();
+  }}
+
+  // soft warm light from a candle on the floor near the loom
+  const cX=W*0.18, cY=floorY+8;
+  ctx.fillStyle='#3a2a1a'; ctx.fillRect(cX-3,cY-10,6,10);
+  ctx.fillStyle=`rgba(255,200,100,${0.8+0.15*Math.sin(t*3)})`;
+  ctx.beginPath(); ctx.ellipse(cX,cY-12,3,5,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,190,90,.15)'; ctx.beginPath(); ctx.arc(cX,cY-6,28,0,7); ctx.fill();
+}
+registerScene('dreamweaverloom', drawDreamweaverLoom);
+
+/* ── ASTRAL GARDEN (outdoor · garden floating in space · nebula sky) ── */
+function drawAstralGarden(){
+  const t = sceneTime, groundY = H*0.60;
+
+  // deep space / nebula sky
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,'#0a0418'); sky.addColorStop(0.3,'#160830'); sky.addColorStop(0.6,'#1a0c38'); sky.addColorStop(1,'#0e0620');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+
+  // nebula clouds — soft color washes
+  const neb1=ctx.createRadialGradient(W*0.25,H*0.20,10,W*0.25,H*0.20,120);
+  neb1.addColorStop(0,'rgba(140,60,180,.12)'); neb1.addColorStop(0.5,'rgba(100,40,160,.06)'); neb1.addColorStop(1,'rgba(100,40,160,0)');
+  ctx.fillStyle=neb1; ctx.fillRect(0,0,W,H);
+  const neb2=ctx.createRadialGradient(W*0.78,H*0.14,10,W*0.78,H*0.14,100);
+  neb2.addColorStop(0,'rgba(60,120,200,.10)'); neb2.addColorStop(0.5,'rgba(40,80,180,.05)'); neb2.addColorStop(1,'rgba(40,80,180,0)');
+  ctx.fillStyle=neb2; ctx.fillRect(0,0,W,H);
+  const neb3=ctx.createRadialGradient(W*0.55,H*0.42,10,W*0.55,H*0.42,90);
+  neb3.addColorStop(0,'rgba(200,80,120,.08)'); neb3.addColorStop(0.5,'rgba(180,60,100,.03)'); neb3.addColorStop(1,'rgba(180,60,100,0)');
+  ctx.fillStyle=neb3; ctx.fillRect(0,0,W,H);
+
+  // stars — many small points
+  for (let i=0;i<80;i++){
+    const sx=(i*73+17)%W, sy=(i*41+7)%H;
+    const bright=0.2+0.5*Math.abs(Math.sin(t*1.3+i*0.9));
+    ctx.fillStyle=`rgba(255,250,240,${bright})`; ctx.fillRect(sx,sy,1+((i%3===0)?0.5:0),1+((i%5===0)?0.5:0));
+  }
+  // a few brighter stars with tiny cross flares
+  for (let i=0;i<6;i++){
+    const sx=(i*127+31)%W, sy=(i*89+13)%(H*0.5);
+    const b=0.5+0.4*Math.sin(t*2+i*1.7);
+    ctx.fillStyle=`rgba(255,250,230,${b})`; ctx.beginPath(); ctx.arc(sx,sy,1.6,0,7); ctx.fill();
+    ctx.strokeStyle=`rgba(255,250,230,${b*0.4})`; ctx.lineWidth=0.6;
+    ctx.beginPath(); ctx.moveTo(sx-5,sy); ctx.lineTo(sx+5,sy); ctx.moveTo(sx,sy-5); ctx.lineTo(sx,sy+5); ctx.stroke();
+  }
+
+  // distant floating islands / asteroids silhouettes
+  ctx.fillStyle='rgba(30,15,50,.5)';
+  ctx.beginPath(); ctx.ellipse(W*0.12,H*0.30,18,8,0.3,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(W*0.90,H*0.22,14,6,-0.2,0,7); ctx.fill();
+
+  // floating stepping stones forming a path across the void
+  function steppingStone(sx,sy,w,h,phase){
+    const bob=Math.sin(t*0.8+phase)*3;
+    ctx.fillStyle='rgba(60,40,80,.7)';
+    ctx.beginPath(); ctx.ellipse(sx,sy+bob,w,h,0,0,7); ctx.fill();
+    // mossy surface
+    ctx.fillStyle='rgba(80,140,100,.4)';
+    ctx.beginPath(); ctx.ellipse(sx,sy+bob-1,w*0.8,h*0.6,0,0,7); ctx.fill();
+    // soft glow underneath
+    ctx.fillStyle='rgba(140,100,200,.08)';
+    ctx.beginPath(); ctx.ellipse(sx,sy+bob+h+6,w*1.2,h*0.8,0,0,7); ctx.fill();
+    return sy+bob; // return current y for planting things on it
+  }
+  steppingStone(W*0.10,H*0.56,22,7,0);
+  steppingStone(W*0.28,H*0.52,18,5,1.2);
+  steppingStone(W*0.72,H*0.54,20,6,2.4);
+  steppingStone(W*0.90,H*0.50,16,5,3.6);
+
+  // the main garden island — a large floating platform
+  const islandCx=W*0.50, islandCy=groundY;
+  // underside rocky mass
+  ctx.fillStyle='rgba(40,25,60,.6)';
+  ctx.beginPath(); ctx.moveTo(W*0.14,islandCy+4); ctx.quadraticCurveTo(W*0.30,islandCy+50,W*0.50,islandCy+60);
+  ctx.quadraticCurveTo(W*0.70,islandCy+50,W*0.86,islandCy+4); ctx.closePath(); ctx.fill();
+  // dangling roots / vines from the underside
+  ctx.strokeStyle='rgba(60,100,80,.3)'; ctx.lineWidth=1.5;
+  for (let i=0;i<5;i++){
+    const vx=W*0.28+i*W*0.11;
+    ctx.beginPath(); ctx.moveTo(vx,islandCy+10+i*4);
+    ctx.quadraticCurveTo(vx+Math.sin(t*0.5+i)*8, islandCy+30+i*3, vx+Math.sin(t*0.7+i)*5, islandCy+45+i*5);
+    ctx.stroke();
+  }
+  // glowing particles falling from the underside
+  for (let i=0;i<8;i++){
+    const px=W*0.25+i*W*0.065;
+    const py=islandCy+20+((t*18+i*23)%50);
+    ctx.fillStyle=`rgba(180,140,255,${0.15+0.1*Math.sin(t*2+i)})`;
+    ctx.beginPath(); ctx.arc(px,py,1,0,7); ctx.fill();
+  }
+  // island surface
+  ctx.fillStyle='rgba(35,50,45,.85)';
+  ctx.beginPath(); ctx.ellipse(islandCx,islandCy,W*0.38,12,0,0,7); ctx.fill();
+  // soft garden soil / grass on top
+  const grass=ctx.createLinearGradient(0,islandCy-10,0,islandCy+6);
+  grass.addColorStop(0,'#2a5a40'); grass.addColorStop(1,'#1e4030');
+  ctx.fillStyle=grass;
+  ctx.beginPath(); ctx.ellipse(islandCx,islandCy-2,W*0.36,8,0,0,7); ctx.fill();
+
+  // crystalline flowers growing on the island
+  function crystalFlower(fx,fy,hue,scale){
+    ctx.save(); ctx.translate(fx,fy); ctx.scale(scale,scale);
+    // stem
+    ctx.strokeStyle='rgba(100,180,140,.6)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(2,-14,-1,-26); ctx.stroke();
+    // crystal petals
+    const glow=0.6+0.3*Math.sin(t*2+fx*0.1);
+    for (let p=0;p<5;p++){
+      const a=p/5*Math.PI*2-Math.PI/2+Math.sin(t*0.5+fx)*0.1;
+      ctx.fillStyle=`hsla(${hue},60%,70%,${glow*0.5})`;
+      ctx.beginPath();
+      ctx.moveTo(-1,-26);
+      ctx.lineTo(Math.cos(a)*10,-26+Math.sin(a)*10);
+      ctx.lineTo(Math.cos(a)*6,-26+Math.sin(a)*6-4);
+      ctx.closePath(); ctx.fill();
+    }
+    // bright center
+    ctx.fillStyle=`hsla(${hue},70%,85%,${glow})`;
+    ctx.beginPath(); ctx.arc(-1,-26,3,0,7); ctx.fill();
+    // small leaves at the base
+    ctx.fillStyle='rgba(80,160,120,.5)';
+    ctx.beginPath(); ctx.ellipse(-5,-4,5,2,-0.4,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(5,-4,5,2,0.4,0,7); ctx.fill();
+    ctx.restore();
+  }
+  crystalFlower(W*0.22,islandCy-6,280,1.0);
+  crystalFlower(W*0.34,islandCy-8,200,0.85);
+  crystalFlower(W*0.60,islandCy-7,320,0.9);
+  crystalFlower(W*0.74,islandCy-6,240,1.0);
+  // smaller background flowers
+  crystalFlower(W*0.28,islandCy-4,260,0.6);
+  crystalFlower(W*0.52,islandCy-5,180,0.65);
+  crystalFlower(W*0.68,islandCy-4,300,0.55);
+
+  // a small crystalline tree on the right side
+  const treeX=W*0.82, treeY=islandCy-6;
+  ctx.strokeStyle='rgba(100,70,140,.6)'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(treeX,treeY); ctx.lineTo(treeX-2,treeY-34); ctx.stroke();
+  ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(treeX-2,treeY-20); ctx.quadraticCurveTo(treeX-14,treeY-28,treeX-18,treeY-36); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(treeX-2,treeY-28); ctx.quadraticCurveTo(treeX+10,treeY-36,treeX+14,treeY-42); ctx.stroke();
+  // crystal leaves
+  const leafHues=[260,300,220];
+  for (let i=0;i<3;i++){
+    const lhue=leafHues[i];
+    const lx=treeX-18+i*16+Math.sin(t*0.6+i)*2, ly=treeY-36-i*4+Math.cos(t*0.7+i)*1.5;
+    ctx.fillStyle=`hsla(${lhue},55%,65%,${0.4+0.2*Math.sin(t*1.5+i)})`;
+    ctx.beginPath(); ctx.ellipse(lx,ly,8,5,0.3*i,0,7); ctx.fill();
+  }
+
+  // cosmic butterflies drifting around
+  for (let i=0;i<4;i++){
+    const bx=W*0.15+i*W*0.22+Math.sin(t*0.5+i*2.1)*30;
+    const by=H*0.25+Math.sin(t*0.7+i*1.6)*25+i*10;
+    const wingFlap=Math.sin(t*6+i*2)*0.35;
+    const hue=(i*70+200+t*8)%360;
+    ctx.save(); ctx.translate(bx,by);
+    // wings
+    ctx.fillStyle=`hsla(${hue},60%,65%,${0.45+0.15*Math.sin(t*2+i)})`;
+    ctx.beginPath(); ctx.ellipse(-4,0,5+wingFlap*2,3,wingFlap-0.3,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(4,0,5+wingFlap*2,3,-wingFlap+0.3,0,7); ctx.fill();
+    // body
+    ctx.fillStyle=`hsla(${hue},50%,80%,.7)`;
+    ctx.fillRect(-0.8,-2,1.6,4);
+    // sparkle trail
+    for (let k=1;k<=3;k++){
+      ctx.fillStyle=`hsla(${hue},50%,75%,${0.2/k})`;
+      ctx.beginPath(); ctx.arc(-Math.sin(t*0.5+i*2.1)*k*4, k*3, 0.8, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // a small arch / gateway on the left side of the island
+  const archX=W*0.18, archY=islandCy-6;
+  ctx.strokeStyle='rgba(140,120,180,.5)'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(archX-12,archY); ctx.lineTo(archX-10,archY-28);
+  ctx.quadraticCurveTo(archX,archY-38,archX+10,archY-28); ctx.lineTo(archX+12,archY); ctx.stroke();
+  // runes on the arch
+  for (let i=0;i<3;i++){
+    const rx=archX-6+i*6, ry=archY-14-i*6;
+    ctx.fillStyle=`rgba(200,180,255,${0.3+0.2*Math.sin(t*1.8+i)})`;
+    ctx.beginPath(); ctx.arc(rx,ry,1.5,0,7); ctx.fill();
+  }
+
+  // shooting star occasionally
+  const shootPhase=(t*0.3)%6;
+  if (shootPhase<0.5){
+    const sp=shootPhase/0.5;
+    const sx0=W*0.7, sy0=H*0.06, sx1=W*0.4, sy1=H*0.22;
+    const sx=sx0+(sx1-sx0)*sp, sy=sy0+(sy1-sy0)*sp;
+    ctx.strokeStyle=`rgba(255,250,220,${0.7*(1-sp)})`; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+(sx0-sx1)*0.15,sy+(sy0-sy1)*0.15); ctx.stroke();
+    ctx.fillStyle=`rgba(255,250,220,${0.8*(1-sp)})`; ctx.beginPath(); ctx.arc(sx,sy,2,0,7); ctx.fill();
+  }
+
+  // foreground: more stepping stones and small flowers at the bottom
+  steppingStone(W*0.20,H*0.82,24,7,4.8);
+  steppingStone(W*0.50,H*0.86,20,6,0.7);
+  steppingStone(W*0.80,H*0.80,22,7,2.1);
+  // tiny crystal flowers on foreground stones
+  crystalFlower(W*0.20,H*0.78,290,0.5);
+  crystalFlower(W*0.80,H*0.76,210,0.45);
+}
+registerScene('astralgarden', drawAstralGarden);
