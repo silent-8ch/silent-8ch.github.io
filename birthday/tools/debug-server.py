@@ -45,6 +45,8 @@ class Handler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path == '/api/sprite-positions':
             self._save_position()
+        elif parsed.path == '/api/sprite-flags':
+            self._save_flag()
         else:
             self.send_error(404)
 
@@ -124,6 +126,31 @@ class Handler(SimpleHTTPRequestHandler):
                 if r.get('created_at'):
                     r['created_at'] = str(r['created_at'])
             self._json_response(rows)
+        finally:
+            db.close()
+
+    def _save_flag(self):
+        data = self._read_body()
+        sprite = data.get('sprite')
+        flag = data.get('flag', '')
+        notes = data.get('notes', '')
+        src = data.get('src', '')
+        cols = data.get('cols')
+        fps = data.get('fps')
+        default_size = data.get('defaultSize')
+        if not sprite:
+            self._json_response({'error': 'sprite required'}, 400)
+            return
+        db = get_db()
+        try:
+            with db.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO sprite_flags (sprite_name, flag, notes, src, cols, fps, default_size)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE notes=%s, src=%s, cols=%s, fps=%s, default_size=%s, resolved=0
+                """, (sprite, flag, notes, src, cols, fps, default_size, notes, src, cols, fps, default_size))
+            db.commit()
+            self._json_response({'ok': True})
         finally:
             db.close()
 

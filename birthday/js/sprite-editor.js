@@ -157,7 +157,7 @@
     const newSize = Math.max(10, curSize + delta);
     s.width = newSize;
     s.height = newSize;
-    savedPositions[s.sprite + '_' + selected] = { x: s.x, y: s.y, sprite: s.sprite, size: newSize };
+    savedPositions[s._editorKey] = { x: s.x, y: s.y, sprite: s.sprite, size: newSize };
     saveToDb(s.sprite, s.x, s.y, newSize, s.phase || sprite?.phase);
     updateSizeDisplay(s);
     updateCoords(s);
@@ -197,7 +197,18 @@
   function getSubmittedSprites() {
     if (typeof SpriteRenderer === 'undefined') return [];
     const submitted = SpriteRenderer.getSubmitted();
-    return submitted.filter(s => s.sprite && s.sprite !== 'cloud');
+    // Track each sprite's submission index (matching _frameCount keys)
+    const counts = {};
+    const result = [];
+    for (const s of submitted) {
+      if (!s.sprite) continue;
+      if (!counts[s.sprite]) counts[s.sprite] = 0;
+      s._editorKey = s.sprite + '_' + counts[s.sprite];
+      counts[s.sprite]++;
+      if (s.sprite === 'cloud') continue;  // hide clouds from list
+      result.push(s);
+    }
+    return result;
   }
 
   function refreshList() {
@@ -206,7 +217,7 @@
     if (typeof SCENES !== 'undefined' && typeof currentScene !== 'undefined') {
       seScene.innerHTML = '📍 ' + SCENES[currentScene] + ' <span style="color:#555">idx ' + currentScene + '  |  ' + W + '×' + H + '</span>'
         + (debugPaused ? '  <span style="color:#ef5350;font-weight:bold;">⏸ PAUSED</span>' : '  <span style="color:#66bb6a;">▶ LIVE</span>')
-        + '<br><span style="color:#555">Space=pause  E=editor  N=scene  X=cutscene</span>';
+        + '<br><span style="color:#555">Space=pause  E=editor  L=library  N=scene  X=cutscene  []=resize</span>';
     }
 
     const sprites = getSubmittedSprites();
@@ -273,7 +284,7 @@
     s.x = pos.x - dragOffX;
     s.y = pos.y - dragOffY;
     // Save override
-    savedPositions[s.sprite + '_' + selected] = { x: s.x, y: s.y, sprite: s.sprite };
+    savedPositions[s._editorKey] = { x: s.x, y: s.y, sprite: s.sprite };
     updateCoords(s);
     e.preventDefault();
   }, true);
