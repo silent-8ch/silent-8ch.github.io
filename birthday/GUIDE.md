@@ -29,7 +29,7 @@ The world has **216 places** to visit, **215 of them with hand-placed tap spots*
 
 ---
 
-## 🎬 Cutscenes (25)
+## 🎬 Cutscenes (28)
 
 _Now and then, if she's idle in the right place, a little story plays out. The screen fades in, characters walk on, and they talk, tease, and share a moment together. Each cutscene is skipable (tap **Skip >>** in the top-right corner) and lasts about 20–30 seconds. They trigger randomly (~15 % chance every 30–60 s) — linger in a scene and one might start on its own._
 
@@ -60,6 +60,9 @@ _Debug shortcut: press **X** on a keyboard to force-trigger the cutscene for the
 - **Treasure Hunt** — triggers at _Canyon_, _Sand Dunes_, or _Corn Maze_. Characters: Krystal, Paul, Wade. Krystal inspects a treasure map. They search behind rocks. Paul finds an X mark and points. They dig up a chest — Wade yells "We're rich!" Krystal opens it: chocolate coins. Everyone laughs.
 - **Cloud Watching** — triggers at _Alpine Meadow_, _Poppy Field_, or _Lavender Field_. Characters: Krystal, Paul. Lying on a blanket pointing at clouds. Paul: "That one looks like a bunny." Krystal: "That's clearly a dragon." They argue playfully, then compromise on "dragon-bunny." Sweet and peaceful.
 - **Spooky Mansion** — triggers at _Escape Room_, _Antique Shop_, or _Darkroom_. Characters: Krystal, William, Luke. Exploring a dark room with a creaky door. William inspects a painting whose eyes seem to follow. Luke beckons them deeper. A "ghost" appears — turns out it's just a sheet! Everyone laughs.
+- **Snowball Fight** — triggers at _Ice Pond_, _Frozen Waterfall_, or _Iceberg Bay_. Characters: Krystal, Paul, Luke, William. Luke throws the first snowball at Paul. All-out war — William builds a snow wall to hide behind. Krystal nails Paul with a perfect shot. Truce and group hug.
+- **Wishing Well** — triggers at _Star Pool_, _Moon Temple_, or _Fairy Ring_. Characters: Krystal, Paul. Standing at a wishing well. Paul hands her a coin. She closes her eyes and thinks. "Can't tell or it won't come true!" She tosses the coin and a sparkle rises from the well. Hearts.
+- **Pet Shop Chaos** — triggers at _Pet Shop_, _Cat Café_, or _Aviary_. Characters: Krystal, Luna, Wade. A puppy runs loose and Wade chases it. Luna tries to catch an escaped parrot. Krystal sits on the floor and all the animals come to her — covered in kittens. "How do you DO that?!" Everyone laughs.
 
 ---
 

@@ -4693,6 +4693,582 @@ function csSpookyMansion(){
 }
 
 /* ============================================================================
+   CUTSCENE 26: SNOWBALL FIGHT  (triggers at icepond, frozenfalls, icebergbay)
+   ============================================================================ */
+function csSnowballFight(){
+  const groundY = H * 0.68;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.20, paulX = W * 0.42, lukeX = W * 0.62, williamX = W * 0.82;
+
+  // snowflake particles
+  const snowflakes = [];
+  for (let i = 0; i < 35; i++){
+    snowflakes.push({
+      x: Math.random() * W, y: Math.random() * H,
+      speed: 12 + Math.random() * 18,
+      drift: rand(-6, 6),
+      size: 1 + Math.random() * 2,
+      phase: Math.random() * 6.28
+    });
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // winter sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#a8bdd0'); sky.addColorStop(0.5, '#c4d4e4'); sky.addColorStop(1, '#dce6f0');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // distant mountains
+    ctx.fillStyle = '#c0cdd8';
+    ctx.beginPath(); ctx.moveTo(0, groundY);
+    ctx.lineTo(W * 0.12, groundY - 45); ctx.lineTo(W * 0.28, groundY - 28);
+    ctx.lineTo(W * 0.48, groundY - 58); ctx.lineTo(W * 0.68, groundY - 32);
+    ctx.lineTo(W * 0.88, groundY - 50); ctx.lineTo(W, groundY - 22);
+    ctx.lineTo(W, groundY); ctx.closePath(); ctx.fill();
+    // snow peaks
+    ctx.fillStyle = '#e6eef6';
+    ctx.beginPath(); ctx.moveTo(W * 0.46, groundY - 53);
+    ctx.lineTo(W * 0.48, groundY - 58); ctx.lineTo(W * 0.50, groundY - 52); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(W * 0.86, groundY - 45);
+    ctx.lineTo(W * 0.88, groundY - 50); ctx.lineTo(W * 0.90, groundY - 44); ctx.fill();
+
+    // pine trees
+    ctx.fillStyle = '#2a5040';
+    for (let i = 0; i < 5; i++){
+      const px = i * W / 4 + 15;
+      const ph = 18 + ((i * 11) % 14);
+      drawPine(px, groundY + 2, ph);
+    }
+    // snow caps on pines
+    ctx.fillStyle = 'rgba(240,245,255,.45)';
+    for (let i = 0; i < 5; i++){
+      const px = i * W / 4 + 15;
+      const ph = 18 + ((i * 11) % 14);
+      ctx.beginPath();
+      ctx.moveTo(px - 4, groundY + 2 - ph * 0.5);
+      ctx.lineTo(px, groundY + 2 - ph);
+      ctx.lineTo(px + 4, groundY + 2 - ph * 0.5);
+      ctx.closePath(); ctx.fill();
+    }
+
+    // snowy ground
+    const snow = ctx.createLinearGradient(0, groundY, 0, H);
+    snow.addColorStop(0, '#eaf0f6'); snow.addColorStop(1, '#d4dce6');
+    ctx.fillStyle = snow; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // subtle drifts
+    ctx.fillStyle = 'rgba(255,255,255,.28)';
+    ctx.beginPath(); ctx.moveTo(0, groundY + 5);
+    for (let x = 0; x <= W; x += 18) ctx.lineTo(x, groundY + 3 + Math.sin(x * 0.05 + 0.4) * 3);
+    ctx.lineTo(W, groundY + 12); ctx.lineTo(0, groundY + 12); ctx.closePath(); ctx.fill();
+
+    // falling snow
+    ctx.fillStyle = 'rgba(255,255,255,.65)';
+    for (const s of snowflakes){
+      const sx = (s.x + Math.sin(t * 0.6 + s.phase) * s.drift + t * s.drift * 0.15) % W;
+      const sy = (s.y + s.speed * t) % H;
+      ctx.beginPath(); ctx.arc(sx < 0 ? sx + W : sx, sy, s.size, 0, 7); ctx.fill();
+    }
+  }
+
+  // draw a snowball in flight
+  function drawSnowball(cx, cy, r){
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx, cy, r || 4, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(200,210,230,.4)';
+    ctx.beginPath(); ctx.arc(cx - 1, cy - 1, (r || 4) * 0.4, 0, 7); ctx.fill();
+  }
+
+  // draw William's snow wall
+  function drawSnowWall(cx, baseY){
+    ctx.fillStyle = '#dce6f0';
+    ctx.beginPath();
+    ctx.moveTo(cx - 22, baseY);
+    ctx.lineTo(cx - 20, baseY - 28);
+    ctx.quadraticCurveTo(cx, baseY - 34, cx + 20, baseY - 28);
+    ctx.lineTo(cx + 22, baseY);
+    ctx.closePath(); ctx.fill();
+    // snow texture
+    ctx.fillStyle = 'rgba(255,255,255,.5)';
+    ctx.beginPath(); ctx.arc(cx - 8, baseY - 18, 5, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 6, baseY - 22, 4, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, baseY - 10, 4, 0, 7); ctx.fill();
+  }
+
+  return {
+    chars: ['krystal', 'paul', 'luke', 'william'],
+    skipable: true,
+    steps: [
+      // Step 1: Luke winds up and throws first snowball at Paul
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          csDrawExpression('luke', 'point', lukeX, fY, charH);
+          csDrawChar('paul', paulX, fY, 'right', charH, 0);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawChar('william', williamX, fY, 'left', charH * 0.95, 0);
+          // snowball in flight
+          const prog = Math.min(1, cs.stepT / 1.0);
+          const sbx = lukeX + (paulX - lukeX) * prog;
+          const sby = fY - charH * 0.5 - Math.sin(prog * Math.PI) * 30;
+          if (prog < 1) drawSnowball(sbx, sby);
+          csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Think fast, Paul! \u2744\ufe0f');
+      }, onStart(cs){ try{ sfx('tap'); }catch(e){} }},
+      // Step 2: Paul gets hit — surprised! All-out war begins
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          csDrawExpression('paul', 'surprised', paulX, fY, charH);
+          csDrawExpression('luke', 'laugh', lukeX, fY, charH);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawExpression('william', 'talk', williamX, fY, charH * 0.95);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Oh it is ON! \ud83d\ude24');
+      }},
+      // Step 3: William builds a snow wall, hides behind it — search + inspect
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawSnowWall(williamX, fY + 5);
+          if (cs.stepT < 1.2){
+            csDrawExpression('william', 'search', williamX, fY, charH * 0.95);
+          } else {
+            csDrawExpression('william', 'inspect', williamX, fY - 6, charH * 0.7);
+          }
+          csDrawExpression('krystal', 'think', krystalX, fY, charH);
+          csDrawExpression('paul', 'nod', paulX, fY, charH);
+          csDrawExpression('luke', 'beckon', lukeX, fY, charH);
+          csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', 'Strategic advantage! \ud83e\uddf1');
+      }},
+      // Step 4: Krystal nails Paul — perfect shot! Paul embarrassed, everyone laughs
+      { dur: 2.6, draw(cs){
+          drawBg(cs);
+          drawSnowWall(williamX, fY + 5);
+          csDrawExpression('krystal', 'point', krystalX, fY, charH);
+          csDrawExpression('paul', 'embarrassed', paulX, fY, charH);
+          csDrawExpression('luke', 'laugh', lukeX, fY, charH);
+          csDrawExpression('william', 'laugh', williamX, fY, charH * 0.95);
+          // snow splatter on Paul
+          ctx.fillStyle = 'rgba(255,255,255,.5)';
+          ctx.beginPath(); ctx.arc(paulX + 4, fY - charH * 0.55, 5, 0, 7); ctx.fill();
+          ctx.beginPath(); ctx.arc(paulX - 2, fY - charH * 0.6, 3, 0, 7); ctx.fill();
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Direct hit! \ud83c\udfaf');
+      }, onStart(cs){
+          try{ sfx('tap'); }catch(e){}
+      }},
+      // Step 5: Truce — group hug, everyone cheering, hearts
+      { dur: 2.8, draw(cs){
+          drawBg(cs);
+          const cx = W * 0.5;
+          csDrawExpression('krystal', 'cheer', cx - 24, fY, charH);
+          csDrawExpression('paul', 'laugh', cx - 8, fY, charH);
+          csDrawExpression('luke', 'cheer', cx + 8, fY, charH);
+          csDrawExpression('william', 'wave', cx + 24, fY, charH * 0.95);
+          csDrawBubble(cx, fY - charH - 4, 'Paul', 'Truce! Truce! Group hug! \u2764\ufe0f');
+      }, onStart(cs){
+          const cx = W * 0.5;
+          csHearts(cs, cx - 24, fY - charH * 0.7, 4);
+          csHearts(cs, cx - 8, fY - charH * 0.7, 3);
+          csHearts(cs, cx + 8, fY - charH * 0.7, 3);
+          csHearts(cs, cx + 24, fY - charH * 0.6, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 27: WISHING WELL  (triggers at starpool, moontemple, fairyring)
+   ============================================================================ */
+function csWishingWell(){
+  const groundY = H * 0.72;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.38, paulX = W * 0.62;
+  const wellX = W * 0.50, wellBaseY = groundY + 4;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // twilight sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#1a1a3a'); sky.addColorStop(0.4, '#2a2850'); sky.addColorStop(0.8, '#3a3060'); sky.addColorStop(1, '#4a3868');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // stars
+    ctx.fillStyle = 'rgba(255,255,220,.6)';
+    const starSeeds = [0.1, 0.2, 0.35, 0.55, 0.7, 0.85, 0.92];
+    for (const s of starSeeds){
+      const sx = s * W;
+      const sy = 10 + ((s * 137) % 1) * groundY * 0.4;
+      const twinkle = 0.4 + 0.3 * Math.sin(t * 2 + s * 20);
+      ctx.globalAlpha = twinkle;
+      ctx.beginPath(); ctx.arc(sx, sy, 1.2, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // crescent moon
+    ctx.fillStyle = '#e8e0c8';
+    ctx.beginPath(); ctx.arc(W * 0.82, H * 0.1, 10, 0, 7); ctx.fill();
+    ctx.fillStyle = '#1a1a3a';
+    ctx.beginPath(); ctx.arc(W * 0.82 + 4, H * 0.1 - 2, 9, 0, 7); ctx.fill();
+
+    // mossy stone ground
+    const ground = ctx.createLinearGradient(0, groundY, 0, H);
+    ground.addColorStop(0, '#2a3a28'); ground.addColorStop(1, '#1e2a1c');
+    ctx.fillStyle = ground; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // scattered grass tufts
+    ctx.strokeStyle = 'rgba(80,120,60,.3)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 8; i++){
+      const gx = (i * 47 + 15) % W;
+      const gy = groundY + 4;
+      ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx - 2, gy - 6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(gx + 3, gy); ctx.lineTo(gx + 5, gy - 5); ctx.stroke();
+    }
+
+    // ambient fireflies
+    ctx.fillStyle = 'rgba(200,220,120,.4)';
+    for (let i = 0; i < 4; i++){
+      const fx = (W * 0.2 + i * W * 0.2) + Math.sin(t * 0.8 + i * 3) * 12;
+      const fy = groundY - 20 - i * 8 + Math.cos(t * 0.6 + i * 2) * 8;
+      const glow = 0.2 + 0.2 * Math.sin(t * 3 + i * 5);
+      ctx.globalAlpha = glow;
+      ctx.beginPath(); ctx.arc(fx, fy, 2, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // draw the wishing well
+  function drawWell(cs){
+    const bx = wellX, by = wellBaseY;
+    // stone base — circular well
+    ctx.fillStyle = '#5a5a5a';
+    ctx.beginPath(); ctx.ellipse(bx, by, 22, 8, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#4a4a4a';
+    ctx.fillRect(bx - 22, by - 20, 44, 20);
+    // top rim
+    ctx.fillStyle = '#6a6a6a';
+    ctx.beginPath(); ctx.ellipse(bx, by - 20, 24, 9, 0, 0, 7); ctx.fill();
+    // dark water inside
+    ctx.fillStyle = '#1a1a2a';
+    ctx.beginPath(); ctx.ellipse(bx, by - 20, 18, 6, 0, 0, 7); ctx.fill();
+    // wooden posts + roof
+    ctx.fillStyle = '#5a3a20';
+    ctx.fillRect(bx - 20, by - 50, 4, 30);
+    ctx.fillRect(bx + 16, by - 50, 4, 30);
+    // little peaked roof
+    ctx.fillStyle = '#4a3018';
+    ctx.beginPath();
+    ctx.moveTo(bx - 24, by - 48);
+    ctx.lineTo(bx, by - 60);
+    ctx.lineTo(bx + 24, by - 48);
+    ctx.closePath(); ctx.fill();
+    // rope and bucket
+    ctx.strokeStyle = '#8a7a60'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(bx, by - 55); ctx.lineTo(bx, by - 30); ctx.stroke();
+    ctx.fillStyle = '#6a5030';
+    ctx.fillRect(bx - 4, by - 32, 8, 6);
+  }
+
+  // draw sparkle rising from well
+  function drawSparkle(cs, prog){
+    const t = cs.totalT;
+    const n = Math.floor(prog * 8) + 2;
+    for (let i = 0; i < n; i++){
+      const angle = t * 2 + i * (6.28 / n);
+      const r = 6 + i * 3 * prog;
+      const sx = wellX + Math.cos(angle) * r;
+      const sy = wellBaseY - 24 - prog * 40 + Math.sin(angle) * r * 0.5;
+      const alpha = (0.8 - prog * 0.5);
+      ctx.fillStyle = `rgba(255,240,180,${alpha.toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(sx, sy, 1.5 + prog, 0, 7); ctx.fill();
+    }
+  }
+
+  return {
+    chars: ['krystal', 'paul'],
+    skipable: true,
+    steps: [
+      // Step 1: Standing at the well — Paul hands her a coin
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawWell(cs);
+          csDrawExpression('paul', 'beckon', paulX, fY, charH);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Here — make a wish! \u2728');
+      }},
+      // Step 2: Krystal closes her eyes and thinks
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawWell(cs);
+          csDrawExpression('krystal', 'think', krystalX, fY, charH);
+          csDrawExpression('paul', 'wave', paulX, fY, charH);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'What did you wish for?');
+      }},
+      // Step 3: Krystal shakes her head — can't tell!
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawWell(cs);
+          csDrawExpression('krystal', 'shake', krystalX, fY, charH);
+          if (cs.stepT < 1.4){
+            csDrawExpression('paul', 'surprised', paulX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Can't tell or it won't come true! \ud83e\udd2b");
+          } else {
+            csDrawExpression('paul', 'shrug', paulX, fY, charH);
+            csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Fair enough! \ud83d\ude04');
+          }
+      }},
+      // Step 4: She tosses the coin — Paul laughs — sparkle rises
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          drawWell(cs);
+          const prog = Math.min(1, cs.stepT / 1.5);
+          // coin arc
+          if (prog < 0.5){
+            const coinProg = prog * 2;
+            const cx = krystalX + (wellX - krystalX) * coinProg;
+            const cy = fY - charH * 0.3 - Math.sin(coinProg * Math.PI) * 35;
+            ctx.fillStyle = '#d4a840';
+            ctx.beginPath(); ctx.arc(cx, cy, 3, 0, 7); ctx.fill();
+            ctx.fillStyle = '#eac050';
+            ctx.beginPath(); ctx.arc(cx - 0.5, cy - 0.5, 1.5, 0, 7); ctx.fill();
+          }
+          // sparkle from well after coin lands
+          if (prog > 0.5) drawSparkle(cs, (prog - 0.5) * 2);
+          csDrawExpression('krystal', 'nod', krystalX, fY, charH);
+          csDrawExpression('paul', 'laugh', paulX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'There it goes\u2026 \u2728');
+      }, onStart(cs){ try{ sfx('tap'); }catch(e){} }},
+      // Step 5: Sparkle bloom — hearts — warm moment
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          drawWell(cs);
+          drawSparkle(cs, 1.0);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawExpression('paul', 'nod', paulX, fY, charH);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'I think the well liked that one \u2764\ufe0f');
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+          csHearts(cs, paulX, fY - charH * 0.7, 4);
+          csHearts(cs, wellX, wellBaseY - 40, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 28: PET SHOP CHAOS  (triggers at petshop, catcafe, aviary)
+   ============================================================================ */
+function csPetShopChaos(){
+  const groundY = H * 0.72;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.26, lunaX = W * 0.50, wadeX = W * 0.74;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // warm indoor shop
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#f0e8d8'); wall.addColorStop(0.5, '#e8dcc8'); wall.addColorStop(1, '#e0d4b8');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // tiled floor
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#d0c4a8'); floor.addColorStop(1, '#c0b498');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+    // tile lines
+    ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 26){
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = groundY; y < H; y += 20){
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    // shelves on the wall
+    ctx.fillStyle = '#a0886a';
+    ctx.fillRect(W * 0.04, H * 0.12, W * 0.18, 4);
+    ctx.fillRect(W * 0.78, H * 0.15, W * 0.18, 4);
+    ctx.fillRect(W * 0.04, H * 0.28, W * 0.14, 4);
+
+    // pet food bags on shelves
+    const bagColors = ['#e06040','#40a0e0','#60c060'];
+    for (let i = 0; i < 3; i++){
+      ctx.fillStyle = bagColors[i];
+      ctx.fillRect(W * 0.05 + i * 14, H * 0.04, 10, 14);
+    }
+
+    // fish tank in corner
+    ctx.fillStyle = 'rgba(100,180,220,.25)';
+    ctx.fillRect(W * 0.80, H * 0.04, W * 0.14, H * 0.10);
+    ctx.strokeStyle = 'rgba(60,120,160,.3)'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(W * 0.80, H * 0.04, W * 0.14, H * 0.10);
+    // little fish
+    ctx.fillStyle = '#e08030';
+    const fishX = W * 0.86 + Math.sin(t * 2) * 6;
+    ctx.beginPath(); ctx.ellipse(fishX, H * 0.09, 3, 2, 0, 0, 7); ctx.fill();
+
+    // warm overhead light
+    const lightX = W * 0.5;
+    ctx.fillStyle = '#c0a870';
+    ctx.fillRect(lightX - 12, 0, 24, 6);
+    const glow = ctx.createRadialGradient(lightX, 4, 3, lightX, 4, 80);
+    glow.addColorStop(0, 'rgba(255,240,200,.08)');
+    glow.addColorStop(1, 'rgba(255,240,200,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(lightX, 4, 80, 0, 7); ctx.fill();
+  }
+
+  // draw a running puppy
+  function drawPuppy(cx, cy, t){
+    const bounce = Math.abs(Math.sin(t * 8)) * 3;
+    // body
+    ctx.fillStyle = '#c09060';
+    ctx.beginPath(); ctx.ellipse(cx, cy - 5 - bounce, 8, 5, 0, 0, 7); ctx.fill();
+    // head
+    ctx.beginPath(); ctx.arc(cx + 6, cy - 9 - bounce, 4.5, 0, 7); ctx.fill();
+    // ears
+    ctx.fillStyle = '#a07040';
+    ctx.beginPath(); ctx.ellipse(cx + 4, cy - 13 - bounce, 2, 3, -0.4, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 8, cy - 13 - bounce, 2, 3, 0.4, 0, 7); ctx.fill();
+    // tail (wagging)
+    const wagAngle = Math.sin(t * 12) * 0.5;
+    ctx.strokeStyle = '#c09060'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx - 7, cy - 6 - bounce);
+    ctx.quadraticCurveTo(cx - 12, cy - 14 - bounce + wagAngle * 6, cx - 10, cy - 16 - bounce);
+    ctx.stroke();
+    // eyes + nose
+    ctx.fillStyle = '#2a2a2a';
+    ctx.beginPath(); ctx.arc(cx + 8, cy - 10 - bounce, 1, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 10, cy - 8 - bounce, 1.2, 0, 7); ctx.fill();
+    // legs (running)
+    ctx.strokeStyle = '#c09060'; ctx.lineWidth = 1.5;
+    const legPhase = t * 8;
+    ctx.beginPath(); ctx.moveTo(cx - 4, cy - 2 - bounce); ctx.lineTo(cx - 4 + Math.sin(legPhase) * 3, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + 4, cy - 2 - bounce); ctx.lineTo(cx + 4 + Math.sin(legPhase + 3) * 3, cy); ctx.stroke();
+  }
+
+  // draw a parrot
+  function drawParrot(cx, cy, t){
+    const flapAngle = Math.sin(t * 10) * 0.6;
+    // body
+    ctx.fillStyle = '#30a040';
+    ctx.beginPath(); ctx.ellipse(cx, cy, 4, 6, 0, 0, 7); ctx.fill();
+    // wings
+    ctx.fillStyle = '#40c050';
+    ctx.save(); ctx.translate(cx - 3, cy - 2);
+    ctx.rotate(-flapAngle); ctx.beginPath(); ctx.ellipse(0, 0, 8, 3, 0, Math.PI, 2 * Math.PI); ctx.fill();
+    ctx.restore();
+    ctx.save(); ctx.translate(cx + 3, cy - 2);
+    ctx.rotate(flapAngle); ctx.beginPath(); ctx.ellipse(0, 0, 8, 3, 0, Math.PI, 2 * Math.PI); ctx.fill();
+    ctx.restore();
+    // head
+    ctx.fillStyle = '#e04040';
+    ctx.beginPath(); ctx.arc(cx, cy - 6, 3.5, 0, 7); ctx.fill();
+    // beak
+    ctx.fillStyle = '#e8c030';
+    ctx.beginPath(); ctx.moveTo(cx + 3, cy - 6);
+    ctx.lineTo(cx + 7, cy - 5); ctx.lineTo(cx + 3, cy - 4); ctx.closePath(); ctx.fill();
+    // eye
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx + 1, cy - 7, 1.2, 0, 7); ctx.fill();
+    ctx.fillStyle = '#111';
+    ctx.beginPath(); ctx.arc(cx + 1, cy - 7, 0.6, 0, 7); ctx.fill();
+  }
+
+  // draw kittens around a character
+  function drawKittens(cx, baseY, t){
+    const kittenColors = ['#4a4a4a', '#e0a040', '#f0f0f0', '#a06030'];
+    for (let i = 0; i < 4; i++){
+      const kx = cx - 16 + i * 11 + Math.sin(t * 1.5 + i * 2) * 3;
+      const ky = baseY - 4 + Math.cos(t * 1.2 + i * 3) * 2;
+      ctx.fillStyle = kittenColors[i];
+      // body
+      ctx.beginPath(); ctx.ellipse(kx, ky - 3, 4, 3, 0, 0, 7); ctx.fill();
+      // head
+      ctx.beginPath(); ctx.arc(kx + 2, ky - 6, 2.5, 0, 7); ctx.fill();
+      // ears
+      ctx.beginPath(); ctx.moveTo(kx + 0.5, ky - 8); ctx.lineTo(kx + 1.5, ky - 10); ctx.lineTo(kx + 2.5, ky - 8); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(kx + 2, ky - 8); ctx.lineTo(kx + 3, ky - 10); ctx.lineTo(kx + 4, ky - 8); ctx.fill();
+      // eyes
+      ctx.fillStyle = '#2a2a2a';
+      ctx.beginPath(); ctx.arc(kx + 1.5, ky - 6, 0.5, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(kx + 3, ky - 6, 0.5, 0, 7); ctx.fill();
+    }
+  }
+
+  return {
+    chars: ['krystal', 'luna', 'wade'],
+    skipable: true,
+    steps: [
+      // Step 1: A puppy runs loose! Wade chases it
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          const puppyX = W * 0.45 + Math.sin(cs.stepT * 3) * 30;
+          const puppyY = fY + 4;
+          drawPuppy(puppyX, puppyY, cs.totalT);
+          csDrawExpression('wade', 'search', wadeX - cs.stepT * 15, fY, charH);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawExpression('luna', 'surprised', lunaX, fY, charH);
+          csDrawBubble(wadeX, fY - charH - 4, 'Wade', 'Loose puppy! I got it! \ud83d\udc36');
+      }, onStart(cs){ try{ sfx('tap'); }catch(e){} }},
+      // Step 2: Luna tries to catch a parrot — points at it flying overhead
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          const parrotX = W * 0.3 + cs.stepT * 40;
+          const parrotY = H * 0.22 + Math.sin(cs.stepT * 4) * 10;
+          drawParrot(parrotX, parrotY, cs.totalT);
+          const puppyX = W * 0.6 + Math.sin(cs.stepT * 2.5) * 15;
+          drawPuppy(puppyX, fY + 4, cs.totalT);
+          csDrawExpression('luna', 'point', lunaX, fY, charH);
+          csDrawExpression('wade', 'sad', wadeX, fY, charH);
+          csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+          csDrawBubble(lunaX, fY - charH - 4, 'Luna', 'The parrot escaped too?! \ud83e\udd9c');
+      }},
+      // Step 3: Krystal sits down — all the animals come to her
+      { dur: 2.6, draw(cs){
+          drawBg(cs);
+          // Krystal seated (lower, smaller)
+          csDrawExpression('krystal', 'beckon', krystalX, fY + 16, charH * 0.65);
+          // kittens gathering
+          drawKittens(krystalX, fY + 16, cs.totalT);
+          // puppy trotting over (slowing)
+          const puppyX = W * 0.45 - cs.stepT * 10;
+          drawPuppy(puppyX, fY + 4, cs.totalT * 0.3);
+          // parrot landing
+          const parrotY = H * 0.22 + cs.stepT * 14;
+          drawParrot(krystalX + 18, Math.min(parrotY, fY - charH * 0.65 + 4), cs.totalT * 0.4);
+          csDrawExpression('luna', 'think', lunaX, fY, charH);
+          csDrawExpression('wade', 'inspect', wadeX, fY, charH);
+          csDrawBubble(krystalX, fY + 16 - charH * 0.65 - 4, 'Krystal', 'Come here, little ones\u2026 \ud83d\udc95');
+      }},
+      // Step 4: Wade is stunned — everyone covered in animals
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'laugh', krystalX, fY + 16, charH * 0.65);
+          drawKittens(krystalX, fY + 16, cs.totalT);
+          drawPuppy(krystalX + 22, fY + 8, cs.totalT * 0.2);
+          drawParrot(krystalX + 16, fY - charH * 0.65 + 6, cs.totalT * 0.3);
+          csDrawExpression('wade', 'surprised', wadeX, fY, charH);
+          csDrawExpression('luna', 'shrug', lunaX, fY, charH);
+          csDrawBubble(wadeX, fY - charH - 4, 'Wade', 'How do you DO that?! \ud83d\ude32');
+      }},
+      // Step 5: Everyone laughs — wholesome ending, hearts
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'cheer', krystalX, fY + 16, charH * 0.65);
+          drawKittens(krystalX, fY + 16, cs.totalT);
+          drawPuppy(krystalX + 22, fY + 8, cs.totalT * 0.15);
+          drawParrot(krystalX + 16, fY - charH * 0.65 + 6, cs.totalT * 0.2);
+          csDrawExpression('wade', 'laugh', wadeX, fY, charH);
+          csDrawExpression('luna', 'laugh', lunaX, fY, charH);
+          csDrawBubble(lunaX, fY - charH - 4, 'Luna', 'The Krystal effect! \ud83d\ude02\u2764\ufe0f');
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY + 16 - charH * 0.5, 5);
+          csHearts(cs, wadeX, fY - charH * 0.7, 3);
+          csHearts(cs, lunaX, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
@@ -4713,8 +5289,9 @@ const CUTSCENE_MAP = {
   lavender:          [csFlowerCrown, csCloudWatching],
   peonygarden:       [csFlowerCrown],
   snowycabin:        [csSnowAngelContest],
-  icepond:           [csSnowAngelContest],
-  frozenfalls:       [csSnowAngelContest],
+  icepond:           [csSnowAngelContest, csSnowballFight],
+  frozenfalls:       [csSnowAngelContest, csSnowballFight],
+  icebergbay:        [csSnowballFight],
   musicroom:         [csMusicJam],
   recordshop:        [csMusicJam],
   jazzclub:          [csMusicJam],
@@ -4759,6 +5336,12 @@ const CUTSCENE_MAP = {
   escaperoom:        [csSpookyMansion],
   antiqueshop:       [csSpookyMansion],
   darkroom:          [csSpookyMansion],
+  starpool:          [csWishingWell],
+  moontemple:        [csWishingWell],
+  fairyring:         [csWishingWell],
+  petshop:           [csPetShopChaos],
+  catcafe:           [csPetShopChaos],
+  aviary:            [csPetShopChaos],
 };
 
 /* ============================================================================
