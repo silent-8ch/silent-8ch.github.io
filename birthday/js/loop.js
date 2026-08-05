@@ -63,7 +63,7 @@ const THOUGHT_SCENE = (()=>{
   g(['catcafe','petshop','butterflydome','aviary','savanna','backyard'], ['🐾','🥰','🦋']);
   g(['snowycabin','icepond','frozenfalls','icebergbay'], ['❄️','☃️']);
   g(['artstudio','pottery','sewingstudio','weaving','stainedglass','glassblowing','luthier','bookbindery','letterpress','cobbler'], ['🎨','✏️','💡']);
-  g(['crystalcave','tarotparlor','enchantedforest','wizardtower','fortuneteller','runecircle','arcanelibrary','fairyring','alchemylab','witchcottage','moontemple','willowispmarsh','enchantedmirrorhall','potionkitchen','crystalgrotto','potionlab','spiritshrine','shadowtheater','dreamweaverloom','astralgarden'], ['🔮','✨','🌙']);
+  g(['crystalcave','tarotparlor','enchantedforest','wizardtower','fortuneteller','runecircle','arcanelibrary','fairyring','alchemylab','witchcottage','moontemple','willowispmarsh','enchantedmirrorhall','potionkitchen','crystalgrotto','potionlab','spiritshrine','shadowtheater','dreamweaverloom','astralgarden','starpool','enchantedclock'], ['🔮','✨','🌙']);
   return map;
 })();
 let thoughtTimer = 7;

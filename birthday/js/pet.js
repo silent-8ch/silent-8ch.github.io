@@ -339,6 +339,8 @@ const SCENE_INTERACT = (()=>{
   g(['shadowtheater'], {lines:['The shadows are dancing! 🎭','Look, they\'re alive ✨','So magical in the lantern light 🕯️'], emoji:'🎭', fun:5});
   g(['dreamweaverloom'], {lines:['The threads are glowing! 🧵','I see constellations in the fabric ✨','So beautiful, like weaving starlight 🌙'], emoji:'🧵', love:5});
   g(['astralgarden'], {lines:['Flowers growing among the stars! 🌸','We\'re floating in space 🌌','Everything sparkles here ✨'], emoji:'🌌', fun:5});
+  g(['starpool'], {lines:['The reflections are so still 🌙','Make a wish in the water ✨','Sacred and beautiful 🥰'], emoji:'🌙', love:5});
+  g(['enchantedclock'], {lines:['Listen to the ticking ⏰','Time feels different here ✨','The gears are mesmerizing ⚙️'], emoji:'⚙️', fun:5});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];
@@ -1662,6 +1664,20 @@ const SCENE_SPOTS = {
     {nx:0.86, ny:0.68, r:50, e:'🛢️', lines:['Stacked oak barrels 🛢️','Aging the cider','So rustic and warm 💛']},
     {nx:0.16, ny:0.30, r:52, e:'🪟', lines:['The orchard outside 🪟','Apple trees through the door','I can smell the blossoms 🥰']},
     {nx:0.16, ny:0.90, r:48, e:'🧺', lines:['A bushel of apples 🧺','Red and round and perfect','One for you, one for me 🍎']},
+  ],
+  starpool: [
+    {nx:0.50, ny:0.60, r:62, e:'🌙', lines:['The reflections in the water 🌙','I can see the stars below us','Like a window into the sky ✨']},
+    {nx:0.82, ny:0.10, r:48, e:'🌙', lines:['The crescent moon 🌙','So soft and silver','It\'s watching over us 🥰']},
+    {nx:0.50, ny:0.70, r:50, e:'🕯️', lines:['A floating candle 🕯️','So warm on the water','Like a little wish light ✨']},
+    {nx:0.06, ny:0.40, r:46, e:'🏛️', lines:['The ancient column 🏛️','How old must it be?','Covered in moss and stories 💛']},
+    {nx:0.50, ny:0.36, r:52, e:'✨', lines:['A firefly! ✨','Dancing above the pool','So gentle and bright 🥰']},
+  ],
+  enchantedclock: [
+    {nx:0.50, ny:0.28, r:56, e:'⏰', lines:['The giant clock face ⏰','The hands are turning slowly','What time is it in magic? ✨']},
+    {nx:0.50, ny:0.58, r:54, e:'🔔', lines:['The pendulum swings 🔔','Back and forth, so steady','Hypnotizing… 🥰']},
+    {nx:0.14, ny:0.38, r:50, e:'⚙️', lines:['Enormous gears turning ⚙️','So intricate and old','I hear them clicking ✨']},
+    {nx:0.70, ny:0.74, r:46, e:'⏳', lines:['An hourglass! ⏳','The sand is falling slowly','Time is so beautiful here 💛']},
+    {nx:0.50, ny:0.10, r:48, e:'🪟', lines:['Moonlight through the window 🪟','So dim and mysterious','The tower is dreaming 🥰']},
   ],
 };
 // nearest hotspot hit for the current scene, or null

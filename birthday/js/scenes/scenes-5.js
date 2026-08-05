@@ -5656,3 +5656,376 @@ function drawAstralGarden(){
   crystalFlower(W*0.80,H*0.76,210,0.45);
 }
 registerScene('astralgarden', drawAstralGarden);
+
+/* ── STAR POOL (outdoor · night · sacred reflecting pool) ── */
+function drawStarPool(){
+  const t = sceneTime, waterY = H*0.52;
+
+  // deep night sky
+  const sky=ctx.createLinearGradient(0,0,0,waterY);
+  sky.addColorStop(0,'#06061a'); sky.addColorStop(0.4,'#0e0e30'); sky.addColorStop(0.8,'#161640'); sky.addColorStop(1,'#1a1a48');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,waterY);
+
+  // milky way band — a soft diagonal wash
+  ctx.save(); ctx.translate(W*0.3,0); ctx.rotate(0.35);
+  const mw=ctx.createLinearGradient(-30,0,30,0);
+  mw.addColorStop(0,'rgba(140,130,200,0)'); mw.addColorStop(0.4,'rgba(160,150,220,.06)');
+  mw.addColorStop(0.5,'rgba(180,170,240,.09)'); mw.addColorStop(0.6,'rgba(160,150,220,.06)');
+  mw.addColorStop(1,'rgba(140,130,200,0)');
+  ctx.fillStyle=mw; ctx.fillRect(-60,-20,120,H);
+  ctx.restore();
+
+  // stars in sky
+  for (let i=0;i<70;i++){
+    const sx=(i*67+19)%W, sy=(i*43+11)%(waterY*0.85);
+    const br=0.2+0.45*Math.abs(Math.sin(t*1.2+i*0.8));
+    ctx.fillStyle=`rgba(255,250,230,${br})`; ctx.fillRect(sx,sy,1+((i%4===0)?0.4:0),1+((i%6===0)?0.4:0));
+  }
+
+  // constellations — connect-the-dot patterns
+  ctx.strokeStyle='rgba(200,200,255,.12)'; ctx.lineWidth=0.8;
+  const consts=[
+    [[W*0.15,H*0.08],[W*0.22,H*0.12],[W*0.26,H*0.06],[W*0.32,H*0.10]],
+    [[W*0.60,H*0.05],[W*0.65,H*0.14],[W*0.72,H*0.10],[W*0.68,H*0.03]],
+    [[W*0.42,H*0.18],[W*0.48,H*0.22],[W*0.52,H*0.16],[W*0.56,H*0.24]],
+  ];
+  for (const c of consts){
+    ctx.beginPath();
+    for (let j=0;j<c.length;j++){ j===0?ctx.moveTo(c[j][0],c[j][1]):ctx.lineTo(c[j][0],c[j][1]); }
+    ctx.stroke();
+    for (const [cx,cy] of c){
+      const b=0.5+0.4*Math.sin(t*1.5+cx*0.02+cy*0.03);
+      ctx.fillStyle=`rgba(255,250,230,${b})`; ctx.beginPath(); ctx.arc(cx,cy,1.8,0,7); ctx.fill();
+      ctx.strokeStyle=`rgba(255,250,230,${b*0.3})`; ctx.lineWidth=0.5;
+      ctx.beginPath(); ctx.moveTo(cx-4,cy); ctx.lineTo(cx+4,cy); ctx.moveTo(cx,cy-4); ctx.lineTo(cx,cy+4); ctx.stroke();
+      ctx.strokeStyle='rgba(200,200,255,.12)'; ctx.lineWidth=0.8;
+    }
+  }
+
+  // crescent moon
+  const moonX=W*0.82, moonY=H*0.10;
+  ctx.fillStyle='rgba(255,250,220,.9)'; ctx.beginPath(); ctx.arc(moonX,moonY,12,0,7); ctx.fill();
+  ctx.fillStyle='#0e0e30'; ctx.beginPath(); ctx.arc(moonX+5,moonY-3,10,0,7); ctx.fill();
+  // moon glow
+  const mg=ctx.createRadialGradient(moonX,moonY,8,moonX,moonY,50);
+  mg.addColorStop(0,'rgba(200,200,255,.08)'); mg.addColorStop(1,'rgba(200,200,255,0)');
+  ctx.fillStyle=mg; ctx.fillRect(moonX-50,moonY-50,100,100);
+
+  // ancient columns flanking the pool
+  function column(cx, h, broken){
+    const baseY=waterY-4;
+    // shadow
+    ctx.fillStyle='rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(cx,baseY+2,12,3,0,0,7); ctx.fill();
+    // shaft
+    const colG=ctx.createLinearGradient(cx-8,0,cx+8,0);
+    colG.addColorStop(0,'#4a4a6a'); colG.addColorStop(0.5,'#6a6a8a'); colG.addColorStop(1,'#4a4a6a');
+    ctx.fillStyle=colG; ctx.fillRect(cx-7,baseY-h,14,h);
+    // fluting lines
+    ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.lineWidth=0.6;
+    for (let i=-1;i<=1;i+=2){ ctx.beginPath(); ctx.moveTo(cx+i*3,baseY-h); ctx.lineTo(cx+i*3,baseY); ctx.stroke(); }
+    // capital
+    if (!broken){
+      ctx.fillStyle='#6a6a8a'; ctx.fillRect(cx-10,baseY-h-5,20,5);
+      ctx.fillRect(cx-12,baseY-h-8,24,3);
+    }
+    // base
+    ctx.fillStyle='#5a5a7a'; ctx.fillRect(cx-10,baseY-3,20,3);
+    // moss accents
+    ctx.fillStyle='rgba(80,120,80,.3)';
+    ctx.beginPath(); ctx.ellipse(cx+5,baseY-2,4,2,0,0,7); ctx.fill();
+  }
+  column(W*0.06,70,false);
+  column(W*0.18,55,true);  // broken column
+  column(W*0.82,60,true);
+  column(W*0.94,72,false);
+
+  // the sacred pool — still water reflecting sky
+  const poolG=ctx.createLinearGradient(0,waterY,0,H);
+  poolG.addColorStop(0,'#10103a'); poolG.addColorStop(0.3,'#0c0c30'); poolG.addColorStop(1,'#080828');
+  ctx.fillStyle=poolG; ctx.fillRect(0,waterY,W,H-waterY);
+
+  // stone edge of pool
+  ctx.strokeStyle='#3a3a5a'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,waterY); ctx.lineTo(W,waterY); ctx.stroke();
+  ctx.fillStyle='#2a2a4a';
+  for (let x=0;x<W;x+=18){ ctx.fillRect(x,waterY-2,16,4); }
+
+  // reflected constellations in water (vertically flipped, slightly distorted)
+  ctx.save(); ctx.globalAlpha=0.15;
+  for (const c of consts){
+    ctx.strokeStyle='rgba(200,200,255,.20)'; ctx.lineWidth=0.6;
+    ctx.beginPath();
+    for (let j=0;j<c.length;j++){
+      const rx=c[j][0]+Math.sin(t*0.8+c[j][0]*0.02)*3;
+      const ry=waterY+(waterY-c[j][1])*0.6+Math.sin(t*1.2+j)*1.5;
+      j===0?ctx.moveTo(rx,ry):ctx.lineTo(rx,ry);
+    }
+    ctx.stroke();
+    for (const [cx,cy] of c){
+      const rx=cx+Math.sin(t*0.8+cx*0.02)*3;
+      const ry=waterY+(waterY-cy)*0.6+Math.sin(t*1.2)*1.5;
+      ctx.fillStyle='rgba(255,250,230,.4)'; ctx.beginPath(); ctx.arc(rx,ry,1.2,0,7); ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  // reflected moon
+  const rmY=waterY+(waterY-moonY)*0.5;
+  ctx.fillStyle='rgba(255,250,220,.12)';
+  ctx.beginPath(); ctx.ellipse(moonX+Math.sin(t*0.6)*2,rmY,10,5+Math.sin(t*1.5)*1,0,0,7); ctx.fill();
+
+  // gentle water ripples
+  ctx.strokeStyle='rgba(180,180,220,.06)'; ctx.lineWidth=0.8;
+  for (let i=0;i<4;i++){
+    const ry=waterY+12+i*18+Math.sin(t*0.5+i)*3;
+    ctx.beginPath();
+    for (let x=0;x<=W;x+=6){ const y=ry+Math.sin(x*0.03+t*0.8+i)*2; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
+    ctx.stroke();
+  }
+
+  // floating candles on the water
+  for (let i=0;i<7;i++){
+    const cx=W*0.10+i*W*0.13+Math.sin(t*0.4+i*1.7)*8;
+    const cy=waterY+8+i*6+Math.sin(t*0.6+i*2.3)*3;
+    // candle body (small rectangle floating)
+    ctx.fillStyle='#e8dcc8'; roundRect(cx-3,cy-4,6,6,1); ctx.fill();
+    // flame
+    const flicker=Math.sin(t*5+i*3)*1.5;
+    ctx.fillStyle=`rgba(255,200,80,${0.8+0.15*Math.sin(t*4+i)})`;
+    ctx.beginPath(); ctx.moveTo(cx,cy-4); ctx.quadraticCurveTo(cx-2+flicker,cy-12,cx,cy-16);
+    ctx.quadraticCurveTo(cx+2+flicker,cy-12,cx,cy-4); ctx.fill();
+    // warm glow on water
+    const fg=ctx.createRadialGradient(cx,cy,2,cx,cy,22);
+    fg.addColorStop(0,'rgba(255,190,100,.12)'); fg.addColorStop(1,'rgba(255,190,100,0)');
+    ctx.fillStyle=fg; ctx.fillRect(cx-22,cy-22,44,44);
+    // tiny reflection streak below candle
+    ctx.fillStyle='rgba(255,200,100,.06)';
+    ctx.fillRect(cx-1,cy+6,2,8+Math.sin(t*0.9+i)*3);
+  }
+
+  // fireflies drifting above the pool
+  for (let i=0;i<12;i++){
+    const fx=W*0.05+i*W*0.08+Math.sin(t*0.3+i*2.5)*20;
+    const fy=waterY-30-i*8+Math.sin(t*0.5+i*1.9)*15;
+    const fb=0.15+0.35*Math.abs(Math.sin(t*2+i*1.3));
+    ctx.fillStyle=`rgba(200,255,150,${fb})`;
+    ctx.beginPath(); ctx.arc(fx,fy,1.5,0,7); ctx.fill();
+    // tiny glow
+    ctx.fillStyle=`rgba(200,255,150,${fb*0.2})`;
+    ctx.beginPath(); ctx.arc(fx,fy,5,0,7); ctx.fill();
+  }
+
+  // foreground: low stone steps and scattered petals
+  ctx.fillStyle='#2a2a4a';
+  ctx.fillRect(0,H*0.88,W,H*0.12);
+  ctx.fillStyle='#323258';
+  for (let x=0;x<W;x+=20){ ctx.fillRect(x+1,H*0.88,18,3); }
+
+  // a few fallen petals on the stone
+  for (let i=0;i<5;i++){
+    const px=(i*73+20)%W, py=H*0.90+(i*17)%10;
+    ctx.fillStyle=`rgba(200,180,220,${0.2+0.1*Math.sin(t+i)})`;
+    ctx.beginPath(); ctx.ellipse(px,py,3,1.5,i*0.8,0,7); ctx.fill();
+  }
+}
+registerScene('starpool', drawStarPool);
+
+/* ── ENCHANTED CLOCK (indoor · giant clocktower interior) ── */
+function drawEnchantedClock(){
+  const t = sceneTime, floorY = H*0.78;
+
+  // dark stone interior walls
+  const wall=ctx.createLinearGradient(0,0,0,floorY);
+  wall.addColorStop(0,'#1a1520'); wall.addColorStop(0.5,'#221c28'); wall.addColorStop(1,'#2a2430');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+
+  // stone block texture
+  ctx.strokeStyle='rgba(0,0,0,.12)'; ctx.lineWidth=0.6;
+  for (let y=0;y<floorY;y+=18){
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    const off=(y/18|0)%2*14;
+    for (let x=off;x<W;x+=28){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+18); ctx.stroke(); }
+  }
+
+  // tall arched window in the back (center) — dim blue light
+  const winCx=W*0.50, winTop=H*0.06, winBot=H*0.44, winW=36;
+  ctx.fillStyle='rgba(30,40,80,.6)';
+  ctx.beginPath(); ctx.moveTo(winCx-winW,winBot); ctx.lineTo(winCx-winW,winTop+winW);
+  ctx.quadraticCurveTo(winCx-winW,winTop,winCx,winTop);
+  ctx.quadraticCurveTo(winCx+winW,winTop,winCx+winW,winTop+winW);
+  ctx.lineTo(winCx+winW,winBot); ctx.closePath(); ctx.fill();
+  // moonlight through window
+  const wg=ctx.createRadialGradient(winCx,winTop+30,5,winCx,winTop+30,80);
+  wg.addColorStop(0,'rgba(150,160,220,.12)'); wg.addColorStop(1,'rgba(150,160,220,0)');
+  ctx.fillStyle=wg; ctx.fillRect(winCx-80,0,160,winBot+20);
+  // window panes
+  ctx.strokeStyle='#1a1520'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(winCx,winTop); ctx.lineTo(winCx,winBot); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(winCx-winW,winTop+40); ctx.lineTo(winCx+winW,winTop+40); ctx.stroke();
+
+  // giant clock face on the upper wall
+  const clkCx=W*0.50, clkCy=H*0.28, clkR=38;
+  // clock backing
+  const clockG=ctx.createRadialGradient(clkCx,clkCy,0,clkCx,clkCy,clkR);
+  clockG.addColorStop(0,'#3a3040'); clockG.addColorStop(0.7,'#2a2430'); clockG.addColorStop(1,'#201a28');
+  ctx.fillStyle=clockG; ctx.beginPath(); ctx.arc(clkCx,clkCy,clkR,0,7); ctx.fill();
+  // rim
+  ctx.strokeStyle='#8a7a60'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.arc(clkCx,clkCy,clkR,0,7); ctx.stroke();
+  ctx.strokeStyle='#6a5a40'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(clkCx,clkCy,clkR-3,0,7); ctx.stroke();
+
+  // glowing numerals (Roman-style dots around the rim)
+  for (let i=0;i<12;i++){
+    const a=i/12*Math.PI*2-Math.PI/2;
+    const nx=clkCx+Math.cos(a)*(clkR-10), ny=clkCy+Math.sin(a)*(clkR-10);
+    const glow=0.5+0.3*Math.sin(t*1.5+i*0.5);
+    ctx.fillStyle=`rgba(220,200,150,${glow})`;
+    ctx.beginPath(); ctx.arc(nx,ny,i%3===0?3:1.8,0,7); ctx.fill();
+    // glow halo on the hour marks
+    if (i%3===0){
+      ctx.fillStyle=`rgba(220,200,150,${glow*0.15})`;
+      ctx.beginPath(); ctx.arc(nx,ny,8,0,7); ctx.fill();
+    }
+  }
+
+  // clock hands — slowly turning
+  // hour hand
+  const hourA=t*0.02-Math.PI/2;
+  ctx.strokeStyle='#c0a870'; ctx.lineWidth=3; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(clkCx,clkCy);
+  ctx.lineTo(clkCx+Math.cos(hourA)*(clkR*0.5),clkCy+Math.sin(hourA)*(clkR*0.5)); ctx.stroke();
+  // minute hand
+  const minA=t*0.15-Math.PI/2;
+  ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(clkCx,clkCy);
+  ctx.lineTo(clkCx+Math.cos(minA)*(clkR*0.7),clkCy+Math.sin(minA)*(clkR*0.7)); ctx.stroke();
+  // center cap
+  ctx.fillStyle='#c0a870'; ctx.beginPath(); ctx.arc(clkCx,clkCy,3.5,0,7); ctx.fill();
+  ctx.lineCap='butt';
+
+  // enormous turning gears
+  function gear(gx,gy,r,teeth,phase,color){
+    const angle=t*0.3*phase;
+    ctx.save(); ctx.translate(gx,gy); ctx.rotate(angle);
+    // teeth
+    ctx.fillStyle=color;
+    for (let i=0;i<teeth;i++){
+      const a=i/teeth*Math.PI*2;
+      ctx.save(); ctx.rotate(a);
+      ctx.fillRect(-3,r-4,6,8); ctx.restore();
+    }
+    // body ring
+    ctx.strokeStyle=color; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.stroke();
+    ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(0,0,r-5,0,7); ctx.stroke();
+    // spokes
+    ctx.strokeStyle=color; ctx.lineWidth=1.5;
+    for (let i=0;i<4;i++){
+      const a=i/4*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(a)*(r-5),Math.sin(a)*(r-5)); ctx.stroke();
+    }
+    // axle
+    ctx.fillStyle=color; ctx.beginPath(); ctx.arc(0,0,4,0,7); ctx.fill();
+    ctx.restore();
+  }
+  gear(W*0.14, H*0.38, 32, 10, 1.0, 'rgba(150,130,90,.5)');
+  gear(W*0.86, H*0.40, 28, 8, -1.3, 'rgba(140,120,85,.45)');
+  gear(W*0.22, H*0.58, 22, 7, 0.8, 'rgba(130,110,80,.4)');
+  gear(W*0.78, H*0.60, 20, 6, -0.9, 'rgba(130,110,80,.4)');
+  // small interlocking gears near the big ones
+  gear(W*0.26, H*0.38, 14, 6, -1.6, 'rgba(160,140,100,.35)');
+  gear(W*0.74, H*0.40, 12, 5, 1.7, 'rgba(160,140,100,.35)');
+
+  // swinging pendulum
+  const pendAngle=Math.sin(t*1.2)*0.35;
+  const pendPivotX=clkCx, pendPivotY=clkCy+clkR+4;
+  const pendLen=H*0.34;
+  const pendBobX=pendPivotX+Math.sin(pendAngle)*pendLen;
+  const pendBobY=pendPivotY+Math.cos(pendAngle)*pendLen;
+  // rod
+  ctx.strokeStyle='#a0904a'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(pendPivotX,pendPivotY); ctx.lineTo(pendBobX,pendBobY); ctx.stroke();
+  // bob (lens shape)
+  ctx.fillStyle='#c8b060';
+  ctx.beginPath(); ctx.ellipse(pendBobX,pendBobY,12,16,pendAngle,0,7); ctx.fill();
+  ctx.strokeStyle='#a09040'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.ellipse(pendBobX,pendBobY,12,16,pendAngle,0,7); ctx.stroke();
+  // glint on bob
+  ctx.fillStyle='rgba(255,240,180,.3)';
+  ctx.beginPath(); ctx.ellipse(pendBobX-3,pendBobY-4,4,6,pendAngle,0,7); ctx.fill();
+
+  // hourglasses on the floor
+  function hourglass(hx,hy,scale){
+    ctx.save(); ctx.translate(hx,hy); ctx.scale(scale,scale);
+    // frame
+    ctx.strokeStyle='#a09060'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(-10,-22); ctx.lineTo(10,-22); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-10,22); ctx.lineTo(10,22); ctx.stroke();
+    // posts
+    ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(-8,-22); ctx.lineTo(-8,22); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(8,-22); ctx.lineTo(8,22); ctx.stroke();
+    // glass body — two triangles meeting at center
+    ctx.fillStyle='rgba(180,200,220,.15)';
+    ctx.beginPath(); ctx.moveTo(-7,-20); ctx.lineTo(7,-20); ctx.lineTo(1,0); ctx.lineTo(-1,0); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-7,20); ctx.lineTo(7,20); ctx.lineTo(1,0); ctx.lineTo(-1,0); ctx.closePath(); ctx.fill();
+    // sand in bottom — pile
+    const sandH=10+Math.sin(t*0.2+hx)*2;
+    ctx.fillStyle='rgba(220,190,130,.5)';
+    ctx.beginPath(); ctx.moveTo(-6,20); ctx.lineTo(6,20); ctx.lineTo(1,20-sandH); ctx.lineTo(-1,20-sandH); ctx.closePath(); ctx.fill();
+    // falling sand stream
+    ctx.fillStyle='rgba(220,190,130,.4)'; ctx.fillRect(-0.5,0,1,20-sandH);
+    // sand in top (less)
+    const topSand=6-Math.sin(t*0.2+hx)*2;
+    ctx.fillStyle='rgba(220,190,130,.35)';
+    ctx.beginPath(); ctx.moveTo(-5,-20); ctx.lineTo(5,-20); ctx.lineTo(1,-20+topSand); ctx.lineTo(-1,-20+topSand); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  hourglass(W*0.30,floorY-22,0.8);
+  hourglass(W*0.70,floorY-20,0.7);
+  hourglass(W*0.88,floorY-18,0.6);
+
+  // floor — polished dark stone
+  const floorG=ctx.createLinearGradient(0,floorY,0,H);
+  floorG.addColorStop(0,'#2a2430'); floorG.addColorStop(1,'#1e1824');
+  ctx.fillStyle=floorG; ctx.fillRect(0,floorY,W,H-floorY);
+  // tile pattern
+  ctx.strokeStyle='rgba(60,50,70,.4)'; ctx.lineWidth=0.6;
+  for (let y=floorY;y<H;y+=12){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  for (let y=floorY;y<H;y+=12){ const off=(((y-floorY)/12|0)%2)*14; for (let x=off;x<W;x+=28){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+12); ctx.stroke(); } }
+
+  // pendulum shadow on the floor
+  const shadowX=pendBobX, shadowW=14+Math.abs(Math.sin(pendAngle))*8;
+  ctx.fillStyle='rgba(0,0,0,.1)';
+  ctx.beginPath(); ctx.ellipse(shadowX,floorY+4,shadowW,3,0,0,7); ctx.fill();
+
+  // floating dust motes in light beam
+  for (let i=0;i<10;i++){
+    const dx=winCx-20+i*5+Math.sin(t*0.2+i*1.7)*12;
+    const dy=winTop+20+((t*8+i*37)%((floorY-winTop)*0.8));
+    const db=0.08+0.06*Math.sin(t*1.5+i);
+    ctx.fillStyle=`rgba(200,200,230,${db})`;
+    ctx.beginPath(); ctx.arc(dx,dy,1,0,7); ctx.fill();
+  }
+
+  // warm ambient glow from gears (implies magical energy)
+  for (const [gx,gy] of [[W*0.14,H*0.38],[W*0.86,H*0.40]]){
+    const gg=ctx.createRadialGradient(gx,gy,5,gx,gy,45);
+    gg.addColorStop(0,'rgba(200,180,120,.06)'); gg.addColorStop(1,'rgba(200,180,120,0)');
+    ctx.fillStyle=gg; ctx.fillRect(gx-45,gy-45,90,90);
+  }
+
+  // a few small ticking cogs on the walls (decorative)
+  for (let i=0;i<4;i++){
+    const cx=(i*W*0.22+W*0.12), cy=H*0.14+i*8;
+    const ca=t*0.5*(i%2?1:-1)+i;
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(ca);
+    ctx.strokeStyle='rgba(140,120,80,.25)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(0,0,6,0,7); ctx.stroke();
+    for (let j=0;j<5;j++){ const a2=j/5*Math.PI*2; ctx.fillStyle='rgba(140,120,80,.2)'; ctx.fillRect(Math.cos(a2)*6-1.5,-1,3,2); }
+    ctx.restore();
+  }
+}
+registerScene('enchantedclock', drawEnchantedClock);

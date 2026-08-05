@@ -1004,6 +1004,388 @@ function csLibraryGhost(){
 }
 
 /* ============================================================================
+   CUTSCENE 6: AQUARIUM WONDER  (triggers at 'aquarium' or 'aquariumtunnel')
+   ============================================================================ */
+function csAquariumWonder(){
+  const groundY = H * 0.76;
+  const charH = 80;
+  const fY = groundY + 8;
+  const krystalX = W * 0.40, lukeX = W * 0.62;
+
+  // jellyfish state
+  let jellies = [];
+  for (let i = 0; i < 5; i++){
+    jellies.push({
+      x: W * 0.15 + i * W * 0.18,
+      y: H * 0.22 + (i % 3) * 28,
+      phase: i * 1.3,
+      r: 8 + (i % 3) * 3
+    });
+  }
+
+  // whale shark state
+  let whaleShark = { x: -80, y: H * 0.18, active: false };
+
+  // small fish
+  const fishArr = [];
+  for (let i = 0; i < 12; i++){
+    fishArr.push({
+      x: (i * 67 + 30) % W, y: H * 0.20 + (i * 31) % (groundY * 0.5),
+      vx: 12 + (i % 4) * 6, size: 3 + (i % 3) * 2,
+      col: ['#f08040','#40a0f0','#f0d040','#a0f060','#f07090'][i % 5],
+      phase: i * 0.8
+    });
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // deep blue aquarium gradient
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#081830'); bg.addColorStop(0.4, '#0c2848'); bg.addColorStop(1, '#061420');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+    // caustic light ripples on the ceiling
+    for (let i = 0; i < 6; i++){
+      const cx = (i * W / 5 + Math.sin(t * 0.8 + i) * 20) % W;
+      const cy = 10 + Math.sin(t * 1.2 + i * 1.5) * 6;
+      const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 30 + Math.sin(t + i) * 8);
+      cg.addColorStop(0, 'rgba(80,180,255,.08)'); cg.addColorStop(1, 'rgba(80,180,255,0)');
+      ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(cx, cy, 30 + Math.sin(t + i) * 8, 0, 7); ctx.fill();
+    }
+
+    // small fish swimming
+    for (const f of fishArr){
+      const fx = (f.x + f.vx * t) % (W + 40) - 20;
+      const fy = f.y + Math.sin(t * 1.5 + f.phase) * 8;
+      ctx.fillStyle = f.col;
+      ctx.beginPath();
+      ctx.moveTo(fx + f.size, fy);
+      ctx.lineTo(fx - f.size, fy - f.size * 0.6);
+      ctx.lineTo(fx - f.size, fy + f.size * 0.6);
+      ctx.closePath(); ctx.fill();
+      // tail
+      ctx.beginPath();
+      ctx.moveTo(fx - f.size, fy);
+      ctx.lineTo(fx - f.size - f.size * 0.7, fy - f.size * 0.5);
+      ctx.lineTo(fx - f.size - f.size * 0.7, fy + f.size * 0.5);
+      ctx.closePath(); ctx.fill();
+    }
+
+    // bubbles
+    ctx.fillStyle = 'rgba(150,220,255,.15)';
+    for (let i = 0; i < 10; i++){
+      const bx = (i * 47 + 20) % W;
+      const by = H - ((t * 18 + i * 50) % (H * 0.9));
+      const br = 1.5 + (i % 3);
+      ctx.beginPath(); ctx.arc(bx, by, br, 0, 7); ctx.fill();
+    }
+
+    // sandy bottom
+    const sand = ctx.createLinearGradient(0, groundY - 10, 0, H);
+    sand.addColorStop(0, '#2a4050'); sand.addColorStop(1, '#1a2830');
+    ctx.fillStyle = sand; ctx.fillRect(0, groundY - 10, W, H - groundY + 10);
+    // sand texture
+    ctx.fillStyle = 'rgba(200,180,140,.08)';
+    for (let i = 0; i < 20; i++){
+      const sx = (i * 31) % W, sy = groundY - 4 + (i * 7) % 16;
+      ctx.fillRect(sx, sy, 3, 1);
+    }
+
+    // seaweed
+    ctx.strokeStyle = 'rgba(40,140,80,.5)'; ctx.lineWidth = 2;
+    for (let i = 0; i < 4; i++){
+      const sx = W * 0.1 + i * W * 0.25;
+      ctx.beginPath(); ctx.moveTo(sx, H);
+      for (let y = H; y > groundY - 20; y -= 6){
+        ctx.lineTo(sx + Math.sin((H - y) * 0.08 + t * 1.5 + i) * 6, y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  function drawJellies(cs){
+    const t = cs.totalT;
+    for (const j of jellies){
+      const jx = j.x + Math.sin(t * 0.6 + j.phase) * 12;
+      const jy = j.y + Math.sin(t * 0.8 + j.phase + 1) * 8;
+      // bell
+      const pulse = 0.85 + 0.15 * Math.sin(t * 2.5 + j.phase);
+      const glow = ctx.createRadialGradient(jx, jy, 0, jx, jy, j.r * pulse);
+      glow.addColorStop(0, 'rgba(200,140,255,.5)'); glow.addColorStop(0.6, 'rgba(180,120,240,.25)'); glow.addColorStop(1, 'rgba(180,120,240,0)');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(jx, jy, j.r * pulse, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(220,180,255,.45)';
+      ctx.beginPath(); ctx.arc(jx, jy, j.r * pulse * 0.7, Math.PI, 0); ctx.fill();
+      // tentacles
+      ctx.strokeStyle = 'rgba(200,160,255,.3)'; ctx.lineWidth = 1;
+      for (let k = 0; k < 4; k++){
+        const tx = jx - 4 + k * 3;
+        ctx.beginPath(); ctx.moveTo(tx, jy + j.r * 0.3);
+        ctx.quadraticCurveTo(tx + Math.sin(t * 2 + k + j.phase) * 4, jy + j.r + 8, tx + Math.sin(t * 1.5 + k) * 3, jy + j.r + 16);
+        ctx.stroke();
+      }
+    }
+  }
+
+  function drawWhaleShark(cs){
+    if (!whaleShark.active) return;
+    const t = cs.totalT;
+    const ws = whaleShark;
+    const wx = ws.x + t * 28;
+    const wy = ws.y + Math.sin(t * 0.5) * 10;
+    if (wx > W + 120) return;
+    // body
+    ctx.fillStyle = 'rgba(60,80,110,.7)';
+    ctx.beginPath();
+    ctx.ellipse(wx, wy, 60, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // spots
+    ctx.fillStyle = 'rgba(180,200,220,.25)';
+    for (let i = 0; i < 8; i++){
+      const dx = -30 + i * 8 + (i % 3) * 2;
+      const dy = -6 + (i % 3) * 6;
+      ctx.beginPath(); ctx.arc(wx + dx, wy + dy, 2, 0, 7); ctx.fill();
+    }
+    // tail
+    ctx.fillStyle = 'rgba(60,80,110,.6)';
+    ctx.beginPath();
+    ctx.moveTo(wx - 56, wy);
+    ctx.lineTo(wx - 76, wy - 14 + Math.sin(t * 3) * 4);
+    ctx.lineTo(wx - 76, wy + 14 + Math.sin(t * 3 + 1) * 4);
+    ctx.closePath(); ctx.fill();
+    // eye
+    ctx.fillStyle = 'rgba(200,220,240,.8)';
+    ctx.beginPath(); ctx.arc(wx + 48, wy - 4, 2.5, 0, 7); ctx.fill();
+    // shadow underneath
+    ctx.fillStyle = 'rgba(0,0,0,.08)';
+    ctx.beginPath(); ctx.ellipse(wx, groundY - 4, 50, 6, 0, 0, 7); ctx.fill();
+  }
+
+  function drawChars(){
+    csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+    csDrawChar('luke',    lukeX,    fY, 'left',  charH * 0.95, 0);
+  }
+
+  return {
+    chars: ['krystal', 'luke'],
+    skipable: true,
+    steps: [
+      // Step 1: Both watching fish
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawJellies(cs); drawChars();
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Look at all the fish! 🐠");
+      }},
+      // Step 2: Luke spots a jellyfish
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawJellies(cs); drawChars();
+          csDrawBubble(lukeX, fY - charH * 0.95 - 4, 'Luke', "Whoa, a jellyfish! Look!");
+      }},
+      // Step 3: Krystal is amazed
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawJellies(cs); drawChars();
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It glows! So pretty 🪼✨");
+      }},
+      // Step 4: Whale shark appears overhead
+      { dur: 3.0, draw(cs){
+          drawBg(cs); drawJellies(cs); drawWhaleShark(cs); drawChars();
+          if (cs.stepT > 1.0){
+            csDrawBubble(W * 0.50, fY - charH - 4, null, 'Woooow! 🐋');
+          }
+      }, onStart(cs){
+          whaleShark.active = true;
+          whaleShark.x = -100;
+          whaleShark.y = H * 0.14;
+      }},
+      // Step 5: Both in awe, hearts
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawJellies(cs); drawWhaleShark(cs); drawChars();
+          csDrawBubble(lukeX, fY - charH * 0.95 - 4, 'Luke', "That was AWESOME! 😍");
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+          csHearts(cs, lukeX, fY - charH * 0.6, 4);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 7: RAINY DAY CHAT  (triggers at 'rainystreet')
+   ============================================================================ */
+function csRainyDayChat(){
+  const groundY = H * 0.72;
+  const charH = 80;
+  const fY = groundY + 10;
+  const paulX = W * 0.46, krystalX = W * 0.54;
+
+  // rain drops
+  const raindrops = [];
+  for (let i = 0; i < 60; i++){
+    raindrops.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      speed: 180 + Math.random() * 120,
+      len: 6 + Math.random() * 8
+    });
+  }
+
+  // puddle ripple state
+  const ripples = [];
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // overcast sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#3a3e4c'); sky.addColorStop(0.5, '#4a5060'); sky.addColorStop(1, '#5a6070');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // cloud layers
+    ctx.fillStyle = 'rgba(70,75,90,.6)';
+    for (let i = 0; i < 5; i++){
+      const cx = (i * W / 4 + Math.sin(t * 0.1 + i) * 8) % (W + 60) - 30;
+      const cy = 14 + i * 10;
+      ctx.beginPath(); ctx.ellipse(cx, cy, 50 + i * 6, 14 + i * 2, 0, 0, 7); ctx.fill();
+    }
+
+    // buildings silhouette in the background
+    ctx.fillStyle = '#2e3240';
+    const bldgs = [
+      [0, groundY - 60, 30, 60],
+      [28, groundY - 80, 24, 80],
+      [50, groundY - 50, 28, 50],
+      [76, groundY - 70, 20, 70],
+      [W - 70, groundY - 65, 26, 65],
+      [W - 46, groundY - 85, 22, 85],
+      [W - 26, groundY - 55, 28, 55],
+    ];
+    for (const [bx, by, bw, bh] of bldgs){
+      ctx.fillRect(bx, by, bw, bh);
+      // lit windows
+      ctx.fillStyle = 'rgba(255,220,140,.2)';
+      for (let wy = by + 8; wy < by + bh - 10; wy += 14){
+        for (let wx = bx + 4; wx < bx + bw - 6; wx += 8){
+          if (((wx * 7 + wy * 3) % 5) < 3) ctx.fillRect(wx, wy, 4, 5);
+        }
+      }
+      ctx.fillStyle = '#2e3240';
+    }
+
+    // wet street
+    const street = ctx.createLinearGradient(0, groundY, 0, H);
+    street.addColorStop(0, '#3a3e50'); street.addColorStop(1, '#2a2e3c');
+    ctx.fillStyle = street; ctx.fillRect(0, groundY, W, H - groundY);
+    // wet reflection sheen
+    ctx.fillStyle = 'rgba(100,120,150,.12)';
+    ctx.fillRect(0, groundY, W, H - groundY);
+
+    // street lamp
+    const lampX = W * 0.18;
+    ctx.fillStyle = '#4a4a4a'; ctx.fillRect(lampX - 2, groundY - 70, 4, 70);
+    ctx.fillStyle = '#5a5a5a'; ctx.fillRect(lampX - 8, groundY - 72, 16, 4);
+    // lamp glow
+    const lampGlow = ctx.createRadialGradient(lampX, groundY - 74, 2, lampX, groundY - 74, 60);
+    lampGlow.addColorStop(0, 'rgba(255,220,140,.25)'); lampGlow.addColorStop(0.5, 'rgba(255,200,100,.08)'); lampGlow.addColorStop(1, 'rgba(255,200,100,0)');
+    ctx.fillStyle = lampGlow; ctx.beginPath(); ctx.arc(lampX, groundY - 74, 60, 0, 7); ctx.fill();
+
+    // puddle ripples
+    for (let i = ripples.length - 1; i >= 0; i--){
+      const r = ripples[i];
+      r.age += 0.016;
+      if (r.age > r.dur){ ripples.splice(i, 1); continue; }
+      const p = r.age / r.dur;
+      const ra = r.maxR * p;
+      ctx.strokeStyle = `rgba(150,170,200,${(0.2 * (1 - p)).toFixed(2)})`;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.ellipse(r.x, r.y, ra, ra * 0.3, 0, 0, 7); ctx.stroke();
+    }
+  }
+
+  function drawRain(cs, dt){
+    const t = cs.totalT;
+    ctx.strokeStyle = 'rgba(180,200,220,.35)'; ctx.lineWidth = 1;
+    for (const r of raindrops){
+      r.y += r.speed * dt;
+      if (r.y > H){
+        r.y = -r.len;
+        r.x = Math.random() * W;
+        // spawn a puddle ripple when a drop hits the ground
+        if (Math.random() < 0.3){
+          ripples.push({ x: r.x, y: groundY + 2 + Math.random() * 8, age: 0, dur: 0.6 + Math.random() * 0.4, maxR: 4 + Math.random() * 4 });
+        }
+      }
+      ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(r.x - 1, r.y + r.len); ctx.stroke();
+    }
+  }
+
+  function drawUmbrella(cx, topY){
+    // umbrella canopy
+    ctx.fillStyle = '#c04060';
+    ctx.beginPath(); ctx.arc(cx, topY, 32, Math.PI, 0); ctx.fill();
+    // scalloped edge
+    ctx.fillStyle = '#a83050';
+    for (let i = 0; i < 5; i++){
+      const ax = cx - 28 + i * 14;
+      ctx.beginPath(); ctx.arc(ax, topY, 5, 0, Math.PI); ctx.fill();
+    }
+    // handle
+    ctx.strokeStyle = '#6a3a2a'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(cx, topY); ctx.lineTo(cx, topY + 48); ctx.stroke();
+    // handle hook
+    ctx.beginPath(); ctx.arc(cx + 4, topY + 48, 4, 0, Math.PI); ctx.stroke();
+  }
+
+  function drawChars(snuggle){
+    const offset = snuggle ? -8 : 0;
+    csDrawChar('paul',    paulX,           fY, 'right', charH, 0);
+    csDrawChar('krystal', krystalX + offset, fY, 'left',  charH, 0);
+  }
+
+  return {
+    chars: ['krystal', 'paul'],
+    skipable: true,
+    steps: [
+      // Step 1: Standing under umbrella, rain falling
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(false);
+          drawUmbrella(W * 0.50, fY - charH - 12);
+          drawRain(cs, 0);
+          csDrawBubble(krystalX, fY - charH - 28, 'Krystal', "It's really coming down! 🌧️");
+      }, update(cs, dt){ drawRain(cs, dt); }},
+      // Step 2: Paul speaks
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(false);
+          drawUmbrella(W * 0.50, fY - charH - 12);
+          drawRain(cs, 0);
+          csDrawBubble(paulX, fY - charH - 28, 'Paul', "I love rainy days with you.");
+      }, update(cs, dt){ drawRain(cs, dt); }},
+      // Step 3: Krystal reacts warmly
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars(false);
+          drawUmbrella(W * 0.50, fY - charH - 12);
+          drawRain(cs, 0);
+          csDrawBubble(krystalX, fY - charH - 28, 'Krystal', "You always say the sweetest things 🥰");
+      }, update(cs, dt){ drawRain(cs, dt); }},
+      // Step 4: Krystal snuggles closer, cozy moment
+      { dur: 3.0, draw(cs){
+          drawBg(cs); drawChars(true);
+          drawUmbrella(W * 0.50, fY - charH - 12);
+          drawRain(cs, 0);
+          if (cs.stepT < 1.5){
+            csDrawBubble(krystalX - 8, fY - charH - 28, 'Krystal', "*snuggles closer* 💛");
+          }
+      }, onStart(cs){
+          csHearts(cs, paulX, fY - charH * 0.7, 5);
+          csHearts(cs, krystalX - 8, fY - charH * 0.7, 6);
+      }, update(cs, dt){ drawRain(cs, dt); }},
+      // Step 5: Peaceful ending — just rain sounds and closeness
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(true);
+          drawUmbrella(W * 0.50, fY - charH - 12);
+          drawRain(cs, 0);
+      }, update(cs, dt){ drawRain(cs, dt); }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
@@ -1016,6 +1398,9 @@ const CUTSCENE_MAP = {
   gingerbreadkitchen:[csBakeryMishap],
   library:           [csLibraryGhost],
   arcanelibrary:     [csLibraryGhost],
+  aquarium:          [csAquariumWonder],
+  aquariumtunnel:    [csAquariumWonder],
+  rainystreet:       [csRainyDayChat],
 };
 
 /* ============================================================================
