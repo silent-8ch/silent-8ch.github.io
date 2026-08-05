@@ -7036,19 +7036,26 @@ function drawTownSquare(){
   SpriteRenderer.submit({sprite:'puppy', x:dogX, y:dogY, frame:dogFrame, flipX:dogFlip});
 
   // ---- Krystal: sits on bench or chair when idle nearby ----
-  const benchX = W * 0.14, benchSitY = groundY + 52;  // bench seat height
-  const chairX = W * 0.74, chairSitY = groundY + 44;  // chair seat height
+  const benchX = W * 0.14, benchSitY = groundY + 52;
+  const chairX = W * 0.74, chairSitY = groundY + 44;
   const nearBench = Math.abs(pet.x - benchX) < 40 && Math.abs(pet.y - (groundY + 60)) < 30;
   const nearChair = Math.abs(pet.x - chairX) < 40 && Math.abs(pet.y - (groundY + 52)) < 30;
   const isIdle = !pet.moving && pet.animLock <= 0 && !pet.resting;
+  const wantsSit = isIdle && (nearBench || nearChair);
 
-  if (isIdle && (nearBench || nearChair)) {
-    // Draw Krystal sitting using the sit expression sprite
+  if (!drawTownSquare._sitStart) drawTownSquare._sitStart = 0;
+  if (wantsSit && drawTownSquare._sitStart === 0) drawTownSquare._sitStart = t;
+  if (!wantsSit) drawTownSquare._sitStart = 0;
+
+  if (wantsSit) {
     const sitX = nearBench ? benchX : chairX;
     const sitY = nearBench ? benchSitY : chairSitY;
-    SpriteRenderer.submit({ phase:'actors', x:sitX, y:sitY, draw: function(ctx2) {
+    const elapsed = t - drawTownSquare._sitStart;
+    // 4 frames at ~4fps = 1 second to sit down, then hold last frame
+    const frame = Math.min(3, Math.floor(elapsed * 4));
+    SpriteRenderer.submit({ phase:'actors', x:sitX, y:sitY, draw: function() {
       csLoadExpression('krystal', 'sit');
-      csDrawExpression('krystal', 'sit', sitX, sitY, 130, 3);
+      csDrawExpression('krystal', 'sit', sitX, sitY, 130, frame);
     }});
   } else {
     SpriteRenderer.submit({ phase:'actors', x:pet.x, y:pet.y, draw:drawPet });
