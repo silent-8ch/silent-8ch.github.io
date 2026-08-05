@@ -6,16 +6,12 @@
   const params = new URLSearchParams(window.location.search);
   if (!params.has('debug')) return;
 
-  // Expand game to full screen in debug mode
-  const gameEl = document.getElementById('game');
-  if (gameEl) {
-    gameEl.style.width = '100vw';
-    gameEl.style.maxWidth = '100vw';
-    gameEl.style.height = '100vh';
-    gameEl.style.borderRadius = '0';
-    gameEl.style.aspectRatio = 'unset';
-  }
+  // Debug layout: game stays centered mobile size, debug panels fill the sides
   document.body.style.overflow = 'hidden';
+  document.body.style.display = 'flex';
+  document.body.style.alignItems = 'center';
+  document.body.style.justifyContent = 'center';
+  document.body.style.gap = '0';
 
   let editorOpen = false;
   let selected = null;       // index into current frame's submitted list
@@ -33,27 +29,33 @@
   const panel = document.createElement('div');
   panel.id = 'spriteEditorPanel';
   panel.innerHTML = `
-    <div id="seHeader">
-      <b>Sprite Editor</b>
-      <span id="seClose" style="cursor:pointer;float:right;">✕</span>
+    <div id="seHeader" style="padding:8px 10px;background:#222;border-bottom:1px solid #333;display:flex;justify-content:space-between;align-items:center;">
+      <b>🔧 Sprite Editor</b>
+      <span id="seClose" style="cursor:pointer;font-size:14px;">✕</span>
     </div>
-    <div id="seInfo" style="font-size:10px;color:#aaa;padding:2px 6px;">Click sprite in list, drag on canvas</div>
-    <div id="seList"></div>
-    <div id="seCoords" style="padding:4px 6px;font-family:monospace;font-size:10px;color:#4fc3f7;min-height:24px;"></div>
-    <div style="padding:4px 6px;">
-      <button id="seSave" style="font-size:10px;padding:2px 8px;">Save positions</button>
-      <button id="seClear" style="font-size:10px;padding:2px 8px;">Clear saved</button>
-      <button id="seCopy" style="font-size:10px;padding:2px 8px;">Copy code</button>
+    <div id="seScene" style="padding:6px 10px;background:#1e1e1e;border-bottom:1px solid #222;font-size:10px;color:#aaa;"></div>
+    <div id="seInfo" style="font-size:10px;color:#666;padding:4px 10px;border-bottom:1px solid #222;">Select sprite → drag on canvas. Press E to toggle.</div>
+    <div id="seList" style="max-height:40vh;overflow-y:auto;"></div>
+    <div id="seCoords" style="padding:6px 10px;font-family:monospace;font-size:11px;color:#4fc3f7;min-height:28px;background:#111;border-top:1px solid #222;"></div>
+    <div style="padding:6px 10px;display:flex;gap:4px;border-top:1px solid #222;">
+      <button id="seSave" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Save</button>
+      <button id="seClear" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Clear</button>
+      <button id="seCopy" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Copy code</button>
     </div>
   `;
   panel.style.cssText = `
-    position:fixed; top:10px; right:10px; width:220px; max-height:80vh;
-    overflow-y:auto; background:rgba(18,18,18,0.95); color:#fff;
-    border:1px solid #333; border-radius:8px; font-size:11px;
-    font-family:sans-serif; z-index:9999; display:none;
-    box-shadow:0 4px 20px rgba(0,0,0,0.5);
+    width:280px; height:100vh; overflow-y:auto;
+    background:#1a1a1a; color:#fff; border-left:1px solid #333;
+    font-size:11px; font-family:sans-serif; flex-shrink:0;
+    display:none;
   `;
-  document.body.appendChild(panel);
+  // Insert panel after the game element so it sits to the right
+  const gameEl = document.getElementById('game');
+  if (gameEl && gameEl.parentNode) {
+    gameEl.parentNode.appendChild(panel);
+  } else {
+    document.body.appendChild(panel);
+  }
 
   const seList = panel.querySelector('#seList');
   const seCoords = panel.querySelector('#seCoords');
@@ -96,14 +98,21 @@
   }
 
   function refreshList() {
+    // Scene info
+    const seScene = panel.querySelector('#seScene');
+    if (typeof SCENES !== 'undefined' && typeof currentScene !== 'undefined') {
+      seScene.textContent = '📍 ' + SCENES[currentScene] + ' (index ' + currentScene + ')  |  W:' + W + ' H:' + H + '  |  groundY ≈ ' + Math.round(H * 0.52);
+    }
+
     const sprites = getSubmittedSprites();
     seList.innerHTML = '';
     sprites.forEach((s, i) => {
       const row = document.createElement('div');
-      row.style.cssText = `padding:3px 6px;cursor:pointer;border-bottom:1px solid #222;${selected === i ? 'background:#333;color:#4fc3f7;' : ''}`;
+      row.style.cssText = `padding:4px 10px;cursor:pointer;border-bottom:1px solid #222;font-size:11px;${selected === i ? 'background:#2a3a4a;color:#4fc3f7;' : 'color:#ccc;'}`;
       const sprite = SpriteRenderer.getSprite(s.sprite);
       const w = s.width || sprite?.defaultSize || '?';
-      row.textContent = `${s.sprite} (${Math.round(s.x)},${Math.round(s.y)}) ${w}px`;
+      const phase = s.phase || sprite?.phase || 'actors';
+      row.innerHTML = `<span style="color:${selected === i ? '#4fc3f7' : '#888'};font-size:9px;">${phase}</span> <b>${s.sprite}</b> <span style="color:#666;font-family:monospace;font-size:10px;">(${Math.round(s.x)}, ${Math.round(s.y)})</span> <span style="color:#555;font-size:9px;">${w}px</span>`;
       row.addEventListener('click', () => {
         selected = i;
         refreshList();
