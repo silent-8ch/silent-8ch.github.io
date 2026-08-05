@@ -29,7 +29,7 @@ The world has **216 places** to visit, **215 of them with hand-placed tap spots*
 
 ---
 
-## 🎬 Cutscenes (19)
+## 🎬 Cutscenes (22)
 
 _Now and then, if she's idle in the right place, a little story plays out. The screen fades in, characters walk on, and they talk, tease, and share a moment together. Each cutscene is skipable (tap **Skip >>** in the top-right corner) and lasts about 20–30 seconds. They trigger randomly (~15 % chance every 30–60 s) — linger in a scene and one might start on its own._
 
@@ -54,6 +54,9 @@ _Debug shortcut: press **X** on a keyboard to force-trigger the cutscene for the
 - **Pillow Fort** — triggers at _Treehouse_, _Sunroom_, or _Cozy Igloo_. Characters: Krystal, Wade, Luke. Building a pillow fort together — Wade stacks too high and it collapses on him. Everyone laughing under a pile of pillows.
 - **Dance Lesson** — triggers at _Ballet Studio_ or _Ballroom_. Characters: Krystal, Paul. Paul tries to dance and steps on her foot. She teaches him, he nails one move, and they spin together with hearts.
 - **Firefly Catching** — triggers at _Firefly Meadow_, _Firefly Pier_, or _Night Garden_. Characters: Krystal, Luna, William. Catching fireflies in jars at night. Luna's jar is empty so Krystal shares hers. They release them all in a burst of lights.
+- **Magic Show** — triggers at _Magic Shop_, _Tarot Parlor_, or _Wizard Tower_. Characters: Krystal, Paul, William. William does a magic trick — pulls a bunny from a hat. Paul is stunned, Krystal claps. William bows and his hat falls off. Everyone laughs.
+- **Sunset Fishing** — triggers at _Fishing Dock_, _Marina_, or _River_. Characters: Krystal, Paul, Wade. Sitting on a dock with fishing lines at sunset. Wade gets a big tug and pulls up... a boot. Everyone laughs.
+- **Garden Butterflies** — triggers at _Butterfly Dome_, _Greenhouse_, or _Sunflower Field_. Characters: Krystal, Luna. Surrounded by butterflies. One lands on Luna's nose — she freezes. Krystal whispers "Don't move!" It flies away. Both laugh, hearts everywhere.
 
 ---
 

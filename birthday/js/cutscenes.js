@@ -3621,6 +3621,529 @@ function csFireflyCatching(){
 }
 
 /* ============================================================================
+   CUTSCENE 20: MAGIC SHOW  (triggers at magicshop, tarotparlor, wizardtower)
+   ============================================================================ */
+function csMagicShow(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.22, paulX = W * 0.50, williamX = W * 0.78;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // dark mystical interior
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#1a1028'); wall.addColorStop(0.5, '#241838'); wall.addColorStop(1, '#2a1e40');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // wooden stage floor
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#6a4830'); floor.addColorStop(1, '#503820');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // curtains on sides
+    ctx.fillStyle = '#6a1040';
+    ctx.fillRect(0, 0, W * 0.08, groundY);
+    ctx.fillRect(W * 0.92, 0, W * 0.08, groundY);
+    // curtain folds
+    ctx.fillStyle = '#801858';
+    ctx.fillRect(W * 0.02, 0, 3, groundY);
+    ctx.fillRect(W * 0.05, 0, 2, groundY);
+    ctx.fillRect(W * 0.93, 0, 3, groundY);
+    ctx.fillRect(W * 0.96, 0, 2, groundY);
+
+    // sparkles drifting
+    ctx.fillStyle = 'rgba(255,220,150,.4)';
+    for (let i = 0; i < 8; i++){
+      const sx = W * 0.12 + ((i * 53 + 7) % (W * 0.76));
+      const sy = H * 0.06 + ((i * 37 + 13) % (H * 0.50));
+      const twinkle = 0.2 + Math.sin(t * 2.5 + i * 1.4) * 0.3;
+      ctx.globalAlpha = twinkle;
+      ctx.font = '6px serif';
+      ctx.fillText('\u2728', sx, sy);
+    }
+    ctx.globalAlpha = 1;
+
+    // small table center-stage for the trick
+    ctx.fillStyle = '#503828';
+    ctx.fillRect(paulX - 14, groundY - 18, 28, 18);
+    ctx.fillStyle = '#604838';
+    ctx.fillRect(paulX - 16, groundY - 20, 32, 4);
+  }
+
+  // draw a top hat (cx = center, baseY = bottom of hat)
+  function drawHat(cx, baseY, tilted){
+    ctx.save();
+    if (tilted){
+      ctx.translate(cx, baseY);
+      ctx.rotate(0.35);
+      ctx.translate(-cx, -baseY);
+    }
+    // brim
+    ctx.fillStyle = '#1a1a2a';
+    ctx.beginPath(); ctx.ellipse(cx, baseY, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
+    // crown
+    ctx.fillStyle = '#222234';
+    ctx.fillRect(cx - 9, baseY - 18, 18, 18);
+    // band
+    ctx.fillStyle = '#8040a0';
+    ctx.fillRect(cx - 9, baseY - 6, 18, 3);
+    // top
+    ctx.fillStyle = '#1a1a2a';
+    ctx.beginPath(); ctx.ellipse(cx, baseY - 18, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  // draw a bunny popping out of the hat
+  function drawBunny(cx, baseY, pop){
+    // bunny head
+    const by = baseY - 18 - pop * 14;
+    ctx.fillStyle = '#f0e8e0';
+    ctx.beginPath(); ctx.ellipse(cx, by - 6, 6, 7, 0, 0, Math.PI * 2); ctx.fill();
+    // ears
+    ctx.fillStyle = '#f0e8e0';
+    ctx.beginPath(); ctx.ellipse(cx - 3, by - 16, 2.5, 7, -0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 3, by - 16, 2.5, 7, 0.15, 0, Math.PI * 2); ctx.fill();
+    // inner ears
+    ctx.fillStyle = '#e8a0b0';
+    ctx.beginPath(); ctx.ellipse(cx - 3, by - 16, 1.2, 4, -0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 3, by - 16, 1.2, 4, 0.15, 0, Math.PI * 2); ctx.fill();
+    // eyes
+    ctx.fillStyle = '#2a2a2a';
+    ctx.beginPath(); ctx.arc(cx - 2.5, by - 7, 1, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 2.5, by - 7, 1, 0, 7); ctx.fill();
+    // nose
+    ctx.fillStyle = '#e08090';
+    ctx.beginPath(); ctx.arc(cx, by - 4, 1, 0, 7); ctx.fill();
+  }
+
+  // sparkle burst around bunny
+  function drawMagicBurst(cs, cx, cy){
+    ctx.font = '8px serif';
+    for (let i = 0; i < 6; i++){
+      const angle = i * 1.05 + cs.stepT * 2;
+      const r = 8 + cs.stepT * 12;
+      const sx = cx + Math.cos(angle) * r;
+      const sy = cy + Math.sin(angle) * r * 0.7;
+      ctx.globalAlpha = Math.max(0, 0.7 - cs.stepT * 0.25);
+      ctx.fillStyle = '#f0d040';
+      ctx.fillText('\u2728', sx, sy);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  const hatCx = paulX, hatBaseY = groundY - 20;
+
+  return {
+    chars: ['krystal', 'paul', 'william'],
+    skipable: true,
+    steps: [
+      // Step 1: William stands center with hat — announces trick
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawHat(hatCx, hatBaseY, false);
+          csDrawExpression('william', 'cheer', williamX, fY, charH);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawChar('paul', paulX, fY, 'left', charH, 0);
+          csDrawBubble(williamX, fY - charH - 4, 'William', 'For my next trick... \ud83c\udfa9');
+      }},
+      // Step 2: He waves hands — bunny pops out — magic!
+      { dur: 2.6, draw(cs){
+          drawBg(cs);
+          drawHat(hatCx, hatBaseY, false);
+          const pop = Math.min(1, cs.stepT / 1.2);
+          drawBunny(hatCx, hatBaseY, pop);
+          if (cs.stepT > 0.8) drawMagicBurst(cs, hatCx, hatBaseY - 28);
+          csDrawExpression('william', 'wave', williamX, fY, charH);
+          csDrawExpression('paul', 'surprised', paulX, fY, charH);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          if (cs.stepT < 1.4){
+            csDrawBubble(williamX, fY - charH - 4, 'William', 'Abracadabra! \u2728');
+          } else {
+            csDrawBubble(paulX, fY - charH - 4, 'Paul', 'NO WAY!! \ud83d\ude32');
+          }
+      }},
+      // Step 3: Paul stunned, Krystal clapping
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawHat(hatCx, hatBaseY, false);
+          drawBunny(hatCx, hatBaseY, 1);
+          csDrawExpression('paul', 'surprised', paulX, fY, charH);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawExpression('william', 'cheer', williamX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'That was amazing! \ud83d\udc4f');
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 3);
+      }},
+      // Step 4: William bows — hat falls off — embarrassed
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          const fallT = Math.min(1, cs.stepT / 0.6);
+          drawHat(hatCx + fallT * 30, hatBaseY + fallT * 20, true);
+          if (cs.stepT < 1.0){
+            csDrawExpression('william', 'embarrassed', williamX, fY, charH);
+            csDrawBubble(williamX, fY - charH - 4, 'William', 'Uhh... that was part of the show!');
+          } else {
+            csDrawExpression('william', 'embarrassed', williamX, fY, charH);
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+            csDrawExpression('paul', 'laugh', paulX, fY, charH);
+          }
+      }},
+      // Step 5: Everyone laughing
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          csDrawExpression('william', 'laugh', williamX, fY, charH);
+          csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+          csDrawExpression('paul', 'laugh', paulX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Best magician ever \ud83d\ude02');
+      }, onStart(cs){
+          csHearts(cs, williamX, fY - charH * 0.7, 3);
+          csHearts(cs, krystalX, fY - charH * 0.7, 3);
+          csHearts(cs, paulX, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 21: SUNSET FISHING  (triggers at fishingdock, marina, river)
+   ============================================================================ */
+function csSunsetFishing(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.24, paulX = W * 0.50, wadeX = W * 0.76;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // warm sunset sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY * 0.50);
+    sky.addColorStop(0, '#1a2848'); sky.addColorStop(0.3, '#c06030'); sky.addColorStop(0.7, '#e8a050'); sky.addColorStop(1, '#f0c870');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY * 0.50);
+
+    // sun low on horizon
+    const sunY = groundY * 0.42;
+    ctx.fillStyle = '#f0c060';
+    ctx.beginPath(); ctx.arc(W * 0.50, sunY, 14, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(240,200,100,.2)';
+    ctx.beginPath(); ctx.arc(W * 0.50, sunY, 22, 0, 7); ctx.fill();
+
+    // water
+    const waterTop = groundY * 0.50;
+    const water = ctx.createLinearGradient(0, waterTop, 0, groundY);
+    water.addColorStop(0, '#c08848'); water.addColorStop(0.3, '#4878a0'); water.addColorStop(1, '#2a5070');
+    ctx.fillStyle = water; ctx.fillRect(0, waterTop, W, groundY - waterTop);
+
+    // sun reflection on water
+    ctx.fillStyle = 'rgba(240,200,100,.15)';
+    ctx.fillRect(W * 0.42, waterTop, W * 0.16, groundY - waterTop);
+
+    // ripples
+    ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++){
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 8){
+        const ry = waterTop + 8 + i * 10 + Math.sin(x * 0.05 + t * 1.2 + i * 1.5) * 1.5;
+        if (x === 0) ctx.moveTo(x, ry); else ctx.lineTo(x, ry);
+      }
+      ctx.stroke();
+    }
+
+    // wooden dock planks
+    const dockTop = groundY - 4;
+    ctx.fillStyle = '#7a5a3a';
+    ctx.fillRect(0, dockTop, W, H - dockTop);
+    // plank lines
+    ctx.strokeStyle = '#604828'; ctx.lineWidth = 0.8;
+    for (let x = 0; x < W; x += 20){
+      ctx.beginPath(); ctx.moveTo(x, dockTop); ctx.lineTo(x, H); ctx.stroke();
+    }
+    // dock edge
+    ctx.fillStyle = '#604020'; ctx.fillRect(0, dockTop, W, 3);
+
+    // dock posts
+    ctx.fillStyle = '#5a4028';
+    ctx.fillRect(W * 0.05, dockTop - 14, 4, 18);
+    ctx.fillRect(W * 0.93, dockTop - 14, 4, 18);
+  }
+
+  // draw a fishing line from a character's hand into the water
+  function drawFishingLine(cx, waterHit, tug){
+    ctx.strokeStyle = '#a0a0a0'; ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(cx + 6, fY - charH * 0.45);
+    const tugOff = tug ? Math.sin(cutscene.totalT * 12) * 3 : 0;
+    ctx.lineTo(cx + 20, groundY * 0.60 + tugOff);
+    ctx.lineTo(waterHit + tugOff, groundY - 6);
+    ctx.stroke();
+    // bobber
+    ctx.fillStyle = tug ? '#e03030' : '#e06040';
+    ctx.beginPath(); ctx.arc(waterHit + tugOff, groundY - 6, 2.5, 0, 7); ctx.fill();
+  }
+
+  // draw a boot hanging from the line
+  function drawBoot(cx, t){
+    const bx = cx + 16, by = fY - charH * 0.50;
+    const swing = Math.sin(t * 3) * 0.15;
+    ctx.save();
+    ctx.translate(bx, by);
+    ctx.rotate(swing);
+    // boot shape
+    ctx.fillStyle = '#5a4030';
+    ctx.fillRect(-5, -12, 10, 14);
+    ctx.fillRect(-5, 2, 16, 5);
+    // sole
+    ctx.fillStyle = '#3a2a1a';
+    ctx.fillRect(-5, 5, 16, 2);
+    // line going up
+    ctx.strokeStyle = '#a0a0a0'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(0, -12); ctx.lineTo(0, -22); ctx.stroke();
+    ctx.restore();
+  }
+
+  return {
+    chars: ['krystal', 'paul', 'wade'],
+    skipable: true,
+    steps: [
+      // Step 1: Peaceful fishing — everyone sitting on the dock
+      { dur: 2.6, draw(cs){
+          drawBg(cs);
+          drawFishingLine(krystalX, krystalX + 30, false);
+          drawFishingLine(paulX, paulX + 25, false);
+          drawFishingLine(wadeX, wadeX + 20, false);
+          csDrawChar('krystal', krystalX, fY, 'down', charH, 0);
+          csDrawChar('paul', paulX, fY, 'down', charH, 0);
+          csDrawChar('wade', wadeX, fY, 'down', charH, 0);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', "This is so peaceful \u2728");
+      }},
+      // Step 2: Wade gets a big tug! Everyone excited
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawFishingLine(krystalX, krystalX + 30, false);
+          drawFishingLine(paulX, paulX + 25, false);
+          drawFishingLine(wadeX, wadeX + 20, true);
+          csDrawExpression('wade', 'surprised', wadeX, fY, charH);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawExpression('paul', 'cheer', paulX, fY, charH);
+          csDrawBubble(wadeX, fY - charH - 4, 'Wade', 'I GOT SOMETHING!! \ud83c\udfa3');
+      }},
+      // Step 3: He pulls it up — it's a boot
+      { dur: 2.8, draw(cs){
+          drawBg(cs);
+          if (cs.stepT < 1.4){
+            csDrawExpression('wade', 'cheer', wadeX, fY, charH);
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('paul', 'cheer', paulX, fY, charH);
+            csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Pull! Pull!');
+          } else {
+            drawBoot(wadeX, cs.totalT);
+            csDrawExpression('wade', 'surprised', wadeX, fY, charH);
+            csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+            csDrawExpression('paul', 'surprised', paulX, fY, charH);
+            csDrawBubble(wadeX, fY - charH - 4, 'Wade', "It's a... boot?! \ud83d\udc62");
+          }
+      }},
+      // Step 4: Everyone laughs — Krystal's quip
+      { dur: 2.6, draw(cs){
+          drawBg(cs);
+          drawBoot(wadeX, cs.totalT);
+          csDrawExpression('wade', 'laugh', wadeX, fY, charH);
+          csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+          csDrawExpression('paul', 'laugh', paulX, fY, charH);
+          if (cs.stepT < 1.4){
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'The one that got away \ud83d\ude02');
+          } else {
+            csDrawBubble(wadeX, fY - charH - 4, 'Wade', "I'm keeping it. Trophy fish. \ud83d\ude0e");
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 3);
+          csHearts(cs, paulX, fY - charH * 0.7, 3);
+          csHearts(cs, wadeX, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 22: GARDEN BUTTERFLIES  (triggers at butterflydome, greenhouse, sunflowers)
+   ============================================================================ */
+function csGardenButterflies(){
+  const groundY = H * 0.70;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.35, lunaX = W * 0.65;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // bright warm garden
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY * 0.45);
+    sky.addColorStop(0, '#78b8e8'); sky.addColorStop(1, '#a0d8f0');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY * 0.45);
+
+    // warm sun
+    ctx.fillStyle = 'rgba(255,240,200,.25)';
+    ctx.beginPath(); ctx.arc(W * 0.80, H * 0.08, 20, 0, 7); ctx.fill();
+    ctx.fillStyle = '#f8e880';
+    ctx.beginPath(); ctx.arc(W * 0.80, H * 0.08, 10, 0, 7); ctx.fill();
+
+    // background foliage
+    const foliage = ctx.createLinearGradient(0, groundY * 0.35, 0, groundY);
+    foliage.addColorStop(0, '#48a848'); foliage.addColorStop(0.5, '#3a8a3a'); foliage.addColorStop(1, '#2a7a2a');
+    ctx.fillStyle = foliage; ctx.fillRect(0, groundY * 0.35, W, groundY * 0.65);
+
+    // bush clusters behind
+    ctx.fillStyle = '#3a9040';
+    for (let i = 0; i < 5; i++){
+      const bx = W * 0.10 + i * W * 0.20;
+      ctx.beginPath(); ctx.arc(bx, groundY * 0.50, 18, 0, 7); ctx.fill();
+    }
+
+    // flowers in the garden
+    const colors = ['#e06080','#e8a040','#c060c0','#e0e040','#60a0e0'];
+    for (let i = 0; i < 12; i++){
+      const fx = W * 0.05 + ((i * 43 + 7) % (W * 0.90));
+      const fy = groundY * 0.55 + ((i * 29 + 11) % (groundY * 0.40));
+      ctx.fillStyle = '#3a8030';
+      ctx.fillRect(fx, fy, 1.5, 6);
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.beginPath(); ctx.arc(fx + 0.75, fy, 3, 0, 7); ctx.fill();
+    }
+
+    // grassy ground
+    const ground = ctx.createLinearGradient(0, groundY, 0, H);
+    ground.addColorStop(0, '#4aaa40'); ground.addColorStop(1, '#388830');
+    ctx.fillStyle = ground; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // grass tufts
+    ctx.fillStyle = '#50b848';
+    for (let x = 0; x < W; x += 6){
+      const gh = 2 + Math.sin(x * 0.5 + t * 0.6) * 1;
+      ctx.fillRect(x, groundY - gh, 1.5, gh);
+    }
+  }
+
+  // draw a butterfly at (bx, by) with wing color, flapping
+  function drawButterfly(bx, by, color, t, scale){
+    scale = scale || 1;
+    const flap = Math.sin(t * 8) * 0.4;
+    ctx.save();
+    ctx.translate(bx, by);
+    ctx.scale(scale, scale);
+    // left wing
+    ctx.fillStyle = color;
+    ctx.save(); ctx.scale(1 - flap, 1);
+    ctx.beginPath(); ctx.ellipse(-3, 0, 5, 3.5, -0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // right wing
+    ctx.save(); ctx.scale(1 - flap, 1);
+    ctx.beginPath(); ctx.ellipse(3, 0, 5, 3.5, 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // body
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(-0.5, -3, 1, 6);
+    // antennae
+    ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(0, -3); ctx.lineTo(-2, -5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, -3); ctx.lineTo(2, -5); ctx.stroke();
+    ctx.restore();
+  }
+
+  // several ambient butterflies
+  function drawAmbientButterflies(cs){
+    const bflies = [
+      { seed: 0, col: '#e88040' },
+      { seed: 1, col: '#6080e0' },
+      { seed: 2, col: '#e060a0' },
+      { seed: 3, col: '#e0d040' },
+      { seed: 4, col: '#60c0c0' },
+    ];
+    for (const b of bflies){
+      const bx = W * 0.08 + ((b.seed * 73 + 17) % (W * 0.84));
+      const by = H * 0.15 + ((b.seed * 41 + 9) % (H * 0.35));
+      const drift = Math.sin(cs.totalT * 0.8 + b.seed * 2) * 8;
+      drawButterfly(bx + drift, by + Math.cos(cs.totalT * 0.6 + b.seed) * 5, b.col, cs.totalT + b.seed, 0.8);
+    }
+  }
+
+  // the special butterfly that lands on Luna's nose
+  function drawNoseButterfly(cs, landed){
+    const noseX = lunaX;
+    const noseY = fY - charH * 0.68;
+    if (landed){
+      // sitting still on nose — tiny wing flutter
+      drawButterfly(noseX, noseY, '#e88040', cs.totalT * 0.3, 1.0);
+    } else {
+      // flying near
+      const bx = noseX + Math.sin(cs.totalT * 1.5) * 15;
+      const by = noseY - 10 + Math.cos(cs.totalT * 1.2) * 8;
+      drawButterfly(bx, by, '#e88040', cs.totalT, 1.0);
+    }
+  }
+
+  // the butterfly flying away
+  function drawFlyAway(cs){
+    const prog = Math.min(1, cs.stepT / 1.5);
+    const startX = lunaX, startY = fY - charH * 0.68;
+    const endX = W * 0.85, endY = H * 0.10;
+    const bx = startX + (endX - startX) * prog;
+    const by = startY + (endY - startY) * prog + Math.sin(prog * 10) * 6;
+    const alpha = 1 - prog * 0.6;
+    ctx.globalAlpha = alpha;
+    drawButterfly(bx, by, '#e88040', cs.totalT, 1.0 - prog * 0.3);
+    ctx.globalAlpha = 1;
+  }
+
+  return {
+    chars: ['krystal', 'luna'],
+    skipable: true,
+    steps: [
+      // Step 1: Garden scene — butterflies everywhere, both delighted
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawAmbientButterflies(cs);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawExpression('luna', 'cheer', lunaX, fY, charH);
+          csDrawBubble(lunaX, fY - charH - 4, 'Luna', 'Look at all the butterflies! \ud83e\udd8b');
+      }},
+      // Step 2: One lands on Luna's nose — she freezes
+      { dur: 2.4, draw(cs){
+          drawBg(cs); drawAmbientButterflies(cs);
+          csDrawExpression('luna', 'surprised', lunaX, fY, charH);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          drawNoseButterfly(cs, true);
+          csDrawBubble(lunaX, fY - charH - 4, 'Luna', "There's one on my nose!! \ud83d\ude33");
+      }},
+      // Step 3: Krystal whispers — Luna goes cross-eyed
+      { dur: 2.6, draw(cs){
+          drawBg(cs); drawAmbientButterflies(cs);
+          csDrawExpression('krystal', 'think', krystalX, fY, charH);
+          csDrawExpression('luna', 'scared', lunaX, fY, charH);
+          drawNoseButterfly(cs, true);
+          if (cs.stepT < 1.3){
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Don\u2019t move! \ud83e\udd2b");
+          } else {
+            csDrawBubble(lunaX, fY - charH - 4, 'Luna', "I\u2019m... trying to see it... \ud83d\ude35");
+          }
+      }},
+      // Step 4: It flies away — both laugh — hearts
+      { dur: 2.8, draw(cs){
+          drawBg(cs); drawAmbientButterflies(cs);
+          drawFlyAway(cs);
+          csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+          csDrawExpression('luna', 'laugh', lunaX, fY, charH);
+          if (cs.stepT < 1.4){
+            csDrawBubble(lunaX, fY - charH - 4, 'Luna', "It tickled! \ud83d\ude02");
+          } else {
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Your face was priceless \ud83d\udc9b");
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+          csHearts(cs, lunaX, fY - charH * 0.7, 5);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
@@ -3670,6 +4193,15 @@ const CUTSCENE_MAP = {
   fireflies:         [csFireflyCatching],
   fireflypier:       [csFireflyCatching],
   nightgarden:       [csFireflyCatching],
+  magicshop:         [csMagicShow],
+  tarotparlor:       [csMagicShow],
+  wizardtower:       [csMagicShow],
+  fishingdock:       [csSunsetFishing],
+  marina:            [csSunsetFishing],
+  river:             [csSunsetFishing],
+  butterflydome:     [csGardenButterflies],
+  greenhouse:        [csGardenButterflies],
+  sunflowers:        [csGardenButterflies],
 };
 
 /* ============================================================================
