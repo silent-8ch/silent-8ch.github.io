@@ -76,6 +76,10 @@ function drawNightMarket(){
   // NPC browsing the stalls
   SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.50,y:H*0.88,anchorY:1,frame:Math.floor(t*8)%4});
   SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.42,y:H*0.86,anchorY:1,frame:Math.floor(t*8+2)%4});
+  // streetlamp illuminating the market
+  SpriteRenderer.submit({sprite:'streetlamp',x:W*0.10,y:H*0.78,frame:Math.floor(sceneTime*3)%4});
+  // market awning over a stall
+  SpriteRenderer.submit({sprite:'marketAwning',x:W*0.50,y:H*0.56,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('nightmarket', drawNightMarket);
 
@@ -556,6 +560,10 @@ function drawFarmersMarket(){
   SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.58,y:H*0.86,anchorY:1,frame:Math.floor(t*8+2)%4});
   // bush on the side
   SpriteRenderer.submit({sprite:'bush',phase:'ground',x:W*0.92,y:groundY+18,anchorY:1,frame:0});
+  // pennant flags strung across the market
+  SpriteRenderer.submit({sprite:'pennantFlags',x:W*0.50,y:groundY-16,frame:Math.floor(sceneTime*4)%4});
+  // market awning over a booth
+  SpriteRenderer.submit({sprite:'marketAwning',x:W*0.28,y:groundY+6,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('farmersmarket', drawFarmersMarket);
 
@@ -1015,6 +1023,10 @@ function drawFlowerMarket(){
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.50+Math.sin(t*1.2)*20,y:H*0.60+Math.cos(t*1.5)*10,anchorY:0.5,frame:Math.floor(t*8)%4});
   // NPC shopper
   SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.48,y:H*0.90,anchorY:1,frame:Math.floor(t*8)%4});
+  // pennant flags across the flower market
+  SpriteRenderer.submit({sprite:'pennantFlags',x:W*0.50,y:groundY-18,frame:Math.floor(sceneTime*4)%4});
+  // flowering bush by the stalls
+  SpriteRenderer.submit({sprite:'floweringBush',x:W*0.08,y:groundY+22,frame:Math.floor(sceneTime*2.5)%4});
 }
 registerScene('flowermarket', drawFlowerMarket);
 
@@ -1348,6 +1360,8 @@ function drawHarborNight(){
   SpriteRenderer.submit({sprite:'lantern',phase:'foreground',x:W*0.90,y:quayY-54,anchorY:0.5,frame:Math.floor(t*3+1)%4});
   // a cat on the quay
   SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.55,y:quayY+12,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4}); /* large — prominent */
+  // streetlamp on the quay
+  SpriteRenderer.submit({sprite:'streetlamp',x:W*0.30,y:quayY+14,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('harbornight', drawHarborNight);
 
@@ -1885,6 +1899,9 @@ function drawPoppyField(){
     ctx.fillStyle=['#e0902a','#c05a90','#5a90d0'][i]; ctx.save(); ctx.translate(bx,by);
     ctx.beginPath(); ctx.ellipse(-2,0,3,flap*4,0.4,0,7); ctx.ellipse(2,0,3,flap*4,-0.4,0,7); ctx.fill();
     ctx.fillStyle='#333'; ctx.fillRect(-0.5,-3,1,6); ctx.restore(); }
+  // wildflowers along the field edge
+  SpriteRenderer.submit({sprite:'wildflowers',x:W*0.12,y:H*0.82,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'wildflowers',x:W*0.88,y:H*0.86,frame:Math.floor(sceneTime*3+2)%4});
 }
 registerScene('poppyfield', drawPoppyField);
 
@@ -2916,6 +2933,9 @@ function drawLotusPond(){
   // a dragonfly hovering
   const dx=W*0.4+Math.sin(t*1.2)*40, dy=waterY-4+Math.cos(t*1.6)*8;
   ctx.fillStyle='#3aa0c0'; ctx.fillRect(dx-1,dy-1,10,2); const wf=Math.abs(Math.sin(t*16))*2+2; ctx.fillStyle='rgba(200,230,240,.5)'; ctx.beginPath(); ctx.ellipse(dx+2,dy,6,wf,0.4,0,7); ctx.ellipse(dx+2,dy,6,wf,-0.4,0,7); ctx.fill();
+  // water ripples on the pond
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.32,y:waterY+54,frame:Math.floor(sceneTime*5)%4});
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.72,y:H*0.72,frame:Math.floor(sceneTime*5+2)%4});
 }
 registerScene('lotuspond', drawLotusPond);
 
@@ -3010,6 +3030,10 @@ function drawBirchGrove(){
   // a small mushroom cluster + a log (sides, low)
   ctx.fillStyle='#8a5a34'; roundRect(W*0.82,H*0.90,30,8,4); ctx.fill(); ctx.fillStyle='#c9a878'; ctx.beginPath(); ctx.arc(W*0.82,H*0.90+4,4,Math.PI,0); ctx.fill();
   for (const mx of [W*0.14,W*0.18]){ ctx.fillStyle='#e8e0d0'; ctx.fillRect(mx-1.5,H*0.92,3,5); ctx.fillStyle='#c05a3a'; ctx.beginPath(); ctx.ellipse(mx,H*0.92,4,2.4,0,Math.PI,0); ctx.fill(); }
+  // park bench under the birches
+  SpriteRenderer.submit({sprite:'parkBench',x:W*0.56,y:H*0.88,frame:Math.floor(sceneTime*2.5)%4});
+  // grass tuft among the fallen leaves
+  SpriteRenderer.submit({sprite:'grassTuft',x:W*0.34,y:H*0.94,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('birchgrove', drawBirchGrove);
 
@@ -3202,6 +3226,10 @@ function drawPeonyGarden(){
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.65+Math.sin(t*1.4+1)*16,y:groundY-4+Math.cos(t*1.7+1)*12,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
   // bunny nibbling near the peony beds
   SpriteRenderer.submit({sprite:'bunny',phase:'actors',x:W*0.18+Math.sin(t*0.5)*6,y:H*0.86,anchorY:1,frame:Math.floor(t*7)%4});
+  // flowering bush among the peonies
+  SpriteRenderer.submit({sprite:'floweringBush',x:W*0.88,y:groundY+22,frame:Math.floor(sceneTime*2.5)%4});
+  // park bench for garden visitors
+  SpriteRenderer.submit({sprite:'parkBench',x:W*0.50,y:H*0.92,frame:Math.floor(sceneTime*2.5)%4});
 }
 registerScene('peonygarden', drawPeonyGarden);
 
@@ -3405,6 +3433,10 @@ function drawDuckPond(){
   // a park bench + breadcrumbs area on the near shore (left, low) — small
   const bx=W*0.14, by=H*0.90; ctx.fillStyle='#6a8a4a'; ctx.fillRect(bx-20,by,40,4); ctx.fillRect(bx-20,by-10,40,3); ctx.fillStyle='#4a6a34'; ctx.fillRect(bx-18,by+4,3,8); ctx.fillRect(bx+15,by+4,3,8);
   ctx.fillStyle='rgba(230,210,160,.7)'; for (let i=0;i<6;i++){ ctx.fillRect(W*0.3+i*4+Math.sin(i)*3, H*0.93+ (i%2)*3, 2,2); }
+  // park bench by the pond
+  SpriteRenderer.submit({sprite:'parkBench',x:W*0.82,y:H*0.86,frame:Math.floor(sceneTime*2.5)%4});
+  // water ripple on the pond surface
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.48,y:waterY+42,frame:Math.floor(sceneTime*5)%4});
 }
 registerScene('duckpond', drawDuckPond);
 
@@ -3449,6 +3481,10 @@ function drawBeekeeperGarden(){
   for (let i=0;i<6;i++){ const bx=W*0.5+Math.sin(t*1.5+i*1.1)*W*0.42; const by=groundY-4+Math.sin(t*2.4+i*2)*18; ctx.fillStyle='#e0a020'; ctx.beginPath(); ctx.ellipse(bx,by,2.4,1.7,0,0,7); ctx.fill(); ctx.fillStyle='#2a2018'; ctx.fillRect(bx-0.8,by-1.4,0.9,2.8); ctx.fillStyle='rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(bx,by-2,2,1,0,0,7); ctx.fill(); }
   // a honey jar on a little stump (left, low)
   ctx.fillStyle='#6a4a2e'; ctx.fillRect(W*0.10-6,H*0.90,12,10); ctx.fillStyle='#e0a828'; roundRect(W*0.10-5,H*0.90-12,10,12,2); ctx.fill(); ctx.fillStyle='#c98a1a'; ctx.fillRect(W*0.10-5,H*0.90-12,10,3); ctx.fillStyle='#fff'; ctx.fillRect(W*0.10-3,H*0.90-8,6,4);
+  // wildflowers in the meadow
+  SpriteRenderer.submit({sprite:'wildflowers',x:W*0.50,y:H*0.80,frame:Math.floor(sceneTime*3)%4});
+  // grass tuft near the hives
+  SpriteRenderer.submit({sprite:'grassTuft',x:W*0.38,y:groundY+32,frame:Math.floor(sceneTime*3+1)%4});
 }
 registerScene('beekeepergarden', drawBeekeeperGarden);
 
@@ -3647,6 +3683,10 @@ function drawWatermill(){
   ctx.strokeStyle='#3a7a3a'; ctx.lineWidth=2; for (const gx of [W*0.06,W*0.1,W*0.92]){ for (let k=-1;k<=1;k++){ ctx.beginPath(); ctx.moveTo(gx+k*3,H); ctx.quadraticCurveTo(gx+k*3+Math.sin(t*1.5+k+gx)*3,H*0.72,gx+k*3,H*0.62); ctx.stroke(); } }
   // a lily pad + a duck
   ctx.fillStyle='#2e7a4a'; ctx.beginPath(); ctx.ellipse(W*0.24,H*0.80,10,4,0,0.5,6.5); ctx.fill();
+  // water ripple on the millpond
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.55,y:H*0.74,frame:Math.floor(sceneTime*5)%4});
+  // fence near the mill
+  SpriteRenderer.submit({sprite:'fence',x:W*0.14,y:groundY+6,frame:Math.floor(sceneTime*2)%4});
 }
 registerScene('watermill', drawWatermill);
 
@@ -6175,6 +6215,10 @@ function drawGasStation(){
 
   // NPC customer by the pumps
   SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.36,y:H*0.86,anchorY:1,frame:Math.floor(t*8)%4});
+  // signpost near the price sign
+  SpriteRenderer.submit({sprite:'signpost',x:W*0.14,y:groundY+18,frame:Math.floor(sceneTime*3)%4});
+  // trash can near the store
+  SpriteRenderer.submit({sprite:'trashCan',x:W*0.58,y:groundY+16,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('gasstation', drawGasStation);
 
@@ -6451,6 +6495,8 @@ function drawOffice(){
 
   // NPC colleague at the far desk
   SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.24,y:H*0.84,anchorY:1,frame:Math.floor(t*8)%4});
+  // trash can by the desk
+  SpriteRenderer.submit({sprite:'trashCan',x:W*0.88,y:floorY+14,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('office', drawOffice);
 
@@ -6549,6 +6595,8 @@ function drawSchool(){
   SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.62,y:H*0.90,anchorY:1,frame:Math.floor(t*8+1)%4,flipX:true});
   // book on a desk
   SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.40,y:floorY-28,anchorY:1,frame:0});
+  // trash can by the teacher's desk
+  SpriteRenderer.submit({sprite:'trashCan',x:W*0.76,y:floorY+16,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('school', drawSchool);
 

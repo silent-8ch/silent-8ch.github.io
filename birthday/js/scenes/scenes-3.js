@@ -151,6 +151,10 @@ function drawPasture(){
   SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.45+Math.sin(t*0.4)*30,y:H*0.16+Math.sin(t*0.6)*6,width:16,height:16,anchorY:0.5,frame:Math.floor(t*6)%4}); /* small — distant */
   // puppy near the fence
   SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.42,y:H*0.78,anchorY:1,frame:Math.floor(t*7)%4});
+  // fence along the pasture
+  SpriteRenderer.submit({sprite:'fence',x:W*0.60,y:groundY+30,frame:Math.floor(sceneTime*2)%4});
+  // grass tuft in the meadow
+  SpriteRenderer.submit({sprite:'grassTuft',x:W*0.28,y:H*0.88,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('pasture', drawPasture);
 
@@ -299,6 +303,10 @@ function drawOrchard(){
   // gentle falling leaf
   const lf=(t*20)%(H*0.5); ctx.fillStyle='#d98a2a';
   ctx.beginPath(); ctx.ellipse(W*0.5+Math.sin(t*2)*18, H*0.2+lf, 4,2, t, 0,7); ctx.fill();
+  // fence around the orchard
+  SpriteRenderer.submit({sprite:'fence',x:W*0.50,y:groundY+14,frame:Math.floor(sceneTime*2)%4});
+  // tree sprite at the edge
+  SpriteRenderer.submit({sprite:'tree',x:W*0.92,y:groundY+38,frame:Math.floor(sceneTime*2)%4});
 }
 registerScene('orchard', drawOrchard);
 
@@ -734,6 +742,10 @@ function drawSunflowers(){
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.55+Math.sin(t*1.2)*20,y:H*0.50+Math.cos(t*1.5)*12,anchorY:0.5,frame:Math.floor(t*8)%4});
   // bird in the sky
   SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.35+Math.sin(t*0.35)*28,y:H*0.14+Math.sin(t*0.5)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6)%4}); /* small — distant */
+  // wildflowers among the sunflower rows
+  SpriteRenderer.submit({sprite:'wildflowers',x:W*0.14,y:groundY+42,frame:Math.floor(sceneTime*3)%4});
+  // grass tuft at the edge
+  SpriteRenderer.submit({sprite:'grassTuft',x:W*0.86,y:H*0.90,frame:Math.floor(sceneTime*3+1)%4});
 }
 registerScene('sunflowers', drawSunflowers);
 
@@ -1155,6 +1167,9 @@ function drawKoiPond(){
   // bridge reflection shimmer
   ctx.strokeStyle='rgba(192,57,43,.2)'; ctx.lineWidth=6; ctx.beginPath();
   ctx.moveTo(bx0,bTop+bRise+18); ctx.quadraticCurveTo(W*0.5,bTop-bRise+40, bx1,bTop+bRise+18); ctx.stroke();
+  // water ripple on the pond
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.36,y:H*0.62,frame:Math.floor(sceneTime*5)%4});
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.62,y:H*0.86,frame:Math.floor(sceneTime*5+2)%4});
 }
 registerScene('koipond', drawKoiPond);
 

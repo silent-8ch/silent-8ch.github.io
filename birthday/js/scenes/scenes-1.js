@@ -101,6 +101,9 @@ function drawBeach(){
   SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.60,y:H*0.74,anchorY:1,frame:0});
   // crab scuttling on the sand
   SpriteRenderer.submit({sprite:'crab',phase:'actors',x:W*0.42+Math.sin(t*1.2)*18,y:H*0.88,anchorY:1,frame:Math.floor(t*7)%4});
+  // water ripple on the ocean surface
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.35,y:H*0.48,frame:Math.floor(sceneTime*5)%4});
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.70,y:H*0.52,frame:Math.floor(sceneTime*5+2)%4});
 }
 
 function drawCloud(cx, cy, scale) {
@@ -687,6 +690,10 @@ function drawBackyard() {
   SpriteRenderer.submit({sprite:'parrot',phase:'ground',x:W*0.52,y:H*0.36-8,anchorY:1,frame:Math.floor(t*7)%4});
   // bunny nibbling on the grass
   SpriteRenderer.submit({sprite:'bunny',phase:'actors',x:W*0.38+Math.sin(t*0.6)*6,y:H*0.90,anchorY:1,frame:Math.floor(t*7)%4});
+  // mailbox at the edge of the yard
+  SpriteRenderer.submit({sprite:'mailbox',x:W*0.92,y:H*0.92,frame:Math.floor(sceneTime*2)%4});
+  // flowering bush by the fence
+  SpriteRenderer.submit({sprite:'floweringBush',x:W*0.08,y:H*0.58,frame:Math.floor(sceneTime*2.5)%4});
 }
 
 /* ══════════════════════ RIVER SCENE ══════════════════════ */
@@ -873,6 +880,10 @@ function drawRiver() {
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.65+Math.sin(t*1.3)*18,y:H*0.72+Math.cos(t*1.6)*8,anchorY:0.5,frame:Math.floor(t*8)%4});
   // bush along the near bank
   SpriteRenderer.submit({sprite:'bush',phase:'ground',x:W*0.10,y:riverBot+10,anchorY:1,frame:0});
+  // grass tuft near the bank
+  SpriteRenderer.submit({sprite:'grassTuft',x:W*0.82,y:riverBot+18,frame:Math.floor(sceneTime*3)%4});
+  // water ripple on the river
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.50,y:H*0.50,frame:Math.floor(sceneTime*5)%4});
 }
 
 /* ══════════════════════ ADDITIONAL SCENES ══════════════════════
@@ -1035,6 +1046,10 @@ function drawCampsite(){
   SpriteRenderer.submit({sprite:'lantern',phase:'ground',x:W*0.34,y:groundY+60,anchorY:1,frame:Math.floor(t*3)%4});
   // fireflies drifting above the campsite
   SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.60+Math.sin(t*0.6)*18,y:groundY+20+Math.sin(t*0.9)*12,anchorY:0.5,frame:Math.floor(t*5)%4});
+  // tree at the edge of the campsite
+  SpriteRenderer.submit({sprite:'tree',x:W*0.92,y:groundY+48,frame:Math.floor(sceneTime*2)%4});
+  // grass tuft near the fire
+  SpriteRenderer.submit({sprite:'grassTuft',x:W*0.52,y:groundY+78,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('campsite', drawCampsite);
 
@@ -1109,6 +1124,8 @@ function drawBakery(){
 
   // kittens napping near the oven
   SpriteRenderer.submit({sprite:'kittens',phase:'actors',x:W*0.68,y:floorY+20,anchorY:1,frame:Math.floor(t*6)%4});
+  // doorway at the back
+  SpriteRenderer.submit({sprite:'doorway',x:W*0.88,y:floorY,frame:Math.floor(sceneTime*2)%4});
 }
 registerScene('bakery', drawBakery);
 
@@ -1235,6 +1252,10 @@ function drawCherryBlossom(){
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.7+Math.sin(t*0.9+2)*24,y:groundY-30+Math.cos(t*1.3+1)*10,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
   // a bird on the park bench
   SpriteRenderer.submit({sprite:'bird',phase:'actors',x:W*0.46,y:groundY+30,anchorY:1,frame:Math.floor(t*6)%4});
+  // park bench along the path
+  SpriteRenderer.submit({sprite:'parkBench',x:W*0.56,y:groundY+62,frame:Math.floor(sceneTime*2.5)%4});
+  // flowering bush by the tree
+  SpriteRenderer.submit({sprite:'floweringBush',x:W*0.10,y:groundY+20,frame:Math.floor(sceneTime*2.5)%4});
 }
 registerScene('cherryblossom', drawCherryBlossom);
 
@@ -1441,6 +1462,9 @@ function drawAutumnForest(){
 
   // a bird perched on a branch
   SpriteRenderer.submit({sprite:'bird',phase:'actors',x:W*0.50,y:groundY+20,anchorY:1,frame:Math.floor(t*6)%4});
+  // grass tuft among the fallen leaves
+  SpriteRenderer.submit({sprite:'grassTuft',x:W*0.40,y:H*0.86,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'grassTuft',x:W*0.68,y:H*0.92,frame:Math.floor(sceneTime*3+1)%4});
 }
 registerScene('autumnforest', drawAutumnForest);
 
@@ -1626,6 +1650,9 @@ function drawLavender(){
   // clouds above the hills
   drawSpriteCloud(W*0.2+Math.sin(t*0.1)*8,H*0.08,0.6);
   drawSpriteCloud(W*0.7+Math.sin(t*0.08+2)*6,H*0.14,0.5);
+  // wildflowers at the edge of the field
+  SpriteRenderer.submit({sprite:'wildflowers',x:W*0.08,y:horizon+28,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'wildflowers',x:W*0.92,y:horizon+34,frame:Math.floor(sceneTime*3+2)%4});
 }
 registerScene('lavender', drawLavender);
 

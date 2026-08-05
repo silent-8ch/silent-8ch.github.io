@@ -310,6 +310,9 @@ function drawAlpineMeadow(){
   ctx.fillStyle='#c98a3a'; ctx.fillRect(cx-4,cy-6,8,10);
   // bunny hopping in the meadow
   SpriteRenderer.submit({sprite:'bunny',phase:'actors',x:W*0.48+Math.sin(t*0.8)*12,y:groundY+56,anchorY:1,frame:Math.floor(t*7)%4});
+  // wildflowers scattered in the alpine meadow
+  SpriteRenderer.submit({sprite:'wildflowers',x:W*0.16,y:groundY+62,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'wildflowers',x:W*0.72,y:groundY+76,frame:Math.floor(sceneTime*3+2)%4});
 }
 registerScene('alpinemeadow', drawAlpineMeadow);
 
@@ -1701,6 +1704,8 @@ function drawHedgeMaze(){
   for(const bx of [W*0.08,W*0.92]){ ctx.fillStyle='#3f8034'; ctx.beginPath(); ctx.arc(bx,H*0.94,14,0,7); ctx.fill(); ctx.fillStyle='#7a5030'; ctx.fillRect(bx-6,H*0.94+10,12,10); }
   // bunny hopping along a hedge path
   SpriteRenderer.submit({sprite:'bunny',phase:'actors',x:W*0.56+Math.sin(t*0.7)*10,y:H*0.82,anchorY:1,frame:Math.floor(t*7)%4});
+  // flowering bush along the hedge wall
+  SpriteRenderer.submit({sprite:'floweringBush',x:W*0.50,y:H*0.74,frame:Math.floor(sceneTime*2.5)%4});
 }
 registerScene('hedgemaze', drawHedgeMaze);
 
@@ -1795,6 +1800,8 @@ function drawCornMaze(){
   ctx.strokeStyle='#b8a040'; ctx.lineWidth=1; for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(W*0.02,H*0.92+i*H*0.02); ctx.lineTo(W*0.12,H*0.92+i*H*0.02); ctx.stroke(); }
   // crows over the field
   for(let i=0;i<3;i++){ const cx=W*0.4+i*W*0.15+Math.sin(t*0.7+i)*12, cy=H*0.18+i*6; ctx.strokeStyle='#2a2018'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(cx-5,cy); ctx.quadraticCurveTo(cx,cy-4+Math.sin(t*6+i)*1.5,cx+5,cy); ctx.stroke(); }
+  // signpost at the maze entrance
+  SpriteRenderer.submit({sprite:'signpost',x:W*0.82,y:H*0.88,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('cornmaze', drawCornMaze);
 

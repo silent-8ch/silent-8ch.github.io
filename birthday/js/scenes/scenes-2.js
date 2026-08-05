@@ -49,6 +49,8 @@ function drawRooftop(){
   SpriteRenderer.submit({sprite:'cat',phase:'ground',x:W*0.74,y:deckY+8,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4}); /* large — prominent */
   // teacup on the table
   SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.48,y:deckY+12,anchorY:1,frame:0});
+  // cafe table on the deck
+  SpriteRenderer.submit({sprite:'cafeTable',x:W*0.30,y:deckY+28,frame:Math.floor(sceneTime*2.5)%4});
 }
 registerScene('rooftop', drawRooftop);
 
@@ -351,6 +353,8 @@ function drawVineyard(){
   SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.40,y:horizon+8,width:16,height:16,anchorY:1,frame:Math.floor(t*6)%4}); /* small — distant */
   // butterfly drifting over the vines
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.55+Math.sin(t*1.1)*20,y:H*0.60+Math.cos(t*1.4)*10,anchorY:0.5,frame:Math.floor(t*8)%4});
+  // fence along the vineyard row
+  SpriteRenderer.submit({sprite:'fence',x:W*0.50,y:horizon+18,frame:Math.floor(sceneTime*2)%4});
 }
 registerScene('vineyard', drawVineyard);
 
@@ -400,6 +404,10 @@ function drawFlorist(){
   // butterfly near the hanging flowers
   const t = sceneTime;
   SpriteRenderer.submit({sprite:'butterfly',phase:'foreground',x:W*0.42+Math.sin(t*1.0)*18,y:H*0.24+Math.cos(t*1.3)*10,anchorY:0.5,frame:Math.floor(t*8)%4});
+  // flower window display
+  SpriteRenderer.submit({sprite:'flowerWindow',x:W*0.70,y:H*0.16,frame:Math.floor(sceneTime*2.5)%4});
+  // flowering bush by the counter
+  SpriteRenderer.submit({sprite:'floweringBush',x:W*0.48,y:floorY+26,frame:Math.floor(sceneTime*2.5)%4});
 }
 registerScene('florist', drawFlorist);
 
@@ -510,6 +518,9 @@ function drawWaterfall(){
 
   // butterfly near the mossy bank
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.60+Math.sin(t*1.2)*16,y:shoreY-10+Math.cos(t*1.5)*8,anchorY:0.5,frame:Math.floor(t*8)%4});
+  // water ripple on the pool surface
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.40,y:poolTop+14,frame:Math.floor(sceneTime*5)%4});
+  SpriteRenderer.submit({sprite:'waterRipple',x:W*0.65,y:poolTop+22,frame:Math.floor(sceneTime*5+2)%4});
 }
 registerScene('waterfall', drawWaterfall);
 
@@ -593,6 +604,10 @@ function drawPumpkinPatch(){
   // crow
   ctx.strokeStyle='#222'; ctx.lineWidth=2; const cx=W*0.5+Math.sin(t*0.5)*40;
   ctx.beginPath(); ctx.moveTo(cx-6,H*0.18); ctx.quadraticCurveTo(cx,H*0.155,cx,H*0.18); ctx.quadraticCurveTo(cx,H*0.155,cx+6,H*0.18); ctx.stroke();
+  // fence along the patch
+  SpriteRenderer.submit({sprite:'fence',x:W*0.88,y:groundY+10,frame:Math.floor(sceneTime*2)%4});
+  // signpost at the entrance
+  SpriteRenderer.submit({sprite:'signpost',x:W*0.06,y:groundY+18,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('pumpkinpatch', drawPumpkinPatch);
 
@@ -868,6 +883,8 @@ function drawCafe(){
 
   // book on the cafe table
   SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.24,y:floorY+18,anchorY:1,frame:0});
+  // doorway at the entrance
+  SpriteRenderer.submit({sprite:'doorway',x:W*0.88,y:floorY,frame:Math.floor(sceneTime*2)%4});
 }
 registerScene('cafe', drawCafe);
 
@@ -909,6 +926,8 @@ function drawRainyStreet(){
 
   // umbrella on the ground
   SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.18,y:sidewalkY+14,anchorY:1,frame:0});
+  // streetlamp illuminating the sidewalk
+  SpriteRenderer.submit({sprite:'streetlamp',x:W*0.42,y:sidewalkY+16,frame:Math.floor(sceneTime*3)%4});
 }
 registerScene('rainystreet', drawRainyStreet);
 
