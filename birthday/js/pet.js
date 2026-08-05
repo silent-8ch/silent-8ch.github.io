@@ -667,6 +667,66 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.48, r:46, e:'🍒', lines:['A tall sundae 🍒','With a cherry on top!','Share it with me?']},
     {nx:0.16, ny:0.86, r:46, e:'🍦', lines:['A soda-fountain stool 🍦','Spin, spin, spin','Sit close to me 🥰']},
   ],
+  sciencelab: [
+    {nx:0.11, ny:0.14, r:48, e:'🧪', lines:['The periodic table 🧪','So many little squares','Quiz me, professor 🥰']},
+    {nx:0.37, ny:0.48, r:52, e:'⚗️', lines:['Bubbling flasks! ⚗️','Blorp blorp blorp','Is it safe to touch?']},
+    {nx:0.58, ny:0.48, r:46, e:'🔥', lines:['The bunsen burner 🔥','A tiny blue flame','Careful, love!']},
+    {nx:0.72, ny:0.47, r:48, e:'🧫', lines:['Test tubes in a rack 🧫','Such pretty colors','Which one\'s the magic potion?']},
+  ],
+  apothecary: [
+    {nx:0.50, ny:0.20, r:60, e:'🫙', lines:['Shelves of old jars 🫙','What\'s in all of them?','Smells like herbs and spice']},
+    {nx:0.84, ny:0.55, r:48, e:'🌿', lines:['Dried herb bundles 🌿','Hanging to cure','So earthy and calming']},
+    {nx:0.30, ny:0.55, r:48, e:'⚖️', lines:['A little brass scale ⚖️','Tipping back and forth','Weigh my heart for you 💛']},
+    {nx:0.66, ny:0.55, r:46, e:'🪨', lines:['A mortar and pestle 🪨','Grind grind grind','An old remedy 🥰']},
+  ],
+  icepond: [
+    {nx:0.12, ny:0.54, r:52, e:'🔥', lines:['A cozy bonfire 🔥','Warm your hands, love','So snug against the cold']},
+    {nx:0.55, ny:0.76, r:60, e:'⛸️', lines:['The frozen pond! ⛸️','Skate with me! 🥰','Hold my hand, don\'t slip']},
+    {nx:0.50, ny:0.07, r:48, e:'💡', lines:['String lights above 💡','Twinkling in the dusk','So magical out here']},
+    {nx:0.25, ny:0.50, r:46, e:'🌲', lines:['Snowy pine trees 🌲','Frosted so pretty','A quiet winter evening']},
+  ],
+  antiqueshop: [
+    {nx:0.17, ny:0.14, r:48, e:'🖼️', lines:['Old framed portraits 🖼️','Who were they?','So much history here']},
+    {nx:0.16, ny:0.55, r:46, e:'🌍', lines:['A dusty globe 🌍','Spin it — where to?','Let\'s travel everywhere 🥰']},
+    {nx:0.52, ny:0.55, r:48, e:'🎵', lines:['A gramophone! 🎵','Does it still play?','A crackly old tune 💛']},
+    {nx:0.80, ny:0.55, r:44, e:'🪔', lines:['A little oil lamp 🪔','Glowing so warmly','Cozy golden light']},
+  ],
+  magicshop: [
+    {nx:0.50, ny:0.50, r:52, e:'🔮', lines:['A crystal ball! 🔮','Swirling with color','What do you see for us? 🥰']},
+    {nx:0.24, ny:0.52, r:48, e:'🎩', lines:['A top hat 🎩','There\'s a bunny inside!','Abracadabra! 🐰']},
+    {nx:0.78, ny:0.17, r:50, e:'🧪', lines:['Shelf of potions 🧪','So bubbly and bright','A love potion, maybe? 💗']},
+    {nx:0.14, ny:0.20, r:44, e:'✨', lines:['Crossed magic wands ✨','Make a wish!','Sparkles everywhere 🥰']},
+  ],
+  orchard: [
+    {nx:0.52, ny:0.42, r:60, e:'🍎', lines:['Apples on the tree! 🍎','So round and red','Pick one for me? 🥰']},
+    {nx:0.46, ny:0.55, r:48, e:'🪜', lines:['A leaning ladder 🪜','Way up to the top','Hold it steady for me!']},
+    {nx:0.16, ny:0.85, r:48, e:'🧺', lines:['A basket of apples 🧺','Fresh from the branch','Let\'s make a pie 🥧']},
+    {nx:0.50, ny:0.80, r:46, e:'🍏', lines:['Apples in the grass 🍏','A few fell down','Windfall treasures']},
+  ],
+  candleshop: [
+    {nx:0.30, ny:0.20, r:52, e:'🕯️', lines:['Rows of candles 🕯️','Every warm shade','So cozy in here 🥰']},
+    {nx:0.80, ny:0.20, r:48, e:'🪢', lines:['The dipping rack 🪢','Hanging by their wicks','Dip, dip, dip']},
+    {nx:0.76, ny:0.58, r:50, e:'♨️', lines:['A steaming wax vat ♨️','Warm and golden','Mind your fingers, love']},
+    {nx:0.50, ny:0.88, r:52, e:'🔥', lines:['Big pillar candles 🔥','Flickering softly','I\'ll light one for us 💛']},
+  ],
+  hotspring: [
+    {nx:0.55, ny:0.76, r:62, e:'♨️', lines:['The warm spring ♨️','So soothing and toasty','Soak with me a while 🥰']},
+    {nx:0.40, ny:0.50, r:50, e:'💨', lines:['Steam rising up 💨','Curling in the cold air','So dreamy and hazy']},
+    {nx:0.85, ny:0.60, r:44, e:'🏮', lines:['A stone lantern 🏮','Glowing on the bank','Such a gentle light']},
+    {nx:0.28, ny:0.72, r:44, e:'🍵', lines:['A floating tea tray 🍵','Tea in the hot spring!','How lovely is this 💛']},
+  ],
+  cinema: [
+    {nx:0.50, ny:0.30, r:64, e:'🎬', lines:['The big screen! 🎬','Ooh, it\'s starting','Snuggle in with me 🥰']},
+    {nx:0.94, ny:0.40, r:44, e:'💡', lines:['A warm wall sconce 💡','Dim and golden','So cozy and dark in here']},
+    {nx:0.35, ny:0.85, r:52, e:'💺', lines:['Comfy velvet seats 💺','Front row for us','Pass the popcorn 🍿']},
+    {nx:0.65, ny:0.80, r:50, e:'🍿', lines:['Rows of seats 🍿','All to ourselves','Our own little theater 💛']},
+  ],
+  bowling: [
+    {nx:0.50, ny:0.12, r:50, e:'✨', lines:['The STRIKE sign! ✨','Glowing pink and bright','Bet I\'ll beat you 😏']},
+    {nx:0.50, ny:0.68, r:56, e:'🎳', lines:['Here comes the ball! 🎳','Roll roll roll','Knock \'em all down!']},
+    {nx:0.90, ny:0.85, r:50, e:'🎳', lines:['The ball return 🎳','So many colors','Pick your lucky one 🥰']},
+    {nx:0.11, ny:0.41, r:44, e:'📺', lines:['The score monitor 📺','Am I winning? 😄','Loser buys the nachos!']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){

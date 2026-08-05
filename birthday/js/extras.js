@@ -1038,7 +1038,7 @@ function fxWalkHerTo(px, py){
       try{
         if (!cat) return false;
         if (px < cat.x - 24 || px > cat.x + 24 || py < cat.y - 18 || py > cat.y + 12) return false;
-        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(cat.x + rand(-14,14), cat.y - 10, pick(['🐾','💗','😺'])), i*80);
+        if (typeof fxAt === 'function'){ const cx=cat.x, cy=cat.y; for (let i=0;i<3;i++) setTimeout(()=> fxAt(cx + rand(-14,14), cy - 10, pick(['🐾','💗','😺'])), i*80); }
         if (cat.petCd <= 0){
           cat.petCd = 1.4; cat.ttl = Math.max(cat.ttl, 10);   // a good pet keeps it around a little
           if (typeof sfx === 'function') sfx('tap');
@@ -1506,7 +1506,7 @@ function fxWalkHerTo(px, py){
           p.cd = 0.8; p.ripple = 0.6;
           // she skips over and splashes
           if (typeof fxWalkHerTo === 'function') fxWalkHerTo(p.x, p.y);
-          if (typeof fxAt === 'function') for (let i=0;i<4;i++) setTimeout(()=> fxAt(p.x + rand(-p.rx,p.rx), p.y - rand(2,14), pick(['💧','💦'])), i*60);
+          if (typeof fxAt === 'function'){ const pxp=p.x, pyp=p.y, prx=p.rx; for (let i=0;i<4;i++) setTimeout(()=> fxAt(pxp + rand(-prx,prx), pyp - rand(2,14), pick(['💧','💦'])), i*60); }
           if (typeof sfx === 'function') sfx('find');
           if (typeof say === 'function') say(pick(['Splash! 💦','Wheee! 🌧️','Jump in the puddles! 💧','Muddy toes 😄']));
           try{ state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
@@ -2002,8 +2002,8 @@ function fxWalkHerTo(px, py){
         card.cd = 1.2;
         card.face = pick(READINGS); card.flip = 0.001;         // start the flip
         if (typeof sfx === 'function') sfx('find');
-        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(card.x+rand(-14,14), card.y-20, pick(['✨','🔮','🌟'])), i*90);
-        setTimeout(()=>{ try{ if (typeof showToast==='function') showToast(card.face.icon, card.face.name, card.face.note); else if (typeof say==='function') say(card.face.note); }catch(e){} }, 500);
+        if (typeof fxAt === 'function'){ const cx=card.x, cy=card.y; for (let i=0;i<3;i++) setTimeout(()=> fxAt(cx+rand(-14,14), cy-20, pick(['✨','🔮','🌟'])), i*90); }
+        { const cf=card.face; setTimeout(()=>{ try{ if (typeof showToast==='function') showToast(cf.icon, cf.name, cf.note); else if (typeof say==='function') say(cf.note); }catch(e){} }, 500); }
         try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
         return true;
       }catch(e){ return false; }
@@ -2152,7 +2152,7 @@ function fxWalkHerTo(px, py){
         if (chime.cd > 0){ chime.swing = Math.min(0.5, chime.swing + 0.1); return true; }
         chime.cd = 0.8; chime.swing = Math.min(0.55, chime.swing + 0.42);
         if (typeof sfx === 'function'){ sfx('draw'); }
-        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(chime.x+rand(-16,16), chime.topY+rand(20,40), pick(['♪','🎐','✨'])), i*100);
+        if (typeof fxAt === 'function'){ const cx=chime.x, cty=chime.topY; for (let i=0;i<3;i++) setTimeout(()=> fxAt(cx+rand(-16,16), cty+rand(20,40), pick(['♪','🎐','✨'])), i*100); }
         if (typeof say === 'function') say(pick(['So peaceful 🎐','Mmm, listen… 😌','Like a soft breeze 💛','Ahhh 🍃']));
         try{ state.energy = clamp(state.energy + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
         return true;
@@ -3159,7 +3159,7 @@ function fxWalkHerTo(px, py){
         if (px < crab.x - 13 || px > crab.x + 13 || py < crab.y - 12 || py > crab.y + 8) return false;
         crab.dir = (px < crab.x) ? 1 : -1;                     // scuttle away from the tap
         crab.scuttle = 1;
-        if (typeof fxAt === 'function') for (let i=0;i<3;i++) setTimeout(()=> fxAt(crab.x+rand(-8,8), crab.y-rand(2,12), pick(['🫧','🦀','💧'])), i*80);
+        if (typeof fxAt === 'function'){ const cx=crab.x, cy=crab.y; for (let i=0;i<3;i++) setTimeout(()=> fxAt(cx+rand(-8,8), cy-rand(2,12), pick(['🫧','🦀','💧'])), i*80); }
         if (crab.cd <= 0){
           crab.cd = 1.2;
           if (typeof sfx === 'function') sfx('tap');
@@ -3430,6 +3430,258 @@ function fxWalkHerTo(px, py){
           }
         }
         return false;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 22). Three more scene-gated micro-interactions, on
+   scenes not yet interactive. No always-on overlays; each self-clears on scene
+   change and its tap returns false on a miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   49) SWEEP THE LIGHTHOUSE  —  on the coastal cliffs or by the lighthouse a little
+   striped tower stands. Tap its lamp to switch on the beacon: a soft beam sweeps
+   once across the sky and out to sea, then fades. "I'll always leave a light on."
+   Scene-gated; the beam only exists during the sweep.
+   -------------------------------------------------------------------------- */
+(function fxLighthouse(){
+  try{
+    const COAST = new Set(['lighthouse','cliffs','coastalcliffs','harbornight']);
+    let lh = null;                       // {x,base,h,sweep,cd,dur}
+    function here(){ try{ return (typeof SCENES!=='undefined') && COAST.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const x = Math.max(W*0.16, Math.min(W*0.86, W*0.84));
+      lh = { x, base: rand(H*0.70, H*0.74), h: rand(H*0.34, H*0.42), sweep:0, cd:0, dur:2.4 };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ lh = null; return; }
+      if (!lh) build();
+      if (lh.cd > 0) lh.cd -= dt;
+      if (lh.sweep > 0) lh.sweep -= dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!lh || !here()) return;
+      const x = lh.x, base = lh.base, h = lh.h, topY = base - h;
+      const lampx = x, lampy = topY - 2;
+      ctx.save();
+      // beam (only while sweeping) — drawn first so the tower sits on top of it
+      if (lh.sweep > 0){
+        const p = 1 - lh.sweep/lh.dur;
+        const ang = Math.PI*1.15 + Math.PI*0.7*p;             // sweeps upper-left -> upper-right
+        const L = W*0.95;
+        const fin = Math.min(1,(lh.dur-lh.sweep)/0.25), fout = Math.min(1, lh.sweep/0.35);
+        const a = Math.max(0, Math.min(fin,fout)) * 0.14;
+        const a1 = ang-0.11, a2 = ang+0.11;
+        const mx = lampx+Math.cos(ang)*L, my = lampy+Math.sin(ang)*L;
+        const grd = ctx.createLinearGradient(lampx, lampy, mx, my);
+        grd.addColorStop(0, 'rgba(255,246,190,'+a.toFixed(3)+')');
+        grd.addColorStop(1, 'rgba(255,246,190,0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath(); ctx.moveTo(lampx, lampy);
+        ctx.lineTo(lampx+Math.cos(a1)*L, lampy+Math.sin(a1)*L);
+        ctx.lineTo(lampx+Math.cos(a2)*L, lampy+Math.sin(a2)*L);
+        ctx.closePath(); ctx.fill();
+      }
+      // tower body (trapezoid)
+      ctx.beginPath();
+      ctx.moveTo(x-9, base); ctx.lineTo(x-5, topY+6); ctx.lineTo(x+5, topY+6); ctx.lineTo(x+9, base); ctx.closePath();
+      ctx.fillStyle = '#f3f0ea'; ctx.fill();
+      // red stripes clipped to the tower
+      ctx.save(); ctx.clip();
+      ctx.fillStyle = '#d94f4f';
+      for (let i=0;i<3;i++) ctx.fillRect(x-11, base - h*(0.16 + i*0.28), 22, h*0.11);
+      ctx.restore();
+      // gallery deck
+      ctx.fillStyle = '#5a5a66'; ctx.fillRect(x-7, topY+2, 14, 4);
+      // lamp room
+      ctx.fillStyle = lh.sweep > 0 ? '#fff6c0' : '#cfe3ea';
+      ctx.fillRect(x-5, topY-6, 10, 8);
+      // roof
+      ctx.fillStyle = '#3a3a44';
+      ctx.beginPath(); ctx.moveTo(x-6, topY-6); ctx.lineTo(x, topY-13); ctx.lineTo(x+6, topY-6); ctx.closePath(); ctx.fill();
+      // lamp glow while lit
+      if (lh.sweep > 0){
+        const g = ctx.createRadialGradient(lampx, lampy, 0, lampx, lampy, 14);
+        g.addColorStop(0, 'rgba(255,246,190,0.6)'); g.addColorStop(1, 'rgba(255,246,190,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lampx, lampy, 14, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!lh || !here()) return false;
+        const topY = lh.base - lh.h;
+        if (px < lh.x - 12 || px > lh.x + 12 || py < topY - 14 || py > lh.base) return false;
+        if (lh.cd > 0) return true;
+        lh.cd = 1.0; lh.sweep = lh.dur;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') fxAt(lh.x, topY - 14, pick(['💡','✨','🌟']));
+        if (typeof say === 'function') say(pick(["I'll always leave a light on ✨",'The light guides you home 💛','Sweep the sea… 🌊','Home is wherever you are 🥰']));
+        try{ state.love = clamp(state.love + 5); state.energy = clamp(state.energy + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   50) CARVE THE PUMPKIN  —  in the pumpkin patch a plump pumpkin sits in the dirt.
+   Tap it to carve a little jack-o-lantern face that flickers to life with a warm
+   inner glow; after a while the candle burns out and a fresh pumpkin is ready to
+   carve again. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxPumpkin(){
+  try{
+    let pk = null;                       // {x,y,carved,glow,cd,ttl,t}
+    function here(){ try{ return (typeof SCENES!=='undefined') && SCENES[currentScene] === 'pumpkinpatch'; }catch(e){ return false; } }
+    function build(){ pk = { x: Math.max(W*0.14, Math.min(W*0.5, W*0.22)), y: rand(H*0.74, H*0.80), carved:false, glow:0, cd:0, ttl:0, t: rand(0,6) }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ pk = null; return; }
+      if (!pk) build();
+      pk.t += dt;
+      if (pk.cd > 0) pk.cd -= dt;
+      if (pk.carved){
+        pk.glow = Math.min(1, pk.glow + dt*2);
+        pk.ttl -= dt;
+        if (pk.ttl <= 0) build();          // candle out — a fresh pumpkin
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pk || !here()) return;
+      const x = pk.x, y = pk.y, rx = 16, ry = 13;
+      ctx.save();
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.14)'; ctx.beginPath(); ctx.ellipse(x, y+ry-1, rx*0.9, 3, 0, 0, 7); ctx.fill();
+      // stem
+      ctx.fillStyle = '#6b8e3a'; ctx.fillRect(x-2, y-ry-4, 4, 6);
+      // body (a few lobes)
+      ctx.fillStyle = '#d96b16'; ctx.beginPath(); ctx.ellipse(x-7, y, rx*0.55, ry, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x+7, y, rx*0.55, ry, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#e8791f'; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fill();
+      // ribs
+      ctx.strokeStyle = 'rgba(150,70,10,0.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x-6, y-ry+3); ctx.quadraticCurveTo(x-9, y, x-6, y+ry-3);
+      ctx.moveTo(x+6, y-ry+3); ctx.quadraticCurveTo(x+9, y, x+6, y+ry-3);
+      ctx.moveTo(x, y-ry+2); ctx.lineTo(x, y+ry-2); ctx.stroke();
+      // carved face
+      if (pk.carved){
+        const fl = 0.75 + 0.25*Math.sin(pk.t*7) + 0.08*Math.sin(pk.t*17);
+        const gy = ctx.createRadialGradient(x, y+1, 0, x, y+1, 20);
+        gy.addColorStop(0, 'rgba(255,180,60,'+(0.35*pk.glow*fl).toFixed(3)+')');
+        gy.addColorStop(1, 'rgba(255,180,60,0)');
+        ctx.fillStyle = gy; ctx.beginPath(); ctx.arc(x, y+1, 20, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,214,94,'+(0.85*pk.glow*fl+0.1).toFixed(3)+')';
+        // eyes (triangles)
+        ctx.beginPath(); ctx.moveTo(x-8, y-3); ctx.lineTo(x-3, y-3); ctx.lineTo(x-5.5, y+2); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x+8, y-3); ctx.lineTo(x+3, y-3); ctx.lineTo(x+5.5, y+2); ctx.closePath(); ctx.fill();
+        // nose
+        ctx.beginPath(); ctx.moveTo(x, y+1); ctx.lineTo(x-2, y+4); ctx.lineTo(x+2, y+4); ctx.closePath(); ctx.fill();
+        // toothy grin
+        ctx.beginPath();
+        ctx.moveTo(x-8, y+5); ctx.lineTo(x+8, y+5); ctx.lineTo(x+5, y+9);
+        ctx.lineTo(x+3, y+6.5); ctx.lineTo(x, y+9); ctx.lineTo(x-3, y+6.5); ctx.lineTo(x-5, y+9);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pk || !here()) return false;
+        const dx = (px - pk.x)/19, dy = (py - pk.y)/16;
+        if (dx*dx + dy*dy > 1) return false;
+        if (pk.carved) return true;          // already carved — consume quietly
+        pk.carved = true; pk.ttl = 14; pk.glow = 0.1;
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof burstAt === 'function') burstAt(pick(['🎃','✨','🍂']), pk.x, pk.y-10);
+        if (typeof say === 'function') say(pick(['Boo! 🎃','A jack-o-lantern! 🥰','Look at his little smile 😊','Spooky and cute ✨']));
+        try{ state.fun = clamp(state.fun + 5); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   51) GUMBALL MACHINE  —  in the candy or toy shop a little gumball machine waits.
+   Tap the knob to turn it: a gumball clinks down the chute and rolls out across the
+   counter before fading. A small sweet reward each turn. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxGumball(){
+  try{
+    const SHOPS = new Set(['candyshop','toyshop','sweetshop','confectionery']);
+    const COLORS = ['#ff5b6a','#ffd166','#6ac8ff','#9be59b','#c8a2ff','#ff9ec4'];
+    let gm = null;                       // {x,y,cd,inner:[{ix,iy,c}]}
+    const balls = [];                    // rolling gumballs {x,y,vx,color,t,life}
+    function here(){ try{ return (typeof SCENES!=='undefined') && SHOPS.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const x = Math.max(W*0.16, Math.min(W*0.86, W*0.80));
+      const inner = [];
+      for (let i=0;i<10;i++){ const a = rand(0,Math.PI*2), r = rand(0,9); inner.push({ ix: Math.cos(a)*r, iy: Math.sin(a)*r, c: pick(COLORS) }); }
+      gm = { x, y: rand(H*0.68, H*0.72), cd:0, inner };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ gm = null; balls.length = 0; return; }
+      if (!gm) build();
+      if (gm.cd > 0) gm.cd -= dt;
+      for (let i=balls.length-1;i>=0;i--){
+        const b = balls[i];
+        b.t += dt; b.x += b.vx*dt; b.vx *= 0.95;
+        if (b.t >= b.life || b.x > W+10) balls.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gm || !here()) return;
+      const x = gm.x, gy = gm.y;
+      ctx.save();
+      // rolling gumballs on the counter
+      for (const b of balls){
+        const a = Math.max(0, Math.min(1, (b.life - b.t)/0.5));
+        ctx.globalAlpha = a;
+        ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.beginPath(); ctx.ellipse(b.x, b.y+3, 4, 1.4, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(b.x, b.y, 3.4, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(b.x-1, b.y-1, 1, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // machine: glass globe of gumballs
+      const gcx = x, gcy = gy - 30;
+      ctx.fillStyle = 'rgba(200,230,240,0.35)'; ctx.beginPath(); ctx.arc(gcx, gcy, 13, 0, 7); ctx.fill();
+      for (const p of gm.inner){ ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(gcx+p.ix, gcy+p.iy, 2.4, 0, 7); ctx.fill(); }
+      ctx.strokeStyle = '#b0b0b8'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(gcx, gcy, 13, 0, 7); ctx.stroke();
+      // red base
+      ctx.fillStyle = '#d63b3b';
+      if (typeof roundRect === 'function'){ roundRect(x-11, gy-18, 22, 16, 3); ctx.fill(); } else ctx.fillRect(x-11, gy-18, 22, 16);
+      // knob + chute
+      ctx.fillStyle = '#e8e8ea'; ctx.beginPath(); ctx.arc(x, gy-11, 2.6, 0, 7); ctx.fill();
+      ctx.fillStyle = '#8a2a2a'; ctx.fillRect(x-4, gy-6, 8, 4);
+      // little stand
+      ctx.fillStyle = '#7a7a82'; ctx.fillRect(x-2, gy-2, 4, 4);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gm || !here()) return false;
+        if (px < gm.x - 14 || px > gm.x + 14 || py < gm.y - 46 || py > gm.y + 4) return false;
+        if (gm.cd > 0) return true;
+        gm.cd = 0.5;
+        balls.push({ x: gm.x, y: gm.y - 3, vx: rand(35, 70), color: pick(COLORS), t:0, life:2.6 });
+        if (balls.length > 8) balls.shift();
+        if (typeof sfx === 'function') sfx('tap');
+        if (typeof fxAt === 'function') fxAt(gm.x, gm.y - 46, pick(['🍬','🍭','✨']));
+        if (typeof say === 'function') say(pick(['A gumball for me? 🍬','Ooh, my favorite color! 🥰','Clink-clink! 😄','Sweet! 🍭']));
+        try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
       }catch(e){ return false; }
     });
   }catch(e){}

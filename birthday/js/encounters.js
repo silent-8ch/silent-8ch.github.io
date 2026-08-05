@@ -283,3 +283,205 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   HOT-AIR BALLOON. On wide outdoor daytime scenes a striped balloon drifts high
+   across the sky. Tap it to wave — and daydream about riding away together.
+   -------------------------------------------------------------------------- */
+(function encBalloon(){
+  try{
+    const SKYWIDE = new Set(['beach','backyard','river','pasture','orchard','vineyard','wheatfield',
+      'sunflowers','sunflowermaze','poppyfield','tulipfield','lavender','alpinemeadow','mountain',
+      'kitehill','sanddunes','cliffs','desert','windmill','watermill','harvestbarn','cornmaze',
+      'teaplantation','riceterraces','coveredbridge','canyon','prairiestorm','driftwoodbeach']);
+    const PALETTE = ['#e07a7a','#e0a24a','#7ab6e0','#8fd07a','#c98ad0'];
+    let bal = null, timer = 30 + Math.random()*50;
+    function canHere(){ try{ return SKYWIDE.has(SCENES[currentScene]) && !isNight(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (bal){
+          bal.t += dt; bal.x += bal.vx*dt;
+          bal.y = bal.baseY + Math.sin(bal.t*0.5)*6;
+          if (bal.x < -50 || bal.x > W+50) bal = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 45 + Math.random()*60;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            const by = H*(0.12+Math.random()*0.12);
+            bal = { x: dir>0 ? -34 : W+34, baseY: by, y: by, vx: dir*rand(9,15), t:0,
+                    col: pick(PALETTE) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!bal) return;
+      try{
+        const x = bal.x, y = bal.y, R = 15;
+        ctx.save();
+        // envelope
+        ctx.fillStyle = bal.col;
+        ctx.beginPath(); ctx.ellipse(x, y, R, R*1.15, 0, Math.PI, 0); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x-R, y); ctx.quadraticCurveTo(x, y+R*1.5, x+R, y); ctx.fill();
+        // vertical stripe
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.beginPath(); ctx.ellipse(x, y-2, 3.5, R*1.1, 0, Math.PI, 0); ctx.fill();
+        // ropes + basket
+        ctx.strokeStyle = 'rgba(90,60,40,0.7)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x-6, y+R*1.1); ctx.lineTo(x-4, y+R*1.1+10);
+        ctx.moveTo(x+6, y+R*1.1); ctx.lineTo(x+4, y+R*1.1+10); ctx.stroke();
+        ctx.fillStyle = '#8a5a34';
+        ctx.fillRect(x-4, y+R*1.1+10, 8, 6);
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!bal) return false;
+      const dx = px - bal.x, dy = py - (bal.y+6);
+      if (dx*dx + dy*dy > 34*34) return false;
+      say(pick(['A balloon! 🎈 One day let\'s ride one, just us two',
+                'Up and away 🎈 I\'d go anywhere with you',
+                'Wave hello! 👋 Somewhere up there is our next adventure',
+                'Imagine the whole world small below us 🥰🎈']));
+      fxAt(bal.x, bal.y-4, '🎈'); hearts(); if (typeof sfx==='function') sfx('day');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); refreshHUD();
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   BUTTERFLY. On flowery daytime scenes a butterfly flutters through in a lazy,
+   looping path. Tap it to let it perch on your finger for a wish.
+   -------------------------------------------------------------------------- */
+(function encButterfly(){
+  try{
+    const FLOWERY = new Set(['florist','flowermarket','greenhouse','tulipfield','lavender','poppyfield',
+      'peonygarden','sunflowers','sunflowermaze','hummingbirdgarden','cherryblossom','sakuratunnel',
+      'butterflydome','topiary','nursery','orchard','vineyard','pasture','meadow','fairyring',
+      'nightgarden','bonsaigarden','mossgarden','sunroom','citrusgrove']);
+    const WINGS = ['#e08fb8','#e6a24a','#8fb0e0','#c98ad0','#e0d06a'];
+    let bf = null, timer = 18 + Math.random()*36;
+    function canHere(){ try{ return FLOWERY.has(SCENES[currentScene]) && !isNight(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (bf){
+          bf.t += dt; bf.life -= dt;
+          bf.x += bf.vx*dt;
+          bf.y += Math.sin(bf.t*3.2)*22*dt;   // bobbing flutter
+          bf.flap = 0.35 + 0.55*Math.abs(Math.sin(bf.t*10));
+          if (bf.life <= 0 || bf.x < -24 || bf.x > W+24) bf = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 26 + Math.random()*44;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            bf = { x: dir>0 ? -16 : W+16, y: H*(0.45+Math.random()*0.2),
+                   vx: dir*rand(14,22), t:0, flap:0, life: rand(9,16), col: pick(WINGS) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!bf) return;
+      try{
+        const x = bf.x, y = bf.y, w = 6*bf.flap + 2;
+        ctx.save();
+        ctx.fillStyle = bf.col;
+        // left wings
+        ctx.beginPath(); ctx.ellipse(x-w, y-3, w, 5, 0.5, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x-w*0.9, y+3, w*0.8, 4, -0.4, 0, 7); ctx.fill();
+        // right wings
+        ctx.beginPath(); ctx.ellipse(x+w, y-3, w, 5, -0.5, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x+w*0.9, y+3, w*0.8, 4, 0.4, 0, 7); ctx.fill();
+        // body
+        ctx.strokeStyle = '#3a2a2a'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x, y-5); ctx.lineTo(x, y+5); ctx.stroke();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!bf) return false;
+      const dx = px - bf.x, dy = py - bf.y;
+      if (dx*dx + dy*dy > 24*24) return false;
+      say(pick(['A butterfly landed! 🦋 Make a wish, my love',
+                'She trusts you enough to rest 🦋 so do I 💗',
+                'Something this pretty, drawn right to you 🥰',
+                'Soft little wings 🦋 like the flutter you give me']));
+      fxAt(bf.x, bf.y-6, '🦋'); hearts(); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 3); refreshHUD();
+      bf = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   SHOOTING STAR. On night/starry scenes a star streaks across the sky, leaving a
+   bright tail. Tap it fast to catch the wish before it fades.
+   -------------------------------------------------------------------------- */
+(function encShootingStar(){
+  try{
+    const STARRY = new Set(['starrymeadow','moonlitjetty','moonbeach','harbornight','nightgarden',
+      'nightmarket','observatory','planetarium','aurora','moontemple','fairyring','willowispmarsh',
+      'lanternfestival','fireworks','rooftop','rooftoppool','cliffs','mountain','alpinemeadow',
+      'campsite','skygondola','lighthouse','desertoasis','treehouse']);
+    let star = null, timer = 26 + Math.random()*44;
+    function nightish(){ try{ return typeof isNight==='function' ? isNight() : (currentHour() >= 20 || currentHour() < 6); }catch(e){ return true; } }
+    function canHere(){ try{ return STARRY.has(SCENES[currentScene]) && nightish(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (star){
+          star.t += dt;
+          star.x += star.vx*dt; star.y += star.vy*dt;
+          if (star.t > 2.4 || star.x > W+40 || star.y > H*0.75) star = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 34 + Math.random()*52;
+          if (canHere()){
+            const sx = rand(W*0.05, W*0.4), sy = rand(H*0.05, H*0.2);
+            const sp = rand(150, 220);
+            star = { x: sx, y: sy, vx: sp*0.9, vy: sp*0.45, t:0, len: rand(26,40) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!star) return;
+      try{
+        const a = Math.max(0, 1 - star.t/2.4);
+        const nrm = Math.hypot(star.vx, star.vy) || 1;
+        const tx = star.x - (star.vx/nrm)*star.len, ty = star.y - (star.vy/nrm)*star.len;
+        ctx.save();
+        const grad = ctx.createLinearGradient(star.x, star.y, tx, ty);
+        grad.addColorStop(0, 'rgba(255,255,240,'+(0.95*a)+')');
+        grad.addColorStop(1, 'rgba(255,255,240,0)');
+        ctx.strokeStyle = grad; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(star.x, star.y); ctx.lineTo(tx, ty); ctx.stroke();
+        ctx.globalAlpha = a; ctx.fillStyle = '#fffef0';
+        ctx.beginPath(); ctx.arc(star.x, star.y, 2.4, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!star) return false;
+      const dx = px - star.x, dy = py - star.y;
+      if (dx*dx + dy*dy > 30*30) return false;
+      say(pick(['You caught it! 🌠 My wish is always the same — you',
+                'Quick, a shooting star! ✨ I already know what I\'d wish for',
+                'A star just for us 💫 make it a good one, my love',
+                'Wish granted the day I met you 🌠 the rest is bonus 💗']));
+      fxAt(star.x, star.y-6, '🌠'); hearts(); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 3); refreshHUD();
+      star = null;
+      return true;
+    });
+  }catch(e){}
+})();
