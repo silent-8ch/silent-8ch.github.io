@@ -1452,6 +1452,54 @@ const SCENE_SPOTS = {
     {nx:0.10, ny:0.56, r:50, e:'🌺', lines:['Trumpet flowers 🌺','So vibrant and tall','Blooming for the birds 🥰']},
     {nx:0.82, ny:0.12, r:46, e:'☀️', lines:['Bright sunny garden ☀️','So warm and buzzy','A perfect afternoon']},
   ],
+  igloo: [
+    {nx:0.20, ny:0.44, r:48, e:'🕯️', lines:['A little ice-shelf lantern 🕯️','Warm glow in the cold','So cozy in here 🥰']},
+    {nx:0.50, ny:0.56, r:52, e:'🌌', lines:['The entrance tunnel 🌌','Stars and aurora outside','A whole sky through there 💛']},
+    {nx:0.50, ny:0.90, r:58, e:'🧸', lines:['The fur rug 🧸','So soft and warm','Curl up with me? 🥰']},
+    {nx:0.16, ny:0.90, r:46, e:'🔥', lines:['The little fire bowl 🔥','Crackling away','Keeps us toasty in here 💛']},
+  ],
+  mistyforest: [
+    {nx:0.62, ny:0.20, r:50, e:'☀️', lines:['Sun through the fog ☀️','A soft pale glow','The forest is waking up 🥰']},
+    {nx:0.50, ny:0.44, r:58, e:'🌫️', lines:['Drifting fog 🌫️','So hazy and quiet','Like walking through a cloud 💛']},
+    {nx:0.20, ny:0.92, r:44, e:'🍄', lines:['A little red mushroom 🍄','Hiding in the moss','So tiny and perfect 🥰']},
+    {nx:0.82, ny:0.90, r:44, e:'🪨', lines:['A mossy stone marker 🪨','Old and weathered','I wonder who left it here']},
+  ],
+  fortuneteller: [
+    {nx:0.50, ny:0.50, r:56, e:'🔮', lines:['The crystal ball 🔮','Swirling with mist inside','I see us together forever 🥰']},
+    {nx:0.50, ny:0.09, r:48, e:'🏮', lines:['The beaded lamp 🏮','Warm and glowing','Such a mysterious place 💛']},
+    {nx:0.35, ny:0.55, r:46, e:'🃏', lines:['Tarot cards 🃏','Turn one over for me?','I bet it says love 💗']},
+    {nx:0.68, ny:0.55, r:44, e:'🕯️', lines:['A flickering candle 🕯️','Dancing in the dark','So intimate in here 🥰']},
+  ],
+  fairyring: [
+    {nx:0.50, ny:0.82, r:60, e:'🍄', lines:['The mushroom ring 🍄','Glowing pink and magical','Step inside with me? 🥰']},
+    {nx:0.50, ny:0.60, r:54, e:'✨', lines:['Fairy lights! ✨','Dancing in a circle','Like little wishes floating 💛']},
+    {nx:0.50, ny:0.30, r:50, e:'🌙', lines:['A moonbeam 🌙','Shining into the clearing','Just for us tonight 🥰']},
+    {nx:0.10, ny:0.92, r:44, e:'🌸', lines:['Glowing wildflowers 🌸','Little sparks of color','The forest is alive with magic']},
+  ],
+  witchcottage: [
+    {nx:0.78, ny:0.50, r:55, e:'⚗️', lines:['The bubbling cauldron ⚗️','Purple and mysterious','What are we brewing, love? 🥰']},
+    {nx:0.32, ny:0.42, r:46, e:'🐈‍⬛', lines:['A sleepy black cat 🐈‍⬛','Green eyes glowing','Purring on the shelf 💛']},
+    {nx:0.16, ny:0.20, r:48, e:'🌙', lines:['The round window 🌙','Moon peeking through','A perfect witchy night 🥰']},
+    {nx:0.10, ny:0.90, r:44, e:'🧹', lines:['A broomstick 🧹','Leaning by the door','Shall we go for a ride? 😄']},
+  ],
+  moontemple: [
+    {nx:0.50, ny:0.24, r:56, e:'🌕', lines:['The full moon 🌕','Hanging behind the temple','So bright it fills the ruins 🥰']},
+    {nx:0.34, ny:0.50, r:52, e:'🏛️', lines:['The marble columns 🏛️','Some broken by time','Still standing for us 💛']},
+    {nx:0.16, ny:0.66, r:48, e:'🔥', lines:['A blue brazier flame 🔥','Flickering on the steps','Ancient and beautiful 🥰']},
+    {nx:0.50, ny:0.82, r:54, e:'✨', lines:['Moonlight on marble ✨','A silvery reflection','Like walking on the moon']},
+  ],
+  rooftoppool: [
+    {nx:0.50, ny:0.66, r:58, e:'💧', lines:['The infinity pool 💧','Water meets the sky','Swim with me? 🥰']},
+    {nx:0.14, ny:0.90, r:50, e:'🏖️', lines:['A lounge chair 🏖️','With a striped towel','Lie in the sun with me 💛']},
+    {nx:0.70, ny:0.62, r:44, e:'🏐', lines:['A beach ball! 🏐','Floating on the water','Boop it over to me 😄']},
+    {nx:0.86, ny:0.86, r:46, e:'🌴', lines:['A potted palm 🌴','Swaying up on the roof','Our own little paradise 🥰']},
+  ],
+  cheesecave: [
+    {nx:0.16, ny:0.36, r:54, e:'🧀', lines:['Wheels of cheese 🧀','Aging on the shelves','Which one shall we try? 🥰']},
+    {nx:0.50, ny:0.26, r:48, e:'🧀', lines:['A cut wedge 🧀','Look at those little holes','Taste it with me? 😋']},
+    {nx:0.50, ny:0.18, r:44, e:'💡', lines:['The hanging bulb 💡','Warm and flickering','So cozy down here 💛']},
+    {nx:0.14, ny:0.90, r:46, e:'🛢️', lines:['An oak barrel 🛢️','Smells like aged wood','I wonder what\'s inside 🥰']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
