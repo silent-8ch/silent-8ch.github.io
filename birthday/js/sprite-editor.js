@@ -82,12 +82,17 @@
     }
   });
 
-  // Toggle with E key
+  // Toggle with E key, pause with Space
   document.addEventListener('keydown', e => {
     if (e.key === 'e' || e.key === 'E') {
       editorOpen = !editorOpen;
       panel.style.display = editorOpen ? '' : 'none';
       if (editorOpen) refreshList();
+    }
+    if (e.key === ' ' && DEBUG_MODE) {
+      e.preventDefault();
+      debugPaused = !debugPaused;
+      refreshList();
     }
   });
 
@@ -101,7 +106,9 @@
     // Scene info
     const seScene = panel.querySelector('#seScene');
     if (typeof SCENES !== 'undefined' && typeof currentScene !== 'undefined') {
-      seScene.textContent = '📍 ' + SCENES[currentScene] + ' (index ' + currentScene + ')  |  W:' + W + ' H:' + H + '  |  groundY ≈ ' + Math.round(H * 0.52);
+      seScene.innerHTML = '📍 ' + SCENES[currentScene] + ' <span style="color:#555">idx ' + currentScene + '  |  ' + W + '×' + H + '</span>'
+        + (debugPaused ? '  <span style="color:#ef5350;font-weight:bold;">⏸ PAUSED</span>' : '  <span style="color:#66bb6a;">▶ LIVE</span>')
+        + '<br><span style="color:#555">Space=pause  E=editor  N=scene  X=cutscene</span>';
     }
 
     const sprites = getSubmittedSprites();

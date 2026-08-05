@@ -110,10 +110,12 @@ function happyTrail(dt){
 
 /* ---------- main loop ---------- */
 let last = 0, started = true;   // no splash — the game runs immediately on load
+let debugPaused = false;
 function loop(ts){
   if (!last) last = ts;
   let dt = (ts - last)/1000; last = ts;
   if (dt > 0.1) dt = 0.1;            // clamp big gaps (tab switch)
+  if (debugPaused) { render(); requestAnimationFrame(loop); return; }
 
   // birthday scene takes over the whole screen while it runs
   if (birthday){
