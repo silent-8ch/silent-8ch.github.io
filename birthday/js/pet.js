@@ -966,6 +966,66 @@ const SCENE_SPOTS = {
     {nx:0.40, ny:0.74, r:50, e:'✨', lines:['Glowing plankton ✨','Sparkling in the shallows','Like fallen stars']},
     {nx:0.30, ny:0.82, r:46, e:'👣', lines:['Glowing footprints 👣','Left in the wet sand','Let\'s make some of our own 🥰']},
   ],
+  naturalhistory: [
+    {nx:0.52, ny:0.45, r:62, e:'🦕', lines:['A giant dinosaur! 🦕','So huge and ancient','Imagine seeing it alive 🥰']},
+    {nx:0.50, ny:0.18, r:48, e:'🪟', lines:['A grand arched window 🪟','Cool light pouring in','Such a majestic hall']},
+    {nx:0.19, ny:0.68, r:46, e:'💎', lines:['A glowing crystal 💎','In its glass case','So sparkly and blue 💛']},
+    {nx:0.84, ny:0.30, r:46, e:'🦅', lines:['A flying dino skeleton 🦅','Soaring on the wall','Wings spread so wide!']},
+  ],
+  sanddunes: [
+    {nx:0.28, ny:0.38, r:54, e:'🌅', lines:['The desert sun 🌅','Sinking into the sand','Everything turns gold 🥰']},
+    {nx:0.55, ny:0.72, r:60, e:'🏜️', lines:['Endless dunes 🏜️','Rolling like waves','So vast and silent 💛']},
+    {nx:0.30, ny:0.60, r:50, e:'🐪', lines:['A camel caravan! 🐪','Plodding over the ridge','Where are they headed?']},
+    {nx:0.50, ny:0.46, r:44, e:'💨', lines:['Sand off the crest 💨','Blowing in the wind','It stings a little!']},
+  ],
+  cartographer: [
+    {nx:0.36, ny:0.32, r:58, e:'🗺️', lines:['A big old world map 🗺️','So many places 🥰','Let\'s go everywhere together 💛']},
+    {nx:0.24, ny:0.60, r:48, e:'🌍', lines:['A little globe 🌍','Spin it, where to?','Round and round it turns']},
+    {nx:0.68, ny:0.63, r:48, e:'📜', lines:['Rolled-up charts 📜','And a fresh scroll','Being drawn by hand']},
+    {nx:0.88, ny:0.60, r:44, e:'🪔', lines:['A brass oil lamp 🪔','Warm and flickering','So cozy to work by 💛']},
+  ],
+  bayou: [
+    {nx:0.16, ny:0.35, r:56, e:'🌳', lines:['Old cypress trees 🌳','Draped in Spanish moss','So eerie and lovely 🥰']},
+    {nx:0.50, ny:0.50, r:52, e:'🌫️', lines:['Mist over the water 🌫️','So hazy and still','A little spooky, isn\'t it?']},
+    {nx:0.36, ny:0.80, r:48, e:'🛶', lines:['A drifting rowboat 🛶','With a little lantern','Glide through the swamp with me 💛']},
+    {nx:0.70, ny:0.60, r:44, e:'🐦', lines:['A heron in the shallows 🐦','So still and patient','Waiting for a fish']},
+  ],
+  escaperoom: [
+    {nx:0.50, ny:0.14, r:50, e:'⏳', lines:['The countdown timer! ⏳','We\'re running out of time!','Quick, help me think 🥰']},
+    {nx:0.50, ny:0.60, r:52, e:'🔐', lines:['A locked safe 🔐','What\'s the combination?','I bet the clues tell us']},
+    {nx:0.19, ny:0.32, r:50, e:'📌', lines:['A corkboard of clues 📌','Red string everywhere','It\'s all connected!']},
+    {nx:0.80, ny:0.25, r:46, e:'📚', lines:['A suspicious bookshelf 📚','One book\'s tilted!','Pull it and see? 😄']},
+  ],
+  teaplantation: [
+    {nx:0.24, ny:0.14, r:50, e:'☀️', lines:['Soft morning sun ☀️','Burning off the mist','So fresh and green 🥰']},
+    {nx:0.50, ny:0.62, r:60, e:'🍃', lines:['Rows of tea bushes 🍃','Curving with the hills','So neat and endless 💛']},
+    {nx:0.30, ny:0.62, r:48, e:'👒', lines:['Tea pickers 👒','In their conical hats','Filling their baskets']},
+    {nx:0.60, ny:0.40, r:44, e:'🏚️', lines:['A little drying shed 🏚️','Up at the path\'s top','Where the leaves rest']},
+  ],
+  recordingstudio: [
+    {nx:0.83, ny:0.32, r:52, e:'🎤', lines:['The vocal booth 🎤','Someone\'s singing in there','Sing me a song? 🥰']},
+    {nx:0.50, ny:0.82, r:56, e:'🎛️', lines:['The mixing console 🎛️','So many knobs!','Which one makes the bass?']},
+    {nx:0.14, ny:0.20, r:46, e:'📊', lines:['VU meters bouncing 📊','Up and down they dance','To the beat 💛']},
+    {nx:0.83, ny:0.13, r:42, e:'🔴', lines:['The REC light\'s on 🔴','Shh — we\'re recording','Quiet on set! 😄']},
+  ],
+  cranberrybog: [
+    {nx:0.40, ny:0.55, r:60, e:'🔴', lines:['A sea of cranberries! 🔴','Floating so bright red','Like a scarlet carpet 🥰']},
+    {nx:0.15, ny:0.30, r:50, e:'🍁', lines:['Autumn trees all around 🍁','Reflected in the bog','So warm and coppery 💛']},
+    {nx:0.34, ny:0.64, r:48, e:'🧑‍🌾', lines:['A worker in waders 🧑‍🌾','Pushing the berry boom','Chest-deep in the water!']},
+    {nx:0.85, ny:0.30, r:44, e:'📦', lines:['The collection box 📦','Waiting on the dike','Soon full of berries']},
+  ],
+  aviary: [
+    {nx:0.50, ny:0.40, r:56, e:'🦜', lines:['Birds on the branches! 🦜','So many colors','Chirping all around us 🥰']},
+    {nx:0.30, ny:0.18, r:50, e:'🐦', lines:['Ones flying free 🐦','Swooping through the dome','So graceful up there 💛']},
+    {nx:0.12, ny:0.75, r:46, e:'🌴', lines:['Lush potted palms 🌴','Like a little jungle','So green and warm']},
+    {nx:0.50, ny:0.92, r:48, e:'⛲', lines:['A little birdbath ⛲','Splish splash','The birds love a dip']},
+  ],
+  icebergbay: [
+    {nx:0.30, ny:0.55, r:58, e:'🧊', lines:['Icebergs! 🧊','Glowing blue underneath','So huge and cold 🥰']},
+    {nx:0.25, ny:0.86, r:52, e:'🐧', lines:['Penguins! 🐧','Huddled on the floe','So waddly and cute 💛']},
+    {nx:0.76, ny:0.16, r:46, e:'☀️', lines:['A pale polar sun ☀️','So low and soft','It barely warms us']},
+    {nx:0.60, ny:0.46, r:46, e:'🏔️', lines:['A glacier wall 🏔️','Stretched across the sea','So ancient and still']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){

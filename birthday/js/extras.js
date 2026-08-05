@@ -4497,3 +4497,215 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 27). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   64) WATER THE SPROUT  —  in the greenhouse a little pot of soil waits. Tap to
+   water it and it grows a stage at a time — seedling, stem, bud — until it bursts
+   into bloom, rests a while, then is ready to grow again. Scene-gated, progressive.
+   -------------------------------------------------------------------------- */
+(function fxSprout(){
+  try{
+    const AT = new Set(['greenhouse','terrariumshop','nursery','plantshop','flowermarket']);
+    let sp = null;                       // {x,y,grow,g,bloomT,cd,wob}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ sp = { x: Math.max(W*0.14, Math.min(W*0.5, W*0.22)), y: rand(H*0.72, H*0.78), grow:0, g:0, bloomT:0, cd:0, wob:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ sp = null; return; }
+      if (!sp) build();
+      if (sp.cd > 0) sp.cd -= dt;
+      sp.wob += dt;
+      sp.g += (sp.grow - sp.g) * Math.min(1, dt*4);
+      if (sp.bloomT > 0){ sp.bloomT -= dt; if (sp.bloomT <= 0) sp.grow = 0; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!sp || !here()) return;
+      const x = sp.x, y = sp.y, g = sp.g;
+      ctx.save();
+      // pot
+      ctx.fillStyle = '#b5623a';
+      ctx.beginPath(); ctx.moveTo(x-9, y); ctx.lineTo(x+9, y); ctx.lineTo(x+7, y+11); ctx.lineTo(x-7, y+11); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#c9713f'; ctx.fillRect(x-10, y-2, 20, 4);
+      ctx.fillStyle = '#4a3420'; ctx.beginPath(); ctx.ellipse(x, y-1, 8, 2.4, 0, 0, 7); ctx.fill();
+      // plant
+      if (g > 0.15){
+        const h = (g/4)*26, topx = x + Math.sin(sp.wob*1.5)*1.5*(g/4), topy = y-2 - h;
+        ctx.strokeStyle = '#3f8a44'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x, y-2); ctx.quadraticCurveTo(x, y-2-h*0.5, topx, topy); ctx.stroke();
+        if (g >= 1.3){
+          const my = y-2-h*0.5; ctx.fillStyle = '#4aa050';
+          ctx.beginPath(); ctx.ellipse(x-4, my, 4, 2, -0.6, 0, 7); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(x+4, my-2, 4, 2, 0.6, 0, 7); ctx.fill();
+        }
+        if (g >= 3.6){
+          ctx.fillStyle = '#ff8fab';
+          for (let k=0;k<5;k++){ const a = k/5*Math.PI*2 + sp.wob*0.3; ctx.beginPath(); ctx.ellipse(topx+Math.cos(a)*4, topy+Math.sin(a)*4, 3, 2, a, 0, 7); ctx.fill(); }
+          ctx.fillStyle = '#ffd166'; ctx.beginPath(); ctx.arc(topx, topy, 2.4, 0, 7); ctx.fill();
+        } else if (g >= 2.6){
+          ctx.fillStyle = '#7fbf6a'; ctx.beginPath(); ctx.ellipse(topx, topy, 3, 4, 0, 0, 7); ctx.fill();
+          ctx.fillStyle = '#ff9ec4'; ctx.beginPath(); ctx.arc(topx, topy-1, 1.6, 0, 7); ctx.fill();
+        }
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!sp || !here()) return false;
+        if (px < sp.x - 12 || px > sp.x + 12 || py < sp.y - 34 || py > sp.y + 12) return false;
+        if (sp.cd > 0) return true;
+        sp.cd = 0.3;
+        const wx = sp.x, wy = sp.y - 8;                             // capture first
+        if (typeof fxAt === 'function') fxAt(wx, wy - 6, '💧');
+        if (sp.grow >= 4) return true;                              // already blooming — just a sip of water
+        sp.grow++;
+        if (sp.grow >= 4){
+          const bx = sp.x, by = sp.y - 32;
+          if (typeof burstAt === 'function') burstAt(pick(['🌸','🌼','✨']), bx, by);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['It bloomed! 🌸','For you, my flower 🥰','Look how it opened ✨','We grew this together 💛']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+          sp.bloomT = 8;
+        } else {
+          if (typeof sfx === 'function') sfx('draw');
+          if (typeof say === 'function' && Math.random() < 0.5) say(pick(['Grow, little one 🌱','A good drink 💧','Almost there ✨']));
+          try{ state.energy = clamp(state.energy + 1); state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   65) THE MODEL TRAIN  —  in the model-train room a little engine sits on an oval
+   of track. Tap it to send it chugging around the loop, puffing smoke and tooting,
+   before it coasts back to a stop. Scene-gated; on its tabletop off to the side.
+   -------------------------------------------------------------------------- */
+(function fxTrainSet(){
+  try{
+    const AT = new Set(['trainroom','modeltrains','modeltrainroom']);
+    let tr = null;                       // {cx,cy,rx,ry,a,speed,running,cd,puffT,puffs:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ tr = { cx: Math.max(W*0.2, Math.min(W*0.8, W*0.72)), cy: rand(H*0.66, H*0.72), rx:22, ry:9, a:0, speed:0, running:false, cd:0, puffT:0, puffs:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ tr = null; return; }
+      if (!tr) build();
+      if (tr.cd > 0) tr.cd -= dt;
+      if (tr.running){
+        tr.a += tr.speed*dt;
+        tr.speed -= dt*0.4;
+        if (tr.speed <= 0.3){ tr.speed = 0; tr.running = false; }
+        tr.puffT -= dt;
+        if (tr.puffT <= 0){ tr.puffT = 0.24; const ex = tr.cx + Math.cos(tr.a)*tr.rx, ey = tr.cy + Math.sin(tr.a)*tr.ry - 6; tr.puffs.push({ x: ex, y: ey, t:0, life: rand(0.8,1.3), r: rand(2,4) }); }
+      }
+      for (let i=tr.puffs.length-1;i>=0;i--){ const p = tr.puffs[i]; p.t += dt; p.y -= 12*dt; p.r += 4*dt; if (p.t >= p.life) tr.puffs.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!tr || !here()) return;
+      const cx = tr.cx, cy = tr.cy, rx = tr.rx, ry = tr.ry;
+      ctx.save();
+      // tabletop
+      ctx.fillStyle = 'rgba(120,90,60,0.25)'; ctx.beginPath(); ctx.ellipse(cx, cy, rx+8, ry+6, 0, 0, 7); ctx.fill();
+      // rails
+      ctx.strokeStyle = '#8a7a5a'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 7); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(cx, cy, rx-3, ry-2, 0, 0, 7); ctx.stroke();
+      ctx.strokeStyle = 'rgba(120,90,60,0.5)'; ctx.lineWidth = 1;
+      for (let k=0;k<12;k++){ const a = k/12*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*(rx-3), cy+Math.sin(a)*(ry-2)); ctx.lineTo(cx+Math.cos(a)*rx, cy+Math.sin(a)*ry); ctx.stroke(); }
+      // smoke
+      for (const p of tr.puffs){ const a = Math.max(0, 1 - p.t/p.life)*0.5; ctx.fillStyle = 'rgba(220,220,225,'+a.toFixed(3)+')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill(); }
+      // car behind
+      const a2 = tr.a - 0.55, c2x = cx+Math.cos(a2)*(rx-1.5), c2y = cy+Math.sin(a2)*(ry-1);
+      ctx.fillStyle = '#2980b9'; ctx.fillRect(c2x-3, c2y-5, 6, 5);
+      // engine
+      const ex = cx+Math.cos(tr.a)*(rx-1.5), ey = cy+Math.sin(tr.a)*(ry-1);
+      ctx.fillStyle = '#c0392b'; ctx.fillRect(ex-4, ey-6, 8, 6);
+      ctx.fillStyle = '#2a2a2a'; ctx.fillRect(ex-1, ey-10, 3, 4);
+      ctx.fillStyle = '#f1c40f'; ctx.beginPath(); ctx.arc(ex, ey-2, 1.2, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!tr || !here()) return false;
+        if (px < tr.cx - tr.rx - 8 || px > tr.cx + tr.rx + 8 || py < tr.cy - tr.ry - 14 || py > tr.cy + tr.ry + 8) return false;
+        if (tr.cd > 0) return true;
+        tr.cd = 0.4; tr.running = true; tr.speed = Math.max(tr.speed, rand(3.6, 4.6));
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof say === 'function') say(pick(['Toot toot! 🚂','All aboard! 🥰','Round the bend it goes 😄','Chugga chugga ✨']));
+        try{ state.fun = clamp(state.fun + 4); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   66) THE PERFUME ATOMIZER  —  in the perfumery a pretty bottle waits with its
+   little squeeze bulb. Tap the bulb to spritz: a fine mist puffs out and drifting
+   scent notes bloom in the air. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxPerfume(){
+  try{
+    const AT = new Set(['perfumery','perfumeshop','fragrancehouse']);
+    let pf = null;                       // {x,y,squeeze,cd,mist:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ pf = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), squeeze:0, cd:0, mist:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ pf = null; return; }
+      if (!pf) build();
+      if (pf.cd > 0) pf.cd -= dt;
+      if (pf.squeeze > 0) pf.squeeze -= dt;
+      for (let i=pf.mist.length-1;i>=0;i--){ const m = pf.mist[i]; m.t += dt; m.x += m.vx*dt; m.y += m.vy*dt; m.vy -= 6*dt; m.r += 6*dt; if (m.t >= m.life) pf.mist.splice(i,1); }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pf || !here()) return;
+      const x = pf.x, y = pf.y;
+      ctx.save();
+      // mist first (behind the bottle)
+      for (const m of pf.mist){ const a = Math.max(0, 1 - m.t/m.life)*0.4; ctx.fillStyle = 'rgba(255,220,240,'+a.toFixed(3)+')'; ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, 7); ctx.fill(); }
+      // bottle body
+      ctx.fillStyle = 'rgba(220,180,210,0.45)'; ctx.beginPath(); ctx.ellipse(x, y-8, 10, 11, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(220,120,180,0.55)'; ctx.beginPath(); ctx.ellipse(x, y-4, 8, 6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.ellipse(x-3.5, y-11, 2.4, 3, -0.5, 0, 7); ctx.fill();
+      // neck + collar
+      ctx.fillStyle = 'rgba(220,180,210,0.6)'; ctx.fillRect(x-3, y-24, 6, 7);
+      ctx.fillStyle = '#c9a24a'; ctx.fillRect(x-4, y-26, 8, 3);
+      // squeeze bulb
+      const sq = pf.squeeze > 0 ? 0.75 : 1;
+      ctx.fillStyle = '#8a5a6a'; ctx.beginPath(); ctx.ellipse(x-8, y-24, 4*sq, 4, 0, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#c9a24a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x-4, y-24); ctx.lineTo(x-6, y-24); ctx.stroke();
+      // tassel
+      ctx.beginPath(); ctx.moveTo(x-8, y-20); ctx.lineTo(x-8, y-16); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pf || !here()) return false;
+        if (px < pf.x - 14 || px > pf.x + 12 || py < pf.y - 30 || py > pf.y + 6) return false;
+        if (pf.cd > 0) return true;
+        pf.cd = 0.5; pf.squeeze = 0.3;
+        const nx = pf.x - 3, ny = pf.y - 24;                        // nozzle — capture first
+        for (let i=0;i<10;i++) pf.mist.push({ x: nx, y: ny, vx: rand(-42,-8), vy: rand(-16,4), t:0, life: rand(0.8,1.4), r: rand(1.5,3) });
+        if (typeof sfx === 'function') sfx('draw');
+        if (typeof fxAt === 'function') fxAt(nx-8, ny-6, pick(['🌸','✨','💐']));
+        if (typeof say === 'function') say(pick(['Mmm, divine 🌸','A little spritz 🥰','Smells like a garden ✨','You always smell wonderful 💛']));
+        try{ state.love = clamp(state.love + 3); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

@@ -1323,3 +1323,214 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   MOTH. On night scenes with lamps/glow a moth flutters in loopy circles, drawn
+   to the light. Tap it gently to guide it back out into the soft dark.
+   -------------------------------------------------------------------------- */
+(function encMoth(){
+  try{
+    const LAMPLIT = new Set(['nightmarket','lanternfestival','harbornight','rainystreet','cafe','diner',
+      'ramenshop','sushibar','jazzclub','trainstation','lighthouse','campsite','porch','nightgarden',
+      'fireflypier','moonlitjetty','witchcottage','fortuneteller','streetlamp','rooftop']);
+    let moth = null, timer = 20 + Math.random()*38;
+    function nightish(){ try{ return typeof isNight==='function' ? isNight() : (currentHour() >= 19 || currentHour() < 6); }catch(e){ return true; } }
+    function canHere(){ try{ return LAMPLIT.has(SCENES[currentScene]) && nightish(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (moth){
+          moth.t += dt; moth.life -= dt;
+          // loopy orbit around a drifting center
+          moth.cx += moth.vx*dt;
+          moth.x = moth.cx + Math.cos(moth.t*3)*moth.r;
+          moth.y = moth.cy + Math.sin(moth.t*3)*moth.r*0.6;
+          moth.flap = Math.abs(Math.sin(moth.t*16));
+          if (moth.life <= 0 || moth.cx < -20 || moth.cx > W+20) moth = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 28 + Math.random()*46;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            moth = { cx: dir>0 ? 20 : W-20, cy: H*(0.35+Math.random()*0.2), r: rand(14,24),
+                     vx: dir*rand(8,14), x:0, y:0, t:0, flap:0, life: rand(9,15) };
+            moth.x = moth.cx; moth.y = moth.cy;
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!moth) return;
+      try{
+        const x = moth.x, y = moth.y, w = 6 - moth.flap*3;
+        ctx.save();
+        ctx.fillStyle = '#cbb89a';
+        // wings (fold with flap)
+        ctx.beginPath(); ctx.ellipse(x-3, y, w, 5, 0.4, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x+3, y, w, 5, -0.4, 0, 7); ctx.fill();
+        // body
+        ctx.strokeStyle = '#5a4a38'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x, y-4); ctx.lineTo(x, y+4); ctx.stroke();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!moth) return false;
+      const cx = moth.x, cy = moth.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 24*24) return false;
+      say(pick(['A little moth 🦋 chasing the light — I know the feeling, I chase you',
+                'There, out you go 🌙 soft wings, gentle hands',
+                'Drawn to the glow 🕯️ same way I\'m drawn to your smile',
+                'Shoo, sweet thing 🌙 the porch light will keep till morning']));
+      fxAt(cx, cy-6, '🌙'); if (typeof sfx==='function') sfx('tap');
+      state.love = clamp(state.love + 3); state.fun = clamp(state.fun + 3); refreshHUD();
+      moth = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   PAPER AIRPLANE. On indoor/study/playful scenes a folded paper plane glides in
+   on a gentle arc. Tap it to catch it — there's a tiny love note on the wing.
+   -------------------------------------------------------------------------- */
+(function encPaperPlane(){
+  try{
+    const INDOORSY = new Set(['library','artstudio','musicroom','sciencelab','classroom','comicshop',
+      'toyshop','arcade','trainroom','papercraftstudio','recordingstudio','cartographer','escaperoom',
+      'planetlab','chesshall','bowling','nursery','sewingstudio','clockmaker','optician','naturalhistory']);
+    let plane = null, timer = 22 + Math.random()*40;
+    function canHere(){ try{ return INDOORSY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (plane){
+          plane.t += dt; plane.x += plane.vx*dt;
+          plane.y = plane.baseY + Math.sin(plane.t*1.3)*18;   // gentle gliding swoops
+          plane.tilt = Math.cos(plane.t*1.3)*0.22 * (plane.dir>0?1:-1);
+          if (plane.x < -30 || plane.x > W+30) plane = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*50;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            const by = H*(0.35+Math.random()*0.15);
+            plane = { x: dir>0 ? -20 : W+20, baseY: by, y: by, vx: dir*rand(26,40), dir, t:0, tilt:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!plane) return;
+      try{
+        const x = plane.x, y = plane.y, d = plane.dir;
+        ctx.save();
+        ctx.translate(x, y); ctx.rotate(plane.tilt); ctx.scale(d, 1);
+        ctx.fillStyle = '#f7f2e6'; ctx.strokeStyle = '#c9b48a'; ctx.lineWidth = 1;
+        // top wing
+        ctx.beginPath(); ctx.moveTo(-12, -5); ctx.lineTo(12, 0); ctx.lineTo(-12, 2); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        // lower wing (shaded fold)
+        ctx.fillStyle = '#e6ddca';
+        ctx.beginPath(); ctx.moveTo(-12, 2); ctx.lineTo(12, 0); ctx.lineTo(-12, 6); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        // center crease
+        ctx.beginPath(); ctx.moveTo(-12, 2); ctx.lineTo(12, 0); ctx.stroke();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!plane) return false;
+      const cx = plane.x, cy = plane.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 30*30) return false;
+      say(pick(['Caught it! ✈️ unfold it — "I love you," it says (I wrote it)',
+                'A paper plane, flown just to you 💌 mind the landing!',
+                'There\'s a note on the wing 📝 "thinking of you, always"',
+                'Whoosh 🛩️ every one of these is me sending love across the room']));
+      fxAt(cx, cy-8, '💌'); hearts(); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 3); refreshHUD();
+      plane = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   COCOA STEAM HEART. On cozy warm scenes a curl of steam rises and, for a moment,
+   forms a little heart. Tap the heart before it fades for a snug, loving wish.
+   -------------------------------------------------------------------------- */
+(function encCocoaHeart(){
+  try{
+    const COZY = new Set(['cafe','diner','bakery','chocolateshop','snowycabin','winterchalet','skilodge',
+      'library','teahouse','bambootearoom','ramenshop','gingerbreadkitchen','sugarshack','cidermill',
+      'igloo','winecellar','cheesecave','spa','hammam','hotspring','cavehotspring','sunroom','ballroom']);
+    let steam = null, timer = 22 + Math.random()*40;
+    function canHere(){ try{ return COZY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (steam){
+          steam.t += dt;
+          steam.y -= steam.vy*dt;
+          steam.sway = Math.sin(steam.t*2)*6;
+          // heart is "formed" and tappable during the middle of its rise
+          steam.formed = steam.t > 1.0 && steam.t < 3.2;
+          if (steam.t > 4 || steam.y < H*0.2) steam = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*48;
+          if (canHere()){
+            steam = { x: rand(W*0.3, W*0.7), y: H*0.62, vy: rand(16,24), t:0, sway:0, formed:false };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!steam) return;
+      try{
+        const x = steam.x + steam.sway, y = steam.y;
+        ctx.save();
+        if (steam.formed){
+          // draw a soft steam heart
+          ctx.globalAlpha = 0.5;
+          ctx.fillStyle = 'rgba(255,240,235,0.8)';
+          const s = 5;
+          ctx.beginPath();
+          ctx.moveTo(x, y + s*0.7);
+          ctx.bezierCurveTo(x - s*1.6, y - s*0.4, x - s*0.4, y - s*1.4, x, y - s*0.5);
+          ctx.bezierCurveTo(x + s*0.4, y - s*1.4, x + s*1.6, y - s*0.4, x, y + s*0.7);
+          ctx.fill();
+        } else {
+          // wispy rising curl
+          ctx.globalAlpha = 0.35;
+          ctx.strokeStyle = 'rgba(255,245,240,0.8)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(x, y+6);
+          ctx.quadraticCurveTo(x+5, y, x, y-6);
+          ctx.quadraticCurveTo(x-5, y-12, x, y-16);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!steam || !steam.formed) return false;
+      const cx = steam.x + steam.sway, cy = steam.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 22*22) return false;
+      say(pick(['Aww, a heart in the steam 💗 warm hands, warm hearts',
+                'Even the cocoa\'s in love with you today ☕💕',
+                'Cupped mug, cozy blanket, you 🥰 my whole heart',
+                'It rose up just to say what I always feel — I love you ☕']));
+      fxAt(cx, cy-6, '💗'); hearts(); if (typeof sfx==='function') sfx('hug');
+      state.love = clamp(state.love + 5); state.energy = clamp(state.energy + 2); refreshHUD();
+      steam = null;
+      return true;
+    });
+  }catch(e){}
+})();
