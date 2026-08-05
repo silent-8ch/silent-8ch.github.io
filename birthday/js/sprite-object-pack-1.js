@@ -8,8 +8,8 @@
     bird:        {src:base+'bird.png',cols:4,fps:6,defaultSize:30},
     npcAdult:    {src:base+'npc-adult.png',cols:4,fps:8,defaultSize:150},
     npcChild:    {src:base+'npc-child.png',cols:4,fps:8,defaultSize:110},
-    puppy:       {src:base+'puppy.png',cols:4,fps:7,defaultSize:50},
-    cat:         {src:base+'cat.png',cols:4,fps:7,defaultSize:45},
+    puppy:       {src:base+'puppy.png',cols:4,fps:7,defaultSize:70},
+    cat:         {src:base+'cat.png',cols:4,fps:7,defaultSize:65},
     /* static props (single-frame) */
     book:        {src:base+'book.png',cols:1,fps:0,defaultSize:28},
     bush:        {src:base+'bush.png',cols:1,fps:0,defaultSize:55},
@@ -28,7 +28,7 @@
     fireflies: {src:base+'fireflies.png',cols:4,fps:5,defaultSize:30},
     reindeer:  {src:base+'reindeer.png',cols:4,fps:6,defaultSize:78},
     /* environment pack: scale, ground anchor, collision footprint, and layering defaults */
-    tree:          {src:base+'tree.png',cols:4,fps:2,defaultSize:150,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:58,depth:22},depthOffset:0},
+    tree:          {src:base+'tree.png',cols:4,fps:2,defaultSize:250,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:58,depth:22},depthOffset:0},
     floweringBush: {src:base+'flowering-bush.png',cols:4,fps:2.5,defaultSize:82,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:60,depth:18},depthOffset:0},
     wildflowers:   {src:base+'wildflowers.png',cols:4,fps:3,defaultSize:58,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:40,depth:12},depthOffset:0},
     grassTuft:     {src:base+'grass-tuft.png',cols:4,fps:3,defaultSize:52,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:36,depth:10},depthOffset:0},
