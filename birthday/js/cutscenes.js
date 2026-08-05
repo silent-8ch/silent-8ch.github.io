@@ -53,7 +53,7 @@ function csDrawChar(name, x, feetY, dir, h, frame){
 /* ---------- Expression sprites ----------
    Each expression PNG is a 4-frame horizontal strip (1024x256, so 256x256 per frame).
    Lazily loaded, keyed by "name:expression" (e.g. "krystal:laugh"). */
-const EXPR_LIST = ['cheer','embarrassed','laugh','sad','scared','surprised','think','wave'];
+const EXPR_LIST = ['beckon','cheer','embarrassed','inspect','laugh','nod','point','sad','scared','search','shake','shrug','surprised','talk','think','wave'];
 const csExprSprites = {};
 
 function csLoadExpression(name, expression){
@@ -399,7 +399,10 @@ function csCampfireStory(){
     steps: [
       // Step 1: Everyone sitting. Paul speaks.
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs);
+          csDrawExpression('paul', 'talk', paul.x, paul.feetY, charH);
+          csDrawChar('krystal', krystal.x, krystal.feetY, 'left', charH, 0);
+          csDrawChar('luna', luna.x, luna.feetY, 'down', charH * 0.9, 0);
           csDrawBubble(paul.x, paul.feetY - charH - 4, 'Paul', 'Want to hear a scary story?');
       }},
       // Step 2: Luna responds — cheer expression (excited)
@@ -412,7 +415,10 @@ function csCampfireStory(){
       }},
       // Step 3: Paul narrates.
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawChars();
+          drawBg(cs);
+          csDrawExpression('paul', 'talk', paul.x, paul.feetY, charH);
+          csDrawChar('krystal', krystal.x, krystal.feetY, 'left', charH, 0);
+          csDrawChar('luna', luna.x, luna.feetY, 'down', charH * 0.9, 0);
           csDrawBubble(paul.x, paul.feetY - charH - 4, 'Paul', 'Once upon a time... in a dark forest...');
       }},
       // Step 4: Krystal on the edge of her seat — think expression
@@ -582,9 +588,16 @@ function csStargazing(){
           csDrawExpression('krystal', 'think', krystalX, blanketY - 2, charH * 0.85);
           csDrawBubble(krystalX, blanketY - charH * 0.85 - 6, 'Krystal', 'Look at all the stars...');
       }},
-      // Step 3: Paul points. Shooting star crosses.
+      // Step 3: Paul points at a star. Shooting star crosses.
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawBlanketAndChars(cs);
+          drawBg(cs);
+          // blanket
+          ctx.fillStyle = '#6e4a7a'; roundRect(blanketX - 56, blanketY - 4, 112, 18, 4); ctx.fill();
+          ctx.fillStyle = '#8a5e9a'; roundRect(blanketX - 52, blanketY - 2, 104, 14, 3); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+          for (let i = 0; i < 5; i++){ const lx = blanketX - 44 + i * 22; ctx.beginPath(); ctx.moveTo(lx, blanketY - 2); ctx.lineTo(lx, blanketY + 12); ctx.stroke(); }
+          csDrawExpression('paul', 'point', paulX, blanketY - 2, charH * 0.85);
+          csDrawChar('krystal', krystalX, blanketY - 2, 'up', charH * 0.85, 0);
           csDrawBubble(paulX, blanketY - charH * 0.85 - 6, 'Paul', "That one's yours.");
       }, onStart(cs){
           const ang = 0.3 + Math.random() * 0.2;
@@ -608,7 +621,13 @@ function csStargazing(){
       }},
       // Step 5: Paul's line.
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawBlanketAndChars(cs);
+          drawBg(cs);
+          ctx.fillStyle = '#6e4a7a'; roundRect(blanketX - 56, blanketY - 4, 112, 18, 4); ctx.fill();
+          ctx.fillStyle = '#8a5e9a'; roundRect(blanketX - 52, blanketY - 2, 104, 14, 3); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+          for (let i = 0; i < 5; i++){ const lx = blanketX - 44 + i * 22; ctx.beginPath(); ctx.moveTo(lx, blanketY - 2); ctx.lineTo(lx, blanketY + 12); ctx.stroke(); }
+          csDrawExpression('paul', 'talk', paulX, blanketY - 2, charH * 0.85);
+          csDrawChar('krystal', krystalX, blanketY - 2, 'up', charH * 0.85, 0);
           csDrawBubble(paulX, blanketY - charH * 0.85 - 6, 'Paul', 'The brightest one. Always.');
       }},
       // Step 6: Hearts float up. Both cheer.
@@ -714,20 +733,20 @@ function csBeachSunsetPicnic(){
     chars: ['krystal', 'paul', 'wade'],
     skipable: true,
     steps: [
-      // Step 1: Quiet scene — golden hour, everyone on the blanket — think expression on Krystal
+      // Step 1: Quiet scene — golden hour, everyone on the blanket — talk expression on Krystal
       { dur: 2.0, draw(cs){
           drawBg(cs);
           csDrawChar('paul',    paul.x,    paul.feetY,    'right', charH, 0);
-          csDrawExpression('krystal', 'think', krystal.x, krystal.feetY, charH);
+          csDrawExpression('krystal', 'talk', krystal.x, krystal.feetY, charH);
           csDrawChar('wade',    wade.x,    wade.feetY,    'left',  charH * 0.95, 0);
           csDrawBubble(krystal.x, krystal.feetY - charH - 4, 'Krystal', "This sunset is so pretty...");
       }},
-      // Step 2: Wade breaks the peace — wave expression
+      // Step 2: Wade breaks the peace — talk expression
       { dur: 2.0, draw(cs){
           drawBg(cs);
           csDrawChar('paul',    paul.x,    paul.feetY,    'right', charH, 0);
           csDrawChar('krystal', krystal.x, krystal.feetY, 'down',  charH, 0);
-          csDrawExpression('wade', 'wave', wade.x, wade.feetY, charH * 0.95);
+          csDrawExpression('wade', 'talk', wade.x, wade.feetY, charH * 0.95);
           csDrawBubble(wade.x, wade.feetY - charH * 0.95 - 4, 'Wade', 'Know what else is pretty? This sandwich.');
       }},
       // Step 3: Everyone laughs
@@ -754,7 +773,7 @@ function csBeachSunsetPicnic(){
           drawBg(cs);
           csDrawExpression('paul', 'cheer', paul.x, paul.feetY, charH);
           csDrawExpression('krystal', 'cheer', krystal.x - 18, krystal.feetY, charH);
-          csDrawExpression('wade', 'wave', wade.x, wade.feetY, charH * 0.95);
+          csDrawExpression('wade', 'nod', wade.x, wade.feetY, charH * 0.95);
           csDrawBubble(wade.x, wade.feetY - charH * 0.95 - 4, 'Wade', "...okay yeah, this is nice too.");
       }, onStart(cs){
           csHearts(cs, wade.x, wade.feetY - charH * 0.6, 3);
@@ -1072,10 +1091,13 @@ function csLibraryGhost(){
           drawBg(cs); drawFallingBook(cs); drawChars(false, 'surprised', 'scared');
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Did you see that?!");
       }},
-      // Step 4: Ghost orb drifts across — William scared, hides behind Krystal
+      // Step 4: Ghost orb drifts across — William scared, hides behind Krystal, then shakes head in denial
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawGhostOrb(cs); drawFallingBook(cs); drawChars(true, 'surprised', 'scared');
-          if (cs.stepT > 0.8){
+          drawBg(cs); drawGhostOrb(cs); drawFallingBook(cs);
+          if (cs.stepT < 0.8){
+            drawChars(true, 'surprised', 'scared');
+          } else {
+            drawChars(true, 'surprised', 'shake');
             csDrawBubble(krystalX + 16, fY - charH * 0.85 - 4, 'William', "I'm not scared... you're scared!");
           }
       }, onStart(cs){
@@ -1260,19 +1282,19 @@ function csAquariumWonder(){
     chars: ['krystal', 'luke'],
     skipable: true,
     steps: [
-      // Step 1: Both watching fish — cheer expression on Krystal
+      // Step 1: Both watching fish — point expression on Krystal
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawJellies(cs); drawChars('cheer', null);
+          drawBg(cs); drawJellies(cs); drawChars('point', null);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Look at all the fish! 🐠");
       }},
-      // Step 2: Luke spots a jellyfish — surprised expression
+      // Step 2: Luke spots a jellyfish — point expression
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawJellies(cs); drawChars(null, 'surprised');
+          drawBg(cs); drawJellies(cs); drawChars(null, 'point');
           csDrawBubble(lukeX, fY - charH * 0.95 - 4, 'Luke', "Whoa, a jellyfish! Look!");
       }},
-      // Step 3: Krystal is amazed — surprised expression
+      // Step 3: Krystal is amazed — inspect expression (looking closely)
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawJellies(cs); drawChars('surprised', 'cheer');
+          drawBg(cs); drawJellies(cs); drawChars('inspect', 'cheer');
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It glows! So pretty 🪼✨");
       }},
       // Step 4: Whale shark appears overhead — surprised both
@@ -1442,9 +1464,9 @@ function csRainyDayChat(){
           drawRain(cs, 0);
           csDrawBubble(krystalX, fY - charH - 28, 'Krystal', "It's really coming down! 🌧️");
       }, update(cs, dt){ drawRain(cs, dt); }},
-      // Step 2: Paul speaks — cheer expression
+      // Step 2: Paul speaks — talk expression
       { dur: 2.5, draw(cs){
-          drawBg(cs); drawCharsExpr(false, 'cheer', null);
+          drawBg(cs); drawCharsExpr(false, 'talk', null);
           drawUmbrella(W * 0.50, fY - charH - 12);
           drawRain(cs, 0);
           csDrawBubble(paulX, fY - charH - 28, 'Paul', "I love rainy days with you.");
@@ -1620,9 +1642,9 @@ function csFlowerCrown(){
           drawBg(cs); drawCharsExpr(true, false, 'cheer', 'cheer', null); drawPetals(0);
           csDrawBubble(krystalX, fY - charH - 14, 'Krystal', 'I love it so much! \ud83e\udd70');
       }, update(cs, dt){ drawPetals(dt); }},
-      // Step 4: Wade wants one — wave expression
+      // Step 4: Wade wants one — talk expression
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawCharsExpr(true, false, 'cheer', null, 'wave'); drawPetals(0);
+          drawBg(cs); drawCharsExpr(true, false, 'cheer', null, 'talk'); drawPetals(0);
           csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', 'Hey, where\u2019s MY crown?!');
       }, update(cs, dt){ drawPetals(dt); }},
       // Step 5: Luna makes Wade a tiny one. Everyone laughs.
@@ -1771,9 +1793,9 @@ function csSnowAngelContest(){
     chars: ['krystal', 'paul', 'william'],
     skipable: true,
     steps: [
-      // Step 1: Fresh snow, everyone excited — cheer expressions
+      // Step 1: Fresh snow, everyone excited — William talks, Krystal cheers
       { dur: 2.0, draw(cs){
-          drawBg(cs); drawChars(false, 'cheer', null, 'cheer');
+          drawBg(cs); drawChars(false, 'cheer', null, 'talk');
           csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', 'Snow angel contest! Watch this!');
       }},
       // Step 2: William makes a perfect snow angel — surprised on Krystal
@@ -1806,14 +1828,14 @@ function csSnowAngelContest(){
           csHearts(cs, krystalX, fY - charH * 0.7, 5);
           csHearts(cs, paulX, fY - charH * 0.7, 4);
       }},
-      // Step 5: William proud — cheer expression, everyone warm
+      // Step 5: William proud — nod expression (self-assured), everyone warm
       { dur: 2.5, draw(cs){
           drawBg(cs);
           drawSnowAngel(williamX, groundY + 14, 'perfect');
           drawSnowAngel(paulX, groundY + 16, 'messy');
           csDrawExpression('krystal', 'cheer', paulX - 20, fY, charH);
           csDrawExpression('paul', 'cheer', paulX, fY, charH);
-          csDrawExpression('william', 'cheer', williamX, fY, charH * 0.95);
+          csDrawExpression('william', 'nod', williamX, fY, charH * 0.95);
           csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', 'I clearly won. \ud83d\ude0e');
       }, onStart(cs){
           csHearts(cs, williamX, fY - charH * 0.6, 3);
@@ -1974,9 +1996,9 @@ function csMusicJam(){
     chars: ['krystal', 'paul', 'luke', 'luna'],
     skipable: true,
     steps: [
-      // Step 1: Everyone picking up instruments — cheer expression on Paul
+      // Step 1: Everyone picking up instruments — beckon expression on Paul
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawCharsExpr(null, 'cheer', null, null); drawInstruments(cs); drawNotes(0);
+          drawBg(cs); drawCharsExpr(null, 'beckon', null, null); drawInstruments(cs); drawNotes(0);
           csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Alright everyone, let\u2019s jam!');
       }, update(cs, dt){ drawNotes(dt); }},
       // Step 2: They start playing — cheer expressions, notes rise
@@ -2135,9 +2157,9 @@ function csPaintingTogether(){
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
-      // Step 1: Both painting side by side — think expression on Paul
+      // Step 1: Both painting side by side — talk expression on Paul
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawCharsExpr(null, 'think');
+          drawBg(cs); drawCharsExpr(null, 'talk');
           drawEasel(krystalX + 24, fY - 4, null);
           drawEasel(paulX - 24, fY - 4, null);
           csDrawBubble(paulX, fY - charH - 4, 'Paul', 'This is going to be a masterpiece.');
@@ -2149,9 +2171,9 @@ function csPaintingTogether(){
           drawEasel(paulX - 24, fY - 4, drawPaulPainting);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', '*peeks over* ...what is that? \ud83d\ude02');
       }},
-      // Step 3: Paul defends his art — embarrassed expression
+      // Step 3: Paul defends his art — shake expression (defensive)
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawCharsExpr('laugh', 'embarrassed');
+          drawBg(cs); drawCharsExpr('laugh', 'shake');
           drawEasel(krystalX + 24, fY - 4, null);
           drawEasel(paulX - 24, fY - 4, drawPaulPainting);
           csDrawBubble(paulX, fY - charH - 4, 'Paul', "It's abstract!");
@@ -2269,8 +2291,8 @@ function csHideAndSeek(){
   }
 
   function drawCharsStep3(cs){
-    // Luke turned around, ready to seek — cheer expression
-    csDrawExpression('luke', 'cheer', lukeX, fY, charH);
+    // Luke turned around, ready to seek — search expression
+    csDrawExpression('luke', 'search', lukeX, fY, charH);
     csDrawChar('william', bushX, fY, 'down', charH * 0.95, 0);
     drawBush(bushX, bushBaseY, 42, 34);
     csDrawChar('krystal', W * 0.10, fY + 6, 'right', charH * 0.7, 0);
@@ -2278,8 +2300,8 @@ function csHideAndSeek(){
   }
 
   function drawCharsStep4(cs){
-    // Luke found William — cheer on Luke, embarrassed on William
-    csDrawExpression('luke', 'cheer', bushX - 24, fY, charH);
+    // Luke found William — point on Luke, embarrassed on William
+    csDrawExpression('luke', 'point', bushX - 24, fY, charH);
     csDrawExpression('william', 'embarrassed', bushX + 8, fY, charH * 0.95);
     drawBush(bushX, bushBaseY, 42, 34);
     csDrawChar('krystal', W * 0.10, fY + 6, 'right', charH * 0.7, 0);
@@ -2501,9 +2523,9 @@ function csTeaParty(){
     chars: ['krystal', 'luna', 'wade'],
     skipable: true,
     steps: [
-      // Step 1: Everyone sipping tea — cheer expression on Luna
+      // Step 1: Everyone sipping tea — talk expression on Luna
       { dur: 2.2, draw(cs){
-          drawBg(cs); drawCharsExpr(null, 'cheer', null); drawTable();
+          drawBg(cs); drawCharsExpr(null, 'talk', null); drawTable();
           drawTeacup(krystalX + 16, tableY - 4, false);
           drawTeacup(lunaX, tableY - 4, false);
           drawTeacup(wadeX - 16, tableY - 4, false);
@@ -2699,14 +2721,14 @@ function csSunsetBalloonRide(){
           drawBg(cs);
           drawBalloon(cs);
           csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
-          csDrawChar('paul', paulX, fY, 'left', charH, 0);
+          csDrawExpression('paul', 'point', paulX, fY, charH);
           csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Look — I can see our house from here! 🏠');
       }},
-      // Step 3: Krystal spots the fields — wave expression
+      // Step 3: Krystal spots the fields — point expression
       { dur: 2.0, draw(cs){
           drawBg(cs);
           drawBalloon(cs);
-          csDrawExpression('krystal', 'wave', krystalX, fY, charH);
+          csDrawExpression('krystal', 'point', krystalX, fY, charH);
           csDrawExpression('paul', 'cheer', paulX, fY, charH);
           csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'The fields look like a quilt! 💛');
       }},
@@ -2889,7 +2911,7 @@ function csCookingDisaster(){
       { dur: 2.2, draw(cs){
           drawBg(cs);
           csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
-          csDrawExpression('wade', 'cheer', wadeX, fY, charH * 0.95);
+          csDrawExpression('wade', 'talk', wadeX, fY, charH * 0.95);
           csDrawChar('william', williamX, fY, 'left', charH, 0);
           drawPot(cs, true);
           drawSpiceShaker(wadeX + 24, potY - 6, false);
@@ -3113,15 +3135,15 @@ function csTidePoolDiscovery(){
       { dur: 2.2, draw(cs){
           drawBg(cs);
           csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
-          csDrawExpression('luke', 'cheer', lukeX, fY, charH);
+          csDrawExpression('luke', 'point', lukeX, fY, charH);
           csDrawChar('luna', lunaX, fY, 'left', charH, 0);
           csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Look at all these little pools! 🌊');
       }},
-      // Step 2: Luke finds a starfish — surprised!
+      // Step 2: Luke finds a starfish — inspect expression
       { dur: 2.5, draw(cs){
           drawBg(cs);
           csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
-          csDrawExpression('luke', 'surprised', lukeX, fY, charH);
+          csDrawExpression('luke', 'inspect', lukeX, fY, charH);
           csDrawChar('luna', lunaX, fY, 'left', charH, 0);
           // starfish in his hand area
           drawStarfish(lukeX + 14, fY - charH * 0.35, 6, 0.2);
@@ -3152,7 +3174,7 @@ function csTidePoolDiscovery(){
           // pretty shell in Krystal's hands
           drawShell(krystalX + 12, fY - charH * 0.35);
           if (cs.stepT < 1.5){
-            csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+            csDrawExpression('krystal', 'inspect', krystalX, fY, charH);
             csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Oh! Look at this one... it\'s beautiful 🐚');
           } else {
             csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
@@ -3267,7 +3289,7 @@ function csPillowFort(){
           drawFortWall(W * 0.38, fY + 4, 4);
           drawFortWall(W * 0.58, fY + 4, 5 + Math.floor(cs.stepT));
           csDrawExpression('luke', 'scared', lukeX, fY, charH);
-          csDrawExpression('wade', 'cheer', wadeX, fY, charH);
+          csDrawExpression('wade', 'talk', wadeX, fY, charH);
           csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
           csDrawBubble(wadeX, fY - charH - 4, 'Wade', 'Just one more... okay maybe two more...');
       }},
@@ -3390,7 +3412,7 @@ function csDanceLesson(){
       // Step 1: Paul trying to dance — terrible
       { dur: 2.4, draw(cs){
           drawBg(cs); drawNotes(cs);
-          csDrawExpression('paul', 'think', paulX, fY, charH);
+          csDrawExpression('paul', 'talk', paulX, fY, charH);
           csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
           csDrawBubble(paulX, fY - charH - 4, 'Paul', "Okay, I think I've got this...");
       }},
@@ -3405,7 +3427,7 @@ function csDanceLesson(){
       { dur: 2.6, draw(cs){
           drawBg(cs); drawNotes(cs);
           if (cs.stepT < 1.3){
-            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('krystal', 'talk', krystalX, fY, charH);
             csDrawExpression('paul', 'think', paulX, fY, charH);
             csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Like this — one, two, step!');
           } else {
@@ -3426,11 +3448,11 @@ function csDanceLesson(){
           csHearts(cs, krystalX, fY - charH * 0.7, 6);
           csHearts(cs, paulX, fY - charH * 0.7, 6);
       }},
-      // Step 5: Final moment — both laughing, warm
+      // Step 5: Final moment — both happy, warm
       { dur: 2.4, draw(cs){
           drawBg(cs); drawNotes(cs);
           csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
-          csDrawExpression('paul', 'laugh', paulX, fY, charH);
+          csDrawExpression('paul', 'talk', paulX, fY, charH);
           csDrawBubble(paulX, fY - charH - 4, 'Paul', "Same time tomorrow? \ud83d\ude0a");
       }, onStart(cs){
           csHearts(cs, (krystalX + paulX) / 2, fY - charH * 0.7, 4);
@@ -3579,7 +3601,7 @@ function csFireflyCatching(){
           drawBg(cs); drawFireflies(cs, 6, 88);
           drawJar(williamX + 14, fY - charH * 0.3, true);
           if (cs.stepT < 1.4){
-            csDrawExpression('luna', 'sad', lunaX, fY, charH);
+            csDrawExpression('luna', 'search', lunaX, fY, charH);
             csDrawExpression('krystal', 'think', krystalX, fY, charH);
             csDrawChar('william', williamX, fY, 'left', charH, 0);
             drawJar(lunaX + 14, fY - charH * 0.3, false);
@@ -3742,7 +3764,7 @@ function csMagicShow(){
       { dur: 2.4, draw(cs){
           drawBg(cs);
           drawHat(hatCx, hatBaseY, false);
-          csDrawExpression('william', 'cheer', williamX, fY, charH);
+          csDrawExpression('william', 'talk', williamX, fY, charH);
           csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
           csDrawChar('paul', paulX, fY, 'left', charH, 0);
           csDrawBubble(williamX, fY - charH - 4, 'William', 'For my next trick... \ud83c\udfa9');
@@ -3775,13 +3797,13 @@ function csMagicShow(){
       }, onStart(cs){
           csHearts(cs, krystalX, fY - charH * 0.7, 3);
       }},
-      // Step 4: William bows — hat falls off — embarrassed
+      // Step 4: William bows — hat falls off — shrug
       { dur: 2.0, draw(cs){
           drawBg(cs);
           const fallT = Math.min(1, cs.stepT / 0.6);
           drawHat(hatCx + fallT * 30, hatBaseY + fallT * 20, true);
           if (cs.stepT < 1.0){
-            csDrawExpression('william', 'embarrassed', williamX, fY, charH);
+            csDrawExpression('william', 'shrug', williamX, fY, charH);
             csDrawBubble(williamX, fY - charH - 4, 'William', 'Uhh... that was part of the show!');
           } else {
             csDrawExpression('william', 'embarrassed', williamX, fY, charH);
@@ -3923,7 +3945,7 @@ function csSunsetFishing(){
           drawFishingLine(paulX, paulX + 25, false);
           drawFishingLine(wadeX, wadeX + 20, true);
           csDrawExpression('wade', 'surprised', wadeX, fY, charH);
-          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawExpression('krystal', 'point', krystalX, fY, charH);
           csDrawExpression('paul', 'cheer', paulX, fY, charH);
           csDrawBubble(wadeX, fY - charH - 4, 'Wade', 'I GOT SOMETHING!! \ud83c\udfa3');
       }},
@@ -3943,16 +3965,19 @@ function csSunsetFishing(){
             csDrawBubble(wadeX, fY - charH - 4, 'Wade', "It's a... boot?! \ud83d\udc62");
           }
       }},
-      // Step 4: Everyone laughs — Krystal's quip
+      // Step 4: Everyone laughs — Krystal's quip, then Wade nods proudly
       { dur: 2.6, draw(cs){
           drawBg(cs);
           drawBoot(wadeX, cs.totalT);
-          csDrawExpression('wade', 'laugh', wadeX, fY, charH);
-          csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
-          csDrawExpression('paul', 'laugh', paulX, fY, charH);
           if (cs.stepT < 1.4){
+            csDrawExpression('wade', 'laugh', wadeX, fY, charH);
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+            csDrawExpression('paul', 'laugh', paulX, fY, charH);
             csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'The one that got away \ud83d\ude02');
           } else {
+            csDrawExpression('wade', 'nod', wadeX, fY, charH);
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+            csDrawExpression('paul', 'laugh', paulX, fY, charH);
             csDrawBubble(wadeX, fY - charH - 4, 'Wade', "I'm keeping it. Trophy fish. \ud83d\ude0e");
           }
       }, onStart(cs){
@@ -4115,7 +4140,7 @@ function csGardenButterflies(){
       // Step 3: Krystal whispers — Luna goes cross-eyed
       { dur: 2.6, draw(cs){
           drawBg(cs); drawAmbientButterflies(cs);
-          csDrawExpression('krystal', 'think', krystalX, fY, charH);
+          csDrawExpression('krystal', 'talk', krystalX, fY, charH);
           csDrawExpression('luna', 'scared', lunaX, fY, charH);
           drawNoseButterfly(cs, true);
           if (cs.stepT < 1.3){
@@ -4144,6 +4169,530 @@ function csGardenButterflies(){
 }
 
 /* ============================================================================
+   CUTSCENE 23: TREASURE HUNT  (triggers at canyon, sanddunes, cornmaze)
+   ============================================================================ */
+function csTreasureHunt(){
+  const groundY = H * 0.68;
+  const charH = 80;
+  const fY = groundY + 12;
+  const krystalX = W * 0.24, paulX = W * 0.50, wadeX = W * 0.76;
+
+  // treasure chest state
+  let chestOpen = false;
+
+  // gold coin particles
+  let coins = [];
+  function spawnCoins(cx, cy, n){
+    for (let i = 0; i < n; i++){
+      coins.push({
+        x: cx + rand(-8, 8), y: cy,
+        vx: rand(-18, 18), vy: rand(-50, -25),
+        life: 1.2 + Math.random() * 0.8,
+        maxLife: 1.2 + Math.random() * 0.8,
+        size: 2 + Math.random() * 2,
+        rot: Math.random() * 6.28,
+        vr: rand(-4, 4)
+      });
+    }
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // warm desert/canyon sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#68a8d0'); sky.addColorStop(0.5, '#a0c8e0'); sky.addColorStop(1, '#d8c8a0');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // sun
+    ctx.fillStyle = 'rgba(255,240,180,.25)';
+    ctx.beginPath(); ctx.arc(W * 0.80, H * 0.10, 18, 0, 7); ctx.fill();
+    ctx.fillStyle = '#f8e080';
+    ctx.beginPath(); ctx.arc(W * 0.80, H * 0.10, 10, 0, 7); ctx.fill();
+
+    // rocky canyon walls in background
+    ctx.fillStyle = '#b8784a';
+    ctx.beginPath();
+    ctx.moveTo(0, groundY); ctx.lineTo(0, groundY - 60); ctx.lineTo(W * 0.12, groundY - 45);
+    ctx.lineTo(W * 0.08, groundY); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(W, groundY); ctx.lineTo(W, groundY - 55); ctx.lineTo(W * 0.88, groundY - 40);
+    ctx.lineTo(W * 0.92, groundY); ctx.closePath(); ctx.fill();
+
+    // sandy ground
+    const sand = ctx.createLinearGradient(0, groundY, 0, H);
+    sand.addColorStop(0, '#d8c090'); sand.addColorStop(1, '#c8a870');
+    ctx.fillStyle = sand; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // scattered rocks
+    ctx.fillStyle = '#a08060';
+    for (let i = 0; i < 6; i++){
+      const rx = (i * 67 + 15) % W, ry = groundY + 6 + (i * 17) % 14;
+      ctx.beginPath(); ctx.ellipse(rx, ry, 4 + (i % 3) * 2, 2.5, i * 0.4, 0, 7); ctx.fill();
+    }
+  }
+
+  // draw a treasure map
+  function drawMap(cx, cy){
+    ctx.fillStyle = '#e8d8b0';
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(-0.1);
+    roundRect(-12, -8, 24, 16, 2); ctx.fill();
+    ctx.strokeStyle = '#a08050'; ctx.lineWidth = 0.8;
+    roundRect(-12, -8, 24, 16, 2); ctx.stroke();
+    // route line
+    ctx.strokeStyle = '#c04030'; ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath(); ctx.moveTo(-8, 4); ctx.lineTo(-2, -2); ctx.lineTo(4, 1); ctx.lineTo(8, -4); ctx.stroke();
+    ctx.setLineDash([]);
+    // X marks the spot
+    ctx.strokeStyle = '#c02020'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(6, -6); ctx.lineTo(10, -2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(10, -6); ctx.lineTo(6, -2); ctx.stroke();
+    ctx.restore();
+  }
+
+  // draw a treasure chest
+  function drawChest(cx, cy, open){
+    // base
+    ctx.fillStyle = '#8a5a2a';
+    roundRect(cx - 14, cy - 10, 28, 14, 2); ctx.fill();
+    // metal bands
+    ctx.fillStyle = '#c8a040';
+    ctx.fillRect(cx - 14, cy - 6, 28, 2);
+    ctx.fillRect(cx - 14, cy, 28, 2);
+    // lock
+    ctx.fillStyle = '#c8a040';
+    ctx.beginPath(); ctx.arc(cx, cy - 2, 2, 0, 7); ctx.fill();
+    if (open){
+      // lid open
+      ctx.fillStyle = '#7a4a20';
+      ctx.save(); ctx.translate(cx - 14, cy - 10); ctx.rotate(-0.8);
+      ctx.fillRect(0, -12, 28, 12);
+      ctx.fillStyle = '#c8a040';
+      ctx.fillRect(0, -4, 28, 2);
+      ctx.restore();
+      // chocolate coins inside
+      ctx.fillStyle = '#e8c040';
+      for (let i = 0; i < 5; i++){
+        ctx.beginPath();
+        ctx.arc(cx - 8 + i * 4, cy - 6, 2.5, 0, 7);
+        ctx.fill();
+      }
+      // gold wrapper highlights
+      ctx.fillStyle = 'rgba(255,240,100,.4)';
+      for (let i = 0; i < 5; i++){
+        ctx.beginPath();
+        ctx.arc(cx - 8 + i * 4 - 0.5, cy - 7, 1, 0, 7);
+        ctx.fill();
+      }
+    } else {
+      // lid closed
+      ctx.fillStyle = '#7a4a20';
+      roundRect(cx - 14, cy - 22, 28, 12, 2); ctx.fill();
+      ctx.fillStyle = '#c8a040';
+      ctx.fillRect(cx - 14, cy - 14, 28, 2);
+    }
+  }
+
+  function drawCoins(dt){
+    for (let i = coins.length - 1; i >= 0; i--){
+      const c = coins[i];
+      c.x += c.vx * dt; c.y += c.vy * dt;
+      c.vy += 50 * dt;
+      c.rot += c.vr * dt;
+      c.life -= dt;
+      if (c.life <= 0){ coins.splice(i, 1); continue; }
+      const a = Math.min(1, c.life / c.maxLife * 2);
+      ctx.save();
+      ctx.translate(c.x, c.y); ctx.rotate(c.rot);
+      ctx.fillStyle = `rgba(232,192,64,${a.toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(0, 0, c.size, 0, 7); ctx.fill();
+      ctx.fillStyle = `rgba(255,240,100,${(a * 0.5).toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(-0.5, -0.5, c.size * 0.5, 0, 7); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // X mark on the ground
+  function drawXMark(cx, cy){
+    ctx.strokeStyle = '#c02020'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(cx - 8, cy - 6); ctx.lineTo(cx + 8, cy + 6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + 8, cy - 6); ctx.lineTo(cx - 8, cy + 6); ctx.stroke();
+  }
+
+  const chestX = paulX, chestY = fY + 4;
+
+  return {
+    chars: ['krystal', 'paul', 'wade'],
+    skipable: true,
+    steps: [
+      // Step 1: Krystal inspects a treasure map
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'inspect', krystalX, fY, charH);
+          csDrawChar('paul', paulX, fY, 'left', charH, 0);
+          csDrawExpression('wade', 'search', wadeX, fY, charH * 0.95);
+          drawMap(krystalX + 16, fY - charH * 0.35);
+          drawCoins(0);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'The map says it should be around here...');
+      }, update(cs, dt){ drawCoins(dt); }},
+      // Step 2: They search around — Wade looks behind a rock
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'search', krystalX, fY, charH);
+          csDrawExpression('paul', 'search', paulX, fY, charH);
+          csDrawExpression('wade', 'search', wadeX, fY, charH * 0.95);
+          drawCoins(0);
+          csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', 'Is it behind this rock? Nope!');
+      }, update(cs, dt){ drawCoins(dt); }},
+      // Step 3: Paul finds the X mark — points at it
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawXMark(chestX, chestY + 8);
+          csDrawExpression('paul', 'point', paulX, fY, charH);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawExpression('wade', 'surprised', wadeX, fY, charH * 0.95);
+          drawCoins(0);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'X marks the spot! Right here!');
+      }, update(cs, dt){ drawCoins(dt); }},
+      // Step 4: They dig it up — Wade: "We're rich!" — Krystal opens it: chocolate coins
+      { dur: 2.6, draw(cs){
+          drawBg(cs);
+          drawXMark(chestX, chestY + 8);
+          drawCoins(0);
+          if (cs.stepT < 1.3){
+            drawChest(chestX, chestY, false);
+            csDrawExpression('wade', 'cheer', wadeX, fY, charH * 0.95);
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('paul', 'cheer', paulX, fY, charH);
+            csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', "We're rich!!");
+          } else {
+            drawChest(chestX, chestY, true);
+            csDrawExpression('krystal', 'inspect', krystalX, fY, charH);
+            csDrawExpression('paul', 'laugh', paulX, fY, charH);
+            csDrawExpression('wade', 'surprised', wadeX, fY, charH * 0.95);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It's... chocolate coins! \ud83c\udf6b\ud83d\ude02");
+          }
+      }, onStart(cs){
+          chestOpen = true;
+          spawnCoins(chestX, chestY - 10, 10);
+      }, update(cs, dt){ drawCoins(dt); }},
+      // Step 5: Everyone laughing — sharing the loot
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          drawXMark(chestX, chestY + 8);
+          drawChest(chestX, chestY, true);
+          drawCoins(0);
+          csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+          csDrawExpression('paul', 'laugh', paulX, fY, charH);
+          csDrawExpression('wade', 'laugh', wadeX, fY, charH * 0.95);
+          csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', "Best treasure ever! \ud83d\ude0b");
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 4);
+          csHearts(cs, paulX, fY - charH * 0.7, 4);
+          csHearts(cs, wadeX, fY - charH * 0.6, 3);
+      }, update(cs, dt){ drawCoins(dt); }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 24: CLOUD WATCHING  (triggers at alpinemeadow, poppyfield, lavender)
+   ============================================================================ */
+function csCloudWatching(){
+  const groundY = H * 0.70;
+  const charH = 75;
+  const blanketX = W * 0.50, blanketY = groundY + 18;
+  const krystalX = blanketX + 32, paulX = blanketX - 32;
+
+  // drifting cloud shapes
+  function drawCloud(cx, cy, w, h, alpha){
+    ctx.fillStyle = `rgba(255,255,255,${(alpha || 0.7).toFixed(2)})`;
+    ctx.beginPath(); ctx.ellipse(cx, cy, w, h, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx - w * 0.3, cy + h * 0.2, w * 0.5, h * 0.7, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + w * 0.35, cy + h * 0.1, w * 0.45, h * 0.6, 0, 0, 7); ctx.fill();
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // bright blue sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#4898d0'); sky.addColorStop(0.5, '#78b8e8'); sky.addColorStop(1, '#a0d0f0');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // drifting clouds
+    const cloudDrift = t * 3;
+    drawCloud((W * 0.20 + cloudDrift) % (W + 80) - 40, H * 0.14, 32, 12, 0.65);
+    drawCloud((W * 0.55 + cloudDrift * 0.7) % (W + 80) - 40, H * 0.08, 28, 10, 0.55);
+    drawCloud((W * 0.80 + cloudDrift * 0.5) % (W + 80) - 40, H * 0.22, 36, 14, 0.60);
+
+    // the "bunny" cloud and "dragon" cloud they argue about
+    if (cs.stepIdx >= 0){
+      // big fluffy cloud — could be a bunny or a dragon
+      const mainCx = W * 0.45 + Math.sin(t * 0.2) * 4;
+      const mainCy = H * 0.18;
+      ctx.fillStyle = 'rgba(255,255,255,.75)';
+      ctx.beginPath(); ctx.ellipse(mainCx, mainCy, 28, 14, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(mainCx - 10, mainCy - 8, 12, 8, -0.2, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(mainCx + 14, mainCy - 4, 10, 10, 0.2, 0, 7); ctx.fill();
+      // ear/horn puff
+      ctx.beginPath(); ctx.ellipse(mainCx - 16, mainCy - 14, 5, 7, -0.4, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(mainCx + 20, mainCy - 10, 5, 6, 0.3, 0, 7); ctx.fill();
+    }
+
+    // grassy meadow
+    const gr = ctx.createLinearGradient(0, groundY, 0, H);
+    gr.addColorStop(0, '#5aaa40'); gr.addColorStop(1, '#3a8a28');
+    ctx.fillStyle = gr; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // wildflowers
+    const cols = ['#e06080','#ffa040','#c060c0','#e0e040'];
+    for (let i = 0; i < 10; i++){
+      const fx = (i * 47 + 8) % W, fy = groundY + 4 + (i * 13) % 14;
+      ctx.fillStyle = cols[i % cols.length];
+      ctx.beginPath(); ctx.arc(fx, fy, 1.8, 0, 7); ctx.fill();
+    }
+
+    // grass blades
+    ctx.fillStyle = '#4a9a34';
+    for (let x = 0; x < W; x += 5){
+      const bh = 3 + Math.sin(x * 0.3 + t * 1.2) * 1.5;
+      ctx.fillRect(x, groundY - bh, 1.5, bh);
+    }
+  }
+
+  function drawBlanketAndChars(cs, exprP, exprK){
+    // blanket
+    ctx.fillStyle = '#6898c0';
+    roundRect(blanketX - 52, blanketY - 4, 104, 16, 4); ctx.fill();
+    ctx.fillStyle = '#78a8d0';
+    roundRect(blanketX - 48, blanketY - 2, 96, 12, 3); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++){
+      const lx = blanketX - 40 + i * 24;
+      ctx.beginPath(); ctx.moveTo(lx, blanketY - 2); ctx.lineTo(lx, blanketY + 10); ctx.stroke();
+    }
+
+    if (exprP) csDrawExpression('paul', exprP, paulX, blanketY - 2, charH * 0.85);
+    else csDrawChar('paul', paulX, blanketY - 2, 'up', charH * 0.85, 0);
+    if (exprK) csDrawExpression('krystal', exprK, krystalX, blanketY - 2, charH * 0.85);
+    else csDrawChar('krystal', krystalX, blanketY - 2, 'up', charH * 0.85, 0);
+  }
+
+  return {
+    chars: ['krystal', 'paul'],
+    skipable: true,
+    steps: [
+      // Step 1: Lying on grass, peaceful
+      { dur: 2.2, draw(cs){
+          drawBg(cs); drawBlanketAndChars(cs, null, null);
+      }},
+      // Step 2: Paul points at a cloud — "That one looks like a bunny"
+      { dur: 2.4, draw(cs){
+          drawBg(cs); drawBlanketAndChars(cs, 'point', null);
+          csDrawBubble(paulX, blanketY - charH * 0.85 - 6, 'Paul', 'That one looks like a bunny. \ud83d\udc30');
+      }},
+      // Step 3: Krystal disagrees — "That's clearly a dragon"
+      { dur: 2.4, draw(cs){
+          drawBg(cs); drawBlanketAndChars(cs, null, 'talk');
+          csDrawBubble(krystalX, blanketY - charH * 0.85 - 6, 'Krystal', "That's clearly a dragon. \ud83d\udc09");
+      }},
+      // Step 4: Playful argument — Paul shakes, Krystal nods
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          if (cs.stepT < 1.2){
+            drawBlanketAndChars(cs, 'shake', 'nod');
+            csDrawBubble(paulX, blanketY - charH * 0.85 - 6, 'Paul', "No way, it's a bunny!");
+          } else {
+            drawBlanketAndChars(cs, null, 'point');
+            csDrawBubble(krystalX, blanketY - charH * 0.85 - 6, 'Krystal', "Look at the wings! Dragon!");
+          }
+      }},
+      // Step 5: Both laugh — warm and peaceful
+      { dur: 2.6, draw(cs){
+          drawBg(cs); drawBlanketAndChars(cs, 'laugh', 'laugh');
+          if (cs.stepT < 1.3){
+            csDrawBubble(paulX, blanketY - charH * 0.85 - 6, 'Paul', "Okay, it's a dragon-bunny. \ud83d\ude02");
+          } else {
+            csDrawBubble(krystalX, blanketY - charH * 0.85 - 6, 'Krystal', "I accept that compromise \ud83d\udc9b");
+          }
+      }, onStart(cs){
+          csHearts(cs, paulX, blanketY - charH * 0.6, 4);
+          csHearts(cs, krystalX, blanketY - charH * 0.6, 5);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 25: SPOOKY MANSION  (triggers at escaperoom, antiqueshop, darkroom)
+   ============================================================================ */
+function csSpookyMansion(){
+  const groundY = H * 0.72;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.24, williamX = W * 0.50, lukeX = W * 0.76;
+
+  // ghost sheet state
+  let ghostVisible = false;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // dark spooky interior
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#1a1420'); wall.addColorStop(0.5, '#241a2a'); wall.addColorStop(1, '#2a2030');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // old wooden floor
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#3a2a20'); floor.addColorStop(1, '#2a1e18');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.strokeStyle = 'rgba(0,0,0,.1)'; ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 22){
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // creepy painting on the wall
+    const paintX = W * 0.50, paintY = H * 0.12;
+    ctx.fillStyle = '#4a3828';
+    ctx.strokeStyle = '#6a4828'; ctx.lineWidth = 3;
+    ctx.strokeRect(paintX - 16, paintY, 32, 26);
+    ctx.fillRect(paintX - 14, paintY + 2, 28, 22);
+    // painting contents — dark portrait
+    ctx.fillStyle = '#2a1a14'; ctx.fillRect(paintX - 14, paintY + 2, 28, 22);
+    // face silhouette
+    ctx.fillStyle = '#5a4a3a';
+    ctx.beginPath(); ctx.ellipse(paintX, paintY + 12, 8, 10, 0, 0, 7); ctx.fill();
+    // eyes that follow — they glow faintly
+    const eyePulse = 0.3 + 0.2 * Math.sin(t * 2);
+    ctx.fillStyle = `rgba(200,180,140,${eyePulse.toFixed(2)})`;
+    ctx.beginPath(); ctx.arc(paintX - 3, paintY + 10, 1.5, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(paintX + 3, paintY + 10, 1.5, 0, 7); ctx.fill();
+
+    // cobwebs in corners
+    ctx.strokeStyle = 'rgba(200,200,200,.12)'; ctx.lineWidth = 0.5;
+    for (let i = 0; i < 4; i++){
+      ctx.beginPath(); ctx.moveTo(0, i * 6); ctx.lineTo(i * 8, 0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(W, i * 6); ctx.lineTo(W - i * 8, 0); ctx.stroke();
+    }
+
+    // dust motes
+    ctx.fillStyle = 'rgba(200,180,140,.08)';
+    for (let i = 0; i < 6; i++){
+      const mx = (i * 61 + Math.sin(t * 0.3 + i * 2) * 12) % W;
+      const my = (i * 43 + Math.cos(t * 0.2 + i) * 10) % (groundY * 0.7) + 20;
+      ctx.beginPath(); ctx.arc(mx, my, 1.2, 0, 7); ctx.fill();
+    }
+
+    // dim flickering candle on a shelf
+    const candleX = W * 0.14;
+    ctx.fillStyle = '#4a3828'; ctx.fillRect(candleX - 8, groundY - 24, 16, 3);
+    ctx.fillStyle = '#e8e0d0'; ctx.fillRect(candleX - 2, groundY - 34, 4, 10);
+    const flicker = 0.6 + 0.4 * Math.sin(t * 11);
+    ctx.fillStyle = `rgba(255,180,60,${(0.6 * flicker).toFixed(2)})`;
+    ctx.beginPath(); ctx.arc(candleX, groundY - 35, 2.5, 0, 7); ctx.fill();
+    const glow = ctx.createRadialGradient(candleX, groundY - 30, 2, candleX, groundY - 30, 40);
+    glow.addColorStop(0, `rgba(255,180,60,${(0.12 * flicker).toFixed(2)})`);
+    glow.addColorStop(1, 'rgba(255,180,60,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(candleX, groundY - 30, 40, 0, 7); ctx.fill();
+  }
+
+  // draw a ghost sheet (friendly)
+  function drawGhostSheet(cx, cy, reveal){
+    const wobble = Math.sin((cutscene ? cutscene.totalT : 0) * 3) * 3;
+    if (reveal){
+      // sheet falling off — reveals nothing, it was just a sheet
+      ctx.fillStyle = 'rgba(240,240,240,.7)';
+      ctx.beginPath(); ctx.ellipse(cx + 8, cy + 20, 14, 4, 0.3, 0, 7); ctx.fill();
+      // crumpled fabric folds
+      ctx.strokeStyle = 'rgba(200,200,200,.4)'; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(cx, cy + 18); ctx.quadraticCurveTo(cx + 8, cy + 16, cx + 16, cy + 18); ctx.stroke();
+    } else {
+      // floating ghost shape
+      ctx.fillStyle = 'rgba(240,240,240,.65)';
+      ctx.beginPath();
+      ctx.moveTo(cx - 12, cy + 14);
+      ctx.quadraticCurveTo(cx - 14, cy - 8, cx, cy - 14 + wobble);
+      ctx.quadraticCurveTo(cx + 14, cy - 8, cx + 12, cy + 14);
+      // wavy bottom
+      ctx.quadraticCurveTo(cx + 8, cy + 10, cx + 4, cy + 14);
+      ctx.quadraticCurveTo(cx, cy + 10, cx - 4, cy + 14);
+      ctx.quadraticCurveTo(cx - 8, cy + 10, cx - 12, cy + 14);
+      ctx.closePath(); ctx.fill();
+      // eyes
+      ctx.fillStyle = '#2a2a2a';
+      ctx.beginPath(); ctx.ellipse(cx - 4, cy - 2, 2, 3, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 4, cy - 2, 2, 3, 0, 0, 7); ctx.fill();
+      // mouth
+      ctx.beginPath(); ctx.ellipse(cx, cy + 4, 3, 2, 0, 0, 7); ctx.fill();
+    }
+  }
+
+  return {
+    chars: ['krystal', 'william', 'luke'],
+    skipable: true,
+    steps: [
+      // Step 1: Exploring a dark room — creaky door — everyone scared
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'scared', krystalX, fY, charH);
+          csDrawExpression('william', 'scared', williamX, fY, charH * 0.95);
+          csDrawChar('luke', lukeX, fY, 'left', charH, 0);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Did you hear that creak? \ud83d\ude30');
+      }, onStart(cs){ try{ sfx('tap'); }catch(e){} }},
+      // Step 2: William inspects the painting — eyes follow
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawExpression('william', 'inspect', williamX, fY, charH * 0.95);
+          csDrawChar('luke', lukeX, fY, 'left', charH, 0);
+          csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', 'Is that painting... looking at me? \ud83d\ude28');
+      }},
+      // Step 3: Luke beckons them to follow
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'scared', krystalX, fY, charH);
+          csDrawExpression('william', 'scared', williamX, fY, charH * 0.95);
+          csDrawExpression('luke', 'beckon', lukeX, fY, charH);
+          csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Come on, over here! I see something!');
+      }},
+      // Step 4: Ghost appears! Then it's just a sheet
+      { dur: 2.8, draw(cs){
+          drawBg(cs);
+          if (cs.stepT < 1.4){
+            drawGhostSheet(W * 0.50, fY - charH * 0.5, false);
+            csDrawExpression('krystal', 'scared', krystalX, fY, charH);
+            csDrawExpression('william', 'scared', williamX - 14, fY, charH * 0.95);
+            csDrawExpression('luke', 'scared', lukeX, fY, charH);
+            csDrawBubble(W * 0.50, fY - charH * 0.95 - 4, 'William', 'GHOST!! \ud83d\udc7b');
+          } else {
+            drawGhostSheet(W * 0.50, fY - charH * 0.5, true);
+            csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+            csDrawExpression('william', 'surprised', williamX, fY, charH * 0.95);
+            csDrawExpression('luke', 'inspect', lukeX, fY, charH);
+            csDrawBubble(lukeX, fY - charH - 4, 'Luke', "Wait... it's just a sheet! \ud83e\udd23");
+          }
+      }, onStart(cs){
+          ghostVisible = true;
+          try{ sfx('tap'); }catch(e){}
+      }},
+      // Step 5: Everyone laughs — it was nothing
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawGhostSheet(W * 0.50, fY - charH * 0.5, true);
+          csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+          csDrawExpression('william', 'laugh', williamX, fY, charH * 0.95);
+          csDrawExpression('luke', 'laugh', lukeX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Our brave explorers! \ud83d\ude02");
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 4);
+          csHearts(cs, williamX, fY - charH * 0.6, 3);
+          csHearts(cs, lukeX, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
@@ -4161,7 +4710,7 @@ const CUTSCENE_MAP = {
   rainystreet:       [csRainyDayChat],
   florist:           [csFlowerCrown],
   cherryblossom:     [csFlowerCrown],
-  lavender:          [csFlowerCrown],
+  lavender:          [csFlowerCrown, csCloudWatching],
   peonygarden:       [csFlowerCrown],
   snowycabin:        [csSnowAngelContest],
   icepond:           [csSnowAngelContest],
@@ -4202,6 +4751,14 @@ const CUTSCENE_MAP = {
   butterflydome:     [csGardenButterflies],
   greenhouse:        [csGardenButterflies],
   sunflowers:        [csGardenButterflies],
+  canyon:            [csTreasureHunt],
+  sanddunes:         [csTreasureHunt],
+  cornmaze:          [csTreasureHunt],
+  alpinemeadow:      [csCloudWatching],
+  poppyfield:        [csCloudWatching],
+  escaperoom:        [csSpookyMansion],
+  antiqueshop:       [csSpookyMansion],
+  darkroom:          [csSpookyMansion],
 };
 
 /* ============================================================================

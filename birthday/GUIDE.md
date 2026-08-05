@@ -29,7 +29,7 @@ The world has **216 places** to visit, **215 of them with hand-placed tap spots*
 
 ---
 
-## 🎬 Cutscenes (22)
+## 🎬 Cutscenes (25)
 
 _Now and then, if she's idle in the right place, a little story plays out. The screen fades in, characters walk on, and they talk, tease, and share a moment together. Each cutscene is skipable (tap **Skip >>** in the top-right corner) and lasts about 20–30 seconds. They trigger randomly (~15 % chance every 30–60 s) — linger in a scene and one might start on its own._
 
@@ -57,6 +57,9 @@ _Debug shortcut: press **X** on a keyboard to force-trigger the cutscene for the
 - **Magic Show** — triggers at _Magic Shop_, _Tarot Parlor_, or _Wizard Tower_. Characters: Krystal, Paul, William. William does a magic trick — pulls a bunny from a hat. Paul is stunned, Krystal claps. William bows and his hat falls off. Everyone laughs.
 - **Sunset Fishing** — triggers at _Fishing Dock_, _Marina_, or _River_. Characters: Krystal, Paul, Wade. Sitting on a dock with fishing lines at sunset. Wade gets a big tug and pulls up... a boot. Everyone laughs.
 - **Garden Butterflies** — triggers at _Butterfly Dome_, _Greenhouse_, or _Sunflower Field_. Characters: Krystal, Luna. Surrounded by butterflies. One lands on Luna's nose — she freezes. Krystal whispers "Don't move!" It flies away. Both laugh, hearts everywhere.
+- **Treasure Hunt** — triggers at _Canyon_, _Sand Dunes_, or _Corn Maze_. Characters: Krystal, Paul, Wade. Krystal inspects a treasure map. They search behind rocks. Paul finds an X mark and points. They dig up a chest — Wade yells "We're rich!" Krystal opens it: chocolate coins. Everyone laughs.
+- **Cloud Watching** — triggers at _Alpine Meadow_, _Poppy Field_, or _Lavender Field_. Characters: Krystal, Paul. Lying on a blanket pointing at clouds. Paul: "That one looks like a bunny." Krystal: "That's clearly a dragon." They argue playfully, then compromise on "dragon-bunny." Sweet and peaceful.
+- **Spooky Mansion** — triggers at _Escape Room_, _Antique Shop_, or _Darkroom_. Characters: Krystal, William, Luke. Exploring a dark room with a creaky door. William inspects a painting whose eyes seem to follow. Luke beckons them deeper. A "ghost" appears — turns out it's just a sheet! Everyone laughs.
 
 ---
 
