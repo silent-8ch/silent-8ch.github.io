@@ -295,6 +295,39 @@ func splitActions(_ input: String, outputDirectory: String, names: [String], ret
     try? FileManager.default.removeItem(atPath: atlasPath)
 }
 
+func splitTiles(_ input: String, outputDirectory: String, names: [String]) throws {
+    guard names.count == rows else {
+        throw NSError(domain: "WalkSprite", code: 14,
+                      userInfo: [NSLocalizedDescriptionKey: "Exactly four tile names are required"])
+    }
+    try FileManager.default.createDirectory(atPath: outputDirectory,
+                                            withIntermediateDirectories: true)
+    let source = try loadPNG(input)
+    for row in 0..<rows {
+        var sheet = Bitmap(width: outputCell * columns, height: outputCell,
+                           pixels: [UInt8](repeating: 0, count: outputCell * columns * outputCell * 4))
+        let sourceTop = row * source.height / rows
+        let sourceBottom = (row + 1) * source.height / rows
+        for column in 0..<columns {
+            let sourceLeft = column * source.width / columns
+            let sourceRight = (column + 1) * source.width / columns
+            for y in 0..<outputCell {
+                let sy = sourceTop + y * (sourceBottom - sourceTop) / outputCell
+                for x in 0..<outputCell {
+                    let sx = sourceLeft + x * (sourceRight - sourceLeft) / outputCell
+                    let sourceOffset = (sy * source.width + sx) * 4
+                    let targetOffset = (y * sheet.width + column * outputCell + x) * 4
+                    sheet.pixels[targetOffset..<(targetOffset + 4)] = source.pixels[sourceOffset..<(sourceOffset + 4)]
+                }
+            }
+        }
+        let output = URL(fileURLWithPath: outputDirectory)
+            .appendingPathComponent("\(names[row]).png").path
+        try savePNG(sheet, to: output)
+        print("split tile \(names[row]) -> \(output)")
+    }
+}
+
 func validate(_ path: String) throws {
     let bitmap = try loadPNG(path)
     guard bitmap.width == outputCell * columns, bitmap.height == outputCell * rows else {
@@ -347,17 +380,37 @@ func validateAction(_ path: String) throws {
     print("validated \(path): 4 contained frames, baseline \(baseline)")
 }
 
+func validateTiles(_ path: String) throws {
+    let bitmap = try loadPNG(path)
+    guard bitmap.width == outputCell * columns, bitmap.height == outputCell else {
+        throw NSError(domain: "WalkSprite", code: 15,
+                      userInfo: [NSLocalizedDescriptionKey: "\(path) must be 1024x256"])
+    }
+    let opaque = stride(from: 3, to: bitmap.pixels.count, by: 4)
+        .filter { bitmap.pixels[$0] > 250 }.count
+    guard opaque == bitmap.width * bitmap.height else {
+        throw NSError(domain: "WalkSprite", code: 16,
+                      userInfo: [NSLocalizedDescriptionKey: "\(path) terrain tiles must be fully opaque"])
+    }
+    print("validated \(path): 4 full-bleed opaque tiles")
+}
+
 do {
     if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate" {
         for path in CommandLine.arguments.dropFirst(2) { try validate(path) }
     } else if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate-actions" {
         for path in CommandLine.arguments.dropFirst(2) { try validateAction(path) }
+    } else if CommandLine.arguments.count >= 3 && CommandLine.arguments[1] == "--validate-tiles" {
+        for path in CommandLine.arguments.dropFirst(2) { try validateTiles(path) }
     } else if CommandLine.arguments.count == 8 && CommandLine.arguments[1] == "--split-actions" {
         try splitActions(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
                          names: Array(CommandLine.arguments[4...7]))
     } else if CommandLine.arguments.count == 8 && CommandLine.arguments[1] == "--split-actions-grouped" {
         try splitActions(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
                          names: Array(CommandLine.arguments[4...7]), retainOnlyLargest: false)
+    } else if CommandLine.arguments.count == 8 && CommandLine.arguments[1] == "--split-tiles" {
+        try splitTiles(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
+                       names: Array(CommandLine.arguments[4...7]))
     } else if CommandLine.arguments.count == 3 {
         try process(CommandLine.arguments[1], CommandLine.arguments[2])
     } else {

@@ -36,13 +36,13 @@
     function drawObject(object){
       if(object.draw){object.draw(context,object);return}
       const sprite=registry.get(object.sprite);if(!sprite||!sprite.ready)return;
-      const width=object.width||(sprite.defaultSize||sprite.fw)*object.scale,height=object.height||(sprite.defaultSize||sprite.fh)*object.scale;
+      const width=object.width||(sprite.defaultWidth||sprite.defaultSize||sprite.fw)*object.scale,height=object.height||(sprite.defaultHeight||sprite.defaultSize||sprite.fh)*object.scale;
       const frame=Math.max(0,Math.min(sprite.cols-1,object.frame|0));
       context.save();context.globalAlpha*=object.alpha;context.translate(object.x,object.y);context.scale(object.flipX?-1:1,1);
       context.drawImage(sprite.image,frame*sprite.fw,0,sprite.fw,sprite.fh,-width*object.anchorX,-height*object.anchorY,width,height);context.restore();
     }
     function drawPhase(phase){assertPhase(phase);const scene=getScene();const list=[...objects.values(),...submitted].filter(object=>object.phase===phase&&visible(object,scene)).sort((a,b)=>((a.depth??a.y)-(b.depth??b.y))||(a.order-b.order));for(const object of list)drawObject(object)}
-    function hitTest(x,y,phases=PHASES){const scene=getScene();return[...objects.values()].filter(object=>phases.includes(object.phase)&&visible(object,scene)).sort((a,b)=>((b.depth??b.y)-(a.depth??a.y))||(b.order-a.order)).find(object=>{const sprite=registry.get(object.sprite),width=object.width||(sprite?.defaultSize||sprite?.fw||0)*object.scale,height=object.height||(sprite?.defaultSize||sprite?.fh||0)*object.scale,left=object.x-width*object.anchorX,top=object.y-height*object.anchorY;return x>=left&&x<=left+width&&y>=top&&y<=top+height})||null}
+    function hitTest(x,y,phases=PHASES){const scene=getScene();return[...objects.values()].filter(object=>phases.includes(object.phase)&&visible(object,scene)).sort((a,b)=>((b.depth??b.y)-(a.depth??a.y))||(b.order-a.order)).find(object=>{const sprite=registry.get(object.sprite),width=object.width||(sprite?.defaultWidth||sprite?.defaultSize||sprite?.fw||0)*object.scale,height=object.height||(sprite?.defaultHeight||sprite?.defaultSize||sprite?.fh||0)*object.scale,left=object.x-width*object.anchorX,top=object.y-height*object.anchorY;return x>=left&&x<=left+width&&y>=top&&y<=top+height})||null}
     function getFootprint(value){const object=typeof value==='object'?value:objects.get(value),sprite=object&&registry.get(object.sprite),shape=sprite?.footprint;if(!object||!shape)return null;const width=shape.width*object.scale,depth=shape.depth*object.scale;return{left:object.x-width*object.anchorX,right:object.x+width*(1-object.anchorX),top:object.y-depth,bottom:object.y,width,depth}}
     return{PHASES,register,create,remove,clearScene,beginFrame,submit,update,drawPhase,hitTest,getFootprint,getSprite:name=>registry.get(name),getObject:id=>objects.get(id)};
   }

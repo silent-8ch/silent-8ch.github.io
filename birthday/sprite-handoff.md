@@ -161,6 +161,13 @@ Environment sheets are transparent 1024 x 256 PNGs with four aligned 256 px
 frames. Their original 4 x 4 generated atlases are retained in
 `sprites/objects/sources/environment-*-pack.png`.
 
+The terrain pack in `js/sprite-terrain-pack.js` adds eight full-bleed surface
+tiles and eight transparent boundary/traversal strips. Surface rows use four
+interchangeable positional variants (`renderMode: 'tile'`, `tileSize: 64`);
+shorelines and riverbanks use four animation frames, while static edges use
+four positional variants. Original atlases are retained as
+`sprites/objects/sources/terrain-*-pack.png`.
+
 ## Important continuation notes
 
 - When prompting image generation, attach `reference-photos.png` and identify each named panel explicitly.
