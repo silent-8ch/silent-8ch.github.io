@@ -1240,6 +1240,30 @@ const SCENE_SPOTS = {
     {nx:0.08, ny:0.60, r:44, e:'📖', lines:['The spell book 📖','Ancient recipes inside','Read me one? 🥰']},
     {nx:0.20, ny:0.16, r:46, e:'✨', lines:['Floating bottles! ✨','Hovering in mid-air','Real magic, right here 💜']},
   ],
+  treehouse: [
+    {nx:0.45, ny:0.46, r:50, e:'🪟', lines:['The little round window 🪟','Warm light inside','Our secret hideaway 🥰']},
+    {nx:0.30, ny:0.78, r:48, e:'🏮', lines:['A paper lantern 🏮','Swaying in the breeze','So cozy up here 💛']},
+    {nx:0.20, ny:0.85, r:52, e:'🪜', lines:['The rope ladder 🪜','Swinging way down','Careful climbing up! 😄']},
+    {nx:0.50, ny:0.06, r:58, e:'🌳', lines:['The leafy canopy 🌳','Dappled sunlight everywhere','Our own little world up here 🥰']},
+  ],
+  wizardtower: [
+    {nx:0.50, ny:0.26, r:56, e:'🌙', lines:['Stars through the window 🌙','A crescent moon glowing','The night sky is ours 🥰']},
+    {nx:0.28, ny:0.12, r:48, e:'🪐', lines:['The little orrery 🪐','Planets spinning slowly','Our own tiny solar system 💛']},
+    {nx:0.18, ny:0.78, r:52, e:'📖', lines:['The glowing spellbook 📖','Words rising off the page','Read me an incantation 🥰']},
+    {nx:0.80, ny:0.60, r:46, e:'🕯️', lines:['A floating candle 🕯️','Bobbing in the air','Real magic, love ✨']},
+  ],
+  sunroom: [
+    {nx:0.50, ny:0.44, r:55, e:'🪴', lines:['So many little plants 🪴','A whole green family','They love the sunshine 🥰']},
+    {nx:0.14, ny:0.25, r:50, e:'🌿', lines:['Trailing vines 🌿','Hanging down so prettily','Like a green curtain 💛']},
+    {nx:0.16, ny:0.86, r:50, e:'🪑', lines:['The wicker chair 🪑','So comfy and warm','Curl up with me? 🥰']},
+    {nx:0.84, ny:0.88, r:48, e:'🌱', lines:['A big monstera 🌱','Look at those leaves!','So lush and happy 💚']},
+  ],
+  winterchalet: [
+    {nx:0.75, ny:0.58, r:56, e:'🔥', lines:['The crackling fire 🔥','So warm on my face','Stay close to me 🥰']},
+    {nx:0.28, ny:0.34, r:55, e:'🏔️', lines:['Snowy peaks outside 🏔️','The mountains are sleeping','So glad we\'re inside 💛']},
+    {nx:0.50, ny:0.90, r:54, e:'🧸', lines:['The soft fur rug 🧸','So warm under our toes','Lie down with me? 🥰']},
+    {nx:0.20, ny:0.90, r:44, e:'☕', lines:['Hot cocoa! ☕','Steam curling up','Warms me right through 💛']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
