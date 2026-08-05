@@ -6968,9 +6968,10 @@ function drawTownSquare(){
   // 14-16s: cat climbs down
   // 16-20s: both run left across screen, then loop
   const chaseT = t % 20;
-  const treeX = W * 0.04;   // left tree x
-  const treeTopY = groundY - 80;  // up in the tree
-  const floorY = groundY + 72;    // ground level for animals
+  const treeX = W * 0.04;         // left tree x
+  const treeBaseY = groundY + 24; // where tree trunk meets ground (matches tree submit y)
+  const treeTopY = groundY - 100; // up in the canopy
+  const floorY = groundY + 72;    // ground level for running
 
   let catX, catY, catFrame, catFlip, dogX, dogY, dogFrame, dogFlip;
 
@@ -6989,12 +6990,12 @@ function drawTownSquare(){
     // Phase 2: cat runs to tree and climbs up
     const p = (chaseT - 6) / 2;
     catX = W + 40 - p * (W + 40 - treeX);  // run back to tree
-    catY = floorY - p * (floorY - treeTopY);  // climb up
+    catY = treeBaseY - p * (treeBaseY - treeTopY);  // climb from base to top
     catFrame = Math.floor(t * 9) % 4;
     catFlip = true;
     // Dog runs to tree base
     dogX = W + 40 - p * (W + 40 - treeX - 30);
-    dogY = floorY + 6;
+    dogY = treeBaseY;
     dogFrame = Math.floor(t * 8) % 4;
     dogFlip = true;
   } else if (chaseT < 14) {
@@ -7004,18 +7005,18 @@ function drawTownSquare(){
     catFrame = 0;  // sitting still
     catFlip = false;
     dogX = treeX + 30;
-    dogY = floorY + 6 + Math.abs(Math.sin(t * 6)) * 6;  // bouncing/barking
+    dogY = treeBaseY + Math.abs(Math.sin(t * 6)) * 6;  // bouncing/barking at tree base
     dogFrame = Math.floor(t * 10) % 4;
     dogFlip = true;
   } else if (chaseT < 16) {
     // Phase 4: cat climbs down
     const p = (chaseT - 14) / 2;
     catX = treeX;
-    catY = treeTopY + p * (floorY - treeTopY);
+    catY = treeTopY + p * (treeBaseY - treeTopY);  // climb down to base
     catFrame = Math.floor(t * 7) % 4;
     catFlip = false;
     dogX = treeX + 30;
-    dogY = floorY + 6;
+    dogY = treeBaseY;
     dogFrame = Math.floor(t * 5) % 4;  // excited
     dogFlip = true;
   } else {
