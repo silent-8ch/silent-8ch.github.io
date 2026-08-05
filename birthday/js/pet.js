@@ -83,7 +83,7 @@ stagewrap.addEventListener('pointerdown', (e)=>{
   const py = (e.clientY - r.top)  / r.height * H;
   // during the birthday scene, taps blow out candles (or return when finished)
   if (birthday){
-    if (birthday.done) endBirthday();
+    if (birthday.done){ if (birthday.doneT >= 0.8) endBirthday(); }
     else blowOutOne(px, py);                                // blow out the nearest candle to the tap
     return;
   }

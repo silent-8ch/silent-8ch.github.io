@@ -27,6 +27,30 @@ function candleCountForToday(){
 let birthday = null;                                   // active scene, or null
 let audioCtx = null, micAnalyser = null, micData = null, micStream = null;
 
+/* ---- post-candle applause sprites (loaded lazily when the easter egg opens) ---- */
+const BIRTHDAY_CLAPPERS = [
+  { name:'paul',    src:'sprites/clapping/paul-clap-processed.png' },
+  { name:'luna',    src:'sprites/clapping/luna-clap-processed.png' },
+  { name:'luke',    src:'sprites/clapping/luke-clap-processed.png' },
+  { name:'william', src:'sprites/clapping/william-clap-processed.png' },
+  { name:'wade',    src:'sprites/clapping/wade-clap-processed.png' },
+  { name:'krystal', src:'sprites/clapping/krystal-clap-processed.png' },
+];
+const birthdayClapSheets = {};
+function loadBirthdayClappers(){
+  for (const spec of BIRTHDAY_CLAPPERS){
+    if (birthdayClapSheets[spec.name]) continue;
+    const img = new Image();
+    const rec = { img, ready:false };
+    birthdayClapSheets[spec.name] = rec;
+    img.onload = ()=>{ rec.ready = true; };
+    img.src = spec.src;
+  }
+}
+function birthdayClappersReady(){
+  return BIRTHDAY_CLAPPERS.every(spec=>birthdayClapSheets[spec.name]?.ready);
+}
+
 function ensureAudio(){
   if (!audioCtx){
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -38,6 +62,7 @@ function ensureAudio(){
 function startBirthday(){
   if (birthday) return;
   ensureAudio();                                       // must happen on the click gesture
+  loadBirthdayClappers();                              // ready by the time the candles go out
   const n = candleCountForToday();   // 43 on Aug 3, 2026; +1 each Aug 3 after
   const cols = Math.max(1, Math.ceil(Math.sqrt(n)));   // roughly square grid, fixed cake
   const candles = [];
@@ -153,14 +178,54 @@ function drawBirthdayScene(){
   ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
   drawBunting();
 
-  // the singers (reuse the hug cluster, positioned in the scene)
+  // Sing gathered together; when the final candle goes out, everyone applauds.
   pet.x = W/2; pet.y = H*0.56;
-  if (sheets.hugs1 && sheets.hugs1.ready) drawHugGroup();
+  if (b.done && birthdayClappersReady()) drawBirthdayClappers(b);
+  else if (sheets.hugs1 && sheets.hugs1.ready) drawHugGroup();
   else { ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.font='13px Segoe UI'; ctx.fillText('loading…', W/2, H*0.5); }
 
   drawCake(b);
   drawBirthdayText(b);
   drawConfetti();
+}
+
+/* All six sheets use four exact 543x724 cells. Applause follows a shared tempo
+   pulse, while small rate differences keep the group from clapping in lockstep. */
+function birthdayClapFrame(t, rate, delay){
+  const localT = Math.max(0, t - delay);
+  const pulseSpeed = 2.05;                              // one swell about every 3 seconds
+  const pulseDepth = 0.34;                              // gently faster, then slower
+  // Integral of rate * (1 + pulseDepth*sin(pulseSpeed*t)); always moves forward.
+  const cycles = rate * (localT + pulseDepth * (1-Math.cos(pulseSpeed*localT)) / pulseSpeed);
+  return Math.floor(cycles * 4) % 4;                    // apart -> near -> clap -> near
+}
+function drawBirthdayClappers(b){
+  const sw = 543, sh = 724;
+  const feetY = H * 0.565;
+  const sideH = 108;
+  const sideW = sideH * sw / sh;
+  const positions = [
+    { name:'paul',    x:34,  rate:1.34, delay:0.00 },
+    { name:'luna',    x:92,  rate:1.48, delay:0.12 },
+    { name:'luke',    x:148, rate:1.26, delay:0.20 },
+    { name:'william', x:238, rate:1.55, delay:0.07 },
+    { name:'wade',    x:300, rate:1.39, delay:0.16 },
+  ];
+
+  // The five family members form the back row around Krystal.
+  for (const p of positions){
+    const rec = birthdayClapSheets[p.name];
+    const frame = birthdayClapFrame(b.doneT, p.rate, p.delay);
+    ctx.drawImage(rec.img, frame*sw, 0, sw, sh,
+      p.x-sideW/2, feetY-sideH, sideW, sideH);
+  }
+
+  // Krystal stays at the visual center and is a touch taller in front.
+  const krystal = birthdayClapSheets.krystal;
+  const mainH = 120, mainW = mainH * sw / sh;
+  const krystalFrame = birthdayClapFrame(b.doneT, 1.43, 0.04);
+  ctx.drawImage(krystal.img, krystalFrame*sw, 0, sw, sh,
+    W/2-mainW/2, feetY-mainH+5, mainW, mainH);
 }
 
 function drawBunting(){
@@ -249,7 +314,7 @@ function drawBirthdayText(b){
     ctx.fillStyle = '#fff'; ctx.font = 'bold 20px Segoe UI, sans-serif';
     ctx.fillText('🎉 Make a wish! 🎉', W/2, H*0.15);
     ctx.font = '13px Segoe UI, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.8)';
-    ctx.fillText('Tap to return', W/2, H*0.21);
+    ctx.fillText(b.doneT < 0.8 ? 'Everyone is cheering!' : 'Tap to return', W/2, H*0.21);
   }
 }
 
