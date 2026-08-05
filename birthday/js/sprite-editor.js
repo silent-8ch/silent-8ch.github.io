@@ -37,6 +37,14 @@
     <div id="seInfo" style="font-size:10px;color:#666;padding:4px 10px;border-bottom:1px solid #222;">Select sprite → drag on canvas. Press E to toggle.</div>
     <div id="seList" style="max-height:40vh;overflow-y:auto;"></div>
     <div id="seCoords" style="padding:6px 10px;font-family:monospace;font-size:11px;color:#4fc3f7;min-height:28px;background:#111;border-top:1px solid #222;"></div>
+    <div id="seSize" style="padding:6px 10px;border-top:1px solid #222;display:none;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button id="seShrink" style="font-size:14px;padding:1px 8px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">−</button>
+        <span id="seSizeVal" style="font-family:monospace;font-size:12px;color:#4fc3f7;min-width:50px;text-align:center;">--</span>
+        <button id="seGrow" style="font-size:14px;padding:1px 8px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">+</button>
+        <span style="color:#555;font-size:9px;margin-left:4px;">[ ] keys also work</span>
+      </div>
+    </div>
     <div style="padding:6px 10px;display:flex;gap:4px;border-top:1px solid #222;">
       <button id="seSave" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Save</button>
       <button id="seClear" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Clear</button>
@@ -73,7 +81,10 @@
   panel.querySelector('#seCopy').addEventListener('click', () => {
     const lines = [];
     for (const [key, pos] of Object.entries(savedPositions)) {
-      lines.push(`${key}: x:${Math.round(pos.x)}, y:${Math.round(pos.y)}`);
+      const p = pos;
+      let line = `${p.sprite}: x:${Math.round(p.x)}, y:${Math.round(p.y)}`;
+      if (p.size) line += `, size:${Math.round(p.size)}`;
+      lines.push(line);
     }
     if (lines.length) {
       navigator.clipboard.writeText(lines.join('\n')).then(() => {
@@ -82,7 +93,38 @@
     }
   });
 
-  // Toggle with E key, pause with Space
+  const seSizeEl = panel.querySelector('#seSize');
+  const seSizeVal = panel.querySelector('#seSizeVal');
+
+  function resizeSelected(delta) {
+    if (selected == null) return;
+    const sprites = getSubmittedSprites();
+    if (selected >= sprites.length) return;
+    const s = sprites[selected];
+    const sprite = SpriteRenderer.getSprite(s.sprite);
+    const curSize = s.width || sprite?.defaultSize || 50;
+    const newSize = Math.max(10, curSize + delta);
+    s.width = newSize;
+    s.height = newSize;
+    savedPositions[s.sprite + '_' + selected] = { x: s.x, y: s.y, sprite: s.sprite, size: newSize };
+    updateSizeDisplay(s);
+    updateCoords(s);
+    refreshList();
+  }
+
+  function updateSizeDisplay(s) {
+    if (!s) { seSizeEl.style.display = 'none'; return; }
+    seSizeEl.style.display = '';
+    const sprite = SpriteRenderer.getSprite(s.sprite);
+    const curSize = s.width || sprite?.defaultSize || '?';
+    const defSize = sprite?.defaultSize || '?';
+    seSizeVal.textContent = curSize + 'px (def:' + defSize + ')';
+  }
+
+  panel.querySelector('#seShrink').addEventListener('click', () => resizeSelected(-5));
+  panel.querySelector('#seGrow').addEventListener('click', () => resizeSelected(5));
+
+  // Toggle with E key, pause with Space, resize with [ ]
   document.addEventListener('keydown', e => {
     if (e.key === 'e' || e.key === 'E') {
       editorOpen = !editorOpen;
@@ -94,6 +136,10 @@
       debugPaused = !debugPaused;
       refreshList();
     }
+    if (e.key === '[' && editorOpen) resizeSelected(-5);
+    if (e.key === ']' && editorOpen) resizeSelected(5);
+    if (e.key === '{' && editorOpen) resizeSelected(-20);  // shift+[ for bigger jumps
+    if (e.key === '}' && editorOpen) resizeSelected(20);
   });
 
   function getSubmittedSprites() {
@@ -124,6 +170,7 @@
         selected = i;
         refreshList();
         updateCoords(s);
+        updateSizeDisplay(s);
       });
       seList.appendChild(row);
     });
@@ -132,7 +179,8 @@
   function updateCoords(s) {
     const sprite = SpriteRenderer.getSprite(s.sprite);
     const size = s.width || sprite?.defaultSize || '?';
-    seCoords.textContent = `${s.sprite}: x:${Math.round(s.x)}, y:${Math.round(s.y)}, ${s.phase||'actors'}, ${size}px`;
+    const defSize = sprite?.defaultSize || '?';
+    seCoords.textContent = `${s.sprite}: x:${Math.round(s.x)}, y:${Math.round(s.y)}, ${s.phase||'actors'}, ${size}px (def:${defSize})`;
   }
 
   // Canvas mouse/touch handling for dragging
