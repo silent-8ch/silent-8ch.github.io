@@ -1130,6 +1130,8 @@ function drawNightGarden(){
   ctx.fillStyle='rgba(255,200,120,.25)'; ctx.beginPath(); ctx.arc(px,py-46,16,0,7); ctx.fill();
   ctx.fillStyle=`rgba(255,205,120,${0.85+0.1*Math.sin(t*2.5)})`; roundRect(px-6,py-52,12,14,2); ctx.fill();
   ctx.fillStyle='#241a14'; ctx.fillRect(px-7,py-54,14,3);
+  // fireflies sprite among the glowing flowers
+  SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.60+Math.sin(t*0.6)*16,y:groundY+6+Math.sin(t*0.9)*10,anchorY:0.5,frame:Math.floor(t*5)%4});
 }
 registerScene('nightgarden', drawNightGarden);
 
@@ -1235,6 +1237,10 @@ function drawAquariumTunnel(){
   for (const sx of [W*0.08,W*0.14,W*0.88,W*0.93]){ ctx.beginPath(); ctx.moveTo(sx,H); for (let k=0;k<=6;k++){ const yy=H-k*8; const xx=sx+Math.sin(t*1.5+k*0.6+sx)*5; ctx.lineTo(xx,yy);} ctx.stroke(); }
   // coral clumps
   ctx.fillStyle='#e2607a'; ctx.beginPath(); ctx.arc(W*0.10,floorY+10,6,0,7); ctx.arc(W*0.90,floorY+12,7,0,7); ctx.fill();
+  // jellyfish drifting past the tunnel glass
+  SpriteRenderer.submit({sprite:'jellyfish',phase:'actors',x:W*0.72+Math.sin(t*0.4)*18,y:H*0.28+Math.sin(t*0.6)*14,anchorY:0.5,frame:Math.floor(t*5)%4});
+  // whale shark gliding overhead
+  SpriteRenderer.submit({sprite:'whaleShark',phase:'background',x:W*0.5+Math.sin(t*0.3)*30,y:H*0.10+Math.sin(t*0.4)*6,anchorY:0.5,frame:Math.floor(t*5)%4});
 }
 registerScene('aquariumtunnel', drawAquariumTunnel);
 
@@ -1773,6 +1779,8 @@ function drawMoonBeach(){
   ctx.fillStyle='#3a2a1a'; ctx.fillRect(px-2,py-4,4,H*0.10);
   ctx.fillStyle='rgba(255,180,90,.25)'; ctx.beginPath(); ctx.arc(px,py-10,14,0,7); ctx.fill();
   ctx.fillStyle=`rgba(255,190,110,${0.85+0.12*Math.sin(t*2.5)})`; roundRect(px-5,py-16,10,12,3); ctx.fill();
+  // crab scuttling on the moonlit sand
+  SpriteRenderer.submit({sprite:'crab',phase:'actors',x:W*0.68+Math.sin(t*1.0)*14,y:H*0.86,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('moonbeach', drawMoonBeach);
 
@@ -1933,6 +1941,8 @@ function drawTreehouse(){
   ctx.fillStyle=`rgba(240,150,80,${0.82+0.12*Math.sin(t*2)})`; roundRect(lx-7,deckY+18,14,18,7); ctx.fill();
   ctx.fillStyle='#b56a44'; ctx.beginPath(); ctx.moveTo(W*0.7,H-4); ctx.lineTo(W*0.78,H-4); ctx.lineTo(W*0.76,H-20); ctx.lineTo(W*0.72,H-20); ctx.closePath(); ctx.fill();
   ctx.fillStyle='#3a8a3a'; for (const a of [-0.5,0,0.5]){ ctx.save(); ctx.translate(W*0.74,H-20); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,-8,4,10,0,0,7); ctx.fill(); ctx.restore(); }
+  // parrot perched on the railing
+  SpriteRenderer.submit({sprite:'parrot',phase:'foreground',x:W*0.56,y:deckY+4,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('treehouse', drawTreehouse);
 
@@ -3190,6 +3200,8 @@ function drawPeonyGarden(){
   // sprite butterflies among the peonies (replacing hand-drawn ones)
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.35+Math.sin(t*1.4)*16,y:groundY-10+Math.cos(t*1.7)*12,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8)%4});
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.65+Math.sin(t*1.4+1)*16,y:groundY-4+Math.cos(t*1.7+1)*12,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8+2)%4,flipX:true});
+  // bunny nibbling near the peony beds
+  SpriteRenderer.submit({sprite:'bunny',phase:'actors',x:W*0.18+Math.sin(t*0.5)*6,y:H*0.86,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('peonygarden', drawPeonyGarden);
 
@@ -3870,6 +3882,8 @@ function drawFireflyPier(){
   // a jar of caught fireflies glowing on the pier (right, low)
   const jx=W*0.86, jy=H*0.90; ctx.fillStyle='rgba(200,230,235,.25)'; roundRect(jx-8,jy-16,16,18,4); ctx.fill(); ctx.fillStyle='#8a6038'; ctx.fillRect(jx-8,jy-18,16,3);
   for (let i=0;i<4;i++){ const bl=Math.max(0,Math.sin(t*4+i*2)); ctx.fillStyle=`rgba(190,255,140,${0.4+bl*0.5})`; ctx.beginPath(); ctx.arc(jx-4+ (i%2)*7, jy-10+ (i>1?6:0), 1.6,0,7); ctx.fill(); }
+  // fireflies sprite cluster over the water
+  SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.40+Math.sin(t*0.5)*22,y:waterY+20+Math.sin(t*0.7)*10,anchorY:0.5,frame:Math.floor(t*5)%4});
 }
 registerScene('fireflypier', drawFireflyPier);
 
@@ -4113,6 +4127,8 @@ function drawReindeerBarn(){
   const bxx=W*0.14, byy=H*0.90; ctx.fillStyle='#8a8e96'; ctx.beginPath(); ctx.moveTo(bxx-10,byy); ctx.lineTo(bxx+10,byy); ctx.lineTo(bxx+8,byy+16); ctx.lineTo(bxx-8,byy+16); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#6a6e76'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(bxx,byy,10,Math.PI,0); ctx.stroke(); ctx.fillStyle='#d8b85a'; ctx.beginPath(); ctx.ellipse(bxx,byy,8,2.6,0,0,7); ctx.fill();
   // burlap sack (right, low)
   ctx.fillStyle='#b8a074'; ctx.beginPath(); ctx.moveTo(W*0.84,H); ctx.lineTo(W*0.84,H*0.90); ctx.quadraticCurveTo(W*0.87,H*0.87,W*0.90,H*0.90); ctx.lineTo(W*0.90,H); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#8a7454'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.845,H*0.90); ctx.lineTo(W*0.895,H*0.90); ctx.stroke();
+  // sprite reindeer in the left stall
+  SpriteRenderer.submit({sprite:'reindeer',phase:'actors',x:W*0.22,y:floorY,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('reindeerbarn', drawReindeerBarn);
 
@@ -4310,6 +4326,8 @@ function drawDriftwoodBeach(){
   ctx.fillStyle='#e0d0d0'; ctx.beginPath(); ctx.arc(W*0.36,H*0.90,5,Math.PI,0); ctx.fill(); ctx.strokeStyle='#c0a8a8'; ctx.lineWidth=1; for (let k=-2;k<=2;k++){ ctx.beginPath(); ctx.moveTo(W*0.36,H*0.90); ctx.lineTo(W*0.36+k*2,H*0.90-5); ctx.stroke(); }
   ctx.fillStyle='#d88a5a'; ctx.save(); ctx.translate(W*0.6,H*0.92); for (let k=0;k<5;k++){ ctx.rotate(6.28/5); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-7); ctx.lineTo(2.2,-3); ctx.closePath(); ctx.fill(); } ctx.restore();
   ctx.strokeStyle='#6a7a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.44,H*0.94); ctx.quadraticCurveTo(W*0.48,H*0.90,W*0.52,H*0.93); ctx.stroke();
+  // crab near the driftwood
+  SpriteRenderer.submit({sprite:'crab',phase:'actors',x:W*0.52+Math.sin(t*1.1)*10,y:H*0.84,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('driftwoodbeach', drawDriftwoodBeach);
 
@@ -4708,6 +4726,8 @@ function drawEnchantedForest(){
   // ambient magical shimmer across the whole scene
   ctx.fillStyle=`rgba(140,120,200,${0.015+0.01*Math.sin(t*1.5)})`;
   ctx.fillRect(0,0,W,H);
+  // fireflies sprite among the glowing trees
+  SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.44+Math.sin(t*0.5)*24,y:groundY-20+Math.sin(t*0.7)*16,anchorY:0.5,frame:Math.floor(t*5)%4});
 }
 registerScene('enchantedforest', drawEnchantedForest);
 
@@ -6335,6 +6355,8 @@ function drawBedroom(){
 
   // book on the nightstand
   SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.54,y:floorY-28,width:30,height:30,anchorY:1,frame:0});
+  // kittens on the rug
+  SpriteRenderer.submit({sprite:'kittens',phase:'actors',x:W*0.46,y:H*0.90,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('bedroom', drawBedroom);
 

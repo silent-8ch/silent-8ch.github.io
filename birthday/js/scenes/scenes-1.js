@@ -99,6 +99,8 @@ function drawBeach(){
   SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.6+Math.sin(t*0.3+2)*24,y:H*0.22+Math.sin(t*0.5+1)*5,width:14,height:14,anchorY:0.5,frame:Math.floor(t*6+2)%4,flipX:true});
   // umbrella stuck in the sand
   SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.60,y:H*0.74,width:65,height:65,anchorY:1,frame:0});
+  // crab scuttling on the sand
+  SpriteRenderer.submit({sprite:'crab',phase:'actors',x:W*0.42+Math.sin(t*1.2)*18,y:H*0.88,anchorY:1,frame:Math.floor(t*7)%4});
 }
 
 function drawCloud(cx, cy, scale) {
@@ -681,6 +683,10 @@ function drawBackyard() {
   SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.60,y:H*0.82,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4});
   // butterfly near the grass
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.48+Math.sin(t*1.4)*16,y:H*0.72+Math.cos(t*1.8)*10,width:26,height:26,anchorY:0.5,frame:Math.floor(t*8)%4});
+  // parrot perched on the fence
+  SpriteRenderer.submit({sprite:'parrot',phase:'ground',x:W*0.52,y:H*0.36-8,anchorY:1,frame:Math.floor(t*7)%4});
+  // bunny nibbling on the grass
+  SpriteRenderer.submit({sprite:'bunny',phase:'actors',x:W*0.38+Math.sin(t*0.6)*6,y:H*0.90,anchorY:1,frame:Math.floor(t*7)%4});
 }
 
 /* ══════════════════════ RIVER SCENE ══════════════════════ */
@@ -1270,6 +1276,11 @@ function drawAquarium(){
   // tank frame + glass sheen
   ctx.strokeStyle='#0c1a24'; ctx.lineWidth=8; ctx.strokeRect(tX,tY,tW,tH);
   ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(tX+4,tY+4,tW-8,10);
+
+  // jellyfish drifting in the tank
+  SpriteRenderer.submit({sprite:'jellyfish',phase:'actors',x:tX+tW*0.65+Math.sin(t*0.5)*12,y:tY+tH*0.35+Math.sin(t*0.7)*10,anchorY:0.5,frame:Math.floor(t*5)%4});
+  // whale shark gliding through the tank
+  SpriteRenderer.submit({sprite:'whaleShark',phase:'actors',x:tX+((t*18)%(tW+60))-30,y:tY+tH*0.25+Math.sin(t*0.4)*8,anchorY:0.5,frame:Math.floor(t*5)%4});
 
   // blue-lit floor
   const fl=ctx.createLinearGradient(0,floorY,0,H); fl.addColorStop(0,'#24303a'); fl.addColorStop(1,'#1a242c');

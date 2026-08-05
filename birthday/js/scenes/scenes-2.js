@@ -252,6 +252,10 @@ function drawTidePools(){
   ctx.fillStyle='#c0503a'; ctx.beginPath(); ctx.ellipse(crX,crY,7,5,0,0,7); ctx.fill();
   ctx.strokeStyle='#c0503a'; ctx.lineWidth=2; for (let i=-1;i<=1;i+=2){ ctx.beginPath(); ctx.moveTo(crX+i*6,crY); ctx.lineTo(crX+i*11,crY-3); ctx.stroke(); }
   ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(crX-2,crY-3,1,0,7); ctx.arc(crX+2,crY-3,1,0,7); ctx.fill();
+  // sprite crab on the rocks
+  SpriteRenderer.submit({sprite:'crab',phase:'actors',x:W*0.82+Math.sin(t*0.9)*8,y:H*0.78,anchorY:1,frame:Math.floor(t*7)%4});
+  // jellyfish in a tide pool
+  SpriteRenderer.submit({sprite:'jellyfish',phase:'ground',x:W*0.30+Math.sin(t*0.6)*4,y:H*0.66+Math.sin(t*0.8)*3,anchorY:0.5,frame:Math.floor(t*5)%4});
 }
 registerScene('tidepools', drawTidePools);
 
@@ -638,6 +642,8 @@ function drawSnowyCabin(){
 
   // falling snow
   ctx.fillStyle='rgba(255,255,255,.9)'; for (let i=0;i<30;i++){ const seed=i*41.7, sx=(((seed*1.6+Math.sin(t+i)*10)%W)+W)%W, sy=(seed*2.2+t*16)%H; ctx.beginPath(); ctx.arc(sx,sy,1.3,0,7); ctx.fill(); }
+  // reindeer standing near the cabin
+  SpriteRenderer.submit({sprite:'reindeer',phase:'actors',x:W*0.48,y:groundY+46,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('snowycabin', drawSnowyCabin);
 
@@ -781,6 +787,9 @@ function drawFireflies(){
     ctx.fillStyle=`rgba(210,255,120,${glow*0.25})`; ctx.beginPath(); ctx.arc(fx,fy,5,0,7); ctx.fill();
     ctx.fillStyle=`rgba(230,255,150,${glow})`; ctx.beginPath(); ctx.arc(fx,fy,1.6,0,7); ctx.fill();
   }
+  // sprite fireflies cluster drifting over the meadow
+  SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.35+Math.sin(t*0.7)*20,y:groundY-10+Math.sin(t*0.9)*14,anchorY:0.5,frame:Math.floor(t*5)%4});
+  SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.70+Math.sin(t*0.5+2)*18,y:groundY+10+Math.sin(t*0.8+1)*12,anchorY:0.5,frame:Math.floor(t*5+2)%4});
 }
 registerScene('fireflies', drawFireflies);
 
@@ -1319,6 +1328,8 @@ function drawCatCafe(){
   SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.50,y:floorY+20,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4});
   // teacup on the counter
   SpriteRenderer.submit({sprite:'teacup',phase:'ground',x:W*0.40,y:floorY-4,width:22,height:22,anchorY:1,frame:0});
+  // kittens playing on the floor
+  SpriteRenderer.submit({sprite:'kittens',phase:'actors',x:W*0.72,y:floorY+24,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('catcafe', drawCatCafe);
 

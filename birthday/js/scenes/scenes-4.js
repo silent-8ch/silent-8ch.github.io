@@ -308,6 +308,8 @@ function drawAlpineMeadow(){
   const cx=W*0.9, cy=groundY+30;
   ctx.fillStyle='#8a6a44'; ctx.fillRect(cx-14,cy-14,28,18); ctx.fillStyle='#5a3a24'; ctx.beginPath(); ctx.moveTo(cx-18,cy-14); ctx.lineTo(cx+18,cy-14); ctx.lineTo(cx,cy-26); ctx.closePath(); ctx.fill();
   ctx.fillStyle='#c98a3a'; ctx.fillRect(cx-4,cy-6,8,10);
+  // bunny hopping in the meadow
+  SpriteRenderer.submit({sprite:'bunny',phase:'actors',x:W*0.48+Math.sin(t*0.8)*12,y:groundY+56,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('alpinemeadow', drawAlpineMeadow);
 
@@ -502,6 +504,8 @@ function drawFrozenFalls(){
   pine(W*0.12,poolY+6,1.0); pine(W*0.88,poolY+6,1.1);
   // gentle snowfall
   for(let i=0;i<24;i++){ const sx=(i*47+t*12)%W, sy=(i*33+t*20)%poolY; ctx.fillStyle='rgba(255,255,255,.8)'; ctx.fillRect(sx,sy,2,2); }
+  // reindeer near the frozen pool
+  SpriteRenderer.submit({sprite:'reindeer',phase:'actors',x:W*0.72,y:poolY+16,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('frozenfalls', drawFrozenFalls);
 
@@ -872,6 +876,10 @@ function drawCoralReef(){
   // green sea-grass tufts
   ctx.strokeStyle='#3f8a5a'; ctx.lineWidth=2; for(let i=0;i<14;i++){ const gx=i*W/14+6; const sw=Math.sin(t*1.5+i)*6;
     ctx.beginPath(); ctx.moveTo(gx,sandY+4); ctx.quadraticCurveTo(gx+sw,sandY-12,gx+sw*1.5,sandY-24); ctx.stroke(); }
+  // jellyfish pulsing through the reef
+  SpriteRenderer.submit({sprite:'jellyfish',phase:'actors',x:W*0.78+Math.sin(t*0.5)*14,y:H*0.30+Math.sin(t*0.7)*12,anchorY:0.5,frame:Math.floor(t*5)%4});
+  // whale shark cruising over the reef
+  SpriteRenderer.submit({sprite:'whaleShark',phase:'actors',x:((t*14)%(W+120))-60,y:H*0.22+Math.sin(t*0.3)*6,anchorY:0.5,frame:Math.floor(t*5)%4});
 }
 registerScene('coralreef', drawCoralReef);
 
@@ -1430,6 +1438,8 @@ function drawAviary(){
   ctx.fillStyle='#b0aa98'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.96,40,8,0,0,7); ctx.fill();
   ctx.fillStyle='#9fd8e0'; ctx.beginPath(); ctx.ellipse(W*0.5,H*0.95,32,5,0,0,7); ctx.fill();
   for(let i=0;i<5;i++){ ctx.fillStyle='rgba(255,255,255,.4)'; ctx.fillRect(W*0.5-24+i*12, H*0.95+Math.sin(t*3+i)*1.5, 2,2); }
+  // parrot perched on a branch
+  SpriteRenderer.submit({sprite:'parrot',phase:'actors',x:tx+54,y:H*0.42,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('aviary', drawAviary);
 
@@ -1689,6 +1699,8 @@ function drawHedgeMaze(){
     ctx.fillStyle=['#c04a6a','#4a6a9a'][i]; ctx.fillRect(px-3,py-16,6,16); ctx.fillStyle='#f0d0a8'; ctx.beginPath(); ctx.arc(px,py-19,3,0,7); ctx.fill(); }
   // a couple of topiary balls flanking the entrance (foreground)
   for(const bx of [W*0.08,W*0.92]){ ctx.fillStyle='#3f8034'; ctx.beginPath(); ctx.arc(bx,H*0.94,14,0,7); ctx.fill(); ctx.fillStyle='#7a5030'; ctx.fillRect(bx-6,H*0.94+10,12,10); }
+  // bunny hopping along a hedge path
+  SpriteRenderer.submit({sprite:'bunny',phase:'actors',x:W*0.56+Math.sin(t*0.7)*10,y:H*0.82,anchorY:1,frame:Math.floor(t*7)%4});
 }
 registerScene('hedgemaze', drawHedgeMaze);
 
@@ -1842,6 +1854,10 @@ function drawPetShop(){
   SpriteRenderer.submit({sprite:'puppy',phase:'actors',x:W*0.30,y:floorY+16,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4});
   // sprite cat near the shelves
   SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.68,y:floorY+12,width:55,height:55,anchorY:1,frame:Math.floor(t*7+2)%4});
+  // parrot in the bird cage
+  SpriteRenderer.submit({sprite:'parrot',phase:'ground',x:W*0.82,y:H*0.24,anchorY:1,frame:Math.floor(t*7)%4});
+  // kittens near the puppy pen
+  SpriteRenderer.submit({sprite:'kittens',phase:'actors',x:W*0.44,y:floorY+20,anchorY:1,frame:Math.floor(t*6)%4});
 }
 registerScene('petshop', drawPetShop);
 
