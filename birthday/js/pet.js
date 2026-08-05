@@ -1282,6 +1282,42 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.90, r:54, e:'🧸', lines:['The soft fur rug 🧸','So warm under our toes','Lie down with me? 🥰']},
     {nx:0.20, ny:0.90, r:44, e:'☕', lines:['Hot cocoa! ☕','Steam curling up','Warms me right through 💛']},
   ],
+  alchemylab: [
+    {nx:0.50, ny:0.18, r:52, e:'♈', lines:['An alchemy chart ♈','Zodiac symbols everywhere','Ancient secrets 🥰']},
+    {nx:0.50, ny:0.68, r:56, e:'⚗️', lines:['The distillation apparatus ⚗️','Bubbling and dripping','What are we making? 💛']},
+    {nx:0.14, ny:0.86, r:48, e:'📖', lines:['An open grimoire 📖','Such old handwriting','Read me a recipe? 🥰']},
+    {nx:0.83, ny:0.90, r:44, e:'🪨', lines:['Runestones 🪨','Each one carved by hand','What do they mean? ✨']},
+  ],
+  bambootearoom: [
+    {nx:0.50, ny:0.68, r:54, e:'🍵', lines:['The iron teapot 🍵','Steam curling up','Pour me a cup? 🥰']},
+    {nx:0.14, ny:0.10, r:46, e:'🎐', lines:['A bamboo wind chime 🎐','Tinkling softly','Such a gentle sound 💛']},
+    {nx:0.84, ny:0.86, r:46, e:'🌸', lines:['A vase with blossoms 🌸','So delicate and pink','Spring in a jar 🥰']},
+    {nx:0.16, ny:0.92, r:44, e:'🟥', lines:['A comfy cushion 🟥','Sit with me 🥰','So warm on the tatami']},
+  ],
+  beekeepergarden: [
+    {nx:0.16, ny:0.72, r:54, e:'🐝', lines:['A white beehive 🐝','Buzzing inside','Busy little workers 🥰']},
+    {nx:0.50, ny:0.13, r:50, e:'☀️', lines:['Warm summer sun ☀️','Perfect for the bees','What a golden day 💛']},
+    {nx:0.10, ny:0.90, r:44, e:'🍯', lines:['A jar of honey 🍯','Fresh from the hive','Taste it with me? 😋']},
+    {nx:0.66, ny:0.62, r:42, e:'💧', lines:['A little birdbath 💧','For thirsty visitors','Even bees need a drink 🥰']},
+  ],
+  birchgrove: [
+    {nx:0.10, ny:0.36, r:56, e:'🌳', lines:['White birch bark 🌳','So papery and pale','I love these trees 🥰']},
+    {nx:0.50, ny:0.06, r:58, e:'🍂', lines:['A golden canopy 🍂','Leaves everywhere','Autumn is so beautiful 💛']},
+    {nx:0.16, ny:0.92, r:44, e:'🍄', lines:['Little mushrooms 🍄','Red caps on the forest floor','So tiny and cute 🥰']},
+    {nx:0.82, ny:0.90, r:46, e:'🪵', lines:['A mossy log 🪵','Sit here with me','Listen to the leaves fall 🍂']},
+  ],
+  bonsaigarden: [
+    {nx:0.16, ny:0.70, r:52, e:'🌳', lines:['A slanting bonsai 🌳','Years of patient care','Such a graceful shape 🥰']},
+    {nx:0.84, ny:0.72, r:52, e:'🌳', lines:['A cascade bonsai 🌳','Spilling over the pot','So dramatic and lovely 💛']},
+    {nx:0.48, ny:0.12, r:48, e:'📜', lines:['A hanging scroll 📜','Painted with a single branch','So serene and simple 🥰']},
+    {nx:0.80, ny:0.94, r:44, e:'💧', lines:['A tiny watering can 💧','For the little trees','Every drop matters 🌱']},
+  ],
+  candyfactory: [
+    {nx:0.24, ny:0.40, r:56, e:'🍬', lines:['A vat of candy syrup 🍬','Bubbling pink and sweet','Can I stir it? 😋']},
+    {nx:0.70, ny:0.44, r:52, e:'🍭', lines:['Candies on the belt 🍭','Riding along so neatly','I want one of each 🥰']},
+    {nx:0.84, ny:0.30, r:48, e:'🍭', lines:['The lollipop spinner 🍭','Round and round it goes','Hypnotizing! 💛']},
+    {nx:0.50, ny:0.30, r:46, e:'🔮', lines:['A gumball machine 🔮','So many colors inside','Got a coin for me? 😄']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
