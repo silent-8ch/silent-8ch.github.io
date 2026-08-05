@@ -7034,7 +7034,23 @@ function drawTownSquare(){
   SpriteRenderer.submit({sprite:'cat', x:catX, y:catY, frame:catFrame, flipX:catFlip});
   SpriteRenderer.submit({sprite:'puppy', x:dogX, y:dogY, frame:dogFrame, flipX:dogFlip});
 
-  // ---- Krystal depth-sorted with everything ----
-  SpriteRenderer.submit({ phase:'actors', x:pet.x, y:pet.y, draw:drawPet });
+  // ---- Krystal: sits on bench or chair when idle nearby ----
+  const benchX = W * 0.14, benchSitY = groundY + 52;  // bench seat height
+  const chairX = W * 0.74, chairSitY = groundY + 44;  // chair seat height
+  const nearBench = Math.abs(pet.x - benchX) < 40 && Math.abs(pet.y - (groundY + 60)) < 30;
+  const nearChair = Math.abs(pet.x - chairX) < 40 && Math.abs(pet.y - (groundY + 52)) < 30;
+  const isIdle = !pet.moving && pet.animLock <= 0 && !pet.resting;
+
+  if (isIdle && (nearBench || nearChair)) {
+    // Draw Krystal sitting using the sit expression sprite
+    const sitX = nearBench ? benchX : chairX;
+    const sitY = nearBench ? benchSitY : chairSitY;
+    SpriteRenderer.submit({ phase:'actors', x:sitX, y:sitY, draw: function(ctx2) {
+      csLoadExpression('krystal', 'sit');
+      csDrawExpression('krystal', 'sit', sitX, sitY, 130, 0);
+    }});
+  } else {
+    SpriteRenderer.submit({ phase:'actors', x:pet.x, y:pet.y, draw:drawPet });
+  }
 }
 registerScene('townsquare', drawTownSquare, true);
