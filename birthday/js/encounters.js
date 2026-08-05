@@ -1688,11 +1688,11 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
   try{
     const ENCHANTED = new Set(['willowispmarsh','fairyring','bayou','mistyforest','mushroomglade',
       'runecircle','witchcottage','moontemple','crystalcave','cavehotspring','tidalcave','nightgarden',
-      'wizardtower','arcanelibrary','enchantedmirrorhall','bamboo','redwoods','mossgarden']);
+      'wizardtower','arcanelibrary','enchantedmirrorhall','bamboo','redwoods','mossgarden','crystalgrotto','potionlab']);
     let wisp = null, timer = 22 + Math.random()*40;
     function darkish(){ try{ const s = SCENES[currentScene];
       const alwaysDark = (s==='crystalcave'||s==='tidalcave'||s==='cavehotspring'||s==='wizardtower'||
-        s==='arcanelibrary'||s==='enchantedmirrorhall'||s==='runecircle'||s==='moontemple'||s==='witchcottage');
+        s==='arcanelibrary'||s==='enchantedmirrorhall'||s==='runecircle'||s==='moontemple'||s==='witchcottage'||s==='crystalgrotto'||s==='potionlab');
       if (alwaysDark) return true;
       return typeof isNight==='function' ? isNight() : (currentHour() >= 18.5 || currentHour() < 6);
     }catch(e){ return true; } }

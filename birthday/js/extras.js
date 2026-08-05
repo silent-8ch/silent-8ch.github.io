@@ -1812,7 +1812,7 @@ function fxWalkHerTo(px, py){
    -------------------------------------------------------------------------- */
 (function fxSpellOrb(){
   try{
-    const MAGIC = new Set(['magicshop','potionkitchen','crystalcave','apothecary','wizardtower','tarotparlor','alchemylab','enchantedforest','witchcottage']);
+    const MAGIC = new Set(['magicshop','potionkitchen','crystalcave','apothecary','wizardtower','tarotparlor','alchemylab','enchantedforest','witchcottage','crystalgrotto','potionlab']);
     let orb = null;                      // {x,y,t,hue,cd,flash}
     function inMagic(){ try{ return (typeof SCENES!=='undefined') && MAGIC.has(SCENES[currentScene]); }catch(e){ return false; } }
     const CHARMS = ['✨ Bibbidi… ✨','A little magic 🔮','Sparkle, sparkle 💫','For you, a charm 🪄','Shazam! 🌟'];

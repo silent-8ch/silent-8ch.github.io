@@ -77,6 +77,7 @@ const SCENE_LABELS = {
   mapleforest:'Maple Forest', skygondola:'Sky Gondola', cidermill:'Cider Mill',
   driftwoodbeach:'Driftwood Beach',
   tarotparlor:'Tarot Parlor', enchantedforest:'Enchanted Forest',
+  crystalgrotto:'Crystal Grotto', potionlab:'Potion Lab',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 function buildPassport(){

@@ -326,6 +326,8 @@ const SCENE_INTERACT = (()=>{
   g(['cheesecave'], {lines:['So many cheeses! 🧀','Yummy and stinky 😋','A little taste? 🍷'], emoji:'🧀', hunger:5});
   g(['tarotparlor'], {lines:['The cards know something 🔮','Read my fortune? 🃏','So mystical in here 🕯️'], emoji:'🔮', love:5});
   g(['enchantedforest'], {lines:['The forest glows ✨','So magical and deep 🌲','I feel the magic 🧚'], emoji:'✨', fun:5});
+  g(['crystalgrotto'], {lines:['Everything sparkles 💎','The crystals are singing ✨','So beautiful down here 🥰'], emoji:'💎', fun:5});
+  g(['potionlab'], {lines:['What shall we brew? 🧪','It\'s bubbling away ⚗️','So many ingredients! 🌿'], emoji:'🧪', fun:5});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];
@@ -1219,6 +1221,18 @@ const SCENE_SPOTS = {
     {nx:0.34, ny:0.60, r:44, e:'🚪', lines:['A tiny fairy door 🚪','Someone lives inside! ✨','Knock knock? 🥰']},
     {nx:0.72, ny:0.62, r:46, e:'🏮', lines:['An old stone lantern 🏮','Glowing green and gentle','Who lit this one? 💚']},
     {nx:0.50, ny:0.30, r:55, e:'✨', lines:['Floating lights ✨','Like tiny spirits 🧚','The forest is alive 💜']},
+  ],
+  crystalgrotto: [
+    {nx:0.12, ny:0.68, r:54, e:'💎', lines:['Giant crystal cluster! 💎','Pulsing with light ✨','I can feel it humming 🥰']},
+    {nx:0.86, ny:0.70, r:52, e:'💎', lines:['Purple crystals here 💜','So tall and beautiful','Like frozen lightning ⚡']},
+    {nx:0.50, ny:0.78, r:50, e:'💧', lines:['An underground lake 💧','Still as a mirror','The crystals reflect in it ✨']},
+    {nx:0.08, ny:0.38, r:46, e:'🌿', lines:['Bioluminescent moss! 🌿','Glowing softly green','Nature\'s own nightlight 💚']},
+  ],
+  potionlab: [
+    {nx:0.32, ny:0.62, r:56, e:'⚗️', lines:['The big cauldron! ⚗️','Bubbling and changing colors','Stir it with me? 🥰']},
+    {nx:0.72, ny:0.22, r:52, e:'🧪', lines:['Shelves of potions 🧪','Every color imaginable!','Which one makes you fly? ✨']},
+    {nx:0.08, ny:0.60, r:44, e:'📖', lines:['The spell book 📖','Ancient recipes inside','Read me one? 🥰']},
+    {nx:0.20, ny:0.16, r:46, e:'✨', lines:['Floating bottles! ✨','Hovering in mid-air','Real magic, right here 💜']},
   ],
 };
 // nearest hotspot hit for the current scene, or null
