@@ -330,6 +330,8 @@ const SCENE_INTERACT = (()=>{
   g(['enchantedforest'], {lines:['The forest glows ✨','So magical and deep 🌲','I feel the magic 🧚'], emoji:'✨', fun:5});
   g(['crystalgrotto'], {lines:['Everything sparkles 💎','The crystals are singing ✨','So beautiful down here 🥰'], emoji:'💎', fun:5});
   g(['potionlab'], {lines:['What shall we brew? 🧪','It\'s bubbling away ⚗️','So many ingredients! 🌿'], emoji:'🧪', fun:5});
+  g(['spiritshrine'], {lines:['The spirits are peaceful here 🙏','Ofuda glowing softly ✨','I feel something ancient and kind 💛'], emoji:'⛩️', love:5});
+  g(['shadowtheater'], {lines:['The shadows are dancing! 🎭','Look, they\'re alive ✨','So magical in the lantern light 🕯️'], emoji:'🎭', fun:5});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];
@@ -1595,6 +1597,20 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.50, r:58, e:'🌊', lines:['The grey-green sea 🌊','Waves rolling in gently','Listen to them breathe 💛']},
     {nx:0.60, ny:0.92, r:44, e:'⭐', lines:['A little starfish ⭐','Washed up on the sand','So pretty and orange 🥰']},
     {nx:0.24, ny:0.14, r:48, e:'☀️', lines:['Pale hazy sun ☀️','Soft light on the water','Such a quiet beach day 💛']},
+  ],
+  spiritshrine: [
+    {nx:0.32, ny:0.30, r:56, e:'⛩️', lines:['The red torii gate ⛩️','So grand and peaceful','Step through with me? 🥰']},
+    {nx:0.50, ny:0.40, r:52, e:'🙏', lines:['The little spirit house 🙏','A warm glow inside','Someone left an offering 💛']},
+    {nx:0.78, ny:0.32, r:54, e:'🌳', lines:['The sacred tree 🌳','So ancient and wise','It has a shimenawa rope ✨']},
+    {nx:0.40, ny:0.18, r:48, e:'✨', lines:['Floating spirit orbs ✨','Drifting so gently','They feel kind and warm 💛']},
+    {nx:0.12, ny:0.56, r:44, e:'🏮', lines:['The stone lantern 🏮','A soft warm glow','Guiding the spirits home 🥰']},
+  ],
+  shadowtheater: [
+    {nx:0.30, ny:0.34, r:56, e:'💃', lines:['The dancing shadow! 💃','She\'s twirling for us','So graceful on the screen 🥰']},
+    {nx:0.68, ny:0.24, r:52, e:'🐦', lines:['A shadow bird! 🐦','Flying across the light','Its wings are flapping 💛']},
+    {nx:0.50, ny:0.68, r:54, e:'🔥', lines:['The enchanted lantern 🔥','Its flame brings the shadows alive','So magical and warm ✨']},
+    {nx:0.18, ny:0.82, r:46, e:'🪑', lines:['A velvet cushion 🪑','Sit with me for the show','Best seats in the house 🥰']},
+    {nx:0.50, ny:0.04, r:50, e:'🎭', lines:['The carved frame 🎭','Golden corners sparkling','Like a window to another world 💛']},
   ],
 };
 // nearest hotspot hit for the current scene, or null

@@ -5026,3 +5026,305 @@ function drawPotionLab(){
   }
 }
 registerScene('potionlab', drawPotionLab);
+
+/* ── SPIRIT SHRINE (outdoor · dusk · Shinto-inspired spirit house) ── */
+function drawSpiritShrine(){
+  const t = sceneTime, groundY = H*0.68;
+
+  // twilight sky — deep violet to warm peach at the horizon
+  const sky=ctx.createLinearGradient(0,0,0,groundY);
+  sky.addColorStop(0,'#1a0e2e'); sky.addColorStop(0.35,'#2e1a48');
+  sky.addColorStop(0.7,'#6a3466'); sky.addColorStop(1,'#d4826a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+
+  // stars in upper sky
+  for (let i=0;i<40;i++){
+    const sx=(i*67+13)%W, sy=(i*31+7)%(groundY*0.45);
+    ctx.fillStyle=`rgba(255,250,230,${0.2+0.3*Math.abs(Math.sin(t*1.3+i))})`;
+    ctx.fillRect(sx,sy,1.2,1.2);
+  }
+
+  // distant mountains — layered silhouettes
+  ctx.fillStyle='#1e1230';
+  ctx.beginPath(); ctx.moveTo(0,groundY);
+  for (let x=0;x<=W;x+=12) ctx.lineTo(x, groundY-40-20*Math.sin(x*0.015+0.5));
+  ctx.lineTo(W,groundY); ctx.fill();
+  ctx.fillStyle='#2a1a3e';
+  ctx.beginPath(); ctx.moveTo(0,groundY);
+  for (let x=0;x<=W;x+=10) ctx.lineTo(x, groundY-22-12*Math.sin(x*0.02+2));
+  ctx.lineTo(W,groundY); ctx.fill();
+
+  // sacred tree behind the shrine (right side)
+  const treeX=W*0.78, treeBase=groundY;
+  ctx.fillStyle='#3a2a1e'; ctx.fillRect(treeX-6,treeBase-90,12,90);
+  // branches
+  ctx.strokeStyle='#3a2a1e'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(treeX,treeBase-70); ctx.quadraticCurveTo(treeX+30,treeBase-85,treeX+45,treeBase-95); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(treeX,treeBase-80); ctx.quadraticCurveTo(treeX-25,treeBase-95,treeX-40,treeBase-100); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(treeX,treeBase-55); ctx.quadraticCurveTo(treeX+20,treeBase-60,treeX+35,treeBase-70); ctx.stroke();
+  // canopy — dark green with mystical shimmer
+  for (const [ox,oy,r] of [[-30,-95,28],[0,-100,32],[30,-90,26],[10,-80,24],[-15,-75,22]]){
+    ctx.fillStyle=`rgba(30,60,40,${0.85+0.1*Math.sin(t*0.8+ox)})`;
+    ctx.beginPath(); ctx.arc(treeX+ox,treeBase+oy,r,0,7); ctx.fill();
+  }
+  // shimenawa rope on tree trunk
+  ctx.strokeStyle='#c9a24a'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(treeX-10,treeBase-42); ctx.quadraticCurveTo(treeX,treeBase-38,treeX+10,treeBase-42); ctx.stroke();
+  // shide (zigzag paper streamers)
+  for (const sx of [treeX-6,treeX+6]){
+    ctx.fillStyle='#f0ece0';
+    ctx.beginPath(); ctx.moveTo(sx,treeBase-40); ctx.lineTo(sx-3,treeBase-34); ctx.lineTo(sx+3,treeBase-28);
+    ctx.lineTo(sx-3,treeBase-22); ctx.lineTo(sx+1,treeBase-22); ctx.lineTo(sx+3,treeBase-28+2);
+    ctx.lineTo(sx-1,treeBase-34+2); ctx.lineTo(sx+2,treeBase-40); ctx.closePath(); ctx.fill();
+  }
+
+  // stone torii gate (left-center)
+  const torX=W*0.32, torY=groundY;
+  // pillars
+  ctx.fillStyle='#8a3030'; ctx.fillRect(torX-42,torY-82,8,82); ctx.fillRect(torX+34,torY-82,8,82);
+  // top crossbar (kasagi) — slightly curved
+  ctx.fillStyle='#a03838';
+  ctx.beginPath(); ctx.moveTo(torX-52,torY-80); ctx.quadraticCurveTo(torX,torY-88,torX+52,torY-80);
+  ctx.lineTo(torX+52,torY-74); ctx.quadraticCurveTo(torX,torY-82,torX-52,torY-74); ctx.closePath(); ctx.fill();
+  // secondary bar (nuki)
+  ctx.fillStyle='#922e2e'; ctx.fillRect(torX-44,torY-66,88,5);
+  // small tablet in center (gakuzuka)
+  ctx.fillStyle='#f0ece0'; ctx.fillRect(torX-10,torY-72,20,12);
+  ctx.fillStyle='#8a3030'; ctx.font='7px serif'; ctx.textAlign='center';
+  ctx.fillText('神', torX, torY-63);
+
+  // spirit house / hokora (small wooden shrine)
+  const shX=W*0.50, shY=groundY-6;
+  // stone base
+  ctx.fillStyle='#6a6a6a'; ctx.fillRect(shX-28,shY,56,8);
+  ctx.fillStyle='#808080'; ctx.fillRect(shX-24,shY-4,48,6);
+  // wooden body
+  ctx.fillStyle='#5a3a22'; ctx.fillRect(shX-20,shY-34,40,32);
+  // dark interior
+  ctx.fillStyle='#1a0e0a'; ctx.fillRect(shX-14,shY-26,28,24);
+  // little offering inside (glowing)
+  ctx.fillStyle=`rgba(255,200,100,${0.7+0.2*Math.sin(t*2)})`;
+  ctx.beginPath(); ctx.arc(shX,shY-14,4,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,200,100,.12)'; ctx.beginPath(); ctx.arc(shX,shY-14,12,0,7); ctx.fill();
+  // miniature roof
+  ctx.fillStyle='#3a2a1a';
+  ctx.beginPath(); ctx.moveTo(shX-26,shY-34); ctx.lineTo(shX,shY-50); ctx.lineTo(shX+26,shY-34); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#2a1a10';
+  ctx.beginPath(); ctx.moveTo(shX-28,shY-32); ctx.lineTo(shX,shY-48); ctx.lineTo(shX+28,shY-32); ctx.closePath(); ctx.fill();
+
+  // glowing ofuda (paper talismans) hanging on either side
+  for (const [ox,c] of [[-18,'rgba(255,240,200,A)'],[18,'rgba(200,220,255,A)']]) {
+    const swing=Math.sin(t*1.5+ox)*2;
+    const fx=shX+ox+swing, fy=shY-50;
+    ctx.fillStyle=c.replace('A',String(0.8+0.15*Math.sin(t*2.5+ox)));
+    ctx.fillRect(fx-3,fy,6,16);
+    // glow
+    ctx.fillStyle=c.replace('A','0.08');
+    ctx.beginPath(); ctx.arc(fx,fy+8,12,0,7); ctx.fill();
+    // calligraphy marks
+    ctx.strokeStyle='rgba(100,60,30,.6)'; ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.moveTo(fx,fy+3); ctx.lineTo(fx,fy+12); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(fx-1.5,fy+6); ctx.lineTo(fx+1.5,fy+6); ctx.stroke();
+  }
+
+  // floating spirit orbs — gentle, bobbing lights
+  for (let i=0;i<7;i++){
+    const phase=i*0.9+t*0.4;
+    const ox=(i*47+20)%((W-40))+20;
+    const oy=groundY*0.3 + Math.sin(phase)*20 + (i*23)%(groundY*0.4);
+    const hue=[210,180,50,300,120,40,260][i];
+    const a=0.3+0.25*Math.sin(t*1.8+i*1.1);
+    // outer glow
+    ctx.fillStyle=`hsla(${hue},70%,75%,${a*0.3})`;
+    ctx.beginPath(); ctx.arc(ox,oy,14,0,7); ctx.fill();
+    // core
+    ctx.fillStyle=`hsla(${hue},80%,85%,${a})`;
+    ctx.beginPath(); ctx.arc(ox,oy,4+Math.sin(t*2+i)*1.2,0,7); ctx.fill();
+    // bright center
+    ctx.fillStyle=`hsla(${hue},60%,95%,${a*0.7})`;
+    ctx.beginPath(); ctx.arc(ox,oy,1.6,0,7); ctx.fill();
+  }
+
+  // ground — mossy stone path
+  const gr=ctx.createLinearGradient(0,groundY,0,H);
+  gr.addColorStop(0,'#2a3a2a'); gr.addColorStop(0.4,'#1e2e1e'); gr.addColorStop(1,'#162016');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+  // stone path down the center
+  ctx.fillStyle='rgba(120,115,100,.3)';
+  for (let y=groundY+2;y<H;y+=12){
+    const w=14+Math.sin(y*0.3)*4;
+    ctx.beginPath(); ctx.ellipse(W*0.42,y+5,w,5,0.1,0,7); ctx.fill();
+  }
+  // moss patches
+  ctx.fillStyle='rgba(60,100,50,.15)';
+  for (let i=0;i<8;i++){
+    const mx=(i*41+10)%W, my=groundY+6+(i*17)%(H-groundY-12);
+    ctx.beginPath(); ctx.ellipse(mx,my,12+i%3*4,4,0,0,7); ctx.fill();
+  }
+
+  // stone lantern at front left
+  const lnX=W*0.12, lnY=groundY;
+  ctx.fillStyle='#7a7a72'; ctx.fillRect(lnX-5,lnY-30,10,30);
+  ctx.fillStyle='#8a8a80'; ctx.fillRect(lnX-8,lnY-34,16,6);
+  ctx.beginPath(); ctx.moveTo(lnX-10,lnY-34); ctx.lineTo(lnX,lnY-44); ctx.lineTo(lnX+10,lnY-34); ctx.closePath(); ctx.fill();
+  // lantern glow
+  ctx.fillStyle=`rgba(255,200,100,${0.5+0.2*Math.sin(t*2.2)})`;
+  ctx.beginPath(); ctx.arc(lnX,lnY-38,3,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,200,100,.1)'; ctx.beginPath(); ctx.arc(lnX,lnY-38,14,0,7); ctx.fill();
+
+  // subtle fireflies near ground
+  for (let i=0;i<6;i++){
+    const fx=(i*53+t*12)%W, fy=groundY-4+Math.sin(t*1.2+i*2)*8+(i*7)%18;
+    ctx.fillStyle=`rgba(200,230,120,${0.15+0.2*Math.sin(t*3+i*1.5)})`;
+    ctx.beginPath(); ctx.arc(fx,fy,1.6,0,7); ctx.fill();
+  }
+}
+registerScene('spiritshrine', drawSpiritShrine);
+
+/* ── SHADOW THEATER (indoor · dark · magical shadow puppet stage) ── */
+function drawShadowTheater(){
+  const t = sceneTime, stageY = H*0.62;
+
+  // dark room background — deep indigo
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#0e0a18'); bg.addColorStop(0.5,'#14101e'); bg.addColorStop(1,'#100c16');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // the shadow screen — a warm, glowing panel (backlit fabric)
+  const scrL=W*0.12, scrR=W*0.88, scrT=H*0.06, scrB=stageY-6;
+  // wooden frame
+  ctx.fillStyle='#3a2818'; ctx.fillRect(scrL-6,scrT-6,scrR-scrL+12,scrB-scrT+12);
+  ctx.fillStyle='#2a1c10'; ctx.fillRect(scrL-8,scrT-8,scrR-scrL+16,6);
+  ctx.fillRect(scrL-8,scrB+2,scrR-scrL+16,6);
+  ctx.fillRect(scrL-8,scrT-8,6,scrB-scrT+16);
+  ctx.fillRect(scrR+2,scrT-8,6,scrB-scrT+16);
+  // carved corner decorations
+  for (const [cx,cy] of [[scrL-2,scrT-2],[scrR+2,scrT-2],[scrL-2,scrB+2],[scrR+2,scrB+2]]){
+    ctx.fillStyle='#c9a24a'; ctx.beginPath(); ctx.arc(cx,cy,3.5,0,7); ctx.fill();
+  }
+  // screen glow (warm parchment)
+  const scrGlow=ctx.createRadialGradient(W*0.5,H*0.30,20,W*0.5,H*0.30,W*0.45);
+  scrGlow.addColorStop(0,'#f5e4c4'); scrGlow.addColorStop(0.6,'#e8d0a8');
+  scrGlow.addColorStop(1,'#d4b888');
+  ctx.fillStyle=scrGlow; ctx.fillRect(scrL,scrT,scrR-scrL,scrB-scrT);
+
+  // shadow puppet figures on the screen — they sway and move
+  ctx.save();
+  ctx.globalAlpha=0.7;
+
+  // shadow figure 1: a dancer (left side)
+  const d1x=W*0.30+Math.sin(t*0.7)*8, d1y=scrB-10;
+  ctx.fillStyle='#3a2a18';
+  // body
+  ctx.beginPath(); ctx.ellipse(d1x,d1y-40,8,12,Math.sin(t*1.2)*0.15,0,7); ctx.fill();
+  // head
+  ctx.beginPath(); ctx.arc(d1x+Math.sin(t*1.2)*2,d1y-56,7,0,7); ctx.fill();
+  // arms — graceful arcs
+  ctx.strokeStyle='#3a2a18'; ctx.lineWidth=3; ctx.lineCap='round';
+  const armA=Math.sin(t*1.5)*0.5;
+  ctx.beginPath(); ctx.moveTo(d1x-4,d1y-44);
+  ctx.quadraticCurveTo(d1x-20,d1y-55+Math.sin(t*1.8)*8, d1x-28,d1y-50+Math.sin(t*1.3)*10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(d1x+4,d1y-44);
+  ctx.quadraticCurveTo(d1x+18,d1y-60+Math.cos(t*1.6)*6, d1x+26,d1y-52+Math.cos(t*1.1)*8); ctx.stroke();
+  // skirt / lower body
+  ctx.beginPath(); ctx.moveTo(d1x-6,d1y-30); ctx.lineTo(d1x-14+Math.sin(t*1.4)*3,d1y);
+  ctx.lineTo(d1x+14+Math.sin(t*1.4+1)*3,d1y); ctx.lineTo(d1x+6,d1y-30); ctx.closePath(); ctx.fill();
+
+  // shadow figure 2: a bird/dragon (right side, flying)
+  const d2x=W*0.68+Math.sin(t*0.6+1)*12, d2y=scrT+50+Math.sin(t*0.9)*15;
+  ctx.fillStyle='#3a2a18';
+  // body
+  ctx.beginPath(); ctx.ellipse(d2x,d2y,14,6,Math.sin(t*0.8)*0.1,0,7); ctx.fill();
+  // head
+  ctx.beginPath(); ctx.arc(d2x+16,d2y-4,5,0,7); ctx.fill();
+  // beak
+  ctx.beginPath(); ctx.moveTo(d2x+20,d2y-5); ctx.lineTo(d2x+26,d2y-3); ctx.lineTo(d2x+20,d2y-2); ctx.closePath(); ctx.fill();
+  // wings flapping
+  const wingA=Math.sin(t*3)*0.4;
+  ctx.beginPath(); ctx.moveTo(d2x-4,d2y-4);
+  ctx.quadraticCurveTo(d2x-14,d2y-20-Math.sin(t*3)*12, d2x-24,d2y-14-Math.sin(t*3)*10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(d2x-4,d2y+2);
+  ctx.quadraticCurveTo(d2x-14,d2y+16+Math.sin(t*3+0.5)*10, d2x-22,d2y+12+Math.sin(t*3+0.5)*8); ctx.stroke();
+  // tail
+  ctx.beginPath(); ctx.moveTo(d2x-12,d2y);
+  ctx.quadraticCurveTo(d2x-22,d2y+Math.sin(t*1.2)*4, d2x-30,d2y+6+Math.sin(t*0.8)*3); ctx.stroke();
+
+  // shadow figure 3: a small tree/plant (center-right, still with gentle sway)
+  const d3x=W*0.54, d3y=scrB-8;
+  ctx.fillStyle='#3a2a18';
+  ctx.fillRect(d3x-2,d3y-18,4,18);
+  // branches swaying
+  for (const [bx,by,a0] of [[-8,-22,0.3],[6,-26,-0.2],[-4,-30,0.1],[10,-20,-0.15]]){
+    const sw=Math.sin(t*1.0+a0*10)*0.12;
+    ctx.save(); ctx.translate(d3x,d3y); ctx.rotate(sw);
+    ctx.beginPath(); ctx.moveTo(0,-18);
+    ctx.quadraticCurveTo(bx*0.5,by*0.7,bx,by); ctx.stroke();
+    ctx.beginPath(); ctx.arc(bx,by,4+Math.abs(bx)*0.2,0,7); ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+
+  // enchanted lantern (center, above the stage)
+  const lanX=W*0.50, lanY=stageY+14;
+  // chain/cord from ceiling
+  ctx.strokeStyle='#4a3a2a'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(lanX,0); ctx.lineTo(lanX,stageY-6); ctx.stroke();
+  // lantern body — ornate
+  ctx.fillStyle=`rgba(255,200,100,${0.2+0.08*Math.sin(t*1.5)})`;
+  ctx.beginPath(); ctx.arc(lanX,lanY,28,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(255,190,80,${0.75+0.15*Math.sin(t*2)})`;
+  roundRect(lanX-10,lanY-14,20,28,8); ctx.fill();
+  // flame inside
+  const fh=Math.sin(t*5)*2;
+  ctx.fillStyle=`rgba(255,220,120,${0.9+0.1*Math.sin(t*6)})`;
+  ctx.beginPath();
+  ctx.moveTo(lanX,lanY+4); ctx.quadraticCurveTo(lanX-4,lanY-6+fh,lanX,lanY-12+fh);
+  ctx.quadraticCurveTo(lanX+4,lanY-6+fh,lanX,lanY+4); ctx.fill();
+  // lantern cap & base
+  ctx.fillStyle='#5a4030'; ctx.fillRect(lanX-12,lanY-16,24,4); ctx.fillRect(lanX-12,lanY+12,24,4);
+  // decorative filigree rings
+  ctx.strokeStyle='#c9a24a'; ctx.lineWidth=0.8;
+  ctx.beginPath(); ctx.arc(lanX,lanY,11,0,7); ctx.stroke();
+
+  // stage floor — dark wooden boards
+  const fl=ctx.createLinearGradient(0,stageY,0,H);
+  fl.addColorStop(0,'#1e1610'); fl.addColorStop(1,'#140e0a');
+  ctx.fillStyle=fl; ctx.fillRect(0,stageY,W,H-stageY);
+  // plank seams
+  ctx.strokeStyle='rgba(0,0,0,.3)'; ctx.lineWidth=0.6;
+  for (let x=0;x<W;x+=28){ ctx.beginPath(); ctx.moveTo(x,stageY); ctx.lineTo(x,H); ctx.stroke(); }
+  ctx.strokeStyle='rgba(255,220,160,.04)';
+  for (let y=stageY+8;y<H;y+=14){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // warm light spill from the screen onto the floor
+  const spill=ctx.createRadialGradient(W*0.5,stageY,10,W*0.5,stageY,W*0.4);
+  spill.addColorStop(0,'rgba(255,220,160,.18)'); spill.addColorStop(1,'rgba(255,220,160,0)');
+  ctx.fillStyle=spill; ctx.fillRect(0,stageY,W,H-stageY);
+
+  // audience cushions at the very front (small colored shapes)
+  const cushions=[[W*0.18,'#8a3040'],[W*0.34,'#3a5080'],[W*0.66,'#6a4a80'],[W*0.82,'#3a7060']];
+  for (const [cx,col] of cushions){
+    ctx.fillStyle=col;
+    ctx.beginPath(); ctx.ellipse(cx,H-10,12,5,0,0,7); ctx.fill();
+    // tassel
+    ctx.fillStyle='#c9a24a';
+    ctx.beginPath(); ctx.arc(cx,H-14,2,0,7); ctx.fill();
+  }
+
+  // dancing shadow cast on the side walls — subtle flickers
+  for (let i=0;i<4;i++){
+    const wx=(i<2)?W*0.04:W*0.94+i%2*6;
+    const wy=H*0.2+i*32+Math.sin(t*1.5+i)*10;
+    ctx.fillStyle=`rgba(60,40,20,${0.06+0.04*Math.sin(t*2+i)})`;
+    ctx.beginPath(); ctx.ellipse(wx,wy,8,18+Math.sin(t*1.2+i)*4,0.2*i,0,7); ctx.fill();
+  }
+
+  // tiny magical sparkles drifting around the lantern
+  for (let i=0;i<8;i++){
+    const angle=t*0.5+i*Math.PI/4;
+    const dist=18+8*Math.sin(t*1.5+i);
+    const sx=lanX+Math.cos(angle)*dist, sy=lanY+Math.sin(angle)*dist*0.6;
+    ctx.fillStyle=`rgba(255,220,140,${0.15+0.15*Math.sin(t*3+i*0.8)})`;
+    ctx.beginPath(); ctx.arc(sx,sy,1,0,7); ctx.fill();
+  }
+}
+registerScene('shadowtheater', drawShadowTheater);
