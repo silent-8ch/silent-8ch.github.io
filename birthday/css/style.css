@@ -111,7 +111,7 @@
   }
   #banner.hide{display:none;}
   /* map / locations */
-  #mapBtn,#collectBtn,#outfitBtn,#setBtn{cursor:pointer;font-size:17px;line-height:1;user-select:none;}
+  #mapBtn,#collectBtn,#outfitBtn,#setBtn,#csJournalBtn{cursor:pointer;font-size:17px;line-height:1;user-select:none;}
   #titlebar > div{gap:8px !important;}
   #setPanel{position:absolute;inset:0;background:rgba(42,33,28,.86);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
   #setPanel.hide{display:none;}
@@ -215,3 +215,22 @@
   .mapRow .mn:hover{text-decoration:underline;}
   .mapFamilyDebug{flex:none;color:#ffe08a;font-size:11px;font-weight:700;text-align:right;}
   .mapRow.current{background:rgba(224,122,139,.4);}
+  /* cutscene journal */
+  #csJournalPanel{position:absolute;inset:0;background:rgba(42,33,28,.90);z-index:15;display:flex;flex-direction:column;padding:16px;backdrop-filter:blur(3px);}
+  #csJournalPanel.hide{display:none;}
+  #csJournalHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  #csJournalClose{cursor:pointer;font-size:18px;padding:0 4px;}
+  #csJournalHint{color:rgba(255,255,255,.55);font-size:11px;font-weight:500;margin-bottom:8px;}
+  #csJournalProgress{color:#fff;font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  #csJournalProgress .pbar{flex:1;min-width:80px;height:6px;border-radius:4px;background:rgba(255,255,255,.15);overflow:hidden;}
+  #csJournalProgress .pbar>i{display:block;height:100%;background:var(--accent);border-radius:4px;}
+  #csJournalList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:4px;}
+  .csRow{background:rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;}
+  .csRow.locked{opacity:.45;}
+  .csRow .csName{color:#fff;font-weight:700;font-size:14px;margin-bottom:2px;}
+  .csRow .csDesc{color:rgba(255,255,255,.7);font-size:12px;margin-bottom:4px;}
+  .csRow .csMeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;}
+  .csRow .csTag{background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;}
+  .csRow .csChars{color:rgba(255,255,255,.5);font-size:10px;font-style:italic;}
+  .csRow .csReplay{border:none;background:var(--accent);color:#fff;font-weight:700;font-size:11px;padding:4px 12px;border-radius:12px;cursor:pointer;}
+  .csRow .csReplay:hover{filter:brightness(1.15);}

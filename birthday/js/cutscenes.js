@@ -157,11 +157,20 @@ function csSkipHit(px, py){
   return px > W - 75 && py < 34;
 }
 
+/* ---- seen-cutscene tracking (persisted) ---- */
+let seenCutscenes = (function(){ try{ const r = localStorage.getItem('bpet_cutscenes_seen'); if (r) return JSON.parse(r); } catch(e){} return {}; })();
+function saveSeenCutscenes(){ try{ localStorage.setItem('bpet_cutscenes_seen', JSON.stringify(seenCutscenes)); }catch(e){} }
+
 /* ---- lifecycle ---- */
 function startCutscene(def){
   if (cutscene || birthday) return;
   // pre-load sprites we'll need (walk + expressions)
   if (def.chars) def.chars.forEach(n => { csLoadSprite(n); csLoadExpressions(n); });
+  // record in seen log
+  if (def.id && !seenCutscenes[def.id]){
+    seenCutscenes[def.id] = Date.now();
+    saveSeenCutscenes();
+  }
   cutscene = {
     def: def,
     steps: def.steps,
@@ -2329,6 +2338,7 @@ function csHideAndSeek(){
   }
 
   return {
+    id: 'hide_and_seek',
     chars: ['krystal', 'luke', 'william'],
     skipable: true,
     steps: [
@@ -2531,6 +2541,7 @@ function csTeaParty(){
   }
 
   return {
+    id: 'tea_party',
     chars: ['krystal', 'luna', 'wade'],
     skipable: true,
     steps: [
@@ -2716,6 +2727,7 @@ function csSunsetBalloonRide(){
   }
 
   return {
+    id: 'sunset_balloon_ride',
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
@@ -2915,6 +2927,7 @@ function csCookingDisaster(){
   }
 
   return {
+    id: 'cooking_disaster',
     chars: ['krystal', 'wade', 'william'],
     skipable: true,
     steps: [
@@ -3139,6 +3152,7 @@ function csTidePoolDiscovery(){
   }
 
   return {
+    id: 'tide_pool_discovery',
     chars: ['krystal', 'luke', 'luna'],
     skipable: true,
     steps: [
@@ -3281,6 +3295,7 @@ function csPillowFort(){
   }
 
   return {
+    id: 'pillow_fort',
     chars: ['krystal', 'wade', 'luke'],
     skipable: true,
     steps: [
@@ -3417,6 +3432,7 @@ function csDanceLesson(){
   }
 
   return {
+    id: 'dance_lesson',
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
@@ -3587,6 +3603,7 @@ function csFireflyCatching(){
   }
 
   return {
+    id: 'firefly_catching',
     chars: ['krystal', 'luna', 'william'],
     skipable: true,
     steps: [
@@ -3768,6 +3785,7 @@ function csMagicShow(){
   const hatCx = paulX, hatBaseY = groundY - 20;
 
   return {
+    id: 'magic_show',
     chars: ['krystal', 'paul', 'william'],
     skipable: true,
     steps: [
@@ -3935,6 +3953,7 @@ function csSunsetFishing(){
   }
 
   return {
+    id: 'sunset_fishing',
     chars: ['krystal', 'paul', 'wade'],
     skipable: true,
     steps: [
@@ -4130,6 +4149,7 @@ function csGardenButterflies(){
   }
 
   return {
+    id: 'garden_butterflies',
     chars: ['krystal', 'luna'],
     skipable: true,
     steps: [
@@ -4333,6 +4353,7 @@ function csTreasureHunt(){
   const chestX = paulX, chestY = fY + 4;
 
   return {
+    id: 'treasure_hunt',
     chars: ['krystal', 'paul', 'wade'],
     skipable: true,
     steps: [
@@ -4490,6 +4511,7 @@ function csCloudWatching(){
   }
 
   return {
+    id: 'cloud_watching',
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
@@ -4639,6 +4661,7 @@ function csSpookyMansion(){
   }
 
   return {
+    id: 'spooky_mansion',
     chars: ['krystal', 'william', 'luke'],
     skipable: true,
     steps: [
@@ -4809,6 +4832,7 @@ function csSnowballFight(){
   }
 
   return {
+    id: 'snowball_fight',
     chars: ['krystal', 'paul', 'luke', 'william'],
     skipable: true,
     steps: [
@@ -4994,6 +5018,7 @@ function csWishingWell(){
   }
 
   return {
+    id: 'wishing_well',
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
@@ -5205,6 +5230,7 @@ function csPetShopChaos(){
   }
 
   return {
+    id: 'pet_shop_chaos',
     chars: ['krystal', 'luna', 'wade'],
     skipable: true,
     steps: [
@@ -5364,6 +5390,7 @@ function csKaraokeNight(){
   }
 
   return {
+    id: 'karaoke_night',
     chars: ['krystal', 'paul', 'luna', 'wade'],
     skipable: true,
     steps: [
@@ -5504,6 +5531,7 @@ function csPuddleJumping(){
   }
 
   return {
+    id: 'puddle_jumping',
     chars: ['krystal', 'luke', 'william'],
     skipable: true,
     steps: [
@@ -5696,6 +5724,7 @@ function csConstellationDrawing(){
   ];
 
   return {
+    id: 'constellation_drawing',
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
@@ -5876,6 +5905,7 @@ function csLanternRelease(){
   }
 
   return {
+    id: 'lantern_release',
     chars: ['krystal', 'paul', 'luna', 'wade', 'luke', 'william'],
     skipable: true,
     steps: [
@@ -6132,6 +6162,7 @@ function csBoardGameNight(){
   }
 
   return {
+    id: 'board_game_night',
     chars: ['krystal', 'paul', 'wade', 'luke'],
     skipable: true,
     steps: [
@@ -6271,6 +6302,7 @@ function csSunriseYoga(){
   }
 
   return {
+    id: 'sunrise_yoga',
     chars: ['krystal', 'luna'],
     skipable: true,
     steps: [
@@ -6445,6 +6477,7 @@ function csSandcastleContest(){
   }
 
   return {
+    id: 'sandcastle_contest',
     chars: ['krystal', 'paul', 'wade', 'william'],
     skipable: true,
     steps: [
@@ -6642,6 +6675,7 @@ function csCandlelitDinner(){
   }
 
   return {
+    id: 'candlelit_dinner',
     chars: ['krystal', 'paul'],
     skipable: true,
     steps: [
@@ -6797,6 +6831,7 @@ function csFossilDiscovery(){
   const fossilX = W * 0.36, fossilY = groundY + 6;
 
   return {
+    id: 'fossil_discovery',
     chars: ['krystal', 'luke', 'luna'],
     skipable: true,
     steps: [
@@ -6859,6 +6894,467 @@ function csFossilDiscovery(){
     ]
   };
 }
+
+/* ============================================================================
+   GENERIC CUTSCENES  —  work on any scene using the current background
+   ============================================================================ */
+const CS_ALL_CHARS = ['paul', 'luna', 'wade', 'luke', 'william'];
+
+function csPickCompanion(exclude){
+  const pool = CS_ALL_CHARS.filter(c => !exclude || !exclude.includes(c));
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function csCurrentBg(){
+  const scene = SCENES[currentScene];
+  const draw = SCENE_RENDERERS[scene];
+  if (draw) draw();
+  else { ctx.fillStyle = '#4a6a5a'; ctx.fillRect(0,0,W,H); }
+}
+
+/* 1) Thinking Out Loud */
+function csGenThinkingOutLoud(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.50;
+  return {
+    id: 'gen_thinking_out_loud',
+    chars: ['krystal'],
+    skipable: true,
+    steps: [
+      { dur: 2.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'think', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'I wonder what Paul is up to right now...');
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'talk', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "He's probably thinking about me too \u{1F49B}");
+      }},
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 5);
+      }},
+    ]
+  };
+}
+
+/* 2) Friendly Wave */
+function csGenFriendlyWave(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.40;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+  const greetings = [
+    "Hey Krystal! How's it going?",
+    "There you are! I was looking for you!",
+    "Krystal! Guess what?",
+    "Oh hey! Fancy meeting you here!",
+  ];
+  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+  let friendX = W + 40; // start off-screen right
+
+  return {
+    id: 'gen_friendly_wave',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          // friend walks in from right
+          const progress = Math.min(1, cs.stepT / 1.5);
+          friendX = W + 40 - (W + 40 - W * 0.62) * progress;
+          const frame = Math.floor(cs.stepT * 4) % 4;
+          csDrawChar(friend, friendX, fY, 'left', charH, frame);
+          csDrawChar('krystal', kx, fY, 'right', charH, 0);
+      }},
+      { dur: 2.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'wave', W * 0.62, fY, charH);
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawBubble(W * 0.62, fY - charH - 4, friendName, greeting);
+      }},
+      { dur: 2.5, draw(cs){
+          csCurrentBg();
+          // friend walks out right
+          const progress = Math.min(1, cs.stepT / 2.0);
+          friendX = W * 0.62 + (W + 40 - W * 0.62) * progress;
+          const frame = Math.floor(cs.stepT * 4) % 4;
+          csDrawChar(friend, friendX, fY, 'right', charH, frame);
+          csDrawExpression('krystal', 'wave', kx, fY, charH);
+      }},
+    ]
+  };
+}
+
+/* 3) Found Something */
+function csGenFoundSomething(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.50;
+  const trinkets = [
+    { emoji: '\u{1F41A}', name: 'a pretty shell' },
+    { emoji: '\u{1F343}', name: 'a four-leaf clover' },
+    { emoji: '\u2B50', name: 'a shiny pebble' },
+    { emoji: '\u{1F48E}', name: 'something sparkly' },
+    { emoji: '\u{1F52E}', name: 'a little marble' },
+  ];
+  const trinket = trinkets[Math.floor(Math.random() * trinkets.length)];
+
+  return {
+    id: 'gen_found_something',
+    chars: ['krystal'],
+    skipable: true,
+    steps: [
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'search', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Hmm, what\u2019s that over there?');
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'inspect', kx, fY, charH);
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'surprised', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Oh! I found ' + trinket.name + '! ' + trinket.emoji);
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "I'll keep this forever!");
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 4);
+      }},
+    ]
+  };
+}
+
+/* 4) Missing Paul */
+function csGenMissingPaul(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.50;
+
+  return {
+    id: 'gen_missing_paul',
+    chars: ['krystal'],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'search', kx, fY, charH);
+      }},
+      { dur: 2.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'sad', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'I miss Paul...');
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'think', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Wait... I just remembered something he said...');
+      }},
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'laugh', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Hehe, he always makes me smile \u{1F49B}');
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 6);
+      }},
+    ]
+  };
+}
+
+/* 5) Dance Break */
+function csGenDanceBreak(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.38;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+
+  return {
+    id: 'gen_dance_break',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawChar(friend, W * 0.62, fY, 'left', charH, 0);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "I can't help it, I gotta dance!");
+      }},
+      { dur: 2.5, draw(cs){
+          csCurrentBg();
+          const frame = Math.floor(cs.stepT * 5) % 4;
+          csDrawExpression('krystal', 'cheer', kx, fY, charH, frame);
+          csDrawExpression(friend, 'cheer', W * 0.62, fY, charH, frame);
+          csDrawBubble(W * 0.62, fY - charH - 4, friendName, "Wait for me! \u{1F3B6}");
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 3);
+          csHearts(cs, W * 0.62, fY - charH * 0.7, 3);
+      }},
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'laugh', kx, fY, charH);
+          csDrawExpression(friend, 'laugh', W * 0.62, fY, charH);
+      }},
+    ]
+  };
+}
+
+/* 6) Photo Moment */
+function csGenPhotoMoment(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+  const kx = W * 0.42, fx = W * 0.58;
+
+  return {
+    id: 'gen_photo_moment',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'talk', kx, fY, charH);
+          csDrawChar(friend, fx, fY, 'left', charH, 0);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "Let's take a picture together!");
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'wave', kx, fY, charH);
+          csDrawExpression(friend, 'cheer', fx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, null, '3... 2... 1...');
+      }},
+      { dur: 2.2, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawExpression(friend, 'wave', fx, fY, charH);
+          // camera flash effect
+          if (cs.stepT < 0.25){
+            const flash = Math.max(0, 1 - cs.stepT / 0.25);
+            ctx.fillStyle = `rgba(255,255,255,${(flash * 0.8).toFixed(2)})`;
+            ctx.fillRect(0, 0, W, H);
+          }
+          if (cs.stepT > 0.6){
+            csDrawBubble(fx, fY - charH - 4, friendName, "That's a keeper! \u{1F4F8}");
+          }
+      }, onStart(cs){
+          try{ sfx('tap'); }catch(e){}
+          csHearts(cs, kx, fY - charH * 0.7, 4);
+          csHearts(cs, fx, fY - charH * 0.7, 4);
+      }},
+    ]
+  };
+}
+
+/* 7) Sharing Snack */
+function csGenSharingSnack(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+  const kx = W * 0.42, fx = W * 0.58;
+  const snacks = ['a cookie \u{1F36A}', 'some candy \u{1F36C}', 'a cupcake \u{1F9C1}', 'a donut \u{1F369}'];
+  const snack = snacks[Math.floor(Math.random() * snacks.length)];
+
+  return {
+    id: 'gen_sharing_snack',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'beckon', fx, fY, charH);
+          csDrawChar('krystal', kx, fY, 'right', charH, 0);
+          csDrawBubble(fx, fY - charH - 4, friendName, 'Hey Krystal, want ' + snack + '?');
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'surprised', kx, fY, charH);
+          csDrawExpression(friend, 'nod', fx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'For me? Really?!');
+      }},
+      { dur: 2.2, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawExpression(friend, 'cheer', fx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "Yay! You're the best! \u{1F49B}");
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 5);
+      }},
+    ]
+  };
+}
+
+/* 8) Cloud Pointing */
+function csGenCloudPointing(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+  const kx = W * 0.42, fx = W * 0.58;
+  const shapes = ['a cookie', 'a bunny', 'a heart', 'a dinosaur', 'a puppy'];
+  const shape = shapes[Math.floor(Math.random() * shapes.length)];
+
+  return {
+    id: 'gen_cloud_pointing',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'point', kx, fY, charH);
+          csDrawChar(friend, fx, fY, 'left', charH, 0);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Look up there! See that cloud?');
+      }},
+      { dur: 2.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'point', kx, fY, charH);
+          csDrawExpression(friend, 'think', fx, fY, charH);
+          csDrawBubble(fx, fY - charH - 4, friendName, 'Hmm, which one?');
+      }},
+      { dur: 2.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawExpression(friend, 'laugh', fx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'That one looks like ' + shape + '! \u{1F602}');
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* 9) Humming a Tune */
+function csGenHummingTune(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.50;
+
+  return {
+    id: 'gen_humming_tune',
+    chars: ['krystal'],
+    skipable: true,
+    steps: [
+      { dur: 2.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', '\u266a La la laaa~ \u266b');
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'talk', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "Paul taught me this one...");
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', '\u266b Hmm hmm hmmm~ \u266a');
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 4);
+      }},
+    ]
+  };
+}
+
+/* 10) Stretching */
+function csGenStretching(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.50;
+
+  return {
+    id: 'gen_stretching',
+    chars: ['krystal'],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'shrug', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', '*biiiig stretch*');
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "Ahhh, that's better!");
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'nod', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Okay, ready for anything! \u{1F4AA}');
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+const GENERIC_CUTSCENES = [
+  csGenThinkingOutLoud,
+  csGenFriendlyWave,
+  csGenFoundSomething,
+  csGenMissingPaul,
+  csGenDanceBreak,
+  csGenPhotoMoment,
+  csGenSharingSnack,
+  csGenCloudPointing,
+  csGenHummingTune,
+  csGenStretching,
+];
+
+/* ============================================================================
+   CUTSCENE CATALOG  —  master list for the journal / checklist UI
+   ============================================================================ */
+const CUTSCENE_CATALOG = [
+  // Scene-specific cutscenes
+  { id: 'campfire_story',        name: 'Campfire Story',        description: 'Spooky stories by the campfire.',              scenes: ['campsite'],                               chars: ['krystal','paul','luna'] },
+  { id: 'stargazing',            name: 'Stargazing',            description: 'A quiet night under the stars.',               scenes: ['starrymeadow','observatory'],              chars: ['krystal','paul'] },
+  { id: 'beach_sunset_picnic',   name: 'Beach Sunset Picnic',   description: 'Golden hour at the beach with friends.',       scenes: ['beach','moonbeach'],                       chars: ['krystal','paul','wade'] },
+  { id: 'bakery_mishap',         name: 'Bakery Mishap',         description: 'Flour explosions in the kitchen!',             scenes: ['bakery','gingerbreadkitchen'],              chars: ['krystal','luna'] },
+  { id: 'library_ghost',         name: 'Library Ghost',         description: 'Mysterious things in the library...',          scenes: ['library','arcanelibrary'],                  chars: ['krystal','william'] },
+  { id: 'aquarium_wonder',       name: 'Aquarium Wonder',       description: 'Marveling at ocean creatures.',                scenes: ['aquarium','aquariumtunnel'],                chars: ['krystal','luke'] },
+  { id: 'rainy_day_chat',        name: 'Rainy Day Chat',        description: 'Cozy under the umbrella together.',            scenes: ['rainystreet'],                              chars: ['krystal','paul'] },
+  { id: 'flower_crown',          name: 'Flower Crown',          description: 'Flower crowns for everyone!',                  scenes: ['florist','cherryblossom','lavender','peonygarden'], chars: ['krystal','luna','wade'] },
+  { id: 'snow_angel_contest',    name: 'Snow Angel Contest',    description: 'Who makes the best snow angel?',               scenes: ['snowycabin','icepond','frozenfalls'],       chars: ['krystal','paul','william'] },
+  { id: 'music_jam',             name: 'Music Jam',             description: 'An impromptu band practice.',                  scenes: ['musicroom','recordshop','jazzclub'],        chars: ['krystal','paul','luke','luna'] },
+  { id: 'painting_together',     name: 'Painting Together',     description: 'Art class side by side.',                      scenes: ['artstudio','pottery'],                      chars: ['krystal','paul'] },
+  { id: 'hide_and_seek',         name: 'Hide and Seek',         description: 'Ready or not, here I come!',                   scenes: ['hedgemaze','topiary','backyard'],            chars: ['krystal','luke','william'] },
+  { id: 'tea_party',             name: 'Tea Party',             description: 'Pinkies up, everyone!',                        scenes: ['teahouse','bambootearoom','cafe'],           chars: ['krystal','luna','wade'] },
+  { id: 'sunset_balloon_ride',   name: 'Sunset Balloon Ride',   description: 'Floating high above the world.',               scenes: ['balloonride','balloonfest','kitehill'],      chars: ['krystal','paul'] },
+  { id: 'cooking_disaster',      name: 'Cooking Disaster',      description: 'When the recipe goes very wrong.',             scenes: ['diner','dumplinghouse','ramenshop'],         chars: ['krystal','wade','william'] },
+  { id: 'tide_pool_discovery',   name: 'Tide Pool Discovery',   description: 'Tiny creatures in the tide pools.',            scenes: ['tidepools','coralreef'],                    chars: ['krystal','luke','luna'] },
+  { id: 'pillow_fort',           name: 'Pillow Fort',           description: 'Building the ultimate blanket fortress.',      scenes: ['treehouse','sunroom','igloo'],               chars: ['krystal','wade','luke'] },
+  { id: 'dance_lesson',          name: 'Dance Lesson',          description: 'One-two-three, one-two-three...',              scenes: ['balletstudio','ballroom'],                   chars: ['krystal','paul'] },
+  { id: 'firefly_catching',      name: 'Firefly Catching',      description: 'Chasing tiny lights in the dark.',             scenes: ['fireflies','fireflypier','nightgarden'],     chars: ['krystal','luna','william'] },
+  { id: 'magic_show',            name: 'Magic Show',            description: 'Pick a card, any card...',                     scenes: ['magicshop','tarotparlor','wizardtower'],     chars: ['krystal','paul','william'] },
+  { id: 'sunset_fishing',        name: 'Sunset Fishing',        description: 'Patience and a good view.',                    scenes: ['fishingdock','marina','river'],              chars: ['krystal','paul','wade'] },
+  { id: 'garden_butterflies',    name: 'Garden Butterflies',    description: 'Flutter flutter flutter.',                     scenes: ['butterflydome','greenhouse','sunflowers'],   chars: ['krystal','luna'] },
+  { id: 'treasure_hunt',         name: 'Treasure Hunt',         description: 'X marks the spot!',                            scenes: ['canyon','sanddunes','cornmaze'],             chars: ['krystal','paul','wade'] },
+  { id: 'cloud_watching',        name: 'Cloud Watching',        description: 'What shapes do you see?',                      scenes: ['alpinemeadow','poppyfield','lavender'],      chars: ['krystal','paul'] },
+  { id: 'spooky_mansion',        name: 'Spooky Mansion',        description: 'Was that a ghost?!',                           scenes: ['escaperoom','antiqueshop','darkroom'],       chars: ['krystal','william','luke'] },
+  { id: 'snowball_fight',        name: 'Snowball Fight',        description: 'Every snowflake for themselves!',              scenes: ['icepond','frozenfalls','icebergbay'],        chars: ['krystal','paul','luke','william'] },
+  { id: 'wishing_well',          name: 'Wishing Well',          description: 'Toss a coin and make a wish.',                 scenes: ['starpool','moontemple','fairyring'],         chars: ['krystal','paul'] },
+  { id: 'pet_shop_chaos',        name: 'Pet Shop Chaos',        description: 'Puppies everywhere!',                          scenes: ['petshop','catcafe','aviary'],                chars: ['krystal','luna','wade'] },
+  { id: 'karaoke_night',         name: 'Karaoke Night',         description: 'Wade\u2019s solo steals the show.',             scenes: ['jazzclub','recordshop','carnival'],          chars: ['krystal','paul','luna','wade'] },
+  { id: 'puddle_jumping',        name: 'Puddle Jumping',        description: 'Splash splash splash!',                        scenes: ['rainystreet','waterfall','river'],           chars: ['krystal','luke','william'] },
+  { id: 'constellation_drawing', name: 'Constellation Drawing', description: 'Connecting the dots in the sky.',              scenes: ['observatory','planetarium','aurora'],        chars: ['krystal','paul'] },
+  { id: 'lantern_release',       name: 'Lantern Release',       description: 'Wishes floating up to the sky.',               scenes: ['lanternfestival','nightmarket','harbornight'], chars: ['krystal','paul','luna','wade','luke','william'] },
+  { id: 'board_game_night',      name: 'Board Game Night',      description: 'Fierce competition and sore losers.',          scenes: ['treehouse','snowycabin','igloo'],            chars: ['krystal','paul','wade','luke'] },
+  { id: 'sunrise_yoga',          name: 'Sunrise Yoga',          description: 'Namaste at dawn.',                             scenes: ['beach','alpinemeadow','rooftoppool'],        chars: ['krystal','luna'] },
+  { id: 'sandcastle_contest',    name: 'Sandcastle Contest',    description: 'Building kingdoms in the sand.',               scenes: ['beach','moonbeach','driftwoodbeach'],        chars: ['krystal','paul','wade','william'] },
+  { id: 'candlelit_dinner',      name: 'Candlelit Dinner',      description: 'A romantic evening for two.',                  scenes: ['cafe','diner','winecellar'],                chars: ['krystal','paul'] },
+  { id: 'fossil_discovery',      name: 'Fossil Discovery',      description: 'Ancient treasures in the rock.',               scenes: ['naturalhistory','canyon','cliffs'],          chars: ['krystal','luke','luna'] },
+  // Generic cutscenes
+  { id: 'gen_thinking_out_loud', name: 'Thinking Out Loud',     description: 'Krystal daydreaming about Paul.',              scenes: ['any'],  chars: ['krystal'] },
+  { id: 'gen_friendly_wave',     name: 'Friendly Wave',         description: 'A friend stops by to say hi.',                 scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_found_something',   name: 'Found Something',       description: 'Krystal finds a little treasure.',             scenes: ['any'],  chars: ['krystal'] },
+  { id: 'gen_missing_paul',      name: 'Missing Paul',          description: 'She misses him, but a memory helps.',          scenes: ['any'],  chars: ['krystal'] },
+  { id: 'gen_dance_break',       name: 'Dance Break',           description: 'Spontaneous dance party!',                     scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_photo_moment',      name: 'Photo Moment',          description: 'Say cheese!',                                  scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_sharing_snack',     name: 'Sharing Snack',         description: 'A friend shares a treat.',                     scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_cloud_pointing',    name: 'Cloud Pointing',        description: 'That cloud looks like a cookie!',              scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_humming_tune',      name: 'Humming a Tune',        description: 'A song stuck in her head.',                    scenes: ['any'],  chars: ['krystal'] },
+  { id: 'gen_stretching',        name: 'Stretching',            description: 'A big stretch before adventure.',              scenes: ['any'],  chars: ['krystal'] },
+];
 
 /* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
@@ -6951,8 +7447,8 @@ const CUTSCENE_MAP = {
 /* ============================================================================
    RANDOM TRIGGER SYSTEM
    ============================================================================ */
-let csTriggerTimer = 30 + Math.random() * 30;
-function resetCsTrigger(){ csTriggerTimer = 30 + Math.random() * 30; }
+let csTriggerTimer = 20 + Math.random() * 20;
+function resetCsTrigger(){ csTriggerTimer = 20 + Math.random() * 20; }
 
 // Debug: force-trigger a cutscene for the current scene (press X cycles through them)
 let csDebugIdx = 0;
@@ -6961,7 +7457,9 @@ function forceCutscene(){
   const scene = SCENES[currentScene];
   const defs = CUTSCENE_MAP[scene];
   if (!defs || !defs.length) {
-    if (typeof say === 'function') say('(no cutscene for this scene)');
+    // try a generic
+    const factory = GENERIC_CUTSCENES[Math.floor(Math.random() * GENERIC_CUTSCENES.length)];
+    startCutscene(factory());
     return;
   }
   const factory = defs[csDebugIdx % defs.length];
@@ -6974,7 +7472,7 @@ function forceCutscene(){
     if (cutscene || birthday) return;
     csTriggerTimer -= dt;
     if (csTriggerTimer > 0) return;
-    csTriggerTimer = 30 + Math.random() * 30;   // reset to 30-60 seconds
+    csTriggerTimer = 20 + Math.random() * 20;   // reset to 20-40 seconds
 
     // don't trigger if pet is busy
     if (pet.animLock > 0 || pet.resting || isCrying()) return;
@@ -6982,16 +7480,90 @@ function forceCutscene(){
     // check if current scene has cutscenes
     const scene = SCENES[currentScene];
     const defs = CUTSCENE_MAP[scene];
-    if (!defs || !defs.length) return;
 
-    // 15% chance
-    if (Math.random() > 0.15) return;
-
-    // pick a random cutscene for this scene and start it
-    const factory = defs[Math.floor(Math.random() * defs.length)];
+    let factory;
+    if (defs && defs.length){
+      // always trigger if scene has cutscenes
+      factory = defs[Math.floor(Math.random() * defs.length)];
+    } else {
+      // fallback to a generic cutscene
+      factory = GENERIC_CUTSCENES[Math.floor(Math.random() * GENERIC_CUTSCENES.length)];
+    }
     startCutscene(factory());
   });
 })();
+
+/* ============================================================================
+   CUTSCENE JOURNAL / CHECKLIST UI
+   ============================================================================ */
+/* Build a map from cutscene ID to its factory for replay */
+const CS_FACTORY_BY_ID = {};
+// scene-specific
+for (const scene in CUTSCENE_MAP){
+  for (const factory of CUTSCENE_MAP[scene]){
+    const test = factory();
+    if (test.id && !CS_FACTORY_BY_ID[test.id]) CS_FACTORY_BY_ID[test.id] = factory;
+  }
+}
+// generic
+for (const factory of GENERIC_CUTSCENES){
+  const test = factory();
+  if (test.id) CS_FACTORY_BY_ID[test.id] = factory;
+}
+
+function buildCutsceneList(){
+  const list = document.getElementById('csJournalList');
+  if (!list) return;
+  list.innerHTML = '';
+  const total = CUTSCENE_CATALOG.length;
+  let seen = 0;
+  for (const entry of CUTSCENE_CATALOG){
+    if (seenCutscenes[entry.id]) seen++;
+  }
+  // progress
+  const prog = document.getElementById('csJournalProgress');
+  if (prog) prog.innerHTML = '<span>' + seen + ' / ' + total + ' discovered</span>' +
+    '<div class="pbar"><i style="width:' + (seen / total * 100).toFixed(1) + '%"></i></div>';
+
+  for (const entry of CUTSCENE_CATALOG){
+    const isSeen = !!seenCutscenes[entry.id];
+    const row = document.createElement('div');
+    row.className = 'csRow' + (isSeen ? '' : ' locked');
+
+    if (isSeen){
+      const isGeneric = entry.scenes.length === 1 && entry.scenes[0] === 'any';
+      const charList = entry.chars.map(c => c === '?' ? 'Random' : c.charAt(0).toUpperCase() + c.slice(1)).join(', ');
+      row.innerHTML =
+        '<div class="csName">' + entry.name + '</div>' +
+        '<div class="csDesc">' + entry.description + '</div>' +
+        '<div class="csMeta">' +
+          (isGeneric ? '<span class="csTag">Any scene</span>' : '<span class="csTag">' + entry.scenes.slice(0, 3).join(', ') + '</span>') +
+          '<span class="csChars">' + charList + '</span>' +
+        '</div>' +
+        '<button class="csReplay">\u25b6 Replay</button>';
+      row.querySelector('.csReplay').addEventListener('click', function(){
+        const factory = CS_FACTORY_BY_ID[entry.id];
+        if (factory){
+          closeCsJournal();
+          setTimeout(function(){ startCutscene(factory()); }, 200);
+        }
+      });
+    } else {
+      row.innerHTML =
+        '<div class="csName">???</div>' +
+        '<div class="csDesc">Not yet discovered</div>';
+    }
+    list.appendChild(row);
+  }
+}
+
+function openCsJournal(){ buildCutsceneList(); document.getElementById('csJournalPanel').classList.remove('hide'); }
+function closeCsJournal(){ document.getElementById('csJournalPanel').classList.add('hide'); }
+function toggleCsJournal(){ document.getElementById('csJournalPanel').classList.contains('hide') ? openCsJournal() : closeCsJournal(); }
+
+// Wire up journal button
+document.getElementById('csJournalBtn').addEventListener('click', openCsJournal);
+document.getElementById('csJournalClose').addEventListener('click', closeCsJournal);
 
 /* ============================================================================
    HOOK INTO EXISTING LOOP  (via EXTRA_* arrays — no core edits needed)
