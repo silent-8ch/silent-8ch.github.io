@@ -1021,14 +1021,15 @@ const CUTSCENE_MAP = {
 /* ============================================================================
    RANDOM TRIGGER SYSTEM
    ============================================================================ */
-(function csTriggerSystem(){
-  let triggerTimer = 30 + Math.random() * 30;
+let csTriggerTimer = 30 + Math.random() * 30;
+function resetCsTrigger(){ csTriggerTimer = 30 + Math.random() * 30; }
 
+(function csTriggerSystem(){
   EXTRA_UPDATERS.push(function csRandomTrigger(dt){
     if (cutscene || birthday) return;
-    triggerTimer -= dt;
-    if (triggerTimer > 0) return;
-    triggerTimer = 30 + Math.random() * 30;   // reset to 30-60 seconds
+    csTriggerTimer -= dt;
+    if (csTriggerTimer > 0) return;
+    csTriggerTimer = 30 + Math.random() * 30;   // reset to 30-60 seconds
 
     // don't trigger if pet is busy
     if (pet.animLock > 0 || pet.resting || isCrying()) return;

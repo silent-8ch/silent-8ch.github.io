@@ -111,6 +111,8 @@ const TRINKET_POOL = (()=>{
   g(['shadowtheater'], ['🎭','🕯️','🎪']);
   g(['dreamweaverloom'], ['🧵','✨','🌙']);
   g(['astralgarden'], ['🌌','💎','🦋']);
+  g(['starpool'], ['🌙','🕯️','✨']);
+  g(['enchantedclock'], ['⏳','⚙️','🔔']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];
@@ -898,11 +900,11 @@ function registerScene(name, drawFn, selfPet){
 
 // Debug: press 1/2/3 to switch scenes, c to toggle crying
 document.addEventListener('keydown', e => {
-  if (e.key === '1') { currentScene = 0; sceneChangeTimer = 60; }
-  if (e.key === '2') { currentScene = 1; sceneChangeTimer = 60; }
-  if (e.key === '3') { currentScene = 2; sceneChangeTimer = 60; }
-  if (e.key === 'n' || e.key === 'N') { randomScene(); sceneChangeTimer = 60; }
-  if (e.key === 'p' || e.key === 'P') { randomScene(); sceneChangeTimer = 60; }
+  if (e.key === '1') { currentScene = 0; sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }
+  if (e.key === '2') { currentScene = 1; sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }
+  if (e.key === '3') { currentScene = 2; sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }
+  if (e.key === 'n' || e.key === 'N') { randomScene(); sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }
+  if (e.key === 'p' || e.key === 'P') { randomScene(); sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }
   if (e.key === 'm' || e.key === 'M') { toggleMap(); }
   if (e.key === 'c' || e.key === 'C') {
     debugCry = !debugCry;
@@ -914,6 +916,6 @@ document.addEventListener('keydown', e => {
 
 function updateScene(dt) {
   sceneChangeTimer -= dt;
-  if (sceneChangeTimer <= 0) { randomScene(); sceneChangeTimer = 60; }
+  if (sceneChangeTimer <= 0) { randomScene(); sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }
 }
 
