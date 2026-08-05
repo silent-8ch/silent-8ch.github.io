@@ -29,7 +29,7 @@ The world has **216 places** to visit, **215 of them with hand-placed tap spots*
 
 ---
 
-## 🎬 Cutscenes (37)
+## 🎬 Cutscenes (40)
 
 _Now and then, if she's idle in the right place, a little story plays out. The screen fades in, characters walk on, and they talk, tease, and share a moment together. Each cutscene is skipable (tap **Skip >>** in the top-right corner) and lasts about 20–30 seconds. They trigger randomly (~15 % chance every 30–60 s) — linger in a scene and one might start on its own._
 
@@ -72,6 +72,9 @@ _Debug shortcut: press **X** on a keyboard to force-trigger the cutscene for the
 - **Sandcastle Contest** — triggers at _Beach_, _Moonlit Beach_, or _Driftwood Beach_. Characters: Krystal, Paul, Wade, William. Building sandcastles on the shore. Wade builds a tiny lopsided one. William unveils an elaborate fortress with a flag — Paul inspects it in disbelief. A wave washes William's away but Krystal's survives — she built a moat! Everyone surprised, then laughing.
 - **Candlelit Dinner** — triggers at _Coffee Shop_, _Diner_, or _Wine Cellar_. Characters: Krystal, Paul. A romantic dinner by candlelight. Paul pulls out her chair, they clink glasses. He tries to be smooth but knocks over his water — mortified. Krystal: "Smooth moves." He nods: "Nailed it." Romantic despite the chaos, hearts everywhere.
 - **Fossil Discovery** — triggers at _Natural History Museum_, _Canyon_, or _Coastal Cliffs_. Characters: Krystal, Luke, Luna. Digging at a rock site. Luke brushes away dirt and finds a fossil — a real ammonite! Krystal examines it: "Millions of years old…" All three think quietly, then burst into cheers. Science moment!
+- **Arcade High Score** _(interactive)_ — triggers at _Arcade_, _Candy Factory_, or _Bowling Alley_. Characters: Krystal, Luke. Luke challenges Krystal to beat a high score. **Tap rapidly** during the mash window to boost her score — 10+ taps earns a new high score with a huge celebration, fewer taps means Luke teases her about it. They high-five either way.
+- **Enchanted Gift** _(interactive)_ — triggers at _Enchanted Forest_, _Crystal Grotto_, or _Mushroom Glade_. Characters: Krystal, William. William discovers three glowing objects the forest has left behind. **Tap one of three choices** (crystal, flower, or feather) to pick a gift — each has a unique reaction: the crystal hums warmly, the flower glows like a night-light, and the feather tickles and floats on its own. They share a hug under the enchanted canopy.
+- **Toy Shop Race** _(interactive)_ — triggers at _Toy Shop_, _Candy Shop_, or _Comic Shop_. Characters: Krystal, Wade. Wade finds wind-up racers and challenges Krystal. A countdown goes 3-2-1-GO! — **tap at the perfect moment** when "GO!" appears. Perfect timing wins the race for Krystal; too early or too late and Wade takes it. Either way, they high-five and demand a rematch.
 
 ---
 

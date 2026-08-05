@@ -8202,6 +8202,398 @@ function csGenSharingUmbrella(){
   };
 }
 
+/* ============================================================================
+   CUTSCENE 38: ARCADE HIGH SCORE  (triggers at arcade, candyfactory, bowling)
+   Interactive: mash-tap during a window to boost Krystal's score.
+   ============================================================================ */
+function csArcadeHighScore(){
+  const groundY = H * 0.70, charH = 80, fY = groundY + 10;
+  const krystalX = W * 0.38, lukeX = W * 0.62;
+  let taps = 0, tapPhaseActive = false;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#1a1230'); wall.addColorStop(0.5, '#241840'); wall.addColorStop(1, '#2e2048');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+    const fl = ctx.createLinearGradient(0, groundY, 0, H);
+    fl.addColorStop(0, '#3a2a50'); fl.addColorStop(1, '#2a1a40');
+    ctx.fillStyle = fl; ctx.fillRect(0, groundY, W, H - groundY);
+    const glowCols = ['#ff3080','#30ff80','#3080ff','#ffff30'];
+    for (let i = 0; i < 4; i++){
+      const nx = W * 0.1 + i * W * 0.25;
+      ctx.fillStyle = glowCols[i]; ctx.globalAlpha = (0.4 + 0.4 * Math.sin(t * 4 + i * 1.5)) * 0.15;
+      ctx.fillRect(nx - 1, 0, 3, groundY);
+    }
+    ctx.globalAlpha = 1;
+    for (let i = 0; i < 3; i++){
+      const cx = W * 0.12 + i * W * 0.32;
+      ctx.fillStyle = '#18102a'; ctx.fillRect(cx - 12, groundY - 55, 24, 55);
+      ctx.fillStyle = '#222'; ctx.fillRect(cx - 9, groundY - 50, 18, 14);
+      ctx.fillStyle = glowCols[(i + Math.floor(t * 2)) % 4]; ctx.globalAlpha = 0.25;
+      ctx.fillRect(cx - 8, groundY - 49, 16, 12); ctx.globalAlpha = 1;
+    }
+    for (let i = 0; i < 12; i++){
+      ctx.fillStyle = glowCols[i % 4]; ctx.globalAlpha = (0.5 + 0.3 * Math.sin(t * 3 + i)) * 0.7;
+      ctx.beginPath(); ctx.arc(i * W / 11, 6, 2.5, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawTapPrompt(cs){
+    if (!tapPhaseActive) return;
+    const remaining = 3.5 - cs.stepT;
+    const barW = 100, barH = 8, barX = W * 0.5 - barW / 2, barY = H * 0.18;
+    ctx.fillStyle = 'rgba(0,0,0,0.4)'; roundRect(barX, barY, barW, barH, 4); ctx.fill();
+    const fill = Math.max(0, remaining / 3.5);
+    ctx.fillStyle = fill > 0.3 ? '#30ff80' : '#ff3030';
+    roundRect(barX, barY, barW * fill, barH, 4); ctx.fill();
+    ctx.save();
+    ctx.font = 'bold 16px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = `rgba(255,255,100,${(0.6 + 0.4 * Math.sin(cs.totalT * 10)).toFixed(2)})`;
+    ctx.fillText('TAP! TAP! TAP!', W * 0.5, H * 0.12);
+    ctx.font = 'bold 13px "Segoe UI", sans-serif'; ctx.fillStyle = '#fff';
+    ctx.fillText('x' + taps, W * 0.5, H * 0.26);
+    ctx.restore();
+  }
+
+  return {
+    id: 'arcade_high_score',
+    chars: ['krystal', 'luke'],
+    skipable: true,
+    steps: [
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('luke', 'point', lukeX, fY, charH);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'This game has a high score \u2014 wanna try?');
+      }},
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'nod', krystalX, fY, charH);
+          csDrawExpression('luke', 'cheer', lukeX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "You're on! Let's do this! \uD83D\uDCAA");
+      }},
+      { dur: 3.5, draw(cs){
+          drawBg(cs); drawTapPrompt(cs);
+          const expr = taps >= 10 ? 'run' : taps >= 4 ? 'interact' : 'inspect';
+          csDrawExpression('krystal', expr, krystalX, fY, charH);
+          csDrawExpression('luke', 'cheer', lukeX, fY, charH);
+      }, onStart(cs){ taps = 0; tapPhaseActive = true; },
+         onEnd(cs){ tapPhaseActive = false; },
+         onTap(cs, px, py){
+          taps++;
+          cs.hearts.push({ x: px, y: py, vx: rand(-12,12), vy: rand(-40,-20), life: 0.4, ch: '\u2728' });
+      }},
+      { dur: 2.8, draw(cs){
+          drawBg(cs);
+          if (taps >= 10){
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('luke', 'surprised', lukeX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'NEW HIGH SCORE!! \uD83C\uDF1F');
+          } else if (taps >= 4){
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+            csDrawExpression('luke', 'nod', lukeX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Not bad! Almost had it!');
+          } else {
+            csDrawExpression('krystal', 'embarrassed', krystalX, fY, charH);
+            csDrawExpression('luke', 'laugh', lukeX, fY, charH);
+            csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Did you even press anything? \uD83D\uDE02');
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, taps >= 10 ? 8 : 3);
+      }},
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          csDrawExpression('luke', 'highfive', lukeX - 10, fY, charH);
+          csDrawExpression('krystal', 'highfive', krystalX + 10, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', taps >= 10 ? 'Rematch tomorrow!' : "I'll beat it next time!");
+      }, onStart(cs){ csHearts(cs, (krystalX + lukeX) / 2, fY - charH * 0.7, 4); }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 39: ENCHANTED GIFT  (triggers at enchantedforest, crystalgrotto, mushroomglade)
+   Interactive: tap one of 3 glowing objects to choose a gift.
+   ============================================================================ */
+function csEnchantedGift(){
+  const groundY = H * 0.70, charH = 80, fY = groundY + 10;
+  const krystalX = W * 0.35, williamX = W * 0.65;
+  let choice = -1, choicePhaseActive = false;
+  const gifts = [
+    { emoji: '\uD83D\uDC8E', reaction: 'It hums when I hold it\u2026 warm!',          krExpr: 'surprised' },
+    { emoji: '\uD83C\uDF38', reaction: "It's glowing! Like a little night-light!", krExpr: 'cheer'     },
+    { emoji: '\uD83E\uDEB6', reaction: 'It tickles! And it floats on its own!',    krExpr: 'laugh'     },
+  ];
+  const optX = [W * 0.22, W * 0.50, W * 0.78], optY = H * 0.38;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#0a1628'); sky.addColorStop(0.4, '#162040'); sky.addColorStop(1, '#1a3030');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+    for (let i = 0; i < 30; i++){
+      const sx = (i * 83 + 11) % W, sy = (i * 41 + 5) % (groundY * 0.5);
+      ctx.fillStyle = `rgba(200,220,255,${(0.2 + 0.3 * Math.sin(t * 1.5 + i)).toFixed(2)})`;
+      ctx.fillRect(sx, sy, 1.2, 1.2);
+    }
+    ctx.fillStyle = '#0a1a12';
+    for (let i = 0; i < 6; i++){
+      const tx = i * W / 5 - 10, th = 40 + (i * 13) % 20;
+      ctx.beginPath(); ctx.moveTo(tx - 14, groundY + 2); ctx.lineTo(tx, groundY - th);
+      ctx.lineTo(tx + 14, groundY + 2); ctx.fill();
+    }
+    const gr = ctx.createLinearGradient(0, groundY, 0, H);
+    gr.addColorStop(0, '#1a3020'); gr.addColorStop(1, '#0e2018');
+    ctx.fillStyle = gr; ctx.fillRect(0, groundY, W, H - groundY);
+    const mc = ['#60ff90','#40e0a0','#80ffc0'];
+    for (let i = 0; i < 5; i++){
+      const mx = W * 0.08 + i * W * 0.22, my = groundY + 6;
+      ctx.fillStyle = mc[i % 3]; ctx.globalAlpha = 0.15 + 0.1 * Math.sin(t * 2 + i);
+      ctx.beginPath(); ctx.arc(mx, my - 3, 4, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = '#c0c0a0'; ctx.fillRect(mx - 1, my - 3, 2, 5); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    for (let i = 0; i < 8; i++){
+      const px = (i * 71 + Math.sin(t * 0.4 + i) * 20) % W;
+      const py = groundY * 0.3 + Math.sin(t * 0.8 + i * 1.5) * 20;
+      ctx.fillStyle = `rgba(150,255,200,${(0.1 + 0.15 * Math.sin(t * 2 + i * 0.7)).toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(px, py, 1.5, 0, 7); ctx.fill();
+    }
+  }
+
+  function drawChoiceUI(cs){
+    if (!choicePhaseActive) return;
+    const t = cs.totalT;
+    ctx.save();
+    ctx.font = 'bold 11px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(220,255,240,0.7)';
+    ctx.fillText('Tap one to choose!', W * 0.5, H * 0.26);
+    const labels = ['\uD83D\uDC8E Crystal', '\uD83C\uDF38 Flower', '\uD83E\uDEB6 Feather'];
+    for (let i = 0; i < 3; i++){
+      const bob = Math.sin(t * 2.5 + i * 2.1) * 6;
+      ctx.fillStyle = `rgba(180,255,220,${((0.6 + 0.3 * Math.sin(t * 4 + i * 1.2)) * 0.2).toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(optX[i], optY + bob, 22, 0, 7); ctx.fill();
+      ctx.font = '22px serif'; ctx.fillStyle = '#fff';
+      ctx.fillText(gifts[i].emoji, optX[i], optY + bob);
+      ctx.font = '9px "Segoe UI", sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillText(labels[i], optX[i], optY + bob + 26);
+    }
+    ctx.restore();
+  }
+
+  return {
+    id: 'enchanted_gift',
+    chars: ['krystal', 'william'],
+    skipable: true,
+    steps: [
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('william', 'search', williamX, fY, charH);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawBubble(williamX, fY - charH - 4, 'William', 'Whoa, look what the forest left us\u2026');
+      }},
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          csDrawExpression('william', 'point', williamX, fY, charH);
+          csDrawExpression('krystal', 'look', krystalX, fY, charH);
+          csDrawBubble(williamX, fY - charH - 4, 'William', 'Pick one \u2014 they only glow like this once!');
+      }},
+      { dur: 5.0, draw(cs){
+          drawBg(cs);
+          if (choice >= 0){
+            csDrawExpression('krystal', 'carry', krystalX, fY, charH);
+            csDrawExpression('william', 'nod', williamX, fY, charH);
+            ctx.save(); ctx.font = '18px serif'; ctx.textAlign = 'center';
+            ctx.fillText(gifts[choice].emoji, krystalX, fY - charH - 8); ctx.restore();
+            csDrawBubble(krystalX, fY - charH - 24, 'Krystal', 'This one!');
+          } else {
+            drawChoiceUI(cs);
+            csDrawExpression('krystal', 'think', krystalX, fY, charH);
+            csDrawExpression('william', 'look', williamX, fY, charH);
+          }
+      }, onStart(cs){ choice = -1; choicePhaseActive = true; },
+         onEnd(cs){ choicePhaseActive = false; if (choice < 0) choice = Math.floor(Math.random() * 3); },
+         onTap(cs, px, py){
+          if (choice >= 0) return;
+          for (let i = 0; i < 3; i++){
+            const dx = px - optX[i], dy = py - optY;
+            if (dx * dx + dy * dy < 30 * 30){
+              choice = i; choicePhaseActive = false;
+              csHearts(cs, optX[i], optY, 5);
+              cs.stepT = Math.max(cs.stepT, 3.5);
+              return;
+            }
+          }
+      }},
+      { dur: 2.8, draw(cs){
+          drawBg(cs);
+          const g = gifts[Math.max(0, choice)];
+          csDrawExpression('krystal', g.krExpr, krystalX, fY, charH);
+          csDrawExpression('william', 'laugh', williamX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', g.reaction);
+      }, onStart(cs){ csHearts(cs, krystalX, fY - charH * 0.7, 6); }},
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('william', 'give', williamX - 8, fY, charH);
+          csDrawExpression('krystal', 'hug', krystalX + 8, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'The forest is magic with you here \u2728');
+      }, onStart(cs){ csHearts(cs, (krystalX + williamX) / 2, fY - charH * 0.7, 6); }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 40: TOY SHOP RACE  (triggers at toyshop, candyshop, comicshop)
+   Interactive: tap at the right moment on a countdown for a wind-up race.
+   ============================================================================ */
+function csToyShopRace(){
+  const groundY = H * 0.70, charH = 80, fY = groundY + 10;
+  const krystalX = W * 0.32, wadeX = W * 0.68;
+  let goPhaseActive = false, goShown = false, tapTiming = -1;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#f8e8d0'); wall.addColorStop(0.5, '#f0dcc0'); wall.addColorStop(1, '#e8d0b0');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+    const fl = ctx.createLinearGradient(0, groundY, 0, H);
+    fl.addColorStop(0, '#c09060'); fl.addColorStop(1, '#a07848');
+    ctx.fillStyle = fl; ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 6; i++){
+      const ly = groundY + i * (H - groundY) / 5;
+      ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(W, ly); ctx.stroke();
+    }
+    for (let row = 0; row < 2; row++){
+      const sy = H * 0.10 + row * 28;
+      ctx.fillStyle = '#b08050'; ctx.fillRect(W * 0.05, sy, W * 0.9, 3);
+      const tc = ['#ff6060','#60a0ff','#60dd60','#ffcc30','#ff80c0'];
+      for (let i = 0; i < 6; i++){
+        ctx.fillStyle = tc[i % 5];
+        ctx.beginPath(); ctx.arc(W * 0.12 + i * W * 0.14, sy - 5, 4 + (i % 3), 0, 7); ctx.fill();
+      }
+    }
+    const warm = ctx.createRadialGradient(W * 0.5, 0, 0, W * 0.5, 0, H * 0.6);
+    warm.addColorStop(0, 'rgba(255,240,200,0.08)'); warm.addColorStop(1, 'rgba(255,240,200,0)');
+    ctx.fillStyle = warm; ctx.fillRect(0, 0, W, H);
+  }
+
+  function drawRacers(cs, progress){
+    const raceY = groundY + 25, startX = W * 0.15, endX = W * 0.85;
+    ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(startX, raceY); ctx.lineTo(endX, raceY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#333'; ctx.fillRect(endX - 1, raceY - 10, 2, 14);
+    ctx.fillStyle = '#fff'; ctx.fillRect(endX, raceY - 10, 6, 5);
+    ctx.fillStyle = '#333'; ctx.fillRect(endX + 3, raceY - 10, 3, 5);
+    ctx.fillStyle = '#333'; ctx.fillRect(endX, raceY - 5, 3, 5);
+    ctx.fillStyle = '#fff'; ctx.fillRect(endX + 3, raceY - 5, 3, 5);
+    const kProg = Math.min(1, progress * (tapTiming === 0 ? 1.15 : tapTiming === 2 ? 0.85 : 1.0));
+    const kRX = startX + (endX - startX) * kProg;
+    ctx.fillStyle = '#e04040'; ctx.fillRect(kRX - 6, raceY - 5, 12, 6);
+    ctx.fillStyle = '#c03030';
+    ctx.beginPath(); ctx.arc(kRX - 3, raceY + 1, 2, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(kRX + 3, raceY + 1, 2, 0, 7); ctx.fill();
+    const wProg = Math.min(1, progress * (tapTiming === 0 ? 0.92 : tapTiming === 2 ? 1.1 : 1.02));
+    const wRX = startX + (endX - startX) * wProg;
+    ctx.fillStyle = '#4060e0'; ctx.fillRect(wRX - 6, raceY + 4, 12, 6);
+    ctx.fillStyle = '#3050c0';
+    ctx.beginPath(); ctx.arc(wRX - 3, raceY + 10, 2, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(wRX + 3, raceY + 10, 2, 0, 7); ctx.fill();
+  }
+
+  function drawCountdown(cs){
+    if (!goPhaseActive) return;
+    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const el = cs.stepT;
+    let label = '', col = '#fff';
+    if (el < 1){ label = '3'; col = '#ffcc30'; }
+    else if (el < 2){ label = '2'; col = '#ff9030'; }
+    else if (el < 3){ label = '1'; col = '#ff5030'; }
+    else { label = 'GO!'; col = '#30ff60'; goShown = true; }
+    const sc = 1 + 0.15 * Math.sin(cs.totalT * 8);
+    ctx.font = `bold ${Math.round(22 * sc)}px "Segoe UI", sans-serif`;
+    ctx.fillStyle = col; ctx.fillText(label, W * 0.5, H * 0.15);
+    if (el >= 3 && tapTiming < 0){
+      ctx.font = '10px "Segoe UI", sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillText('Tap NOW!', W * 0.5, H * 0.22);
+    }
+    if (tapTiming >= 0){
+      ctx.font = 'bold 12px "Segoe UI", sans-serif';
+      ctx.fillStyle = tapTiming === 0 ? '#30ff60' : '#ffcc30';
+      ctx.fillText(tapTiming === 0 ? 'PERFECT!' : tapTiming === 1 ? 'Too early!' : 'A bit late!', W * 0.5, H * 0.22);
+    }
+    ctx.restore();
+  }
+
+  return {
+    id: 'toy_shop_race',
+    chars: ['krystal', 'wade'],
+    skipable: true,
+    steps: [
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('wade', 'carry', wadeX, fY, charH);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawBubble(wadeX, fY - charH - 4, 'Wade', 'Check it out \u2014 wind-up racers! Wanna go?');
+      }},
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'run', krystalX, fY, charH);
+          csDrawExpression('wade', 'cheer', wadeX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Oh you're SO going down! \uD83C\uDFC1");
+      }},
+      { dur: 4.5, draw(cs){
+          drawBg(cs); drawCountdown(cs);
+          csDrawExpression('krystal', 'crouch', krystalX, fY, charH);
+          csDrawExpression('wade', 'crouch', wadeX, fY, charH);
+          drawRacers(cs, 0);
+      }, onStart(cs){ goPhaseActive = true; goShown = false; tapTiming = -1; },
+         onEnd(cs){ goPhaseActive = false; if (tapTiming < 0) tapTiming = 2; },
+         onTap(cs, px, py){
+          if (tapTiming >= 0) return;
+          if (cs.stepT < 3.0) tapTiming = 1;
+          else if (cs.stepT < 3.8) tapTiming = 0;
+          else tapTiming = 2;
+      }},
+      { dur: 3.0, draw(cs){
+          drawBg(cs);
+          const progress = Math.min(1, cs.stepT / 2.5);
+          drawRacers(cs, progress);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawExpression('wade', 'cheer', wadeX, fY, charH);
+          if (progress > 0.8){
+            const winner = tapTiming === 0 ? 'Krystal' : 'Wade';
+            csDrawBubble(W * 0.5, fY - charH - 14, null, winner + "'s toy is winning! \uD83C\uDFC1");
+          }
+      }},
+      { dur: 2.8, draw(cs){
+          drawBg(cs); drawRacers(cs, 1.0);
+          if (tapTiming === 0){
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('wade', 'sad', wadeX, fY, charH);
+            csDrawBubble(wadeX, fY - charH - 4, 'Wade', 'No way!! Best two out of three?! \uD83D\uDE29');
+          } else {
+            csDrawExpression('wade', 'cheer', wadeX, fY, charH);
+            csDrawExpression('krystal', 'shrug', krystalX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Okay fine, you got lucky\u2026");
+          }
+      }, onStart(cs){ csHearts(cs, (krystalX + wadeX) / 2, fY - charH * 0.7, 4); }},
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'highfive', krystalX + 10, fY, charH);
+          csDrawExpression('wade', 'highfive', wadeX - 10, fY, charH);
+          csDrawBubble(W * 0.5, fY - charH - 14, null, 'Good race! \uD83E\uDD1D');
+      }, onStart(cs){ csHearts(cs, (krystalX + wadeX) / 2, fY - charH * 0.7, 6); }},
+    ]
+  };
+}
+
 const GENERIC_CUTSCENES = [
   csGenThinkingOutLoud,
   csGenFriendlyWave,
@@ -8277,6 +8669,9 @@ const CUTSCENE_CATALOG = [
   { id: 'sandcastle_contest',    name: 'Sandcastle Contest',    description: 'Building kingdoms in the sand.',               scenes: ['beach','moonbeach','driftwoodbeach'],        chars: ['krystal','paul','wade','william'] },
   { id: 'candlelit_dinner',      name: 'Candlelit Dinner',      description: 'A romantic evening for two.',                  scenes: ['cafe','diner','winecellar'],                chars: ['krystal','paul'] },
   { id: 'fossil_discovery',      name: 'Fossil Discovery',      description: 'Ancient treasures in the rock.',               scenes: ['naturalhistory','canyon','cliffs'],          chars: ['krystal','luke','luna'] },
+  { id: 'arcade_high_score',    name: 'Arcade High Score',     description: 'Mash buttons for glory! (interactive)',        scenes: ['arcade','candyfactory','bowling'],           chars: ['krystal','luke'] },
+  { id: 'enchanted_gift',       name: 'Enchanted Gift',        description: 'The forest offers three gifts. (interactive)', scenes: ['enchantedforest','crystalgrotto','mushroomglade'], chars: ['krystal','william'] },
+  { id: 'toy_shop_race',        name: 'Toy Shop Race',         description: 'Wind-up racers on your marks! (interactive)',  scenes: ['toyshop','candyshop','comicshop'],           chars: ['krystal','wade'] },
   // Generic cutscenes
   { id: 'gen_thinking_out_loud', name: 'Thinking Out Loud',     description: 'Krystal daydreaming about Paul.',              scenes: ['any'],  chars: ['krystal'] },
   { id: 'gen_friendly_wave',     name: 'Friendly Wave',         description: 'A friend stops by to say hi.',                 scenes: ['any'],  chars: ['krystal','?'] },
@@ -8396,6 +8791,15 @@ const CUTSCENE_MAP = {
   winecellar:        [csCandlelitDinner],
   naturalhistory:    [csFossilDiscovery],
   cliffs:            [csFossilDiscovery],
+  arcade:            [csArcadeHighScore],
+  candyfactory:      [csArcadeHighScore],
+  bowling:           [csArcadeHighScore],
+  enchantedforest:   [csEnchantedGift],
+  crystalgrotto:     [csEnchantedGift],
+  mushroomglade:     [csEnchantedGift],
+  toyshop:           [csToyShopRace],
+  candyshop:         [csToyShopRace],
+  comicshop:         [csToyShopRace],
 };
 
 /* ============================================================================
