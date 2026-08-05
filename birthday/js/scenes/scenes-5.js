@@ -4278,3 +4278,274 @@ function drawDriftwoodBeach(){
   ctx.strokeStyle='#6a7a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.44,H*0.94); ctx.quadraticCurveTo(W*0.48,H*0.90,W*0.52,H*0.93); ctx.stroke();
 }
 registerScene('driftwoodbeach', drawDriftwoodBeach);
+
+/* ── TAROT PARLOR (indoor · mystic reading room · candlelit) ── */
+function drawTarotParlor(){
+  const t = sceneTime, floorY = H*0.68;
+
+  // deep velvet wall
+  const wall=ctx.createLinearGradient(0,0,0,floorY);
+  wall.addColorStop(0,'#1a0a20'); wall.addColorStop(0.5,'#2a1230'); wall.addColorStop(1,'#3a1a3a');
+  ctx.fillStyle=wall; ctx.fillRect(0,0,W,floorY);
+
+  // ornate wallpaper pattern — faint repeating moons + stars
+  ctx.globalAlpha=0.08;
+  for (let y=16;y<floorY;y+=36){ for (let x=14;x<W;x+=36){
+    ctx.fillStyle='#c0a0d0'; ctx.beginPath(); ctx.arc(x,y,5,0.4*Math.PI,1.6*Math.PI); ctx.fill(); // crescent
+    ctx.fillStyle='#e0c060'; ctx.beginPath(); ctx.arc(x+16,y+16,2,0,7); ctx.fill(); // tiny star
+  }}
+  ctx.globalAlpha=1;
+
+  // heavy curtain drapes at the sides
+  for (const side of [-1,1]){
+    const cx0=side<0?0:W-50;
+    const cg=ctx.createLinearGradient(cx0,0,cx0+50*side,0);
+    cg.addColorStop(0,'rgba(80,20,60,.85)'); cg.addColorStop(1,'rgba(80,20,60,0)');
+    ctx.fillStyle=cg; ctx.fillRect(cx0,0,50,floorY);
+    // fold lines
+    ctx.strokeStyle='rgba(40,10,30,.5)'; ctx.lineWidth=1;
+    for (let k=0;k<3;k++){ const fx=cx0+8+k*14*side; ctx.beginPath(); ctx.moveTo(fx,0); ctx.quadraticCurveTo(fx+Math.sin(t*0.5+k)*3,floorY*0.5,fx,floorY); ctx.stroke(); }
+  }
+
+  // round table in the center
+  const tX=W*0.5, tY=floorY-8;
+  // tablecloth
+  ctx.fillStyle='#2a1040'; ctx.beginPath(); ctx.ellipse(tX,tY,68,20,0,0,7); ctx.fill();
+  // embroidered border
+  ctx.strokeStyle='#c9a040'; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.ellipse(tX,tY,68,20,0,0,7); ctx.stroke();
+  // gold embroidery dots on cloth
+  for (let i=0;i<16;i++){ const a=i/16*Math.PI*2; ctx.fillStyle='#c9a040'; ctx.beginPath(); ctx.arc(tX+Math.cos(a)*60,tY+Math.sin(a)*17,1.6,0,7); ctx.fill(); }
+  // table surface highlight
+  ctx.fillStyle='rgba(160,100,180,.15)'; ctx.beginPath(); ctx.ellipse(tX,tY-2,60,16,0,0,7); ctx.fill();
+
+  // tarot cards fanned on the table
+  for (let i=0;i<5;i++){
+    const ang=-0.3+i*0.15, cx=tX-30+i*15, cy=tY-6;
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(ang);
+    // card back
+    ctx.fillStyle='#3a1a5a'; roundRect(-8,-13,16,26,2); ctx.fill();
+    ctx.strokeStyle='#c9a040'; ctx.lineWidth=0.8; roundRect(-8,-13,16,26,2); ctx.stroke();
+    // card face detail — central star/moon icon
+    ctx.fillStyle='#c9a040';
+    if (i===2){ // center card face-up
+      ctx.fillStyle='#e8e0d0'; roundRect(-7,-12,14,24,1.5); ctx.fill();
+      ctx.fillStyle='#5a2a8a'; ctx.beginPath(); ctx.arc(0,-2,4,0,7); ctx.fill(); // central orb
+      ctx.strokeStyle='#c9a040'; ctx.lineWidth=0.6;
+      for (let r=0;r<6;r++){ const ra=r/6*Math.PI*2; ctx.beginPath(); ctx.moveTo(0,-2); ctx.lineTo(Math.cos(ra)*7,Math.sin(ra)*7-2); ctx.stroke(); }
+    } else {
+      // decorative pattern on card backs
+      ctx.beginPath(); ctx.arc(0,0,4,0,7); ctx.fill();
+      ctx.strokeStyle='rgba(200,160,64,.5)'; ctx.lineWidth=0.6; roundRect(-5,-9,10,18,1); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // crystal ball on table (right of center)
+  const cbX=tX+36, cbY=tY-10;
+  // pedestal
+  ctx.fillStyle='#2a1a10'; ctx.beginPath(); ctx.ellipse(cbX,cbY+6,10,4,0,0,7); ctx.fill();
+  ctx.fillStyle='#4a3020'; ctx.fillRect(cbX-7,cbY+2,14,4);
+  // ball
+  const bg=ctx.createRadialGradient(cbX-3,cbY-4,2,cbX,cbY,12);
+  bg.addColorStop(0,'rgba(180,160,220,.9)'); bg.addColorStop(0.5,'rgba(100,60,140,.7)'); bg.addColorStop(1,'rgba(40,20,60,.5)');
+  ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(cbX,cbY-4,11,0,7); ctx.fill();
+  // inner swirl
+  ctx.strokeStyle=`rgba(200,180,255,${0.3+0.2*Math.sin(t*2)})`; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(cbX+Math.sin(t)*3,cbY-4+Math.cos(t*1.3)*2,4,0,7); ctx.stroke();
+  // highlight
+  ctx.fillStyle='rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(cbX-4,cbY-8,2.5,0,7); ctx.fill();
+
+  // candelabra (left of center)
+  const caX=tX-40, caY=tY-6;
+  ctx.fillStyle='#c9a040'; ctx.fillRect(caX-1,caY-18,3,18);
+  ctx.fillRect(caX-8,caY-24,2,10); ctx.fillRect(caX+7,caY-24,2,10);
+  ctx.fillRect(caX-8,caY-14,17,2); // crossbar
+  // candle cups
+  for (const dx of [-8,0,8]){
+    ctx.fillStyle='#e8d8c0'; ctx.fillRect(caX+dx-2,caY-30,5,6);
+    // flames
+    const fh=Math.sin(t*4+dx)*2;
+    ctx.fillStyle=`rgba(255,200,80,${0.8+0.2*Math.sin(t*5+dx)})`;
+    ctx.beginPath(); ctx.moveTo(caX+dx,caY-30); ctx.quadraticCurveTo(caX+dx-2,caY-36+fh,caX+dx,caY-40+fh); ctx.quadraticCurveTo(caX+dx+2,caY-36+fh,caX+dx,caY-30); ctx.fill();
+    // warm glow around each flame
+    ctx.fillStyle='rgba(255,180,60,.12)'; ctx.beginPath(); ctx.arc(caX+dx,caY-34,14,0,7); ctx.fill();
+  }
+
+  // incense smoke curling up from the left side
+  ctx.strokeStyle='rgba(180,160,200,.2)'; ctx.lineWidth=2;
+  for (let s=0;s<2;s++){
+    ctx.beginPath();
+    const sx=W*0.12+s*16;
+    for (let k=0;k<=12;k++){ const yy=floorY-20-k*12, xx=sx+Math.sin(t*1.5+k*0.8+s)*8;
+      k===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy);} ctx.stroke();
+  }
+
+  // zodiac wheel painted on the wall (behind, upper center)
+  const zX=W*0.5, zY=H*0.18, zR=32;
+  ctx.strokeStyle='rgba(200,160,64,.35)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(zX,zY,zR,0,7); ctx.stroke();
+  ctx.beginPath(); ctx.arc(zX,zY,zR-8,0,7); ctx.stroke();
+  // zodiac symbols (simplified marks around the ring)
+  ctx.fillStyle='rgba(200,160,64,.3)';
+  for (let i=0;i<12;i++){ const a=i/12*Math.PI*2-Math.PI/2;
+    ctx.beginPath(); ctx.arc(zX+Math.cos(a)*(zR-4),zY+Math.sin(a)*(zR-4),2,0,7); ctx.fill(); }
+
+  // hanging beaded curtain at far right
+  ctx.strokeStyle='rgba(160,120,180,.3)'; ctx.lineWidth=1;
+  for (let i=0;i<6;i++){ const bx=W*0.92+i*4;
+    ctx.beginPath(); for (let k=0;k<8;k++){ const by=k*18; bx===W*0.92&&k===0?ctx.moveTo(bx,by):ctx.lineTo(bx,by+Math.sin(t*0.8+i)*2); }
+    ctx.stroke();
+    for (let k=0;k<8;k++){ ctx.fillStyle=['#a060c0','#c9a040','#e060a0'][k%3]; ctx.beginPath(); ctx.arc(bx,k*18+Math.sin(t*0.8+i)*2,1.8,0,7); ctx.fill(); }
+  }
+
+  // ornate rug / floor
+  const fl=ctx.createLinearGradient(0,floorY,0,H);
+  fl.addColorStop(0,'#3a1a28'); fl.addColorStop(1,'#2a1018');
+  ctx.fillStyle=fl; ctx.fillRect(0,floorY,W,H-floorY);
+  // rug pattern — faint gold border
+  ctx.strokeStyle='rgba(200,160,64,.25)'; ctx.lineWidth=1;
+  ctx.strokeRect(W*0.1,floorY+4,W*0.8,H-floorY-8);
+  ctx.strokeRect(W*0.14,floorY+8,W*0.72,H-floorY-16);
+  // rug central motif
+  ctx.fillStyle='rgba(200,160,64,.12)'; ctx.beginPath(); ctx.arc(W*0.5,floorY+(H-floorY)*0.5,20,0,7); ctx.fill();
+  for (let i=0;i<8;i++){ const a=i/8*Math.PI*2; ctx.beginPath(); ctx.moveTo(W*0.5,floorY+(H-floorY)*0.5); ctx.lineTo(W*0.5+Math.cos(a)*28,floorY+(H-floorY)*0.5+Math.sin(a)*10); ctx.stroke(); }
+
+  // ambient sparkles drifting in candlelight
+  for (let i=0;i<10;i++){
+    const sx=(i*67+t*6)%W, sy=(i*43+Math.sin(t*0.4+i)*20)%(floorY*0.8)+10;
+    ctx.fillStyle=`rgba(220,200,160,${0.1+0.15*Math.sin(t*2+i)})`;
+    ctx.beginPath(); ctx.arc(sx,sy,1,0,7); ctx.fill();
+  }
+}
+registerScene('tarotparlor', drawTarotParlor);
+
+/* ── ENCHANTED FOREST (outdoor · magical twilight · glowing flora) ── */
+function drawEnchantedForest(){
+  const t = sceneTime, groundY = H*0.64;
+
+  // deep twilight sky through enchanted canopy
+  const sky=ctx.createLinearGradient(0,0,0,groundY);
+  sky.addColorStop(0,'#0c0a1e'); sky.addColorStop(0.4,'#1a1240'); sky.addColorStop(1,'#2a1a4a');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,groundY);
+
+  // faint stars peeking through the canopy
+  for (let i=0;i<30;i++){ const sx=(i*73+13)%W, sy=(i*31+7)%(groundY*0.4);
+    ctx.fillStyle=`rgba(220,210,255,${0.15+0.25*Math.abs(Math.sin(t*1.3+i))})`; ctx.fillRect(sx,sy,1,1); }
+
+  // moon glow filtering through trees (upper right)
+  const mg=ctx.createRadialGradient(W*0.78,H*0.08,6,W*0.78,H*0.08,100);
+  mg.addColorStop(0,'rgba(180,200,255,.18)'); mg.addColorStop(1,'rgba(180,200,255,0)');
+  ctx.fillStyle=mg; ctx.fillRect(0,0,W,groundY);
+
+  // moonbeam shafts through the canopy
+  ctx.fillStyle='rgba(160,180,220,.04)';
+  for (let i=0;i<4;i++){ ctx.save(); ctx.translate(W*0.15+i*60,0); ctx.rotate(0.08+i*0.04);
+    ctx.fillRect(0,0,18,groundY); ctx.restore(); }
+
+  // massive ancient trees (background silhouettes)
+  ctx.fillStyle='#0a0814';
+  for (const tx of [W*0.08,W*0.32,W*0.68,W*0.92]){
+    const tw=18+Math.abs(Math.sin(tx))*10;
+    ctx.fillRect(tx-tw/2,groundY-160,tw,160);
+    // gnarled canopy
+    ctx.beginPath(); ctx.arc(tx-10,groundY-150,28,0,7); ctx.arc(tx+12,groundY-140,32,0,7); ctx.arc(tx,groundY-160,24,0,7); ctx.fill();
+    // exposed roots
+    ctx.strokeStyle='#0a0814'; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.moveTo(tx-tw/2,groundY); ctx.quadraticCurveTo(tx-tw-8,groundY+6,tx-tw-14,groundY+2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(tx+tw/2,groundY); ctx.quadraticCurveTo(tx+tw+8,groundY+6,tx+tw+14,groundY+2); ctx.stroke();
+  }
+
+  // mid-ground trees (slightly lighter)
+  ctx.fillStyle='#12101e';
+  for (const tx of [W*0.20,W*0.50,W*0.80]){
+    ctx.fillRect(tx-8,groundY-110,16,110);
+    ctx.beginPath(); ctx.arc(tx,groundY-100,22,0,7); ctx.fill();
+  }
+
+  // glowing magical flowers on the trees (bioluminescent blooms)
+  function glowFlower(fx,fy,col,r){
+    ctx.fillStyle=`rgba(${col},${0.15+0.1*Math.sin(t*2+fx+fy)})`;
+    ctx.beginPath(); ctx.arc(fx,fy,r*3,0,7); ctx.fill(); // outer glow
+    ctx.fillStyle=`rgba(${col},${0.6+0.3*Math.sin(t*2.5+fx)})`;
+    ctx.beginPath(); ctx.arc(fx,fy,r,0,7); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.arc(fx-r*0.3,fy-r*0.3,r*0.3,0,7); ctx.fill();
+  }
+  glowFlower(W*0.10,groundY-80,'120,180,255',4);
+  glowFlower(W*0.35,groundY-120,'200,140,255',3.5);
+  glowFlower(W*0.55,groundY-90,'100,220,200',4);
+  glowFlower(W*0.75,groundY-130,'180,120,255',3);
+  glowFlower(W*0.90,groundY-70,'140,200,255',3.5);
+
+  // forest floor — mossy, soft
+  const gr=ctx.createLinearGradient(0,groundY,0,H);
+  gr.addColorStop(0,'#1a2a1a'); gr.addColorStop(1,'#0e1a0e');
+  ctx.fillStyle=gr; ctx.fillRect(0,groundY,W,H-groundY);
+
+  // glowing moss patches on the ground
+  for (const mx of [W*0.15,W*0.40,W*0.65,W*0.85]){
+    const my=groundY+6;
+    ctx.fillStyle=`rgba(80,200,120,${0.08+0.05*Math.sin(t*1.5+mx)})`;
+    ctx.beginPath(); ctx.ellipse(mx,my+8,22,6,0,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(100,220,140,${0.25+0.15*Math.sin(t*2+mx)})`;
+    ctx.beginPath(); ctx.ellipse(mx,my+6,14,3,0,0,7); ctx.fill();
+  }
+
+  // glowing mushrooms on the ground (small cluster left & right)
+  function glowShroom(sx,sy,h,col){
+    // stem
+    ctx.fillStyle='#c8c0b0'; ctx.fillRect(sx-2,sy-h,4,h);
+    // cap
+    ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(sx,sy-h,8,5,0,Math.PI,0); ctx.fill();
+    // glow
+    ctx.fillStyle=`rgba(${col==='#6a40c0'?'106,64,192':'60,180,160'},${0.12+0.08*Math.sin(t*2.5+sx)})`;
+    ctx.beginPath(); ctx.arc(sx,sy-h-2,16,0,7); ctx.fill();
+    // spots on cap
+    ctx.fillStyle='rgba(255,255,255,.4)';
+    ctx.beginPath(); ctx.arc(sx-3,sy-h-2,1.5,0,7); ctx.arc(sx+4,sy-h-1,1.2,0,7); ctx.fill();
+  }
+  glowShroom(W*0.12,groundY+20,16,'#6a40c0');
+  glowShroom(W*0.18,groundY+24,12,'#3ab4a0');
+  glowShroom(W*0.82,groundY+18,14,'#6a40c0');
+  glowShroom(W*0.88,groundY+22,10,'#3ab4a0');
+
+  // floating magical motes / fireflies (different from the mushroom glade — these are blue/purple)
+  for (let i=0;i<20;i++){
+    const mx=(i*47+t*8+Math.sin(t*0.3+i)*30)%W;
+    const my=(i*67+Math.sin(t*0.5+i*2)*40)%(groundY+30)+20;
+    const c=i%3===0?'160,140,255':i%3===1?'100,220,200':'200,160,255';
+    ctx.fillStyle=`rgba(${c},${0.15+0.2*Math.abs(Math.sin(t*1.8+i*1.4))})`;
+    ctx.beginPath(); ctx.arc(mx,my,2+Math.sin(t*2+i)*0.8,0,7); ctx.fill();
+  }
+
+  // a stone fairy-door in a tree trunk (center-left, charming detail)
+  const dX=W*0.34, dY=groundY-6;
+  ctx.fillStyle='#3a3a3a'; roundRect(dX-8,dY-22,16,22,3); ctx.fill();
+  ctx.strokeStyle='#c9a040'; ctx.lineWidth=1; roundRect(dX-8,dY-22,16,22,3); ctx.stroke();
+  ctx.fillStyle='#c9a040'; ctx.beginPath(); ctx.arc(dX+4,dY-11,1.5,0,7); ctx.fill(); // tiny doorknob
+  // faint glow from behind the door
+  ctx.fillStyle=`rgba(255,220,120,${0.08+0.06*Math.sin(t*1.5)})`;
+  ctx.beginPath(); ctx.arc(dX,dY-11,18,0,7); ctx.fill();
+
+  // old stone lantern (right side, mossy)
+  const lX=W*0.72, lY=groundY+4;
+  ctx.fillStyle='#5a5a5a'; ctx.fillRect(lX-5,lY-30,10,30);
+  ctx.fillRect(lX-10,lY-34,20,5);
+  ctx.fillRect(lX-8,lY-40,16,6);
+  // moss on the lantern
+  ctx.fillStyle='rgba(60,120,60,.5)';
+  ctx.beginPath(); ctx.ellipse(lX,lY-34,11,3,0,0,7); ctx.fill();
+  // lantern flame
+  ctx.fillStyle=`rgba(180,220,160,${0.5+0.3*Math.sin(t*2)})`;
+  ctx.beginPath(); ctx.arc(lX,lY-37,4,0,7); ctx.fill();
+  ctx.fillStyle=`rgba(160,200,140,${0.1+0.06*Math.sin(t*2)})`;
+  ctx.beginPath(); ctx.arc(lX,lY-37,14,0,7); ctx.fill();
+
+  // a winding path through the forest floor (faint, leading into the trees)
+  ctx.strokeStyle='rgba(120,100,80,.2)'; ctx.lineWidth=16;
+  ctx.beginPath(); ctx.moveTo(W*0.3,H); ctx.quadraticCurveTo(W*0.45,groundY+20,W*0.5,groundY+4);
+  ctx.quadraticCurveTo(W*0.55,groundY-10,W*0.6,groundY-30); ctx.stroke();
+  ctx.strokeStyle='rgba(100,80,60,.1)'; ctx.lineWidth=20;
+  ctx.beginPath(); ctx.moveTo(W*0.3,H); ctx.quadraticCurveTo(W*0.45,groundY+20,W*0.5,groundY+4); ctx.stroke();
+}
+registerScene('enchantedforest', drawEnchantedForest);

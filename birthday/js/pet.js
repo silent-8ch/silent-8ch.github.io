@@ -324,6 +324,8 @@ const SCENE_INTERACT = (()=>{
   g(['beekeepergarden'], {lines:['Busy little bees 🐝','Fresh honey? 🍯','So sweet and buzzy 🌼'], emoji:'🐝', fun:5});
   g(['kelpforest'], {lines:['Swaying kelp 🌿','So peaceful underwater ✨','Look, a fish! 🐟'], emoji:'🌿', energy:5});
   g(['cheesecave'], {lines:['So many cheeses! 🧀','Yummy and stinky 😋','A little taste? 🍷'], emoji:'🧀', hunger:5});
+  g(['tarotparlor'], {lines:['The cards know something 🔮','Read my fortune? 🃏','So mystical in here 🕯️'], emoji:'🔮', love:5});
+  g(['enchantedforest'], {lines:['The forest glows ✨','So magical and deep 🌲','I feel the magic 🧚'], emoji:'✨', fun:5});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];
@@ -1205,6 +1207,18 @@ const SCENE_SPOTS = {
     {nx:0.16, ny:0.14, r:46, e:'🌙', lines:['A crescent moon 🌙','Slim and silver','So pretty tonight 💛']},
     {nx:0.12, ny:0.88, r:48, e:'🏮', lines:['A lantern and blanket 🏮','Our little spot','Lie back and look up with me 🥰']},
     {nx:0.86, ny:0.90, r:46, e:'🔭', lines:['A telescope 🔭','Let\'s find a planet','Point it wherever you like']},
+  ],
+  tarotparlor: [
+    {nx:0.50, ny:0.56, r:52, e:'🃏', lines:['The tarot cards 🃏','Turn one over? 🔮','I see love in our future 💗']},
+    {nx:0.68, ny:0.52, r:46, e:'🔮', lines:['The crystal ball 🔮','Swirling with light ✨','What does it see? 🥰']},
+    {nx:0.32, ny:0.46, r:44, e:'🕯️', lines:['The candelabra 🕯️','Flickering warmly','So atmospheric 💛']},
+    {nx:0.50, ny:0.18, r:48, e:'♈', lines:['A zodiac wheel ♈','Which sign is yours? ✨','Written in the stars 🌟']},
+  ],
+  enchantedforest: [
+    {nx:0.12, ny:0.78, r:50, e:'🍄', lines:['Glowing mushrooms! 🍄','So purple and magical','A fairy\'s umbrella 🧚']},
+    {nx:0.34, ny:0.60, r:44, e:'🚪', lines:['A tiny fairy door 🚪','Someone lives inside! ✨','Knock knock? 🥰']},
+    {nx:0.72, ny:0.62, r:46, e:'🏮', lines:['An old stone lantern 🏮','Glowing green and gentle','Who lit this one? 💚']},
+    {nx:0.50, ny:0.30, r:55, e:'✨', lines:['Floating lights ✨','Like tiny spirits 🧚','The forest is alive 💜']},
   ],
 };
 // nearest hotspot hit for the current scene, or null
