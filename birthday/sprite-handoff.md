@@ -122,12 +122,13 @@ swift tools/process-walk-sprites.swift INPUT.png OUTPUT.png
 
 ## Four-frame expression library
 
-Every person has 24 front-facing, transparent 1024 x 256 sheets under
+Every person has 32 transparent 1024 x 256 sheets under
 `sprites/expressions/<name>/`: `laugh`, `scared`, `surprised`, `cheer`, `sad`,
 `embarrassed`, `think`, `wave`, `talk`, `nod`, `shake`, `shrug`, `point`,
 `beckon`, `search`, `inspect`, `sit`, `give`, `hug`, `highfive`, `look`,
-`interact`, `startled`, and `sleep`. Each sheet contains four aligned 256 x 256
-cells with feet pinned to pixel 236. The library contains 144 character sheets.
+`interact`, `startled`, `sleep`, `run`, `sneak`, `crouch`, `carry`, `push`,
+`pull`, `doorway`, and `trip`. Each sheet contains four aligned 256 x 256 cells
+with feet pinned to pixel 236. The library contains 192 character sheets.
 Generated 4 x 4 source atlases are retained in `sprites/expressions/sources/`.
 
 Use `sprite-lab.html` to preview all expression, walking, and clapping sheets,

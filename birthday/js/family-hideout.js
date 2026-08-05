@@ -88,7 +88,7 @@
     const x = fromLeft ? W*FLOOR.minX : W*FLOOR.maxX;
     const y = rand(H*FLOOR.minY, H*FLOOR.maxY);
     const walker = {
-      name:person.name, label:person.label, sheet:`${person.name}Walk`,
+      name:person.name, label:person.label, sheet:`${person.name}Sneak`,
       scene:savedScenes[person.name], x, y, tx:x, ty:y,
       dir:fromLeft ? 'right' : 'left', frame:0, frameTime:0, pause:0,
       celebrateT:0, celebrateElapsed:0, leaving:false,
@@ -173,18 +173,21 @@
       drawCelebration(walker);
       return;
     }
-    const sh = sheets[walker.sheet];
+    const sh = sheets[walker.leaving ? `${walker.name}Run` : walker.sheet];
     if (!sh || !sh.ready) return;
     const displayW = DISPLAY_H * sh.fw / sh.fh;
     const feetY = walker.y + (sh.cfg.footInset || 0) * DISPLAY_H;
-    const row = sh.cfg.rowMap[walker.dir] ?? 0;
+    const row = sh.cfg.rowMap ? (sh.cfg.rowMap[walker.dir] ?? 0) : 0;
+    const mirror = !sh.cfg.rowMap && walker.dir === 'left';
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,.14)';
     ctx.beginPath();
     ctx.ellipse(walker.x, walker.y-3, displayW*.26, DISPLAY_H*.035, 0, 0, 7);
     ctx.fill();
+    ctx.translate(walker.x, 0);
+    ctx.scale(mirror ? -1 : 1, 1);
     ctx.drawImage(sh.canvas, walker.frame*sh.fw, row*sh.fh, sh.fw, sh.fh,
-      walker.x-displayW/2, feetY-DISPLAY_H, displayW, DISPLAY_H);
+      -displayW/2, feetY-DISPLAY_H, displayW, DISPLAY_H);
     ctx.restore();
   }
 

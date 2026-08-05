@@ -9,9 +9,12 @@ let clapLoads = 0;
 const scenes = ['beach','backyard','river','cafe','arcade','garden','cinema'];
 const renderers = Object.fromEntries(scenes.map(scene => [scene, () => {}]));
 const sheets = Object.fromEntries(['paul','luna','wade','luke','william'].map(name => [
-  `${name}Walk`,
+  `${name}Sneak`,
   { ready:true, fw:256, fh:256, canvas:{}, cfg:{ footInset:.08, rowMap:{down:0,left:1,right:2,up:3} } },
 ]));
+for (const name of ['paul','luna','wade','luke','william']){
+  sheets[`${name}Run`] = { ready:true, fw:256, fh:256, canvas:{}, cfg:{ footInset:.08 } };
+}
 
 const context = vm.createContext({
   SCENES:scenes,
@@ -31,7 +34,7 @@ const context = vm.createContext({
     setItem:(key, value) => data.set(key, value),
   },
   ctx:{
-    save(){}, restore(){}, beginPath(){}, ellipse(){}, fill(){}, translate(){}, rotate(){},
+    save(){}, restore(){}, beginPath(){}, ellipse(){}, fill(){}, translate(){}, rotate(){}, scale(){},
     fillRect(){}, strokeRect(){}, moveTo(){}, lineTo(){}, stroke(){}, arc(){},
     drawImage(...args){ drawCalls.push({ args, alpha:this.globalAlpha ?? 1 }); },
   },
@@ -74,9 +77,10 @@ context.EXTRA_DRAWERS[0]();
 assert.equal(drawCalls.length, 1, 'the family member should render in their assigned scene');
 
 const draw = drawCalls[0].args;
-const spriteX = draw[5] + draw[7]/2;
 const clickY = draw[6] + 52;
-assert.equal(context.CHARACTER_TAPS[0](spriteX, clickY), true);
+const found = context.CHARACTER_TAPS[0](context.W*.12, clickY)
+  || context.CHARACTER_TAPS[0](context.W*.88, clickY);
+assert.equal(found, true);
 
 assert.equal(clapLoads, 1);
 const immediateRelocation = JSON.parse(data.get(storageKey));

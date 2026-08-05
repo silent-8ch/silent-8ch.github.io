@@ -25,6 +25,7 @@ assert.equal(new Set(runners.map(runner => runner.name)).size, 5);
 assert.deepEqual(runners.map(runner => runner.slot), [0, 1, 2, 3, 4]);
 assert.deepEqual(runners.map(runner => runner.side), [1, -1, 1, -1, 1]);
 assert.deepEqual(runners.map(runner => runner.x), [415, -55, 415, -55, 415]);
+assert.ok(runners.every(runner => runner.sheet.endsWith('Run')));
 assert.equal(context.overflow, false);
 
 console.log('hug runner spawning: ok');

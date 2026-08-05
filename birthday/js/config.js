@@ -58,6 +58,16 @@ const SHEETS = {
                 rowMap:{ down:0, left:1, right:2, up:3 } },
   williamWalk:{ src:"sprites/walking-all/william-walk.png",cols:4, rows:4, fps:12, displayH:150, footInset:0.08,
                 rowMap:{ down:0, left:1, right:2, up:3 } },
+  paulRun:    { src:"sprites/expressions/paul/run.png",    cols:4, rows:1, fps:12, displayH:150, footInset:0.08 },
+  lunaRun:    { src:"sprites/expressions/luna/run.png",    cols:4, rows:1, fps:12, displayH:150, footInset:0.08 },
+  wadeRun:    { src:"sprites/expressions/wade/run.png",    cols:4, rows:1, fps:12, displayH:150, footInset:0.08 },
+  lukeRun:    { src:"sprites/expressions/luke/run.png",    cols:4, rows:1, fps:12, displayH:150, footInset:0.08 },
+  williamRun: { src:"sprites/expressions/william/run.png", cols:4, rows:1, fps:12, displayH:150, footInset:0.08 },
+  paulSneak:    { src:"sprites/expressions/paul/sneak.png",    cols:4, rows:1, fps:8, displayH:118, footInset:0.08 },
+  lunaSneak:    { src:"sprites/expressions/luna/sneak.png",    cols:4, rows:1, fps:8, displayH:118, footInset:0.08 },
+  wadeSneak:    { src:"sprites/expressions/wade/sneak.png",    cols:4, rows:1, fps:8, displayH:118, footInset:0.08 },
+  lukeSneak:    { src:"sprites/expressions/luke/sneak.png",    cols:4, rows:1, fps:8, displayH:118, footInset:0.08 },
+  williamSneak: { src:"sprites/expressions/william/sneak.png", cols:4, rows:1, fps:8, displayH:118, footInset:0.08 },
 };
 
 /* ----------------------------------------------------------------------------
@@ -99,7 +109,7 @@ function addHugger(){
   const side = (order % 2 === 0) ? 1 : -1;             // first arrives from right, then left
   hugRunners.push({
     name,
-    sheet: `${name}Walk`,
+    sheet: `${name}Run`,
     slot: order,
     side,
     x: side > 0 ? W + 55 : -55,

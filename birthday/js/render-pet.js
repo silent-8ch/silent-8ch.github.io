@@ -134,15 +134,19 @@ function drawHugRunners(){
     const dispH = sh.cfg.displayH;
     const dispW = dispH * sh.fw / sh.fh;
     const feetY = runner.y + (sh.cfg.footInset || 0) * dispH;
-    const direction = runner.side > 0 ? 'left' : 'right';
-    const row = sh.cfg.rowMap[direction];
+    const facesLeft = runner.side > 0;
+    const row = sh.cfg.rowMap ? sh.cfg.rowMap[facesLeft ? 'left' : 'right'] : 0;
 
     ctx.fillStyle = 'rgba(0,0,0,.14)';
     ctx.beginPath();
     ctx.ellipse(runner.x, runner.y-4, dispW*0.27, dispH*0.04, 0, 0, 7);
     ctx.fill();
+    ctx.save();
+    ctx.translate(runner.x, 0);
+    ctx.scale(facesLeft ? -1 : 1, 1);
     ctx.drawImage(sh.canvas, runner.frame*sh.fw, row*sh.fh, sh.fw, sh.fh,
-      runner.x-dispW/2, feetY-dispH, dispW, dispH);
+      -dispW/2, feetY-dispH, dispW, dispH);
+    ctx.restore();
   }
 }
 
