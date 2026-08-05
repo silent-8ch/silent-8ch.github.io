@@ -44,13 +44,37 @@
   let selected = null;       // index into current frame's submitted list
   let dragging = false;
   let dragOffX = 0, dragOffY = 0;
-  let savedPositions = {};   // sprite name → {x, y} overrides
+  let savedPositions = {};   // key → {x, y, size, sprite} overrides
+  const API_BASE = window.location.port === '8083' ? '' : null;  // only use API on local debug server
+  const isLocal = !!API_BASE || window.location.hostname === 'localhost';
 
-  // Load saved positions from localStorage
+  // Load saved positions from localStorage (fallback) or DB
   try {
     const raw = localStorage.getItem('bpet_sprite_positions');
     if (raw) savedPositions = JSON.parse(raw);
   } catch(e){}
+
+  // If running on local debug server, also load from DB
+  if (isLocal) {
+    fetch('/api/sprite-positions?scene=' + (typeof SCENES !== 'undefined' ? SCENES[currentScene] : ''))
+      .then(r => r.json())
+      .then(rows => {
+        for (const r of rows) {
+          // Find matching key by sprite name
+          savedPositions[r.sprite_name] = { x: r.x, y: r.y, size: r.size, sprite: r.sprite_name };
+        }
+      }).catch(() => {});
+  }
+
+  function saveToDb(spriteName, x, y, size, phase) {
+    if (!isLocal) return;
+    const scene = typeof SCENES !== 'undefined' ? SCENES[currentScene] : 'unknown';
+    fetch('/api/sprite-positions', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ scene, sprite: spriteName, x: Math.round(x), y: Math.round(y), size: size ? Math.round(size) : null, phase })
+    }).catch(() => {});
+  }
 
   // Panel DOM
   const panel = document.createElement('div');
@@ -134,6 +158,7 @@
     s.width = newSize;
     s.height = newSize;
     savedPositions[s.sprite + '_' + selected] = { x: s.x, y: s.y, sprite: s.sprite, size: newSize };
+    saveToDb(s.sprite, s.x, s.y, newSize, s.phase || sprite?.phase);
     updateSizeDisplay(s);
     updateCoords(s);
     refreshList();
@@ -251,10 +276,19 @@
     savedPositions[s.sprite + '_' + selected] = { x: s.x, y: s.y, sprite: s.sprite };
     updateCoords(s);
     e.preventDefault();
-  });
+  }, true);
 
   window.addEventListener('pointerup', () => {
     if (dragging) {
+      // Save to DB on drag end
+      if (selected != null) {
+        const sprites = getSubmittedSprites();
+        if (selected < sprites.length) {
+          const s = sprites[selected];
+          const sprite = SpriteRenderer.getSprite(s.sprite);
+          saveToDb(s.sprite, s.x, s.y, s.width || sprite?.defaultSize, s.phase || sprite?.phase);
+        }
+      }
       dragging = false;
       refreshList();
     }
