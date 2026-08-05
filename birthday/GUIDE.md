@@ -29,7 +29,7 @@ The world has **216 places** to visit, **215 of them with hand-placed tap spots*
 
 ---
 
-## 🎬 Cutscenes (13)
+## 🎬 Cutscenes (16)
 
 _Now and then, if she's idle in the right place, a little story plays out. The screen fades in, characters walk on, and they talk, tease, and share a moment together. Each cutscene is skipable (tap **Skip >>** in the top-right corner) and lasts about 20–30 seconds. They trigger randomly (~15 % chance every 30–60 s) — linger in a scene and one might start on its own._
 
@@ -48,6 +48,9 @@ _Debug shortcut: press **X** on a keyboard to force-trigger the cutscene for the
 - **Painting Together** — triggers at _Art Studio_ or _Pottery Studio_. Characters: Krystal, Paul. They paint side by side.
 - **Hide and Seek** — triggers at _Hedge Maze_, _Topiary Garden_, or _Backyard_. Characters: Krystal, Luke, William. Ready or not…
 - **Tea Party** — triggers at _Tea House_, _Bamboo Tearoom_, or _Coffee Shop_. Characters: Krystal, Luna, Wade. Tiny cups, big feelings.
+- **Sunset Balloon Ride** — triggers at _Balloon Ride_, _Balloon Festival_, or _Kite Hill_. Characters: Krystal, Paul. Floating over patchwork fields at golden hour.
+- **Cooking Disaster** — triggers at _Diner_, _Dumpling House_, or _Ramen Shop_. Characters: Krystal, Wade, William. Too much spice, too many tears, time for pizza.
+- **Tide Pool Discovery** — triggers at _Tide Pools_ or _Coral Reef_. Characters: Krystal, Luke, Luna. Starfish, hermit crabs, and a shell worth keeping.
 
 ---
 

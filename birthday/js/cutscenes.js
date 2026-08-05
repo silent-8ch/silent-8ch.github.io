@@ -2569,6 +2569,605 @@ function csTeaParty(){
 }
 
 /* ============================================================================
+   CUTSCENE 14: SUNSET BALLOON RIDE  (triggers at balloonride, balloonfest, kitehill)
+   ============================================================================ */
+function csSunsetBalloonRide(){
+  const groundY = H * 0.78;
+  const charH = 80;
+  const fY = groundY - 10;  // they're in a basket, floating above the fields
+  const basketX = W * 0.50;
+  const krystalX = basketX - 18, paulX = basketX + 18;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // sunset sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#2a1a48'); sky.addColorStop(0.25, '#8a3060'); sky.addColorStop(0.5, '#e07040');
+    sky.addColorStop(0.75, '#f0a848'); sky.addColorStop(1, '#f8d888');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // sun — low on the horizon
+    const sunX = W * 0.75, sunY = groundY - 10;
+    const sg = ctx.createRadialGradient(sunX, sunY, 8, sunX, sunY, 50);
+    sg.addColorStop(0, 'rgba(255,220,120,.9)'); sg.addColorStop(0.4, 'rgba(255,180,80,.4)');
+    sg.addColorStop(1, 'rgba(255,140,60,0)');
+    ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(sunX, sunY, 50, 0, 7); ctx.fill();
+    ctx.fillStyle = '#ffe080'; ctx.beginPath(); ctx.arc(sunX, sunY, 14, 0, 7); ctx.fill();
+
+    // wispy clouds
+    ctx.fillStyle = 'rgba(255,200,160,.25)';
+    ctx.beginPath(); ctx.ellipse(W * 0.20, H * 0.18, 40, 8, 0.1, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(W * 0.65, H * 0.10, 30, 6, -0.1, 0, 7); ctx.fill();
+
+    // patchwork fields below
+    const fieldCols = ['#6a9a40','#8ab050','#a0b860','#78a838','#90b048','#7aaa48'];
+    const rows = 4, cols = 6;
+    const fy0 = groundY;
+    const fh = (H - groundY) / rows;
+    const fw = W / cols;
+    for (let r = 0; r < rows; r++){
+      for (let c = 0; c < cols; c++){
+        ctx.fillStyle = fieldCols[(r * cols + c) % fieldCols.length];
+        ctx.fillRect(c * fw, fy0 + r * fh, fw + 1, fh + 1);
+      }
+    }
+    // field borders
+    ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 0.5;
+    for (let r = 0; r <= rows; r++){
+      ctx.beginPath(); ctx.moveTo(0, fy0 + r * fh); ctx.lineTo(W, fy0 + r * fh); ctx.stroke();
+    }
+    for (let c = 0; c <= cols; c++){
+      ctx.beginPath(); ctx.moveTo(c * fw, fy0); ctx.lineTo(c * fw, H); ctx.stroke();
+    }
+
+    // tiny house in the fields
+    const hx = W * 0.30, hy = groundY + (H - groundY) * 0.4;
+    ctx.fillStyle = '#d8c0a0'; ctx.fillRect(hx - 4, hy - 5, 8, 5);
+    ctx.fillStyle = '#a05030';
+    ctx.beginPath(); ctx.moveTo(hx - 5, hy - 5); ctx.lineTo(hx, hy - 10); ctx.lineTo(hx + 5, hy - 5); ctx.closePath(); ctx.fill();
+
+    // distant birds
+    ctx.strokeStyle = 'rgba(60,30,20,.3)'; ctx.lineWidth = 0.8;
+    for (let i = 0; i < 4; i++){
+      const bx = W * 0.10 + i * W * 0.18 + Math.sin(t + i * 2) * 5;
+      const by = H * 0.14 + (i % 2) * H * 0.06;
+      ctx.beginPath();
+      ctx.moveTo(bx - 4, by + 1); ctx.quadraticCurveTo(bx - 1, by - 2, bx, by);
+      ctx.quadraticCurveTo(bx + 1, by - 2, bx + 4, by + 1);
+      ctx.stroke();
+    }
+  }
+
+  function drawBalloon(cs){
+    const t = cs.totalT;
+    const sway = Math.sin(t * 0.8) * 3;
+    const bx = basketX + sway;
+    const envelopeY = fY - charH - 50;
+
+    // ropes from basket to envelope
+    ctx.strokeStyle = '#8a7050'; ctx.lineWidth = 0.8;
+    const basketTop = fY - charH * 0.6;
+    ctx.beginPath(); ctx.moveTo(bx - 22, basketTop); ctx.lineTo(bx - 14, envelopeY + 30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx + 22, basketTop); ctx.lineTo(bx + 14, envelopeY + 30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx - 22, basketTop); ctx.lineTo(bx + 14, envelopeY + 30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx + 22, basketTop); ctx.lineTo(bx - 14, envelopeY + 30); ctx.stroke();
+
+    // envelope (the balloon itself)
+    const envR = 36;
+    ctx.fillStyle = '#d04040';
+    ctx.beginPath(); ctx.ellipse(bx, envelopeY, envR, envR * 1.2, 0, 0, 7); ctx.fill();
+    // stripe
+    ctx.fillStyle = '#e8a020';
+    ctx.beginPath(); ctx.ellipse(bx, envelopeY, envR, envR * 1.2, 0, -0.4, 0.4); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(bx, envelopeY, envR, envR * 1.2, 0, Math.PI - 0.4, Math.PI + 0.4); ctx.fill();
+    // highlight
+    ctx.fillStyle = 'rgba(255,255,255,.15)';
+    ctx.beginPath(); ctx.ellipse(bx - 10, envelopeY - 8, 10, 18, -0.2, 0, 7); ctx.fill();
+
+    // burner glow
+    const burnerFlicker = 0.7 + 0.3 * Math.sin(t * 12);
+    const bg = ctx.createRadialGradient(bx, envelopeY + envR * 1.2 + 2, 1, bx, envelopeY + envR * 1.2 + 2, 8);
+    bg.addColorStop(0, `rgba(255,180,60,${(0.5 * burnerFlicker).toFixed(2)})`);
+    bg.addColorStop(1, 'rgba(255,180,60,0)');
+    ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(bx, envelopeY + envR * 1.2 + 2, 8, 0, 7); ctx.fill();
+
+    // basket
+    ctx.fillStyle = '#a08050';
+    ctx.fillRect(bx - 24, basketTop, 48, 16);
+    ctx.strokeStyle = '#806030'; ctx.lineWidth = 0.6;
+    for (let i = 0; i < 4; i++){
+      ctx.beginPath(); ctx.moveTo(bx - 24 + i * 16, basketTop); ctx.lineTo(bx - 24 + i * 16, basketTop + 16); ctx.stroke();
+    }
+    ctx.strokeStyle = '#806030'; ctx.lineWidth = 1;
+    ctx.strokeRect(bx - 24, basketTop, 48, 16);
+  }
+
+  return {
+    chars: ['krystal', 'paul'],
+    skipable: true,
+    steps: [
+      // Step 1: Rising up — Krystal cheers at the view
+      { dur: 2.5, draw(cs){
+          drawBg(cs);
+          drawBalloon(cs);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawChar('paul', paulX, fY, 'left', charH, 0);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'We\'re so high up! Look at everything! ✨');
+      }},
+      // Step 2: Paul points out their house — Krystal surprised
+      { dur: 2.5, draw(cs){
+          drawBg(cs);
+          drawBalloon(cs);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawChar('paul', paulX, fY, 'left', charH, 0);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Look — I can see our house from here! 🏠');
+      }},
+      // Step 3: Krystal spots the fields — wave expression
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          drawBalloon(cs);
+          csDrawExpression('krystal', 'wave', krystalX, fY, charH);
+          csDrawExpression('paul', 'cheer', paulX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'The fields look like a quilt! 💛');
+      }},
+      // Step 4: Romantic moment — she leans on him. Hearts.
+      { dur: 3.5, draw(cs){
+          drawBg(cs);
+          drawBalloon(cs);
+          // Draw them close together
+          csDrawChar('paul', paulX - 6, fY, 'left', charH, 0);
+          csDrawChar('krystal', krystalX + 8, fY, 'right', charH, 0);
+          if (cs.stepT < 2.0){
+            csDrawBubble(krystalX + 8, fY - charH - 4, 'Krystal', 'This is perfect...');
+          } else {
+            csDrawBubble(paulX - 6, fY - charH - 4, 'Paul', 'Yeah... it really is 💕');
+          }
+      }, onStart(cs){
+          csHearts(cs, basketX, fY - charH * 0.7, 8);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 15: COOKING DISASTER  (triggers at diner, dumplinghouse, ramenshop)
+   ============================================================================ */
+function csCookingDisaster(){
+  const groundY = H * 0.68;
+  const charH = 80;
+  const fY = groundY + 14;
+  const krystalX = W * 0.22, wadeX = W * 0.50, williamX = W * 0.78;
+
+  // spice cloud particle state
+  let spiceParticles = [];
+  function spawnSpice(cx, cy, n){
+    for (let i = 0; i < n; i++){
+      spiceParticles.push({
+        x: cx + rand(-6, 6), y: cy,
+        vx: rand(-20, 20), vy: rand(-40, -15),
+        life: 0.8 + Math.random() * 0.6,
+        maxLife: 0.8 + Math.random() * 0.6,
+        size: 1.5 + Math.random() * 2,
+        col: Math.random() < 0.5 ? '#c03020' : '#d04828'
+      });
+    }
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // kitchen wall
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#f0e8d8'); wall.addColorStop(0.6, '#e8dcc8'); wall.addColorStop(1, '#d8ccb0');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // tile backsplash (upper wall)
+    ctx.fillStyle = '#e0d8c8';
+    for (let r = 0; r < 3; r++){
+      for (let c = 0; c < Math.ceil(W / 14) + 1; c++){
+        const tx = c * 14 + (r % 2) * 7;
+        const ty = H * 0.06 + r * 14;
+        ctx.strokeStyle = 'rgba(0,0,0,.05)'; ctx.lineWidth = 0.5;
+        ctx.strokeRect(tx, ty, 13, 13);
+      }
+    }
+
+    // shelf with spice jars
+    ctx.fillStyle = '#b89868'; ctx.fillRect(W * 0.60, H * 0.08, W * 0.32, 3);
+    const jarCols = ['#c03020','#e08020','#d04828','#a02818'];
+    for (let i = 0; i < 4; i++){
+      const jx = W * 0.64 + i * W * 0.08;
+      ctx.fillStyle = jarCols[i];
+      ctx.fillRect(jx - 3, H * 0.02, 6, 6);  // jar body
+      ctx.fillStyle = '#d0c0a0';
+      ctx.fillRect(jx - 3, H * 0.02, 6, 1.5);  // lid
+    }
+
+    // kitchen counter (long)
+    ctx.fillStyle = '#c8b898';
+    ctx.fillRect(0, groundY - 10, W, 10);
+    ctx.fillStyle = '#a08060';
+    ctx.fillRect(0, groundY, W, 4);
+
+    // floor — kitchen tile
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#c0a880'); floor.addColorStop(1, '#a89068');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.strokeStyle = 'rgba(0,0,0,.04)'; ctx.lineWidth = 0.5;
+    for (let x = 0; x < W; x += 18){
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // hanging lamp
+    const lampX = W * 0.50;
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(lampX, 0); ctx.lineTo(lampX, H * 0.04); ctx.stroke();
+    ctx.fillStyle = '#f0dcc0';
+    ctx.beginPath(); ctx.ellipse(lampX, H * 0.06, 8, 5, 0, 0, 7); ctx.fill();
+    const glow = ctx.createRadialGradient(lampX, H * 0.06, 2, lampX, H * 0.06, 55);
+    glow.addColorStop(0, 'rgba(255,240,200,.14)'); glow.addColorStop(1, 'rgba(255,240,200,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(lampX, H * 0.06, 55, 0, 7); ctx.fill();
+  }
+
+  // draw a big pot on the counter
+  const potX = W * 0.50, potY = groundY - 10;
+  function drawPot(cs, steaming){
+    // pot body
+    ctx.fillStyle = '#606060';
+    ctx.fillRect(potX - 16, potY - 18, 32, 18);
+    // rim
+    ctx.fillStyle = '#505050';
+    ctx.fillRect(potX - 18, potY - 18, 36, 3);
+    // handles
+    ctx.fillStyle = '#484848';
+    ctx.fillRect(potX - 22, potY - 14, 5, 3);
+    ctx.fillRect(potX + 17, potY - 14, 5, 3);
+    // contents
+    ctx.fillStyle = steaming ? '#c06030' : '#d09050';
+    ctx.fillRect(potX - 14, potY - 16, 28, 5);
+
+    // steam
+    if (steaming){
+      const t = cs.totalT;
+      ctx.strokeStyle = 'rgba(200,200,200,.25)'; ctx.lineWidth = 0.8;
+      for (let i = 0; i < 3; i++){
+        const sx = potX - 8 + i * 8;
+        const drift = Math.sin(t * 3 + i * 2) * 3;
+        ctx.beginPath();
+        ctx.moveTo(sx, potY - 20);
+        ctx.quadraticCurveTo(sx + drift, potY - 28, sx - drift, potY - 36);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // draw a spice shaker
+  function drawSpiceShaker(cx, cy, tilted){
+    ctx.save();
+    if (tilted){
+      ctx.translate(cx, cy);
+      ctx.rotate(-0.8);
+      ctx.translate(-cx, -cy);
+    }
+    ctx.fillStyle = '#c03020'; ctx.fillRect(cx - 3, cy - 10, 6, 10);
+    ctx.fillStyle = '#d0c0a0'; ctx.fillRect(cx - 3, cy - 10, 6, 2);
+    // dots on lid
+    ctx.fillStyle = '#333';
+    ctx.fillRect(cx - 1, cy - 9.5, 1, 1);
+    ctx.fillRect(cx + 1, cy - 9.5, 1, 1);
+    ctx.restore();
+  }
+
+  function drawSpiceCloud(dt){
+    for (let i = spiceParticles.length - 1; i >= 0; i--){
+      const p = spiceParticles[i];
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vy += 30 * dt;
+      p.life -= dt;
+      if (p.life <= 0){ spiceParticles.splice(i, 1); continue; }
+      const a = Math.min(1, p.life / p.maxLife * 2);
+      ctx.fillStyle = p.col;
+      ctx.globalAlpha = a * 0.7;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // red haze for the spice cloud lingering
+  function drawSpiceHaze(cs){
+    if (cs.stepIdx >= 2){
+      const intensity = Math.min(0.08, (cs.stepIdx === 2 ? cs.stepT * 0.04 : 0.08));
+      ctx.fillStyle = `rgba(200,60,30,${intensity.toFixed(3)})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  return {
+    chars: ['krystal', 'wade', 'william'],
+    skipable: true,
+    steps: [
+      // Step 1: Cooking together — Wade near the pot
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawExpression('wade', 'cheer', wadeX, fY, charH * 0.95);
+          csDrawChar('william', williamX, fY, 'left', charH, 0);
+          drawPot(cs, true);
+          drawSpiceShaker(wadeX + 24, potY - 6, false);
+          drawSpiceCloud(0);
+          csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', 'Needs more spice! 🌶️');
+      }, update(cs, dt){ drawSpiceCloud(dt); }},
+      // Step 2: Wade dumps the WHOLE shaker — spice cloud!
+      { dur: 2.5, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawExpression('wade', 'embarrassed', wadeX, fY, charH * 0.95);
+          csDrawChar('william', williamX, fY, 'left', charH, 0);
+          drawPot(cs, true);
+          drawSpiceShaker(potX + 2, potY - 14, true);
+          drawSpiceCloud(0);
+          drawSpiceHaze(cs);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'WADE that was the WHOLE bottle! 😱');
+      }, onStart(cs){
+          spawnSpice(potX, potY - 20, 14);
+      }, update(cs, dt){ drawSpiceCloud(dt); }},
+      // Step 3: William tastes it — scared then surprised
+      { dur: 2.8, draw(cs){
+          drawBg(cs);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawExpression('wade', 'embarrassed', wadeX, fY, charH * 0.95);
+          drawPot(cs, true);
+          drawSpiceCloud(0);
+          drawSpiceHaze(cs);
+          if (cs.stepT < 1.4){
+            csDrawExpression('william', 'scared', williamX, fY, charH);
+            csDrawBubble(williamX, fY - charH - 4, 'William', '...!!! 🥵🥵🥵');
+          } else {
+            csDrawExpression('william', 'surprised', williamX, fY, charH);
+            // everyone's eyes watering — draw tear drops
+            ctx.fillStyle = 'rgba(100,160,255,.5)';
+            ctx.beginPath(); ctx.arc(krystalX + 6, fY - charH * 0.55, 1.5, 0, 7); ctx.fill();
+            ctx.beginPath(); ctx.arc(wadeX + 5, fY - charH * 0.50, 1.5, 0, 7); ctx.fill();
+            ctx.beginPath(); ctx.arc(williamX + 6, fY - charH * 0.55, 1.5, 0, 7); ctx.fill();
+            csDrawExpression('krystal', 'sad', krystalX, fY, charH);
+            csDrawBubble(williamX, fY - charH - 4, 'William', 'MY TONGUE 😭');
+          }
+      }, update(cs, dt){ drawSpiceCloud(dt); }},
+      // Step 4: Krystal calls for pizza — everyone laughing
+      { dur: 3.0, draw(cs){
+          drawBg(cs);
+          drawPot(cs, true);
+          drawSpiceCloud(0);
+          drawSpiceHaze(cs);
+          if (cs.stepT < 1.5){
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+            csDrawExpression('wade', 'laugh', wadeX, fY, charH * 0.95);
+            csDrawExpression('william', 'laugh', williamX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'We\'re ordering pizza 😂');
+          } else {
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawExpression('wade', 'cheer', wadeX, fY, charH * 0.95);
+            csDrawExpression('william', 'cheer', williamX, fY, charH);
+            csDrawBubble(wadeX, fY - charH * 0.95 - 4, 'Wade', 'Extra cheese please! 🍕');
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 4);
+          csHearts(cs, wadeX, fY - charH * 0.6, 3);
+          csHearts(cs, williamX, fY - charH * 0.7, 4);
+      }, update(cs, dt){ drawSpiceCloud(dt); }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 16: TIDE POOL DISCOVERY  (triggers at tidepools, coralreef)
+   ============================================================================ */
+function csTidePoolDiscovery(){
+  const groundY = H * 0.65;
+  const charH = 80;
+  const fY = groundY + 20;
+  const krystalX = W * 0.25, lukeX = W * 0.50, lunaX = W * 0.75;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // soft blue sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY * 0.6);
+    sky.addColorStop(0, '#88c8e8'); sky.addColorStop(0.5, '#a8d8f0'); sky.addColorStop(1, '#c8e4f0');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY * 0.6);
+
+    // ocean horizon
+    const ocean = ctx.createLinearGradient(0, groundY * 0.6, 0, groundY);
+    ocean.addColorStop(0, '#3888b0'); ocean.addColorStop(0.5, '#50a0c0'); ocean.addColorStop(1, '#68b0c8');
+    ctx.fillStyle = ocean; ctx.fillRect(0, groundY * 0.6, W, groundY * 0.4);
+
+    // gentle waves on the horizon
+    ctx.strokeStyle = 'rgba(255,255,255,.2)'; ctx.lineWidth = 0.8;
+    for (let i = 0; i < 3; i++){
+      const wy = groundY * 0.63 + i * 8;
+      ctx.beginPath();
+      for (let x = 0; x < W; x += 4){
+        const y = wy + Math.sin(x * 0.05 + t * 1.5 + i) * 1.5;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // rocky shore
+    const rock = ctx.createLinearGradient(0, groundY, 0, H);
+    rock.addColorStop(0, '#8a8878'); rock.addColorStop(0.3, '#7a7868'); rock.addColorStop(1, '#6a6858');
+    ctx.fillStyle = rock; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // rocky texture
+    ctx.fillStyle = 'rgba(0,0,0,.04)';
+    for (let i = 0; i < 12; i++){
+      const rx = (i * 67 + 11) % W, ry = groundY + 4 + (i * 43 + 7) % (H - groundY - 8);
+      ctx.beginPath(); ctx.ellipse(rx, ry, 6 + (i % 4) * 3, 3 + (i % 3), (i * 0.7), 0, 7); ctx.fill();
+    }
+
+    // tide pools (shallow water pools in the rocks)
+    const pools = [
+      { x: W * 0.20, y: groundY + 30, rx: 22, ry: 7 },
+      { x: W * 0.50, y: groundY + 35, rx: 26, ry: 8 },
+      { x: W * 0.78, y: groundY + 28, rx: 20, ry: 6 },
+    ];
+    for (const p of pools){
+      // pool water
+      ctx.fillStyle = 'rgba(60,140,180,.45)';
+      ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, 7); ctx.fill();
+      // pool rim (darker rock edge)
+      ctx.strokeStyle = 'rgba(80,70,60,.3)'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, 7); ctx.stroke();
+      // water shimmer
+      ctx.fillStyle = `rgba(255,255,255,${(0.1 + 0.06 * Math.sin(t * 2 + p.x)).toFixed(2)})`;
+      ctx.beginPath(); ctx.ellipse(p.x - 4, p.y - 1, p.rx * 0.4, p.ry * 0.3, -0.2, 0, 7); ctx.fill();
+    }
+
+    // seaweed tufts near pools
+    ctx.fillStyle = '#4a8848';
+    for (let i = 0; i < 5; i++){
+      const sx = W * 0.12 + i * W * 0.18;
+      const sy = groundY + 18 + (i % 3) * 8;
+      const sway = Math.sin(t * 1.2 + i) * 2;
+      ctx.beginPath();
+      ctx.moveTo(sx - 2, sy); ctx.quadraticCurveTo(sx + sway, sy - 10, sx - 1, sy - 16);
+      ctx.quadraticCurveTo(sx + sway * 0.5, sy - 10, sx + 2, sy);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // draw a starfish
+  function drawStarfish(cx, cy, size, rot){
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rot || 0);
+    ctx.fillStyle = '#e06838';
+    for (let i = 0; i < 5; i++){
+      const a = i * Math.PI * 2 / 5 - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(a - 0.3) * size * 0.4, Math.sin(a - 0.3) * size * 0.4);
+      ctx.lineTo(Math.cos(a) * size, Math.sin(a) * size);
+      ctx.lineTo(Math.cos(a + 0.3) * size * 0.4, Math.sin(a + 0.3) * size * 0.4);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // center dot
+    ctx.fillStyle = '#d05828';
+    ctx.beginPath(); ctx.arc(0, 0, size * 0.2, 0, 7); ctx.fill();
+    ctx.restore();
+  }
+
+  // draw a hermit crab
+  function drawCrab(cx, cy, pinching){
+    // shell
+    ctx.fillStyle = '#c8a868';
+    ctx.beginPath(); ctx.ellipse(cx, cy - 3, 5, 4, 0.2, 0, 7); ctx.fill();
+    // shell spiral
+    ctx.strokeStyle = '#a88848'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.arc(cx + 1, cy - 3, 2.5, 0, 4); ctx.stroke();
+    // legs
+    ctx.strokeStyle = '#c06040'; ctx.lineWidth = 0.8;
+    for (let i = -1; i <= 1; i += 2){
+      ctx.beginPath(); ctx.moveTo(cx + i * 4, cy); ctx.lineTo(cx + i * 7, cy + 3); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx + i * 3, cy + 1); ctx.lineTo(cx + i * 6, cy + 4); ctx.stroke();
+    }
+    // claws
+    if (pinching){
+      // claws raised and snapping!
+      ctx.fillStyle = '#c06040';
+      ctx.beginPath(); ctx.ellipse(cx - 7, cy - 5, 3, 2, -0.5, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 7, cy - 5, 3, 2, 0.5, 0, 7); ctx.fill();
+    } else {
+      ctx.fillStyle = '#c06040';
+      ctx.beginPath(); ctx.ellipse(cx - 6, cy - 1, 2.5, 1.5, -0.3, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 6, cy - 1, 2.5, 1.5, 0.3, 0, 7); ctx.fill();
+    }
+    // eyes
+    ctx.fillStyle = '#222';
+    ctx.fillRect(cx - 2, cy - 6, 1, 1);
+    ctx.fillRect(cx + 1, cy - 6, 1, 1);
+  }
+
+  // draw a pretty shell
+  function drawShell(cx, cy){
+    ctx.fillStyle = '#f0d0b0';
+    ctx.beginPath(); ctx.ellipse(cx, cy, 5, 3.5, 0.3, 0, 7); ctx.fill();
+    // ridges
+    ctx.strokeStyle = '#d8b090'; ctx.lineWidth = 0.4;
+    for (let i = 0; i < 4; i++){
+      const a = i * 0.6 - 0.9;
+      ctx.beginPath();
+      ctx.moveTo(cx - 4, cy);
+      ctx.quadraticCurveTo(cx, cy - 3 + i * 0.5, cx + 4, cy + 1);
+      ctx.stroke();
+    }
+    // iridescent highlight
+    ctx.fillStyle = 'rgba(200,180,255,.25)';
+    ctx.beginPath(); ctx.ellipse(cx - 1, cy - 1, 2.5, 1.5, 0.2, 0, 7); ctx.fill();
+  }
+
+  return {
+    chars: ['krystal', 'luke', 'luna'],
+    skipable: true,
+    steps: [
+      // Step 1: Exploring — kneeling near pools
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawExpression('luke', 'cheer', lukeX, fY, charH);
+          csDrawChar('luna', lunaX, fY, 'left', charH, 0);
+          csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'Look at all these little pools! 🌊');
+      }},
+      // Step 2: Luke finds a starfish — surprised!
+      { dur: 2.5, draw(cs){
+          drawBg(cs);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawExpression('luke', 'surprised', lukeX, fY, charH);
+          csDrawChar('luna', lunaX, fY, 'left', charH, 0);
+          // starfish in his hand area
+          drawStarfish(lukeX + 14, fY - charH * 0.35, 6, 0.2);
+          csDrawBubble(lukeX, fY - charH - 4, 'Luke', 'A STARFISH!! Look at it! ⭐');
+      }},
+      // Step 3: Luna finds a hermit crab — it pinches her! scared then laugh
+      { dur: 3.0, draw(cs){
+          drawBg(cs);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawChar('luke', lukeX, fY, 'down', charH, 0);
+          drawStarfish(lukeX + 14, fY - charH * 0.35, 6, 0.2);
+          if (cs.stepT < 1.5){
+            csDrawExpression('luna', 'scared', lunaX, fY, charH);
+            drawCrab(lunaX + 10, fY - charH * 0.25, true);
+            csDrawBubble(lunaX, fY - charH - 4, 'Luna', 'OW!! It pinched me!! 😱');
+          } else {
+            csDrawExpression('luna', 'laugh', lunaX, fY, charH);
+            drawCrab(lunaX + 16, fY - charH * 0.10, false);
+            csDrawBubble(lunaX, fY - charH - 4, 'Luna', 'Okay that was kind of funny 😂');
+          }
+      }},
+      // Step 4: Krystal finds a pretty shell — hearts
+      { dur: 3.0, draw(cs){
+          drawBg(cs);
+          csDrawExpression('luke', 'cheer', lukeX, fY, charH);
+          csDrawExpression('luna', 'cheer', lunaX, fY, charH);
+          drawStarfish(lukeX + 14, fY - charH * 0.35, 6, 0.2);
+          // pretty shell in Krystal's hands
+          drawShell(krystalX + 12, fY - charH * 0.35);
+          if (cs.stepT < 1.5){
+            csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Oh! Look at this one... it\'s beautiful 🐚');
+          } else {
+            csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'I\'m keeping this one forever 💕');
+          }
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 6);
+          csHearts(cs, lukeX, fY - charH * 0.7, 3);
+          csHearts(cs, lunaX, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
@@ -2602,6 +3201,14 @@ const CUTSCENE_MAP = {
   teahouse:          [csTeaParty],
   bambootearoom:     [csTeaParty],
   cafe:              [csTeaParty],
+  balloonride:       [csSunsetBalloonRide],
+  balloonfest:       [csSunsetBalloonRide],
+  kitehill:          [csSunsetBalloonRide],
+  diner:             [csCookingDisaster],
+  dumplinghouse:     [csCookingDisaster],
+  ramenshop:         [csCookingDisaster],
+  tidepools:         [csTidePoolDiscovery],
+  coralreef:         [csTidePoolDiscovery],
 };
 
 /* ============================================================================
