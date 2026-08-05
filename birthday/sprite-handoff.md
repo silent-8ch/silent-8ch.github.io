@@ -183,6 +183,55 @@ loading. Use `SpriteRenderer.preload(name)` only when a scene needs a texture
 ready before its first rendered frame. Four original 4 x 4 atlases are retained
 under `sprites/textures/sources/`.
 
+## Requested sprite sheets — next generation batch
+
+Priority-ordered by number of scenes impacted. All sheets should be transparent
+1024 x 256 PNGs (four 256 x 256 frames) matching the existing art style.
+Animated sheets use four sequential frames; static sheets use four positional
+variants. Scenes can clip sprites to polygon shapes, so irregular silhouettes
+are fine.
+
+### Tier 1 — highest impact
+
+| Name | Description | Frames | Scenes | Notes |
+|------|-------------|--------|--------|-------|
+| `sky-day` | Blue sky gradient, lightest at bottom | 4 positional variants | 67 | Rect fill, stretched to upper canvas |
+| `sky-night` | Dark indigo/navy gradient with subtle depth | 4 variants | 45 | Rect fill, pairs with star-field |
+| `sky-sunset` | Warm orange-pink-purple gradient | 4 variants | 8+ | Rect fill |
+| `star-field` | Twinkling white/yellow dots on transparent bg | 4 animated frames | 45 | Overlay on night sky, subtle twinkle |
+| `water-surface` | Rippling blue water, semi-transparent | 4 animated frames | 21 | Tileable horizontally, rect fill |
+| `shelf-counter` | Wooden shelf/counter surface, front-facing | 4 positional variants | 48 | Tileable horizontally, rect clip |
+| `window-rect` | Rectangular window pane showing blue/orange sky | 4 variants (day/night/sunset/curtained) | 42 | Rect placement |
+| `window-arch` | Arched window variant | 4 variants (day/night/sunset/curtained) | 12 | Polygon clip for arch shape |
+| `candle-flame` | Small candle with flickering flame and glow | 4 animated frames | 36 | Alpha-blended, small (defaultSize ~24) |
+| `moon-crescent` | Crescent moon with soft radial glow halo | 4 phase variants (new/quarter/half/full) | 25 | Circular clip, transparent bg |
+| `mountain-silhouette` | Layered mountain ridgeline, dark tones | 4 positional variants | 15 | Polygon clip, stretch to width, background phase |
+| `rock-boulder` | Irregular rock/boulder, earthy tones | 4 size/shape variants | 19 | Polygon clip, ground phase |
+
+### Tier 2 — medium impact
+
+| Name | Description | Frames | Scenes | Notes |
+|------|-------------|--------|--------|-------|
+| `rug-carpet` | Warm patterned oval/rectangular rug | 4 color/pattern variants | 13 | Ground phase, polygon clip for oval |
+| `bed-pillow` | Bed with pillow and blanket, side view | 4 variants (made/messy/occupied/nightstand) | 10 | Ground phase, large (defaultSize ~120) |
+| `fog-mist` | Translucent white-gray horizontal mist band | 4 animated drift frames | 10 | Overlay phase, alpha 0.15-0.3, tileable |
+| `boat-hull` | Small wooden boat/canoe on water | 4 variants (rowboat/sailboat/canoe/kayak) | 8 | Actors phase, polygon clip |
+| `curtain-drape` | Hanging fabric curtain from top edge | 4 color variants | 7 | Foreground phase, polygon clip |
+
+### Art direction for these sheets
+
+- Match the compact cozy-RPG pixel style of existing sprites.
+- Skies and water should have visible chunky pixels, not smooth gradients — the
+  charm is in the pixel texture.
+- Rocks and mountains should have defined dark outlines with 2-3 tone shading.
+- Candle flame should glow warmly with a soft radial halo (drawn into the frame,
+  not relying on canvas effects).
+- Moon glow should be baked into the sprite as concentric semi-transparent rings.
+- Window panes should show a simple interior/exterior gradient with mullion
+  cross-bars.
+- All sheets must have transparent backgrounds (except sky sheets, which are
+  opaque fills).
+
 ## Important continuation notes
 
 - When prompting image generation, attach `reference-photos.png` and identify each named panel explicitly.
