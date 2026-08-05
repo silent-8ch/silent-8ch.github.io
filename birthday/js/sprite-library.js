@@ -27,7 +27,7 @@
     </div>
     <div id="slList" style="max-height:35vh;overflow-y:auto;border-bottom:1px solid #333;"></div>
     <div id="slDetail" style="padding:10px;display:none;">
-      <div id="slPreview" style="text-align:center;padding:10px;background:#111;border-radius:4px;margin-bottom:8px;position:relative;min-height:80px;"></div>
+      <div id="slPreview" style="text-align:center;padding:10px;background:#111;border-radius:4px;margin-bottom:8px;position:relative;min-height:420px;"></div>
       <div id="slStats" style="font-family:monospace;font-size:10px;color:#aaa;margin-bottom:8px;"></div>
       <div id="slAnchor" style="margin-bottom:8px;">
         <button id="slAnchorBtn" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Set anchor point (click preview)</button>
