@@ -4411,12 +4411,67 @@ function drawTarotParlor(){
   ctx.fillStyle='rgba(200,160,64,.12)'; ctx.beginPath(); ctx.arc(W*0.5,floorY+(H-floorY)*0.5,20,0,7); ctx.fill();
   for (let i=0;i<8;i++){ const a=i/8*Math.PI*2; ctx.beginPath(); ctx.moveTo(W*0.5,floorY+(H-floorY)*0.5); ctx.lineTo(W*0.5+Math.cos(a)*28,floorY+(H-floorY)*0.5+Math.sin(a)*10); ctx.stroke(); }
 
+  // floating arcane runes drifting slowly upward
+  ctx.font='12px serif'; ctx.textAlign='center';
+  const runeChars=['\u2640','\u2642','\u2609','\u263D','\u2641','\u2643','\u2644'];
+  for (let i=0;i<6;i++){
+    const rx=(i*53+17)%W, ry=((i*71+t*12)%(floorY+40))-20;
+    const rAlpha=0.06+0.06*Math.sin(t*1.2+i*1.7);
+    ctx.fillStyle=`rgba(200,160,255,${rAlpha})`;
+    ctx.fillText(runeChars[i%runeChars.length],rx,ry);
+  }
+
+  // pulsing energy rings around the crystal ball
+  const cbPX=tX+36, cbPY=tY-14;
+  for (let ring=0;ring<3;ring++){
+    const rr=14+ring*6+Math.sin(t*3+ring*2)*2;
+    ctx.strokeStyle=`rgba(180,140,255,${0.12-ring*0.03+0.06*Math.sin(t*2.5+ring)})`;
+    ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.arc(cbPX,cbPY,rr,0,7); ctx.stroke();
+  }
+
+  // bubbling potion bottle on the floor (near left curtain)
+  const pbX=W*0.16, pbY=floorY+10;
+  // bottle body
+  ctx.fillStyle='rgba(40,80,60,.7)'; roundRect(pbX-5,pbY-16,10,16,2); ctx.fill();
+  ctx.fillStyle='rgba(40,80,60,.7)'; ctx.fillRect(pbX-2,pbY-22,4,6); // neck
+  // liquid inside
+  ctx.fillStyle=`rgba(80,220,160,${0.5+0.2*Math.sin(t*2)})`;
+  roundRect(pbX-4,pbY-10,8,10,1); ctx.fill();
+  // bubbles rising inside
+  for (let b=0;b<3;b++){
+    const bby=pbY-8-b*4-((t*20+b*30)%12);
+    const bbx=pbX+Math.sin(t*3+b*2)*2;
+    ctx.fillStyle=`rgba(120,255,200,${0.3+0.2*Math.sin(t*4+b)})`;
+    ctx.beginPath(); ctx.arc(bbx,bby,1.2+Math.sin(t*3+b)*0.4,0,7); ctx.fill();
+  }
+  // potion glow
+  ctx.fillStyle=`rgba(80,220,160,${0.06+0.04*Math.sin(t*2)})`;
+  ctx.beginPath(); ctx.arc(pbX,pbY-6,18,0,7); ctx.fill();
+
+  // mystical pendulum swinging from above (right of zodiac wheel)
+  const penX=W*0.72, penAnchorY=0;
+  const penAngle=Math.sin(t*0.8)*0.35;
+  const penLen=floorY*0.35;
+  const penBobX=penX+Math.sin(penAngle)*penLen;
+  const penBobY=penAnchorY+Math.cos(penAngle)*penLen;
+  ctx.strokeStyle='rgba(200,160,64,.3)'; ctx.lineWidth=0.8;
+  ctx.beginPath(); ctx.moveTo(penX,penAnchorY); ctx.lineTo(penBobX,penBobY); ctx.stroke();
+  // pendulum crystal
+  ctx.fillStyle=`rgba(180,120,220,${0.6+0.2*Math.sin(t*1.6)})`;
+  ctx.beginPath(); ctx.moveTo(penBobX,penBobY-6); ctx.lineTo(penBobX-4,penBobY); ctx.lineTo(penBobX,penBobY+8); ctx.lineTo(penBobX+4,penBobY); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(220,180,255,.2)'; ctx.beginPath(); ctx.arc(penBobX,penBobY,12,0,7); ctx.fill();
+
   // ambient sparkles drifting in candlelight
   for (let i=0;i<10;i++){
     const sx=(i*67+t*6)%W, sy=(i*43+Math.sin(t*0.4+i)*20)%(floorY*0.8)+10;
     ctx.fillStyle=`rgba(220,200,160,${0.1+0.15*Math.sin(t*2+i)})`;
     ctx.beginPath(); ctx.arc(sx,sy,1,0,7); ctx.fill();
   }
+
+  // flickering warm ambient glow across the whole room from candles
+  ctx.fillStyle=`rgba(255,200,100,${0.02+0.015*Math.sin(t*3)})`;
+  ctx.fillRect(0,0,W,floorY);
 }
 registerScene('tarotparlor', drawTarotParlor);
 
@@ -4541,11 +4596,83 @@ function drawEnchantedForest(){
   ctx.fillStyle=`rgba(160,200,140,${0.1+0.06*Math.sin(t*2)})`;
   ctx.beginPath(); ctx.arc(lX,lY-37,14,0,7); ctx.fill();
 
+  // pulsing crystals embedded in the ground
+  function groundCrystal(cx,cy,h,col){
+    const pulse=0.7+0.3*Math.sin(t*2+cx);
+    // crystal body
+    ctx.fillStyle=col;
+    ctx.globalAlpha=pulse*0.8;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx-4,cy+h*0.4);
+    ctx.lineTo(cx-2,cy-h); ctx.lineTo(cx+3,cy-h*0.7);
+    ctx.lineTo(cx+5,cy+h*0.3); ctx.closePath(); ctx.fill();
+    // crystal glow
+    ctx.globalAlpha=pulse*0.15;
+    ctx.fillStyle=col;
+    ctx.beginPath(); ctx.arc(cx,cy-h*0.4,h*1.2,0,7); ctx.fill();
+    // inner highlight
+    ctx.globalAlpha=pulse*0.5;
+    ctx.fillStyle='rgba(255,255,255,.4)';
+    ctx.beginPath(); ctx.moveTo(cx-1,cy-h*0.3); ctx.lineTo(cx,cy-h+2); ctx.lineTo(cx+1,cy-h*0.4); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  groundCrystal(W*0.25,groundY+12,18,'#a060e0');
+  groundCrystal(W*0.58,groundY+16,14,'#60c0d0');
+  groundCrystal(W*0.78,groundY+20,12,'#c080f0');
+
+  // will-o'-wisps with trailing glow
+  for (let i=0;i<3;i++){
+    const wx=W*0.2+i*W*0.3+Math.sin(t*0.6+i*2.5)*40;
+    const wy=groundY-30+Math.sin(t*0.8+i*1.7)*25;
+    // trail
+    for (let tr=0;tr<5;tr++){
+      const trx=wx-Math.sin(t*0.6+i*2.5-tr*0.15)*40+Math.sin(t*0.6+i*2.5)*40-wx+wx;
+      const trDelay=tr*0.12;
+      const twx=wx-Math.cos(t*0.5+i+tr*0.3)*tr*4;
+      const twy=wy+tr*3;
+      ctx.fillStyle=`rgba(180,220,255,${0.08-tr*0.015})`;
+      ctx.beginPath(); ctx.arc(twx,twy,3-tr*0.4,0,7); ctx.fill();
+    }
+    // core
+    ctx.fillStyle=`rgba(180,220,255,${0.4+0.2*Math.sin(t*3+i)})`;
+    ctx.beginPath(); ctx.arc(wx,wy,3,0,7); ctx.fill();
+    // bright center
+    ctx.fillStyle=`rgba(220,240,255,${0.6+0.3*Math.sin(t*3.5+i)})`;
+    ctx.beginPath(); ctx.arc(wx,wy,1.5,0,7); ctx.fill();
+    // outer glow
+    ctx.fillStyle=`rgba(140,200,255,${0.06+0.04*Math.sin(t*2+i)})`;
+    ctx.beginPath(); ctx.arc(wx,wy,14,0,7); ctx.fill();
+  }
+
+  // swirling mist near the ground
+  for (let i=0;i<5;i++){
+    const mx=(i*W/5+t*4+Math.sin(t*0.3+i)*20)%W;
+    const my=groundY+2+Math.sin(t*0.5+i*0.8)*4;
+    const mr=24+Math.sin(t*0.4+i)*6;
+    ctx.fillStyle=`rgba(140,160,180,${0.04+0.02*Math.sin(t*0.7+i*1.3)})`;
+    ctx.beginPath(); ctx.ellipse(mx,my,mr,8,0,0,7); ctx.fill();
+  }
+
   // a winding path through the forest floor (faint, leading into the trees)
   ctx.strokeStyle='rgba(120,100,80,.2)'; ctx.lineWidth=16;
   ctx.beginPath(); ctx.moveTo(W*0.3,H); ctx.quadraticCurveTo(W*0.45,groundY+20,W*0.5,groundY+4);
   ctx.quadraticCurveTo(W*0.55,groundY-10,W*0.6,groundY-30); ctx.stroke();
   ctx.strokeStyle='rgba(100,80,60,.1)'; ctx.lineWidth=20;
   ctx.beginPath(); ctx.moveTo(W*0.3,H); ctx.quadraticCurveTo(W*0.45,groundY+20,W*0.5,groundY+4); ctx.stroke();
+
+  // fallen leaves drifting gently
+  const leafCols=['rgba(180,120,40,.3)','rgba(140,80,30,.25)','rgba(100,160,60,.2)'];
+  for (let i=0;i<6;i++){
+    const lx=(i*61+t*5)%W;
+    const ly=groundY+8+i*4+Math.sin(t*0.6+i*2)*3;
+    const lr=Math.sin(t*0.4+i)*0.3;
+    ctx.save(); ctx.translate(lx,ly); ctx.rotate(lr);
+    ctx.fillStyle=leafCols[i%3];
+    ctx.beginPath(); ctx.ellipse(0,0,4,2,0,0,7); ctx.fill();
+    ctx.restore();
+  }
+
+  // ambient magical shimmer across the whole scene
+  ctx.fillStyle=`rgba(140,120,200,${0.015+0.01*Math.sin(t*1.5)})`;
+  ctx.fillRect(0,0,W,H);
 }
 registerScene('enchantedforest', drawEnchantedForest);
