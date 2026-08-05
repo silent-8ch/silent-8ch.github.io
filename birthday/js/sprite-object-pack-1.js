@@ -6,8 +6,8 @@
     lantern:     {src:base+'lantern.png',cols:4,fps:3,defaultSize:32},
     butterfly:   {src:base+'butterfly.png',cols:4,fps:8,defaultSize:26},
     bird:        {src:base+'bird.png',cols:4,fps:6,defaultSize:30},
-    npcAdult:    {src:base+'npc-adult.png',cols:4,fps:8,defaultSize:80},
-    npcChild:    {src:base+'npc-child.png',cols:4,fps:8,defaultSize:60},
+    npcAdult:    {src:base+'npc-adult.png',cols:4,fps:8,defaultSize:150},
+    npcChild:    {src:base+'npc-child.png',cols:4,fps:8,defaultSize:110},
     puppy:       {src:base+'puppy.png',cols:4,fps:7,defaultSize:50},
     cat:         {src:base+'cat.png',cols:4,fps:7,defaultSize:45},
     /* static props (single-frame) */

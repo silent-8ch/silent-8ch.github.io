@@ -6940,15 +6940,15 @@ function drawTownSquare(){
   SpriteRenderer.submit({sprite:'mailbox', x:W * 0.34, y:groundY + 42, frame:0});
 
   // ---- NPCs walking across screen in a loop (Krystal-scale: 120-130px) ----
-  // Adult walks left to right, loops off-screen
-  const npc1X = ((t * 22) % (W + 160)) - 80;  // ~22px/sec
+  // Adult walks left to right, loops off-screen (same height as Krystal)
+  const npc1X = ((t * 22) % (W + 200)) - 100;
   SpriteRenderer.submit({sprite:'npcAdult', x:npc1X, y:groundY + 76,
-    width:120, height:120, frame:Math.floor(t * 4) % 4});
+    width:150, height:150, frame:Math.floor(t * 4) % 4});
 
   // Child walks right to left, loops
-  const npc2X = W + 80 - ((t * 18) % (W + 160));  // ~18px/sec, opposite direction
+  const npc2X = W + 100 - ((t * 18) % (W + 200));
   SpriteRenderer.submit({sprite:'npcChild', x:npc2X, y:groundY + 84,
-    width:100, height:100, frame:Math.floor(t * 4 + 1) % 4, flipX:true});
+    width:110, height:110, frame:Math.floor(t * 4 + 1) % 4, flipX:true});
 
   // ---- animals ----
   const birdFlap = (t % 8 > 6.5);
