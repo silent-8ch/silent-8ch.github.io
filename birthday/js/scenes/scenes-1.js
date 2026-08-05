@@ -104,6 +104,8 @@ function drawBeach(){
   // water ripple on the ocean surface
   SpriteRenderer.submit({sprite:'waterRipple',x:W*0.35,y:H*0.48,frame:Math.floor(sceneTime*5)%4});
   SpriteRenderer.submit({sprite:'waterRipple',x:W*0.70,y:H*0.52,frame:Math.floor(sceneTime*5+2)%4});
+  SpriteRenderer.submit({sprite:'beachSand',x:W*0.30,y:H*0.76,frame:0});
+  SpriteRenderer.submit({sprite:'sandShoreline',x:W*0.50,y:H*0.64,frame:1});
 }
 
 function drawCloud(cx, cy, scale) {
@@ -694,6 +696,7 @@ function drawBackyard() {
   SpriteRenderer.submit({sprite:'mailbox',x:W*0.92,y:H*0.92,frame:Math.floor(sceneTime*2)%4});
   // flowering bush by the fence
   SpriteRenderer.submit({sprite:'floweringBush',x:W*0.08,y:H*0.58,frame:Math.floor(sceneTime*2.5)%4});
+  SpriteRenderer.submit({sprite:'grassDirtEdge',x:W*0.50,y:H*0.88,frame:0});
 }
 
 /* ══════════════════════ RIVER SCENE ══════════════════════ */
@@ -884,6 +887,7 @@ function drawRiver() {
   SpriteRenderer.submit({sprite:'grassTuft',x:W*0.82,y:riverBot+18,frame:Math.floor(sceneTime*3)%4});
   // water ripple on the river
   SpriteRenderer.submit({sprite:'waterRipple',x:W*0.50,y:H*0.50,frame:Math.floor(sceneTime*5)%4});
+  SpriteRenderer.submit({sprite:'riverbankEdge',x:W*0.50,y:H*0.60,frame:0});
 }
 
 /* ══════════════════════ ADDITIONAL SCENES ══════════════════════
@@ -1050,6 +1054,8 @@ function drawCampsite(){
   SpriteRenderer.submit({sprite:'tree',x:W*0.92,y:groundY+48,frame:Math.floor(sceneTime*2)%4});
   // grass tuft near the fire
   SpriteRenderer.submit({sprite:'grassTuft',x:W*0.52,y:groundY+78,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'dirtPath',x:W*0.50,y:groundY+50,frame:0});
+  SpriteRenderer.submit({sprite:'grassDirtEdge',x:W*0.50,y:groundY+90,frame:1});
 }
 registerScene('campsite', drawCampsite);
 
@@ -1126,6 +1132,7 @@ function drawBakery(){
   SpriteRenderer.submit({sprite:'kittens',phase:'actors',x:W*0.68,y:floorY+20,anchorY:1,frame:Math.floor(t*6)%4});
   // doorway at the back
   SpriteRenderer.submit({sprite:'doorway',x:W*0.88,y:floorY,frame:Math.floor(sceneTime*2)%4});
+  SpriteRenderer.submit({sprite:'terracottaTile',x:W*0.50,y:floorY+40,frame:0});
 }
 registerScene('bakery', drawBakery);
 
@@ -1193,6 +1200,7 @@ function drawLibrary(){
   SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.32,y:floorY-28,anchorY:1,frame:0});
   // cat napping by the fireplace
   SpriteRenderer.submit({sprite:'cat',phase:'ground',x:W*0.62,y:floorY,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4}); /* large — prominent */
+  SpriteRenderer.submit({sprite:'woodFloor',x:W*0.50,y:floorY+40,frame:0});
 }
 registerScene('library', drawLibrary);
 
@@ -1256,6 +1264,7 @@ function drawCherryBlossom(){
   SpriteRenderer.submit({sprite:'parkBench',x:W*0.56,y:groundY+62,frame:Math.floor(sceneTime*2.5)%4});
   // flowering bush by the tree
   SpriteRenderer.submit({sprite:'floweringBush',x:W*0.10,y:groundY+20,frame:Math.floor(sceneTime*2.5)%4});
+  SpriteRenderer.submit({sprite:'pathBorder',x:W*0.50,y:groundY+40,frame:0});
 }
 registerScene('cherryblossom', drawCherryBlossom);
 
@@ -1465,6 +1474,8 @@ function drawAutumnForest(){
   // grass tuft among the fallen leaves
   SpriteRenderer.submit({sprite:'grassTuft',x:W*0.40,y:H*0.86,frame:Math.floor(sceneTime*3)%4});
   SpriteRenderer.submit({sprite:'grassTuft',x:W*0.68,y:H*0.92,frame:Math.floor(sceneTime*3+1)%4});
+  SpriteRenderer.submit({sprite:'forestGrass',x:W*0.30,y:groundY+30,frame:0});
+  SpriteRenderer.submit({sprite:'dirtPath',x:W*0.70,y:groundY+50,frame:2});
 }
 registerScene('autumnforest', drawAutumnForest);
 
@@ -1522,6 +1533,7 @@ function drawMusicRoom(){
 
   // cat curled up on the floor near the cello
   SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.22,y:floorY+16,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'woodFloor',x:W*0.50,y:floorY+40,frame:1});
 }
 registerScene('musicroom', drawMusicRoom);
 
@@ -1653,6 +1665,7 @@ function drawLavender(){
   // wildflowers at the edge of the field
   SpriteRenderer.submit({sprite:'wildflowers',x:W*0.08,y:horizon+28,frame:Math.floor(sceneTime*3)%4});
   SpriteRenderer.submit({sprite:'wildflowers',x:W*0.92,y:horizon+34,frame:Math.floor(sceneTime*3+2)%4});
+  SpriteRenderer.submit({sprite:'meadowGrass',x:W*0.50,y:horizon+50,frame:0});
 }
 registerScene('lavender', drawLavender);
 

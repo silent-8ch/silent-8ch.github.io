@@ -80,6 +80,7 @@ function drawNightMarket(){
   SpriteRenderer.submit({sprite:'streetlamp',x:W*0.10,y:H*0.78,frame:Math.floor(sceneTime*3)%4});
   // market awning over a stall
   SpriteRenderer.submit({sprite:'marketAwning',x:W*0.50,y:H*0.56,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'cobblestone',x:W*0.50,y:H*0.82,frame:1});
 }
 registerScene('nightmarket', drawNightMarket);
 
@@ -564,6 +565,7 @@ function drawFarmersMarket(){
   SpriteRenderer.submit({sprite:'pennantFlags',x:W*0.50,y:groundY-16,frame:Math.floor(sceneTime*4)%4});
   // market awning over a booth
   SpriteRenderer.submit({sprite:'marketAwning',x:W*0.28,y:groundY+6,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'grassDirtEdge',x:W*0.50,y:groundY+40,frame:2});
 }
 registerScene('farmersmarket', drawFarmersMarket);
 
@@ -1362,6 +1364,8 @@ function drawHarborNight(){
   SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.55,y:quayY+12,width:55,height:55,anchorY:1,frame:Math.floor(t*7)%4}); /* large — prominent */
   // streetlamp on the quay
   SpriteRenderer.submit({sprite:'streetlamp',x:W*0.30,y:quayY+14,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'cobblestone',x:W*0.50,y:quayY+30,frame:2});
+  SpriteRenderer.submit({sprite:'dockEdge',x:W*0.50,y:quayY+6,frame:3});
 }
 registerScene('harbornight', drawHarborNight);
 
@@ -1795,6 +1799,8 @@ function drawMoonBeach(){
   ctx.fillStyle=`rgba(255,190,110,${0.85+0.12*Math.sin(t*2.5)})`; roundRect(px-5,py-16,10,12,3); ctx.fill();
   // crab scuttling on the moonlit sand
   SpriteRenderer.submit({sprite:'crab',phase:'actors',x:W*0.68+Math.sin(t*1.0)*14,y:H*0.86,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'beachSand',x:W*0.50,y:H*0.76,frame:1});
+  SpriteRenderer.submit({sprite:'sandShoreline',x:W*0.50,y:sandTop+6,frame:3});
 }
 registerScene('moonbeach', drawMoonBeach);
 
@@ -1902,6 +1908,7 @@ function drawPoppyField(){
   // wildflowers along the field edge
   SpriteRenderer.submit({sprite:'wildflowers',x:W*0.12,y:H*0.82,frame:Math.floor(sceneTime*3)%4});
   SpriteRenderer.submit({sprite:'wildflowers',x:W*0.88,y:H*0.86,frame:Math.floor(sceneTime*3+2)%4});
+  SpriteRenderer.submit({sprite:'meadowGrass',x:W*0.50,y:fieldY+30,frame:2});
 }
 registerScene('poppyfield', drawPoppyField);
 
@@ -1960,6 +1967,7 @@ function drawTreehouse(){
   ctx.fillStyle='#3a8a3a'; for (const a of [-0.5,0,0.5]){ ctx.save(); ctx.translate(W*0.74,H-20); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,-8,4,10,0,0,7); ctx.fill(); ctx.restore(); }
   // parrot perched on the railing
   SpriteRenderer.submit({sprite:'parrot',phase:'foreground',x:W*0.56,y:deckY+4,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'woodStairs',x:W*0.20,y:H*0.92,frame:1});
 }
 registerScene('treehouse', drawTreehouse);
 
@@ -2684,6 +2692,7 @@ function drawMoonTemple(){
   for (const bx of [W*0.16,W*0.84]){ ctx.fillStyle='#3a3444'; ctx.fillRect(bx-2,floorY-4,4,20); ctx.beginPath(); ctx.ellipse(bx,floorY-6,9,4,0,0,7); ctx.fill();
     for (let i=0;i<4;i++){ const fx=bx-4+i*3; const fh=6+4*Math.sin(t*6+i+bx); ctx.fillStyle='#7ac0f0'; ctx.beginPath(); ctx.moveTo(fx-2,floorY-8); ctx.quadraticCurveTo(fx,floorY-8-fh,fx+2,floorY-8); ctx.fill(); }
     ctx.fillStyle='rgba(120,200,255,.12)'; ctx.beginPath(); ctx.arc(bx,floorY-12,18,0,7); ctx.fill(); }
+  SpriteRenderer.submit({sprite:'stoneStairs',x:W*0.50,y:floorY+18,frame:2});
 }
 registerScene('moontemple', drawMoonTemple);
 
@@ -3034,6 +3043,7 @@ function drawBirchGrove(){
   SpriteRenderer.submit({sprite:'parkBench',x:W*0.56,y:H*0.88,frame:Math.floor(sceneTime*2.5)%4});
   // grass tuft among the fallen leaves
   SpriteRenderer.submit({sprite:'grassTuft',x:W*0.34,y:H*0.94,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'forestGrass',x:W*0.50,y:groundY+10,frame:2});
 }
 registerScene('birchgrove', drawBirchGrove);
 
@@ -3134,6 +3144,7 @@ function drawBonsaiGarden(){
 
   // a tiny raked-gravel tray + stone (center-back, high)
   ctx.fillStyle='#d8cdb2'; roundRect(W*0.42,benchY+6,W*0.16,10,2); ctx.fill(); ctx.strokeStyle='rgba(150,130,100,.4)'; ctx.lineWidth=0.6; for (let k=0;k<4;k++){ ctx.beginPath(); ctx.moveTo(W*0.43,benchY+8+k*2.4); ctx.lineTo(W*0.57,benchY+8+k*2.4); ctx.stroke(); } ctx.fillStyle='#7a7a72'; ctx.beginPath(); ctx.arc(W*0.46,benchY+11,3,0,7); ctx.fill();
+  SpriteRenderer.submit({sprite:'pathBorder',x:W*0.50,y:H*0.92,frame:3});
 }
 registerScene('bonsaigarden', drawBonsaiGarden);
 
@@ -3687,6 +3698,7 @@ function drawWatermill(){
   SpriteRenderer.submit({sprite:'waterRipple',x:W*0.55,y:H*0.74,frame:Math.floor(sceneTime*5)%4});
   // fence near the mill
   SpriteRenderer.submit({sprite:'fence',x:W*0.14,y:groundY+6,frame:Math.floor(sceneTime*2)%4});
+  SpriteRenderer.submit({sprite:'riverbankEdge',x:W*0.50,y:H*0.64,frame:2});
 }
 registerScene('watermill', drawWatermill);
 
@@ -3924,6 +3936,7 @@ function drawFireflyPier(){
   for (let i=0;i<4;i++){ const bl=Math.max(0,Math.sin(t*4+i*2)); ctx.fillStyle=`rgba(190,255,140,${0.4+bl*0.5})`; ctx.beginPath(); ctx.arc(jx-4+ (i%2)*7, jy-10+ (i>1?6:0), 1.6,0,7); ctx.fill(); }
   // fireflies sprite cluster over the water
   SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.40+Math.sin(t*0.5)*22,y:waterY+20+Math.sin(t*0.7)*10,anchorY:0.5,frame:Math.floor(t*5)%4});
+  SpriteRenderer.submit({sprite:'dockEdge',x:W*0.50,y:dockY+10,frame:2});
 }
 registerScene('fireflypier', drawFireflyPier);
 
@@ -4368,6 +4381,8 @@ function drawDriftwoodBeach(){
   ctx.strokeStyle='#6a7a3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.44,H*0.94); ctx.quadraticCurveTo(W*0.48,H*0.90,W*0.52,H*0.93); ctx.stroke();
   // crab near the driftwood
   SpriteRenderer.submit({sprite:'crab',phase:'actors',x:W*0.52+Math.sin(t*1.1)*10,y:H*0.84,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'beachSand',x:W*0.50,y:sandY+20,frame:2});
+  SpriteRenderer.submit({sprite:'sandShoreline',x:W*0.50,y:sandY+6,frame:0});
 }
 registerScene('driftwoodbeach', drawDriftwoodBeach);
 
@@ -4768,6 +4783,7 @@ function drawEnchantedForest(){
   ctx.fillRect(0,0,W,H);
   // fireflies sprite among the glowing trees
   SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.44+Math.sin(t*0.5)*24,y:groundY-20+Math.sin(t*0.7)*16,anchorY:0.5,frame:Math.floor(t*5)%4});
+  SpriteRenderer.submit({sprite:'forestGrass',x:W*0.50,y:groundY+10,frame:3});
 }
 registerScene('enchantedforest', drawEnchantedForest);
 
@@ -6219,6 +6235,7 @@ function drawGasStation(){
   SpriteRenderer.submit({sprite:'signpost',x:W*0.14,y:groundY+18,frame:Math.floor(sceneTime*3)%4});
   // trash can near the store
   SpriteRenderer.submit({sprite:'trashCan',x:W*0.58,y:groundY+16,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'grassCurbEdge',x:W*0.50,y:groundY+40,frame:0});
 }
 registerScene('gasstation', drawGasStation);
 
@@ -6597,6 +6614,7 @@ function drawSchool(){
   SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.40,y:floorY-28,anchorY:1,frame:0});
   // trash can by the teacher's desk
   SpriteRenderer.submit({sprite:'trashCan',x:W*0.76,y:floorY+16,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'grassCurbEdge',x:W*0.50,y:floorY+40,frame:1});
 }
 registerScene('school', drawSchool);
 

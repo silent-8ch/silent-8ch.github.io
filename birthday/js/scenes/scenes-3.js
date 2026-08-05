@@ -75,6 +75,7 @@ function drawFishingDock(){
   // fishing rod
   ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(W*0.64,dockY+10); ctx.lineTo(W*0.82,dockY-40); ctx.stroke();
   ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W*0.82,dockY-40); ctx.lineTo(W*0.84,dockY-2); ctx.stroke();
+  SpriteRenderer.submit({sprite:'dockEdge',x:W*0.50,y:dockY+10,frame:0});
 }
 registerScene('fishingdock', drawFishingDock);
 
@@ -630,6 +631,7 @@ function drawMarina(){
   for(let i=0;i<3;i++){ const gx=W*0.2+i*W*0.28+Math.sin(t*0.7+i)*10, gy=H*0.14+i*8;
     ctx.strokeStyle='#5a4a4a'; ctx.lineWidth=1.5; ctx.beginPath();
     ctx.moveTo(gx-5,gy); ctx.quadraticCurveTo(gx,gy-4,gx+5,gy); ctx.stroke(); }
+  SpriteRenderer.submit({sprite:'dockEdge',x:W*0.18,y:H*0.84,frame:1});
 }
 registerScene('marina', drawMarina);
 
@@ -847,6 +849,8 @@ function drawTopiary(){
   for(let i=0;i<6;i++){ ctx.fillStyle=`rgba(255,255,255,${0.3+0.3*Math.sin(t*4+i)})`; ctx.fillRect(fx-20+i*8, fb-3+Math.sin(t*3+i)*1.5, 2,2); }
   // little clipped shrubs lining the path front
   for(let i=0;i<4;i++){ ball(W*0.32+i*W*0.12, H*0.98, 9); }
+  SpriteRenderer.submit({sprite:'flagstone',x:W*0.50,y:groundY+40,frame:1});
+  SpriteRenderer.submit({sprite:'pathBorder',x:W*0.50,y:groundY+70,frame:2});
 }
 registerScene('topiary', drawTopiary);
 
@@ -951,6 +955,7 @@ function drawRedwoods(){
   for(let i=0;i<3;i++){ const mx=W*0.24+i*W*0.22; ctx.fillStyle='#e8e0d0'; ctx.fillRect(mx-1,H*0.955,2,6);
     ctx.fillStyle='#c0503a'; ctx.beginPath(); ctx.ellipse(mx,H*0.955,5,3,0,Math.PI,0); ctx.fill();
     ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(mx-1,H*0.95,0.8,0,7); ctx.fill(); }
+  SpriteRenderer.submit({sprite:'forestGrass',x:W*0.50,y:groundY+10,frame:1});
 }
 registerScene('redwoods', drawRedwoods);
 
@@ -1055,6 +1060,7 @@ function drawRiceTerraces(){
   for(let i=0;i<2;i++){ const gx=(t*24+i*160)%(W+40)-20, gy=skyY*0.7+i*16;
     ctx.strokeStyle='#f4f4f0'; ctx.lineWidth=2; ctx.beginPath();
     ctx.moveTo(gx-6,gy); ctx.quadraticCurveTo(gx,gy-3+Math.sin(t*6+i),gx+6,gy); ctx.stroke(); }
+  SpriteRenderer.submit({sprite:'stoneStairs',x:W*0.50,y:H*0.72,frame:0});
 }
 registerScene('riceterraces', drawRiceTerraces);
 
@@ -1270,6 +1276,7 @@ function drawCliffs(){
   for(let i=0;i<4;i++){ const gx=W*0.55+Math.sin(t*0.6+i*1.7)*W*0.3, gy=H*0.2+Math.cos(t*0.8+i)*24+i*6;
     ctx.strokeStyle='#f0f0ec'; ctx.lineWidth=1.5; ctx.beginPath();
     ctx.moveTo(gx-5,gy); ctx.quadraticCurveTo(gx,gy-4,gx+5,gy); ctx.stroke(); }
+  SpriteRenderer.submit({sprite:'stoneStairs',x:W*0.26,y:seaY-38,frame:1});
 }
 registerScene('cliffs', drawCliffs);
 

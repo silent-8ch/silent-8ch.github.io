@@ -168,6 +168,7 @@ function drawZenGarden(){
 
   // butterfly drifting over the raked gravel
   SpriteRenderer.submit({sprite:'butterfly',phase:'actors',x:W*0.45+Math.sin(t*0.9)*22,y:H*0.52+Math.cos(t*1.2)*8,anchorY:0.5,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'flagstone',x:W*0.50,y:H*0.72,frame:0});
 }
 registerScene('zengarden', drawZenGarden);
 
@@ -264,6 +265,7 @@ function drawTidePools(){
   SpriteRenderer.submit({sprite:'crab',phase:'actors',x:W*0.82+Math.sin(t*0.9)*8,y:H*0.78,anchorY:1,frame:Math.floor(t*7)%4});
   // jellyfish in a tide pool
   SpriteRenderer.submit({sprite:'jellyfish',phase:'ground',x:W*0.30+Math.sin(t*0.6)*4,y:H*0.66+Math.sin(t*0.8)*3,anchorY:0.5,frame:Math.floor(t*5)%4});
+  SpriteRenderer.submit({sprite:'sandShoreline',x:W*0.50,y:H*0.64,frame:2});
 }
 registerScene('tidepools', drawTidePools);
 
@@ -408,6 +410,7 @@ function drawFlorist(){
   SpriteRenderer.submit({sprite:'flowerWindow',x:W*0.70,y:H*0.16,frame:Math.floor(sceneTime*2.5)%4});
   // flowering bush by the counter
   SpriteRenderer.submit({sprite:'floweringBush',x:W*0.48,y:floorY+26,frame:Math.floor(sceneTime*2.5)%4});
+  SpriteRenderer.submit({sprite:'terracottaTile',x:W*0.50,y:floorY+40,frame:1});
 }
 registerScene('florist', drawFlorist);
 
@@ -478,6 +481,7 @@ function drawRecordShop(){
 
   // cat lounging beside the record bins
   SpriteRenderer.submit({sprite:'cat',phase:'actors',x:W*0.72,y:floorY+16,anchorY:1,frame:Math.floor(t*7)%4});
+  SpriteRenderer.submit({sprite:'woodFloor',x:W*0.50,y:floorY+40,frame:2});
 }
 registerScene('recordshop', drawRecordShop);
 
@@ -521,6 +525,7 @@ function drawWaterfall(){
   // water ripple on the pool surface
   SpriteRenderer.submit({sprite:'waterRipple',x:W*0.40,y:poolTop+14,frame:Math.floor(sceneTime*5)%4});
   SpriteRenderer.submit({sprite:'waterRipple',x:W*0.65,y:poolTop+22,frame:Math.floor(sceneTime*5+2)%4});
+  SpriteRenderer.submit({sprite:'riverbankEdge',x:W*0.50,y:shoreY+10,frame:1});
 }
 registerScene('waterfall', drawWaterfall);
 
@@ -885,6 +890,7 @@ function drawCafe(){
   SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.24,y:floorY+18,anchorY:1,frame:0});
   // doorway at the entrance
   SpriteRenderer.submit({sprite:'doorway',x:W*0.88,y:floorY,frame:Math.floor(sceneTime*2)%4});
+  SpriteRenderer.submit({sprite:'terracottaTile',x:W*0.50,y:floorY+40,frame:2});
 }
 registerScene('cafe', drawCafe);
 
@@ -928,6 +934,7 @@ function drawRainyStreet(){
   SpriteRenderer.submit({sprite:'umbrella',phase:'ground',x:W*0.18,y:sidewalkY+14,anchorY:1,frame:0});
   // streetlamp illuminating the sidewalk
   SpriteRenderer.submit({sprite:'streetlamp',x:W*0.42,y:sidewalkY+16,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'cobblestone',x:W*0.50,y:sidewalkY+40,frame:0});
 }
 registerScene('rainystreet', drawRainyStreet);
 
@@ -1002,6 +1009,7 @@ function drawLighthouse(){
   ctx.fillStyle=rock; ctx.fillRect(0,shoreY,W,H-shoreY);
   ctx.fillStyle='rgba(255,255,255,.4)'; for (let x=0;x<W;x+=10){ ctx.beginPath(); ctx.arc(x,shoreY+Math.sin(x*0.2+t*3)*2,2,0,7); ctx.fill(); }
   ctx.strokeStyle='#eee'; ctx.lineWidth=1.5; const gx=W*0.3+Math.sin(t*0.4)*30; ctx.beginPath(); ctx.moveTo(gx-5,seaY-30); ctx.quadraticCurveTo(gx,seaY-33,gx,seaY-30); ctx.quadraticCurveTo(gx,seaY-33,gx+5,seaY-30); ctx.stroke();
+  SpriteRenderer.submit({sprite:'woodStairs',x:W*0.50,y:shoreY+20,frame:0});
 }
 registerScene('lighthouse', drawLighthouse);
 
