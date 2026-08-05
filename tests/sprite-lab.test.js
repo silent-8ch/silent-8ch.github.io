@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const people = ['krystal','luna','wade','paul','luke','william'];
-const expressions = ['laugh','scared','surprised','cheer','sad','embarrassed','think','wave','talk','nod','shake','shrug','point','beckon','search','inspect'];
+const expressions = ['laugh','scared','surprised','cheer','sad','embarrassed','think','wave','talk','nod','shake','shrug','point','beckon','search','inspect','sit','give','hug','highfive','look','interact','startled','sleep'];
 
 function pngSize(path){
   const header = fs.readFileSync(path).subarray(0, 24);
@@ -24,4 +24,4 @@ const html = fs.readFileSync('birthday/sprite-lab.html', 'utf8');
 assert.match(html, /css\/sprite-lab\.css/);
 assert.match(html, /js\/sprite-lab\.js/);
 
-console.log('sprite lab manifest: 96 expression sheets and shared cycles ok');
+console.log('sprite lab manifest: 144 expression sheets and shared cycles ok');
