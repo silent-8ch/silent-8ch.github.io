@@ -74,8 +74,8 @@ function drawNightMarket(){
   SpriteRenderer.submit({sprite:'lantern',phase:'foreground',x:W*0.38,y:H*0.18,width:20,height:20,anchorY:0.5,frame:Math.floor(t*3)%4});
   SpriteRenderer.submit({sprite:'lantern',phase:'foreground',x:W*0.62,y:H*0.16,width:18,height:18,anchorY:0.5,frame:Math.floor(t*3+1)%4});
   // NPC browsing the stalls
-  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.50,y:H*0.88,width:28,height:28,anchorY:1,frame:Math.floor(t*8)%4});
-  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.42,y:H*0.86,width:22,height:22,anchorY:1,frame:Math.floor(t*8+2)%4});
+  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.50,y:H*0.88,width:80,height:80,anchorY:1,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.42,y:H*0.86,width:60,height:60,anchorY:1,frame:Math.floor(t*8+2)%4});
 }
 registerScene('nightmarket', drawNightMarket);
 
@@ -552,8 +552,8 @@ function drawFarmersMarket(){
   for (let k=0;k<7;k++){ ctx.fillStyle=['#e26fb0','#f2d04a','#e0603a','#a06fe0'][k%4]; ctx.beginPath(); ctx.arc(fbx-10+k*3.4,fby-4-Math.sin(k+ t)*2,3,0,7); ctx.fill(); }
 
   // NPC shoppers
-  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.50,y:H*0.88,width:28,height:28,anchorY:1,frame:Math.floor(t*8)%4});
-  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.58,y:H*0.86,width:22,height:22,anchorY:1,frame:Math.floor(t*8+2)%4});
+  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.50,y:H*0.88,width:80,height:80,anchorY:1,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.58,y:H*0.86,width:60,height:60,anchorY:1,frame:Math.floor(t*8+2)%4});
   // bush on the side
   SpriteRenderer.submit({sprite:'bush',phase:'ground',x:W*0.92,y:groundY+18,width:30,height:30,anchorY:1,frame:0});
 }
@@ -6428,7 +6428,7 @@ function drawOffice(){
   ctx.fillStyle='rgba(0,0,0,.05)'; for (let i=0;i<60;i++){ const px=(i*67+11)%W, py=floorY+4+((i*43+7)%(H-floorY-4)); ctx.fillRect(px,py,1.5,1.5); }
 
   // NPC colleague at the far desk
-  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.24,y:H*0.84,width:26,height:26,anchorY:1,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'npcAdult',phase:'actors',x:W*0.24,y:H*0.84,width:80,height:80,anchorY:1,frame:Math.floor(t*8)%4});
 }
 registerScene('office', drawOffice);
 
@@ -6523,8 +6523,8 @@ function drawSchool(){
   ctx.fillStyle='rgba(255,255,255,.06)'; ctx.beginPath(); ctx.ellipse(W*0.45,floorY+24,80,16,0,0,7); ctx.fill();
 
   // background students
-  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.18,y:H*0.88,width:22,height:22,anchorY:1,frame:Math.floor(t*8)%4});
-  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.62,y:H*0.90,width:22,height:22,anchorY:1,frame:Math.floor(t*8+1)%4,flipX:true});
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.18,y:H*0.88,width:60,height:60,anchorY:1,frame:Math.floor(t*8)%4});
+  SpriteRenderer.submit({sprite:'npcChild',phase:'actors',x:W*0.62,y:H*0.90,width:60,height:60,anchorY:1,frame:Math.floor(t*8+1)%4,flipX:true});
   // book on a desk
   SpriteRenderer.submit({sprite:'book',phase:'ground',x:W*0.40,y:floorY-28,width:14,height:14,anchorY:1,frame:0});
 }
