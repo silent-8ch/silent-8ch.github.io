@@ -1354,6 +1354,54 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.50, r:56, e:'🌊', lines:['The cold sea 🌊','One just jumped in!','Splash! So brave 🥰']},
     {nx:0.86, ny:0.56, r:50, e:'❄️', lines:['A snow mound ❄️','Sparkly and white','Cold but so pretty']},
   ],
+  windmill: [
+    {nx:0.70, ny:0.20, r:56, e:'🌬️', lines:['The spinning sails 🌬️','Round and round they go','So mesmerizing to watch 🥰']},
+    {nx:0.50, ny:0.80, r:52, e:'🌷', lines:['Tulip rows! 🌷','So many bright colors','Like little painted stripes 💛']},
+    {nx:0.46, ny:0.92, r:46, e:'🪿', lines:['Little geese! 🪿','Waddling down the path','So proud and fluffy']},
+    {nx:0.50, ny:0.12, r:50, e:'☁️', lines:['Puffy clouds ☁️','Drifting over the fields','Such a breezy day 🥰']},
+  ],
+  puppettheater: [
+    {nx:0.38, ny:0.40, r:52, e:'🎭', lines:['A dancing puppet! 🎭','She\'s twirling for us','So graceful on her strings 🥰']},
+    {nx:0.62, ny:0.40, r:52, e:'🎭', lines:['The blue puppet! 🎭','He\'s bowing to us','What a little gentleman 💛']},
+    {nx:0.50, ny:0.10, r:50, e:'✨', lines:['The golden arch ✨','So grand and ornate','Like a real theater!']},
+    {nx:0.50, ny:0.92, r:54, e:'👥', lines:['The audience 👥','Everyone\'s watching','Shhh, the show\'s on 🥰']},
+  ],
+  topiary: [
+    {nx:0.50, ny:0.76, r:56, e:'⛲', lines:['The stone fountain ⛲','Water arcing so prettily','I could listen to it all day 🥰']},
+    {nx:0.14, ny:0.72, r:48, e:'🌳', lines:['A spiral topiary 🌳','Stacked like green scoops','Such patient trimming 💛']},
+    {nx:0.84, ny:0.72, r:48, e:'🦚', lines:['A peacock topiary! 🦚','Leaves shaped like feathers','So clever and fancy']},
+    {nx:0.50, ny:0.12, r:50, e:'☁️', lines:['A perfect blue sky ☁️','Not a worry up there','What a gorgeous day 🥰']},
+  ],
+  harbornight: [
+    {nx:0.24, ny:0.48, r:52, e:'⛵', lines:['A sailboat bobbing ⛵','Gently on the dark water','Let\'s go sailing sometime 🥰']},
+    {nx:0.94, ny:0.38, r:46, e:'🔦', lines:['The little lighthouse 🔦','Blinking across the harbor','Guiding everyone home 💛']},
+    {nx:0.10, ny:0.62, r:48, e:'💡', lines:['A warm lamppost 💡','Glowing on the quay','So romantic tonight']},
+    {nx:0.50, ny:0.40, r:54, e:'🌃', lines:['Town lights on the water 🌃','All those little windows','Someone\'s cozy over there 🥰']},
+  ],
+  giftwrapshop: [
+    {nx:0.28, ny:0.30, r:54, e:'🎀', lines:['Rolls of wrapping paper 🎀','Every pattern and color','Which one for you? 🥰']},
+    {nx:0.72, ny:0.22, r:48, e:'🧶', lines:['Spools of ribbon 🧶','Dangling so prettily','I love the pink one 💛']},
+    {nx:0.16, ny:0.78, r:50, e:'🎁', lines:['A wrapped present! 🎁','So neat and tidy','Who\'s it for? 🥰']},
+    {nx:0.50, ny:0.08, r:46, e:'🎉', lines:['Little paper flags 🎉','Strung across the ceiling','So festive in here']},
+  ],
+  gingerbreadkitchen: [
+    {nx:0.50, ny:0.62, r:52, e:'🏠', lines:['A gingerbread house! 🏠','With icing on the roof','Can we eat it? 😋']},
+    {nx:0.14, ny:0.76, r:48, e:'🍪', lines:['Gingerbread people! 🍪','Cooling on the rack','They look so happy 🥰']},
+    {nx:0.84, ny:0.78, r:46, e:'🥣', lines:['The mixing bowl 🥣','Still full of batter','Can I lick the spoon? 💛']},
+    {nx:0.20, ny:0.24, r:50, e:'❄️', lines:['Snow outside the window ❄️','Falling so softly','Warm and cozy in here 🥰']},
+  ],
+  sunflowermaze: [
+    {nx:0.10, ny:0.62, r:54, e:'🌻', lines:['Giant sunflowers! 🌻','Taller than both of us','They\'re watching the sun 🥰']},
+    {nx:0.90, ny:0.62, r:54, e:'🌻', lines:['More sunflowers here 🌻','A golden wall of petals','So cheerful and warm 💛']},
+    {nx:0.50, ny:0.12, r:48, e:'☀️', lines:['The bright summer sun ☀️','So warm on my face','A perfect maze day']},
+    {nx:0.30, ny:0.48, r:44, e:'🐝', lines:['Busy little bees 🐝','Buzz buzz buzz','They love these flowers 🥰']},
+  ],
+  jellyfishtank: [
+    {nx:0.30, ny:0.34, r:54, e:'🪼', lines:['A purple jellyfish! 🪼','Pulsing so gently','Like a tiny heartbeat 🥰']},
+    {nx:0.66, ny:0.50, r:56, e:'🪼', lines:['A big blue one! 🪼','Trailing long tentacles','So elegant and slow 💛']},
+    {nx:0.50, ny:0.24, r:48, e:'🫧', lines:['Rising bubbles 🫧','Floating to the top','Pop, pop, pop']},
+    {nx:0.50, ny:0.70, r:52, e:'✨', lines:['The tank glows ✨','Blue and purple light','So magical in the dark 🥰']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
