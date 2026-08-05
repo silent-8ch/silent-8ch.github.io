@@ -185,6 +185,11 @@ under `sprites/textures/sources/`.
 
 ## Requested sprite sheets — next generation batch
 
+**Delivered:** all 17 sheets below are processed and registered by
+`js/sprite-requested-pack.js`. Final files are in `sprites/requested/`; retained
+generation sources are in `sprites/requested/sources/`. Every final sheet is an
+exact 1024 x 256 four-cell row and requires no manual partition adjustment.
+
 Priority-ordered by number of scenes impacted. All sheets should be transparent
 1024 x 256 PNGs (four 256 x 256 frames) matching the existing art style.
 Animated sheets use four sequential frames; static sheets use four positional

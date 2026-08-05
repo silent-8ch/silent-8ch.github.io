@@ -454,6 +454,104 @@ func splitObjectGrid(_ input: String, outputDirectory: String, names: [String]) 
     }
 }
 
+func splitFourFrameRows(_ input: String, outputDirectory: String, names: [String], fullBleed: Bool) throws {
+    guard !names.isEmpty else {
+        throw NSError(domain: "WalkSprite", code: 23,
+                      userInfo: [NSLocalizedDescriptionKey: "At least one row name is required"])
+    }
+    try FileManager.default.createDirectory(atPath: outputDirectory,
+                                            withIntermediateDirectories: true)
+    var source = try loadPNG(input)
+    if !fullBleed { removeChromaKey(&source) }
+    let sourceRows = names.count
+    let rowEdges = sourceRows == 3
+        ? [0, source.height * 27 / 100, source.height * 61 / 100, source.height]
+        : (0...sourceRows).map { $0 * source.height / sourceRows }
+
+    for row in 0..<sourceRows {
+        let top = rowEdges[row]
+        let bottom = rowEdges[row + 1]
+        var frames = [Bounds]()
+        for column in 0..<columns {
+            let left = column * source.width / columns
+            let right = (column + 1) * source.width / columns
+            var bounds = Bounds(minX: right - left, minY: bottom - top, maxX: -1, maxY: -1)
+            for y in top..<bottom {
+                for x in left..<right where source.pixels[(y * source.width + x) * 4 + 3] > 8 {
+                    bounds.minX = min(bounds.minX, x - left)
+                    bounds.minY = min(bounds.minY, y - top)
+                    bounds.maxX = max(bounds.maxX, x - left)
+                    bounds.maxY = max(bounds.maxY, y - top)
+                }
+            }
+            guard fullBleed || bounds.maxX >= 0 else {
+                throw NSError(domain: "WalkSprite", code: 24,
+                              userInfo: [NSLocalizedDescriptionKey: "Empty frame at row \(row), column \(column)"])
+            }
+            if fullBleed { bounds = Bounds(minX: 0, minY: 0, maxX: right-left-1, maxY: bottom-top-1) }
+            frames.append(bounds)
+        }
+
+        let widest = frames.map(\.width).max()!
+        let tallest = frames.map(\.height).max()!
+        let scale = fullBleed ? 1 : min(Double(outputCell - sidePadding * 2) / Double(widest),
+                                         Double(baseline - topPadding) / Double(tallest))
+        var sheet = Bitmap(width: outputCell * columns, height: outputCell,
+                           pixels: [UInt8](repeating: 0, count: outputCell * columns * outputCell * 4))
+        for column in 0..<columns {
+            let frame = frames[column]
+            let targetWidth = fullBleed ? outputCell : max(1, Int((Double(frame.width) * scale).rounded()))
+            let targetHeight = fullBleed ? outputCell : max(1, Int((Double(frame.height) * scale).rounded()))
+            let targetX = column * outputCell + (outputCell - targetWidth) / 2
+            let targetY = fullBleed ? 0 : baseline - targetHeight
+            let left = column * source.width / columns
+            for y in 0..<targetHeight {
+                let sourceY = targetHeight > 1 ? y * (frame.height - 1) / (targetHeight - 1) : 0
+                for x in 0..<targetWidth {
+                    let sourceX = targetWidth > 1 ? x * (frame.width - 1) / (targetWidth - 1) : 0
+                    let sx = left + frame.minX + sourceX
+                    let sy = top + frame.minY + sourceY
+                    let sourceOffset = (sy * source.width + sx) * 4
+                    let targetOffset = ((targetY + y) * sheet.width + targetX + x) * 4
+                    sheet.pixels[targetOffset..<(targetOffset + 4)] = source.pixels[sourceOffset..<(sourceOffset + 4)]
+                }
+            }
+        }
+        if !fullBleed {
+            for column in 0..<columns {
+                let originX = column * outputCell
+                var maxY = -1
+                for y in 0..<outputCell {
+                    for x in 0..<outputCell where sheet.pixels[(y * sheet.width + originX + x) * 4 + 3] > 8 {
+                        maxY = max(maxY, y)
+                    }
+                }
+                let shiftY = baseline - 1 - maxY
+                if shiftY != 0 {
+                    var cell = [UInt8](repeating: 0, count: outputCell * outputCell * 4)
+                    for y in 0..<outputCell where y + shiftY >= 0 && y + shiftY < outputCell {
+                        for x in 0..<outputCell {
+                            let sourceOffset = (y * sheet.width + originX + x) * 4
+                            let targetOffset = ((y + shiftY) * outputCell + x) * 4
+                            cell[targetOffset..<(targetOffset + 4)] = sheet.pixels[sourceOffset..<(sourceOffset + 4)]
+                        }
+                    }
+                    for y in 0..<outputCell {
+                        for x in 0..<outputCell {
+                            let sourceOffset = (y * outputCell + x) * 4
+                            let targetOffset = (y * sheet.width + originX + x) * 4
+                            sheet.pixels[targetOffset..<(targetOffset + 4)] = cell[sourceOffset..<(sourceOffset + 4)]
+                        }
+                    }
+                }
+            }
+        }
+        let output = URL(fileURLWithPath: outputDirectory).appendingPathComponent("\(names[row]).png").path
+        try savePNG(sheet, to: output)
+        print("split four-frame row \(names[row]) -> \(output)")
+    }
+}
+
 func validate(_ path: String) throws {
     let bitmap = try loadPNG(path)
     guard bitmap.width == outputCell * columns, bitmap.height == outputCell * rows else {
@@ -582,6 +680,12 @@ do {
     } else if CommandLine.arguments.count == 20 && CommandLine.arguments[1] == "--split-object-grid" {
         try splitObjectGrid(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
                             names: Array(CommandLine.arguments[4...19]))
+    } else if CommandLine.arguments.count >= 5 && CommandLine.arguments[1] == "--split-four-frame-rows" {
+        try splitFourFrameRows(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
+                               names: Array(CommandLine.arguments.dropFirst(4)), fullBleed: false)
+    } else if CommandLine.arguments.count >= 5 && CommandLine.arguments[1] == "--split-four-frame-fills" {
+        try splitFourFrameRows(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
+                               names: Array(CommandLine.arguments.dropFirst(4)), fullBleed: true)
     } else if CommandLine.arguments.count == 3 {
         try process(CommandLine.arguments[1], CommandLine.arguments[2])
     } else {

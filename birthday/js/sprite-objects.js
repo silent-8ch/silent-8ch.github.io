@@ -25,7 +25,7 @@
     function normalize(spec,persistent){const sprite=registry.get(spec.sprite),phase=spec.phase||sprite?.phase||'actors';assertPhase(phase);return{
       id:persistent?nextId++:null,sprite:spec.sprite||null,draw:spec.draw||null,scene:spec.scene??getScene(),phase,
       x:spec.x||0,y:spec.y||0,depth:spec.depth??((spec.y||0)+(sprite?.depthOffset||0)),width:spec.width,height:spec.height,scale:spec.scale??1,
-      anchorX:spec.anchorX??sprite?.anchorX??.5,anchorY:spec.anchorY??sprite?.anchorY??1,flipX:!!spec.flipX,alpha:spec.alpha??1,
+      anchorX:spec.anchorX??sprite?.anchorX??.5,anchorY:spec.anchorY??sprite?.anchorY??1,flipX:!!spec.flipX,alpha:spec.alpha??sprite?.defaultAlpha??1,
       tint:typeof spec.tint==='string'&&spec.tint?spec.tint:null,tintAmount:Math.round(clamp01(spec.tintAmount??(spec.tint?1:0))*100)/100,
       frame:spec.frame??0,elapsed:0,playing:spec.playing!==false,loop:spec.loop!==false,
       visible:spec.visible!==false,order:order++,data:spec.data||null};}
