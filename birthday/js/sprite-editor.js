@@ -10,6 +10,33 @@
   document.body.style.overflow = 'hidden';
   document.body.style.display = 'flex';
   document.body.style.alignItems = 'center';
+
+  // Patch SpriteRenderer.submit to apply saved position/size overrides in real time.
+  // Each sprite gets a stable key per scene based on its name + submission order.
+  // The scene re-submits every frame, but overrides stick.
+  const _origSubmit = SpriteRenderer.submit.bind(SpriteRenderer);
+  const _frameCount = {};  // tracks submission index per sprite name per frame
+  SpriteRenderer.submit = function(spec) {
+    const name = spec.sprite;
+    if (name) {
+      if (!_frameCount[name]) _frameCount[name] = 0;
+      const key = name + '_' + _frameCount[name];
+      _frameCount[name]++;
+      const ov = savedPositions[key];
+      if (ov) {
+        spec.x = ov.x;
+        spec.y = ov.y;
+        if (ov.size) { spec.width = ov.size; spec.height = ov.size; }
+      }
+    }
+    return _origSubmit(spec);
+  };
+  // Reset frame counters each frame
+  const _origBegin = SpriteRenderer.beginFrame.bind(SpriteRenderer);
+  SpriteRenderer.beginFrame = function() {
+    for (const k in _frameCount) _frameCount[k] = 0;
+    return _origBegin();
+  };
   document.body.style.justifyContent = 'center';
   document.body.style.gap = '0';
 
