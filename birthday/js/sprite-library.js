@@ -69,9 +69,10 @@
     const reg = SpriteRenderer.getRegistry();
     const list = [];
     for (const [name, cfg] of reg) {
-      list.push({ name, ...cfg });
+      cfg._name = name;  // ensure name is on the original record
+      list.push(cfg);    // use the live registry record, not a copy
     }
-    return list.sort((a, b) => a.name.localeCompare(b.name));
+    return list.sort((a, b) => (a._name || a.name || '').localeCompare(b._name || b.name || ''));
   }
 
   function buildList() {
