@@ -15,7 +15,7 @@
     bush:        {src:base+'bush.png',cols:1,fps:0,defaultSize:55},
     cookingPot:  {src:base+'cooking-pot.png',cols:1,fps:0,defaultSize:38},
     giftBox:     {src:base+'gift-box.png',cols:1,fps:0,defaultSize:36},
-    pottedPlant: {src:base+'potted-plant.png',cols:1,fps:0,defaultSize:45},
+    pottedPlant: {src:base+'potted-plant.png',cols:1,fps:0,defaultSize:65},
     tableChair:  {src:base+'table-chair.png',cols:1,fps:0,defaultSize:65},
     teacup:      {src:base+'teacup.png',cols:1,fps:0,defaultSize:22},
     umbrella:    {src:base+'umbrella.png',cols:1,fps:0,defaultSize:65},
