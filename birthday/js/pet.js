@@ -89,6 +89,8 @@ stagewrap.addEventListener('pointerdown', (e)=>{
     else blowOutOne(px, py);                                // blow out the nearest candle to the tap
     return;
   }
+  // cutscene absorbs all taps (skip button handled inside)
+  if (cutscene){ csTap(px, py); return; }
   // Roaming characters may cross Krystal's hitbox, so let their visible sprite
   // consume the tap before treating it as a pet/nuzzle.
   for (const f of CHARACTER_TAPS){ try{ if (f(px, py)) return; }catch(e){} }

@@ -114,6 +114,14 @@ function loop(ts){
     return;
   }
 
+  // cutscene takes over like birthday does
+  if (cutscene){
+    updateCutscene(dt);
+    render();
+    requestAnimationFrame(loop);
+    return;
+  }
+
   if (started){
     // needs decay (relaxed mode halves the drain)
     const dm = (settings && settings.relaxed) ? 0.5 : 1;
