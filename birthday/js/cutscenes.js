@@ -5269,12 +5269,500 @@ function csPetShopChaos(){
 }
 
 /* ============================================================================
+   CUTSCENE 29: KARAOKE NIGHT  (triggers at jazzclub, recordshop, carnival)
+   ============================================================================ */
+function csKaraokeNight(){
+  const groundY = H * 0.72;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.18, paulX = W * 0.38, lunaX = W * 0.62, wadeX = W * 0.82;
+  const micX = W * 0.50, stageY = groundY - 8;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // dark club interior
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#1a0e2e'); bg.addColorStop(0.4, '#221640'); bg.addColorStop(1, '#140c22');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+    // stage platform
+    ctx.fillStyle = '#2e1a48';
+    ctx.fillRect(W * 0.15, stageY, W * 0.70, 14);
+    ctx.fillStyle = '#3a2258';
+    ctx.fillRect(W * 0.15, stageY, W * 0.70, 4);
+
+    // spotlight cone
+    const spotA = 0.25 + 0.08 * Math.sin(t * 1.5);
+    const spot = ctx.createRadialGradient(micX, stageY - 80, 5, micX, stageY + 20, 100);
+    spot.addColorStop(0, `rgba(255,220,120,${spotA})`);
+    spot.addColorStop(1, 'rgba(255,220,120,0)');
+    ctx.fillStyle = spot; ctx.beginPath(); ctx.arc(micX, stageY - 30, 100, 0, 7); ctx.fill();
+
+    // disco ball sparkles
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    for (let i = 0; i < 12; i++){
+      const sx = (i * 73 + t * 25) % W;
+      const sy = (i * 47 + t * 12) % (groundY * 0.5);
+      const tw = 0.5 + 0.5 * Math.sin(t * 4 + i * 2.5);
+      ctx.globalAlpha = tw * 0.35;
+      ctx.fillRect(sx, sy, 2, 2);
+    }
+    ctx.globalAlpha = 1;
+
+    // floor
+    const fl = ctx.createLinearGradient(0, groundY, 0, H);
+    fl.addColorStop(0, '#1e1232'); fl.addColorStop(1, '#120a20');
+    ctx.fillStyle = fl; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // mic stand
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(micX, stageY); ctx.lineTo(micX, stageY - 50); ctx.stroke();
+    ctx.fillStyle = '#555'; ctx.beginPath(); ctx.arc(micX, stageY - 52, 5, 0, 7); ctx.fill();
+    // mic base
+    ctx.fillStyle = '#444';
+    ctx.beginPath(); ctx.ellipse(micX, stageY + 2, 8, 3, 0, 0, 7); ctx.fill();
+  }
+
+  // floating music notes
+  function drawNotes(cs, cx, cy){
+    const t = cs.totalT;
+    ctx.font = '14px serif'; ctx.textAlign = 'center';
+    const notes = ['\u{1F3B5}', '\u{1F3B6}', '\u{266A}'];
+    for (let i = 0; i < 4; i++){
+      const ny = cy - 20 - ((t * 22 + i * 18) % 50);
+      const nx = cx + Math.sin(t * 2 + i * 1.8) * 12;
+      const a = Math.max(0, 1 - ((t * 22 + i * 18) % 50) / 50);
+      ctx.globalAlpha = a * 0.7;
+      ctx.fillText(notes[i % notes.length], nx, ny);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // 10/10 sign
+  function drawSign(cx, cy, t){
+    const bob = Math.sin(t * 3) * 3;
+    ctx.save();
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#e85a8a'; ctx.lineWidth = 2;
+    const sw = 46, sh = 22;
+    roundRect(cx - sw / 2, cy - sh / 2 + bob, sw, sh, 6); ctx.fill();
+    roundRect(cx - sw / 2, cy - sh / 2 + bob, sw, sh, 6); ctx.stroke();
+    ctx.fillStyle = '#e85a8a'; ctx.font = 'bold 13px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('10/10', cx, cy + bob + 1);
+    ctx.restore();
+  }
+
+  return {
+    chars: ['krystal', 'paul', 'luna', 'wade'],
+    skipable: true,
+    steps: [
+      // Step 1: Wade takes the stage — terrible but confident
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('wade', 'cheer', micX, fY - 8, charH);
+          drawNotes(cs, micX, fY - charH - 8);
+          csDrawExpression('krystal', 'embarrassed', krystalX, fY, charH);
+          csDrawExpression('paul', 'scared', paulX, fY, charH);
+          csDrawExpression('luna', 'shake', lunaX, fY, charH);
+          csDrawBubble(micX, fY - charH - 14, 'Wade', 'IIII WILL ALWAYS LOVE YOUUU\u{1F3A4}');
+      }, onStart(cs){ try{ sfx('tap'); }catch(e){} }},
+      // Step 2: Everyone cringing — Wade oblivious
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          csDrawExpression('wade', 'wave', micX, fY - 8, charH);
+          drawNotes(cs, micX, fY - charH - 8);
+          csDrawExpression('krystal', 'think', krystalX, fY, charH);
+          csDrawExpression('paul', 'sad', paulX, fY, charH);
+          csDrawExpression('luna', 'inspect', lunaX, fY, charH);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Is he\u2026 is he serious? \ud83d\ude30');
+      }},
+      // Step 3: Luna takes the mic — nails it! Everyone surprised
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          csDrawExpression('luna', 'talk', micX, fY - 8, charH);
+          drawNotes(cs, micX, fY - charH - 8);
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawExpression('paul', 'nod', paulX, fY, charH);
+          csDrawExpression('wade', 'search', wadeX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Wait\u2026 she\u2019s AMAZING! \ud83d\ude2e');
+      }},
+      // Step 4: Everyone cheers for Luna
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          csDrawExpression('luna', 'shrug', micX, fY - 8, charH);
+          drawNotes(cs, micX, fY - charH - 8);
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawExpression('paul', 'cheer', paulX, fY, charH);
+          csDrawExpression('wade', 'point', wadeX, fY, charH);
+          csDrawBubble(lunaX + 30, fY - charH - 14, 'Luna', 'Oh stop it\u2026 \ud83d\ude0a');
+      }, onStart(cs){
+          csHearts(cs, micX, fY - charH * 0.7, 4);
+      }},
+      // Step 5: Krystal & Paul duet — hearts float, Wade holds 10/10 sign
+      { dur: 3.2, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'laugh', micX - 16, fY - 8, charH);
+          csDrawExpression('paul', 'laugh', micX + 16, fY - 8, charH);
+          drawNotes(cs, micX, fY - charH - 8);
+          csDrawExpression('luna', 'beckon', lunaX, fY, charH);
+          csDrawExpression('wade', 'wave', wadeX, fY, charH);
+          drawSign(wadeX, fY - charH - 12, cs.totalT);
+          csDrawBubble(micX, fY - charH - 18, null, '\u{1F3B6} You\u2019re my sunshine\u2026 \u{1F3B6}');
+      }, onStart(cs){
+          csHearts(cs, micX - 16, fY - charH * 0.5, 5);
+          csHearts(cs, micX + 16, fY - charH * 0.5, 5);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 30: PUDDLE JUMPING  (triggers at rainystreet, waterfall, river)
+   ============================================================================ */
+function csPuddleJumping(){
+  const groundY = H * 0.72;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.25, lukeX = W * 0.50, williamX = W * 0.75;
+
+  // rain particles
+  const raindrops = [];
+  for (let i = 0; i < 50; i++){
+    raindrops.push({
+      x: Math.random() * W, y: Math.random() * H,
+      speed: 180 + Math.random() * 120,
+      len: 6 + Math.random() * 8
+    });
+  }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // grey rainy sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#5a6270'); sky.addColorStop(0.5, '#6e7888'); sky.addColorStop(1, '#8a94a0');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // distant buildings silhouette
+    ctx.fillStyle = '#555d6a';
+    const bldgs = [0.05, 0.15, 0.28, 0.42, 0.58, 0.72, 0.85];
+    const bldgH = [35, 50, 28, 55, 40, 48, 32];
+    const bldgW2 = [18, 14, 20, 16, 18, 15, 22];
+    for (let i = 0; i < bldgs.length; i++){
+      ctx.fillRect(bldgs[i] * W - bldgW2[i], groundY - bldgH[i], bldgW2[i] * 2, bldgH[i]);
+    }
+
+    // wet ground
+    const gr = ctx.createLinearGradient(0, groundY, 0, H);
+    gr.addColorStop(0, '#4a5260'); gr.addColorStop(1, '#3e4550');
+    ctx.fillStyle = gr; ctx.fillRect(0, groundY, W, H - groundY);
+    // wet reflection sheen
+    ctx.fillStyle = 'rgba(150,170,200,.12)';
+    ctx.fillRect(0, groundY, W, 6);
+
+    // puddles
+    ctx.fillStyle = 'rgba(120,145,180,.3)';
+    ctx.beginPath(); ctx.ellipse(lukeX, fY + 8, 28, 6, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(krystalX + 30, fY + 10, 18, 4, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(W * 0.5, fY + 14, 40, 8, 0, 0, 7); ctx.fill();
+
+    // rain
+    ctx.strokeStyle = 'rgba(180,200,220,.4)'; ctx.lineWidth = 1;
+    for (const r of raindrops){
+      const ry = (r.y + r.speed * t) % (H + 20) - 10;
+      const rx = (r.x + t * 8) % (W + 20) - 10;
+      ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 1, ry + r.len); ctx.stroke();
+    }
+  }
+
+  // splash effect
+  function drawSplash(cx, cy, radius, t){
+    const prog = (t * 3) % 1;
+    const r = radius * prog;
+    const a = 1 - prog;
+    ctx.strokeStyle = `rgba(150,180,220,${(a * 0.6).toFixed(2)})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(cx, cy, r, r * 0.3, 0, 0, 7); ctx.stroke();
+    // droplets
+    ctx.fillStyle = `rgba(150,180,220,${(a * 0.5).toFixed(2)})`;
+    for (let i = 0; i < 5; i++){
+      const angle = i / 5 * 6.28;
+      const dx = cx + Math.cos(angle) * r * 0.8;
+      const dy = cy + Math.sin(angle) * r * 0.2 - prog * 14;
+      ctx.beginPath(); ctx.arc(dx, dy, 1.5, 0, 7); ctx.fill();
+    }
+  }
+
+  return {
+    chars: ['krystal', 'luke', 'william'],
+    skipable: true,
+    steps: [
+      // Step 1: Luke runs and jumps in a huge puddle — splash!
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          const jumpProg = Math.min(1, cs.stepT / 0.8);
+          const jumpY = fY - Math.sin(jumpProg * Math.PI) * 30;
+          csDrawExpression('luke', 'cheer', lukeX, jumpY, charH);
+          if (cs.stepT > 0.8) drawSplash(lukeX, fY + 8, 35, cs.stepT - 0.8);
+          csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+          csDrawExpression('william', 'surprised', williamX, fY, charH);
+          csDrawBubble(lukeX, jumpY - charH - 4, 'Luke', 'CANNONBALL! \ud83d\udca6');
+      }, onStart(cs){ try{ sfx('tap'); }catch(e){} }},
+      // Step 2: William tries to stay dry — shakes his head
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          csDrawExpression('luke', 'laugh', lukeX, fY, charH);
+          csDrawExpression('william', 'shake', williamX, fY, charH);
+          csDrawExpression('krystal', 'think', krystalX, fY, charH);
+          // water droplets on William
+          ctx.fillStyle = 'rgba(140,170,210,.4)';
+          for (let i = 0; i < 4; i++){
+            ctx.beginPath();
+            ctx.arc(williamX - 8 + i * 5, fY - charH * 0.5 - i * 6, 1.5, 0, 7);
+            ctx.fill();
+          }
+          csDrawBubble(williamX, fY - charH - 4, 'William', 'No way. I\u2019m staying DRY. \ud83d\ude45');
+      }},
+      // Step 3: Krystal grabs William's hand — beckon
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          csDrawExpression('krystal', 'beckon', krystalX + 20, fY, charH);
+          csDrawExpression('william', 'scared', williamX - 20, fY, charH);
+          csDrawExpression('luke', 'point', lukeX, fY, charH);
+          csDrawBubble(krystalX + 20, fY - charH - 4, 'Krystal', 'Come on, it\u2019ll be fun! \ud83e\udd1d');
+      }},
+      // Step 4: All three jump together — massive splash!
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          const cx = W * 0.50;
+          const jumpProg = Math.min(1, cs.stepT / 0.6);
+          const jumpY = fY - Math.sin(jumpProg * Math.PI) * 35;
+          csDrawExpression('krystal', 'cheer', cx - 28, jumpY, charH);
+          csDrawExpression('luke', 'cheer', cx, jumpY, charH);
+          csDrawExpression('william', 'wave', cx + 28, jumpY, charH * 0.95);
+          if (cs.stepT > 0.6) drawSplash(cx, fY + 8, 50, cs.stepT - 0.6);
+          csDrawBubble(cx, jumpY - charH - 4, null, 'ONE\u2026 TWO\u2026 THREE! \ud83d\udca6\ud83d\udca6');
+      }, onStart(cs){ try{ sfx('tap'); }catch(e){} }},
+      // Step 5: Everyone soaked and laughing
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          const cx = W * 0.50;
+          csDrawExpression('krystal', 'laugh', cx - 28, fY, charH);
+          csDrawExpression('luke', 'laugh', cx, fY, charH);
+          csDrawExpression('william', 'embarrassed', cx + 28, fY, charH * 0.95);
+          // water dripping off all of them
+          ctx.fillStyle = 'rgba(140,170,210,.35)';
+          for (let c = -1; c <= 1; c++){
+            const px = cx + c * 28;
+            for (let i = 0; i < 3; i++){
+              const dy = (cs.stepT * 40 + i * 14) % 30;
+              ctx.beginPath(); ctx.arc(px - 6 + i * 6, fY - charH * 0.3 + dy, 1.2, 0, 7); ctx.fill();
+            }
+          }
+          csDrawBubble(cx + 28, fY - charH * 0.95 - 4, 'William', 'Okay\u2026 that was worth it. \ud83d\ude02');
+      }, onStart(cs){
+          const cx = W * 0.50;
+          csHearts(cs, cx - 28, fY - charH * 0.7, 3);
+          csHearts(cs, cx, fY - charH * 0.7, 3);
+          csHearts(cs, cx + 28, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 31: CONSTELLATION DRAWING  (triggers at observatory, planetarium, aurora)
+   ============================================================================ */
+function csConstellationDrawing(){
+  const groundY = H * 0.78;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.35, paulX = W * 0.65;
+
+  // fixed star field
+  const stars = [];
+  for (let i = 0; i < 60; i++){
+    stars.push({
+      x: (i * 83 + 17) % W,
+      y: (i * 53 + 11) % (groundY - 20),
+      size: 0.8 + Math.random() * 1.4,
+      phase: Math.random() * 6.28,
+      brightness: 0.3 + Math.random() * 0.7
+    });
+  }
+
+  // heart constellation points (relative to center, scaled)
+  const heartPts = [
+    { x: 0, y: -28 },    // top center dip
+    { x: -12, y: -38 },  // left bump
+    { x: -22, y: -30 },  // left outer
+    { x: -18, y: -16 },  // left lower
+    { x: -8, y: -4 },    // left bottom
+    { x: 0, y: 6 },      // bottom point
+    { x: 8, y: -4 },     // right bottom
+    { x: 18, y: -16 },   // right lower
+    { x: 22, y: -30 },   // right outer
+    { x: 12, y: -38 },   // right bump
+  ];
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // deep night sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#060818'); sky.addColorStop(0.3, '#0c1028'); sky.addColorStop(0.7, '#161838'); sky.addColorStop(1, '#1e1e40');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // milky way band (faint)
+    ctx.save();
+    ctx.globalAlpha = 0.06;
+    const mw = ctx.createLinearGradient(0, 0, W, groundY * 0.5);
+    mw.addColorStop(0, 'transparent'); mw.addColorStop(0.3, '#8888cc'); mw.addColorStop(0.7, '#8888cc'); mw.addColorStop(1, 'transparent');
+    ctx.fillStyle = mw;
+    ctx.translate(W * 0.5, groundY * 0.25);
+    ctx.rotate(-0.3);
+    ctx.fillRect(-W * 0.7, -25, W * 1.4, 50);
+    ctx.restore();
+
+    // stars
+    for (const s of stars){
+      const tw = 0.5 + 0.5 * Math.sin(t * 1.8 + s.phase);
+      ctx.fillStyle = `rgba(255,255,240,${(s.brightness * (0.4 + 0.6 * tw)).toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, 7); ctx.fill();
+    }
+
+    // gentle rolling hill silhouette
+    ctx.fillStyle = '#0e1220';
+    ctx.beginPath(); ctx.moveTo(0, groundY);
+    for (let x = 0; x <= W; x += 8){
+      ctx.lineTo(x, groundY - 8 + Math.sin(x * 0.02 + 1) * 6 + Math.sin(x * 0.05) * 3);
+    }
+    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
+
+    // ground
+    const gr = ctx.createLinearGradient(0, groundY, 0, H);
+    gr.addColorStop(0, '#141828'); gr.addColorStop(1, '#0e1220');
+    ctx.fillStyle = gr; ctx.fillRect(0, groundY, W, H - groundY);
+  }
+
+  // draw the traced constellation line (arbitrary shape)
+  function drawTrace(cs, pts, cx, cy, progress){
+    if (progress <= 0) return;
+    const n = pts.length;
+    const segCount = n; // closed loop
+    const totalSegs = segCount;
+    const segsDrawn = progress * totalSegs;
+
+    ctx.strokeStyle = 'rgba(180,200,255,.55)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < Math.min(segsDrawn, totalSegs); i++){
+      const p1 = pts[i % n];
+      const p2 = pts[(i + 1) % n];
+      const px1 = cx + p1.x, py1 = cy + p1.y;
+      const px2 = cx + p2.x, py2 = cy + p2.y;
+      if (i === 0) ctx.moveTo(px1, py1);
+      if (i < Math.floor(segsDrawn)){
+        ctx.lineTo(px2, py2);
+      } else {
+        const frac = segsDrawn - Math.floor(segsDrawn);
+        ctx.lineTo(px1 + (px2 - px1) * frac, py1 + (py2 - py1) * frac);
+      }
+    }
+    ctx.stroke();
+
+    // dots at vertices
+    ctx.fillStyle = 'rgba(200,220,255,.8)';
+    for (let i = 0; i <= Math.min(Math.floor(segsDrawn), n - 1); i++){
+      const p = pts[i % n];
+      ctx.beginPath(); ctx.arc(cx + p.x, cy + p.y, 2.2, 0, 7); ctx.fill();
+    }
+  }
+
+  // Krystal's made-up constellation (squiggly shape)
+  const funnyPts = [
+    { x: -14, y: -20 }, { x: -6, y: -30 }, { x: 8, y: -24 },
+    { x: 16, y: -34 }, { x: 22, y: -18 }, { x: 10, y: -10 },
+    { x: -4, y: -8 },
+  ];
+
+  return {
+    chars: ['krystal', 'paul'],
+    skipable: true,
+    steps: [
+      // Step 1: Night sky, Krystal points up and traces a constellation
+      { dur: 2.4, draw(cs){
+          drawBg(cs);
+          const traceProgress = Math.min(1, cs.stepT / 2.0);
+          drawTrace(cs, funnyPts, W * 0.35, H * 0.22, traceProgress);
+          csDrawExpression('krystal', 'point', krystalX, fY, charH);
+          csDrawChar('paul', paulX, fY, 'left', charH, 0);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'See that one? Right there! \u2b50');
+      }},
+      // Step 2: Paul asks what it is — Krystal shrugs then laughs
+      { dur: 2.2, draw(cs){
+          drawBg(cs);
+          drawTrace(cs, funnyPts, W * 0.35, H * 0.22, 1);
+          csDrawExpression('paul', 'search', paulX, fY, charH);
+          if (cs.stepT < 1.2){
+            csDrawExpression('krystal', 'shrug', krystalX, fY, charH);
+            csDrawBubble(paulX, fY - charH - 4, 'Paul', 'What\u2019s that one called? \ud83e\udd14');
+          } else {
+            csDrawExpression('krystal', 'laugh', krystalX, fY, charH);
+            csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'I just made it up! \ud83d\ude1d');
+          }
+      }},
+      // Step 3: Paul nods, starts tracing his own — it's a heart
+      { dur: 2.6, draw(cs){
+          drawBg(cs);
+          drawTrace(cs, funnyPts, W * 0.35, H * 0.22, 1);
+          const heartProg = Math.min(1, cs.stepT / 2.2);
+          drawTrace(cs, heartPts, W * 0.65, H * 0.22, heartProg);
+          csDrawExpression('paul', 'nod', paulX, fY, charH);
+          csDrawExpression('krystal', 'inspect', krystalX, fY, charH);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'Okay my turn\u2026 watch this. \u270b');
+      }},
+      // Step 4: Heart constellation complete — stars connect and glow
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          drawTrace(cs, funnyPts, W * 0.35, H * 0.22, 1);
+          drawTrace(cs, heartPts, W * 0.65, H * 0.22, 1);
+          // glow around heart constellation
+          const glow = ctx.createRadialGradient(W * 0.65, H * 0.22 - 16, 5, W * 0.65, H * 0.22 - 16, 40);
+          glow.addColorStop(0, 'rgba(255,180,200,.15)'); glow.addColorStop(1, 'rgba(255,180,200,0)');
+          ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(W * 0.65, H * 0.22 - 16, 40, 0, 7); ctx.fill();
+          csDrawExpression('krystal', 'surprised', krystalX, fY, charH);
+          csDrawExpression('paul', 'talk', paulX, fY, charH);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', 'Wait\u2026 is that a\u2026?! \ud83d\udc96');
+      }},
+      // Step 5: Krystal cheers — hearts everywhere
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          drawTrace(cs, funnyPts, W * 0.35, H * 0.22, 1);
+          drawTrace(cs, heartPts, W * 0.65, H * 0.22, 1);
+          // warm glow
+          const glow = ctx.createRadialGradient(W * 0.65, H * 0.22 - 16, 5, W * 0.65, H * 0.22 - 16, 50);
+          glow.addColorStop(0, 'rgba(255,180,200,.22)'); glow.addColorStop(1, 'rgba(255,180,200,0)');
+          ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(W * 0.65, H * 0.22 - 16, 50, 0, 7); ctx.fill();
+          csDrawExpression('krystal', 'cheer', krystalX, fY, charH);
+          csDrawExpression('paul', 'embarrassed', paulX, fY, charH);
+          csDrawBubble(paulX, fY - charH - 4, 'Paul', 'I call it\u2026 us. \u2764\ufe0f');
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 5);
+          csHearts(cs, paulX, fY - charH * 0.7, 5);
+          csHearts(cs, W * 0.65, H * 0.22 - 16, 4);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
   campsite:          [csCampfireStory],
   starrymeadow:      [csStargazing],
-  observatory:       [csStargazing],
+  observatory:       [csStargazing, csConstellationDrawing],
+  planetarium:       [csConstellationDrawing],
+  aurora:            [csConstellationDrawing],
   beach:             [csBeachSunsetPicnic],
   moonbeach:         [csBeachSunsetPicnic],
   bakery:            [csBakeryMishap],
@@ -5283,7 +5771,8 @@ const CUTSCENE_MAP = {
   arcanelibrary:     [csLibraryGhost],
   aquarium:          [csAquariumWonder],
   aquariumtunnel:    [csAquariumWonder],
-  rainystreet:       [csRainyDayChat],
+  rainystreet:       [csRainyDayChat, csPuddleJumping],
+  waterfall:         [csPuddleJumping],
   florist:           [csFlowerCrown],
   cherryblossom:     [csFlowerCrown],
   lavender:          [csFlowerCrown, csCloudWatching],
@@ -5293,8 +5782,9 @@ const CUTSCENE_MAP = {
   frozenfalls:       [csSnowAngelContest, csSnowballFight],
   icebergbay:        [csSnowballFight],
   musicroom:         [csMusicJam],
-  recordshop:        [csMusicJam],
-  jazzclub:          [csMusicJam],
+  recordshop:        [csMusicJam, csKaraokeNight],
+  jazzclub:          [csMusicJam, csKaraokeNight],
+  carnival:          [csKaraokeNight],
   artstudio:         [csPaintingTogether],
   pottery:           [csPaintingTogether],
   hedgemaze:         [csHideAndSeek],
@@ -5324,7 +5814,7 @@ const CUTSCENE_MAP = {
   wizardtower:       [csMagicShow],
   fishingdock:       [csSunsetFishing],
   marina:            [csSunsetFishing],
-  river:             [csSunsetFishing],
+  river:             [csSunsetFishing, csPuddleJumping],
   butterflydome:     [csGardenButterflies],
   greenhouse:        [csGardenButterflies],
   sunflowers:        [csGardenButterflies],
