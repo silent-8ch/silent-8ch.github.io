@@ -3259,95 +3259,7 @@ function fxWalkHerTo(px, py){
 })();
 
 /* ----------------------------------------------------------------------------
-   47) STARGAZE THROUGH THE TELESCOPE  —  at the observatory or planetarium a little
-   telescope stands on its tripod. Tap it to peer through: a constellation twinkles
-   into view across the upper sky for a few seconds, then gently fades. A wish, and
-   a warm word. Scene-gated.
-   -------------------------------------------------------------------------- */
-(function fxTelescope(){
-  try{
-    const PLACES = new Set(['observatory','planetarium']);
-    let ts = null;                       // {x,y,view,cd,stars:[],ang}
-    function here(){ try{ return (typeof SCENES!=='undefined') && PLACES.has(SCENES[currentScene]); }catch(e){ return false; } }
-    function build(){
-      ts = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.80)), y: rand(H*0.70, H*0.76), view:0, cd:0, stars:[], ang:-0.9 };
-    }
-    function newConstellation(){
-      const stars = [], n = 5 + Math.floor(Math.random()*3);
-      let sx = rand(W*0.2, W*0.4), sy = rand(H*0.12, H*0.24);
-      for (let i=0;i<n;i++){
-        stars.push({ x: sx, y: sy, tw: rand(0,Math.PI*2) });
-        sx = Math.max(W*0.14, Math.min(W*0.72, sx + rand(14,34)*(Math.random()<0.5?-1:1) + 16));
-        sy = Math.max(H*0.08, Math.min(H*0.34, sy + rand(-16,16)));
-      }
-      ts.stars = stars;
-    }
-
-    EXTRA_UPDATERS.push(function(dt){
-      if (!here()){ ts = null; return; }
-      if (!ts) build();
-      if (ts.cd > 0) ts.cd -= dt;
-      if (ts.view > 0){ ts.view -= dt; for (const s of ts.stars) s.tw += dt*4; }
-    });
-
-    EXTRA_DRAWERS.push(function(){
-      if (!ts || !here()) return;
-      const x = ts.x, y = ts.y;
-      // constellation while viewing (fade in fast, hold, fade out at the end)
-      if (ts.view > 0 && ts.stars.length){
-        const alpha = Math.max(0, Math.min(1, ts.view < 0.6 ? ts.view/0.6 : 1));
-        ctx.save();
-        ctx.strokeStyle = 'rgba(200,220,255,' + (0.35*alpha).toFixed(3) + ')'; ctx.lineWidth = 1;
-        ctx.beginPath();
-        for (let i=0;i<ts.stars.length;i++){ const s = ts.stars[i]; if (i===0) ctx.moveTo(s.x,s.y); else ctx.lineTo(s.x,s.y); }
-        ctx.stroke();
-        for (const s of ts.stars){
-          const tw = 0.6 + 0.4*Math.sin(s.tw);
-          const gg = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,6);
-          gg.addColorStop(0,'rgba(255,255,240,'+(alpha*tw).toFixed(3)+')');
-          gg.addColorStop(1,'rgba(255,255,240,0)');
-          ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(s.x,s.y,6,0,7); ctx.fill();
-          ctx.fillStyle = 'rgba(255,255,255,'+alpha.toFixed(3)+')'; ctx.beginPath(); ctx.arc(s.x,s.y,1.4,0,7); ctx.fill();
-        }
-        ctx.restore();
-      }
-      // telescope: tripod + tube
-      ctx.save();
-      ctx.strokeStyle = '#4a3b2a'; ctx.lineWidth = 2; ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(x, y-4); ctx.lineTo(x-8, y+14);
-      ctx.moveTo(x, y-4); ctx.lineTo(x+8, y+14);
-      ctx.moveTo(x, y-4); ctx.lineTo(x+2, y+14);
-      ctx.stroke();
-      const ang = ts.ang + (ts.view>0 ? Math.sin(ts.view*3)*0.03 : 0);
-      ctx.save(); ctx.translate(x, y-4); ctx.rotate(ang);
-      ctx.fillStyle = '#b8b0c8';
-      if (typeof roundRect === 'function'){ roundRect(-4, -3, 26, 7, 3); ctx.fill(); } else ctx.fillRect(-4,-3,26,7);
-      ctx.fillStyle = '#8a82a0'; ctx.beginPath(); ctx.ellipse(22, 0.5, 2.4, 4, 0, 0, 7); ctx.fill();   // objective lens
-      ctx.fillStyle = '#d4cbe4'; ctx.fillRect(-6, -2.5, 4, 6);                                          // eyepiece
-      ctx.restore();
-      ctx.fillStyle = '#6a5a44'; ctx.beginPath(); ctx.arc(x, y-4, 2.4, 0, 7); ctx.fill();               // pivot
-      ctx.restore();
-    });
-
-    EXTRA_TAPS.push(function(px, py){
-      try{
-        if (!ts || !here()) return false;
-        if (px < ts.x - 12 || px > ts.x + 26 || py < ts.y - 16 || py > ts.y + 16) return false;
-        if (ts.cd > 0) return true;
-        ts.cd = 1.2; ts.view = 2.6; newConstellation();
-        if (typeof sfx === 'function') sfx('find');
-        if (typeof fxAt === 'function') fxAt(ts.x, ts.y - 18, pick(['🔭','🌟','✨']));
-        if (typeof say === 'function') say(pick(['Look — a constellation! 🌟','I see stars… make a wish ✨','Our own little sky 🔭','I named that one after you 💫']));
-        try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
-        return true;
-      }catch(e){ return false; }
-    });
-  }catch(e){}
-})();
-
-/* ----------------------------------------------------------------------------
-   48) LIGHT THE CANDLES  —  in the candle workshop or the snowy cabin a little row
+   47) LIGHT THE CANDLES  —  in the candle workshop or the snowy cabin a little row
    of candles waits. Tap each unlit one to light it: a flame flickers up with a warm
    glow. Light them all for a birthday cheer + a shower of hearts; after a while they
    burn down and can be lit again. Scene-gated, progressive.
@@ -3906,6 +3818,228 @@ function fxWalkHerTo(px, py){
         if (typeof fxAt === 'function') fxAt(jx, jy - 16, pick(['🪼','✨','💙']));
         if (typeof say === 'function') say(pick(['It glows! 🪼','So graceful ✨','Like a little lantern 💙','Off it drifts 🥰']));
         try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 24). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   55) THE POTTER'S WHEEL  —  in the pottery studio a lump of clay waits on the
+   wheel. Tap to spin it: the wheel turns and the clay rises and rounds a little
+   more with each touch, until a finished pot lifts away and a fresh lump appears.
+   Scene-gated, progressive.
+   -------------------------------------------------------------------------- */
+(function fxPotteryWheel(){
+  try{
+    const AT = new Set(['pottery','potterystudio','ceramics']);
+    let pw = null;                       // {x,y,spin,spinV,shape,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ pw = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), spin:0, spinV:0, shape:0, cd:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ pw = null; return; }
+      if (!pw) build();
+      if (pw.cd > 0) pw.cd -= dt;
+      pw.spin += pw.spinV*dt;
+      pw.spinV *= 0.95; if (pw.spinV < 0.15) pw.spinV = 0;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pw || !here()) return;
+      const x = pw.x, y = pw.y, s = pw.shape;
+      const wob = pw.spinV > 0 ? Math.sin(pw.spin)*1.2*(1-s) : 0;   // wetter clay wobbles more
+      ctx.save();
+      // wheel head
+      ctx.fillStyle = '#5a4d40'; ctx.beginPath(); ctx.ellipse(x, y+5, 21, 6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#6c5c4c'; ctx.beginPath(); ctx.ellipse(x, y+3, 21, 5.5, 0, 0, 7); ctx.fill();
+      // spin marks on the head
+      ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 1;
+      const mark = pw.spin % (Math.PI*2);
+      ctx.beginPath(); ctx.ellipse(x + Math.cos(mark)*9, y+3, 3, 1.4, 0, 0, 7); ctx.stroke();
+      // clay form (base -> belly -> neck grows with shape)
+      const h = 6 + s*22, belly = 5 + s*11, neck = 3 + s*3, top = y - h;
+      ctx.fillStyle = '#a86a4a';
+      ctx.beginPath();
+      ctx.moveTo(x-4, y+2);
+      ctx.quadraticCurveTo(x-belly+wob, y - h*0.5, x-neck+wob, top);
+      ctx.lineTo(x+neck+wob, top);
+      ctx.quadraticCurveTo(x+belly+wob, y - h*0.5, x+4, y+2);
+      ctx.closePath(); ctx.fill();
+      // rim highlight + opening
+      ctx.fillStyle = '#8a5238';
+      ctx.beginPath(); ctx.ellipse(x+wob, top, neck, 1.6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(x-belly*0.4+wob, y-h*0.6, 2, h*0.5);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pw || !here()) return false;
+        if (px < pw.x - 22 || px > pw.x + 22 || py < pw.y - 32 || py > pw.y + 10) return false;
+        if (pw.cd > 0) return true;
+        pw.cd = 0.2; pw.spinV = 9;
+        if (typeof sfx === 'function') sfx('draw');
+        pw.shape += 0.34;
+        if (pw.shape >= 1){
+          pw.shape = 0;
+          const cx = pw.x, cy = pw.y - 26;                       // capture BEFORE any deferred use
+          if (typeof burstAt === 'function') burstAt(pick(['🏺','✨','🫙']), cx, cy);
+          if (typeof say === 'function') say(pick(['Ta-da! A little pot 🏺','I made it just for you 🥰','Look what we shaped! ✨','So satisfying 😌']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); state.energy = clamp(state.energy + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          if (typeof say === 'function' && Math.random() < 0.5) say(pick(['Round and round… 😌','Keep going ✨','Feels lovely 🥰']));
+          try{ state.fun = clamp(state.fun + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   56) FIRE THE BURNER  —  in the hot-air-balloon scene a little balloon hovers.
+   Tap its basket to fire the burner: a flame flares under the envelope and the
+   balloon lifts with a happy whoosh, then eases gently back down. Scene-gated;
+   sits up high so it never covers her.
+   -------------------------------------------------------------------------- */
+(function fxHotAirBalloon(){
+  try{
+    const AT = new Set(['balloons','balloonfest','hotairballoons']);
+    const PANELS = ['#ff8fab','#ffd166','#8ad3ff'];
+    let hab = null;                      // {x,baseY,y,flame,cd,sway,col}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ hab = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.72)), baseY: rand(H*0.30, H*0.38), y:0, flame:0, cd:0, sway: rand(0,Math.PI*2), col: pick(PANELS) }; hab.y = hab.baseY; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ hab = null; return; }
+      if (!hab) build();
+      if (hab.cd > 0) hab.cd -= dt;
+      if (hab.flame > 0) hab.flame -= dt;
+      hab.sway += dt;
+      const target = hab.baseY - (hab.flame > 0 ? 20 : 0);
+      hab.y += (target - hab.y) * Math.min(1, dt*3);
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!hab || !here()) return;
+      const x = hab.x + Math.sin(hab.sway*0.8)*3, cy = hab.y, rx = 22, ry = 26;
+      const basketY = cy + ry + 16;
+      ctx.save();
+      // ropes
+      ctx.strokeStyle = 'rgba(90,80,70,0.6)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x-8, cy+ry-2); ctx.lineTo(x-5, basketY-4); ctx.moveTo(x+8, cy+ry-2); ctx.lineTo(x+5, basketY-4); ctx.stroke();
+      // flame under the envelope
+      if (hab.flame > 0){
+        const fl = 0.6 + 0.4*Math.sin(hab.sway*30);
+        const g = ctx.createRadialGradient(x, cy+ry+4, 0, x, cy+ry+4, 12);
+        g.addColorStop(0, 'rgba(255,210,120,'+(0.9*fl).toFixed(3)+')'); g.addColorStop(1, 'rgba(255,120,60,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, cy+ry+4, 12, 0, 7); ctx.fill();
+        ctx.fillStyle = '#ffcf6b';
+        ctx.beginPath(); ctx.moveTo(x, cy+ry-2); ctx.quadraticCurveTo(x+4, cy+ry+6, x, cy+ry+10*fl); ctx.quadraticCurveTo(x-4, cy+ry+6, x, cy+ry-2); ctx.fill();
+      }
+      // envelope
+      ctx.fillStyle = hab.col;
+      ctx.beginPath(); ctx.moveTo(x, cy+ry);
+      ctx.bezierCurveTo(x-rx*1.4, cy+ry*0.4, x-rx, cy-ry, x, cy-ry);
+      ctx.bezierCurveTo(x+rx, cy-ry, x+rx*1.4, cy+ry*0.4, x, cy+ry);
+      ctx.fill();
+      // panel seams
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, cy-ry); ctx.lineTo(x, cy+ry);
+      ctx.moveTo(x-rx*0.6, cy-ry*0.7); ctx.quadraticCurveTo(x-rx*0.7, cy, x-rx*0.2, cy+ry*0.9);
+      ctx.moveTo(x+rx*0.6, cy-ry*0.7); ctx.quadraticCurveTo(x+rx*0.7, cy, x+rx*0.2, cy+ry*0.9);
+      ctx.stroke();
+      // basket
+      ctx.fillStyle = '#9a6a3a';
+      if (typeof roundRect === 'function'){ roundRect(x-6, basketY-4, 12, 9, 2); ctx.fill(); } else ctx.fillRect(x-6, basketY-4, 12, 9);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!hab || !here()) return false;
+        const x = hab.x, cy = hab.y, rx = 22, ry = 26, basketY = cy + ry + 16;
+        const inEnv = ((px-x)*(px-x))/(rx*rx*1.3) + ((py-cy)*(py-cy))/(ry*ry) <= 1;
+        const inBasket = (px >= x-10 && px <= x+10 && py >= basketY-6 && py <= basketY+8);
+        if (!inEnv && !inBasket) return false;
+        hab.flame = 0.7;
+        if (hab.cd <= 0){
+          hab.cd = 1.0;
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof fxAt === 'function') fxAt(x, cy - ry - 6, pick(['🎈','🔥','✨']));
+          if (typeof say === 'function') say(pick(['Up, up we go! 🎈','Whoosh! 🔥','Take me flying 🥰','What a view up here ✨']));
+          try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   57) CHOCOLATE FOUNTAIN  —  in the chocolate shop a little fountain burbles with
+   flowing cocoa. Tap it to dip a strawberry: it comes up glossy and coated, and
+   she pops it in with a happy sigh. A sweet, filling treat. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxChocolateFountain(){
+  try{
+    const AT = new Set(['chocolateshop','chocolatier','cocoahouse']);
+    let cf = null;                       // {x,y,flow,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ cf = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.80)), y: rand(H*0.68, H*0.74), flow:0, cd:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ cf = null; return; }
+      if (!cf) build();
+      cf.flow += dt;
+      if (cf.cd > 0) cf.cd -= dt;
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!cf || !here()) return;
+      const x = cf.x, base = cf.y;
+      ctx.save();
+      // base bowl
+      ctx.fillStyle = '#c9a24a';
+      ctx.beginPath(); ctx.ellipse(x, base, 20, 6, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#5a3a24'; ctx.beginPath(); ctx.ellipse(x, base-1, 16, 4, 0, 0, 7); ctx.fill();   // pooled chocolate
+      // central column
+      ctx.fillStyle = '#b8923f'; ctx.fillRect(x-2, base-30, 4, 28);
+      // two tiers (cones)
+      for (const ty of [base-14, base-24]){
+        ctx.fillStyle = '#c9a24a';
+        ctx.beginPath(); ctx.moveTo(x-11, ty); ctx.lineTo(x+11, ty); ctx.lineTo(x, ty-6); ctx.closePath(); ctx.fill();
+        // cascading chocolate sheet (animated) — contained to the tier width only
+        ctx.fillStyle = '#5a3a24';
+        for (let i=-2;i<=2;i++){
+          const dx = i*4.2;
+          const drip = ((cf.flow*22 + (i+2)*7) % 10);
+          ctx.fillRect(x+dx-1, ty + drip*0.2, 2, 5 + Math.sin(cf.flow*6 + i)*1.2);
+        }
+      }
+      // top dollop
+      ctx.fillStyle = '#5a3a24'; ctx.beginPath(); ctx.arc(x, base-30, 3, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!cf || !here()) return false;
+        if (px < cf.x - 20 || px > cf.x + 20 || py < cf.y - 36 || py > cf.y + 6) return false;
+        if (cf.cd > 0) return true;
+        cf.cd = 1.1;
+        const cx = cf.x, cy = cf.y - 20;                          // capture BEFORE any deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof burstAt === 'function') burstAt(pick(['🍫','🍓','😋']), cx, cy);
+        if (typeof say === 'function') say(pick(['Mmm, chocolate-dipped! 🍫','So decadent 😋','Just one more strawberry 🍓','Sweet like you 🥰']));
+        try{ state.hunger = clamp(state.hunger + 4); state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
         return true;
       }catch(e){ return false; }
     });

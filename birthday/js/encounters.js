@@ -681,3 +681,222 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   KOI. On pond/water scenes a koi glides just under the surface and now and then
+   dimples the water. Tap the ripple to say hello and feed it a crumb.
+   -------------------------------------------------------------------------- */
+(function encKoi(){
+  try{
+    const PONDY = new Set(['koipond','lotuspond','duckpond','waterlily','river','zengarden','teahouse',
+      'watermill','marina','fishingdock','bamboo','bambootearoom','riceterraces','mossgarden',
+      'lanternfestival','nightgarden','bonsaigarden']);
+    const KOIC = ['#e8663a','#e0a03a','#d94f5c','#e8e0d0'];
+    let koi = null, timer = 22 + Math.random()*40;
+    function canHere(){ try{ return PONDY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (koi){
+          koi.t += dt; koi.x += koi.vx*dt;
+          koi.y = koi.baseY + Math.sin(koi.t*1.1)*10;
+          koi.tail = Math.sin(koi.t*6)*0.4;
+          koi.ripple = 0.5 + 0.5*Math.sin(koi.t*2.5);
+          if (koi.x < -30 || koi.x > W+30) koi = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*50;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            const by = H*(0.70+Math.random()*0.08);
+            koi = { x: dir>0 ? -22 : W+22, baseY: by, y: by, vx: dir*rand(14,22),
+                    dir, t:0, tail:0, ripple:0, col: pick(KOIC) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!koi) return;
+      try{
+        const x = koi.x, y = koi.y, d = koi.dir;
+        ctx.save();
+        // surface ripple above the fish
+        ctx.strokeStyle = 'rgba(255,255,255,'+(0.25*koi.ripple)+')'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(x, y-2, 12, 4, 0, 0, 7); ctx.stroke();
+        // body (soft, seen through water)
+        ctx.globalAlpha = 0.8; ctx.fillStyle = koi.col;
+        ctx.beginPath(); ctx.ellipse(x, y, 11, 5, 0, 0, 7); ctx.fill();
+        // tail
+        ctx.beginPath();
+        ctx.moveTo(x - d*10, y);
+        ctx.lineTo(x - d*17, y - 4 + koi.tail*6);
+        ctx.lineTo(x - d*17, y + 4 + koi.tail*6);
+        ctx.closePath(); ctx.fill();
+        // pale patch
+        ctx.globalAlpha = 0.5; ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.ellipse(x + d*3, y-1, 3, 2, 0, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!koi) return false;
+      const cx = koi.x, cy = koi.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 30*30) return false;
+      say(pick(['A koi came to say hi 🐟 here, a little crumb for you',
+                'Slow and graceful 🐟 like a quiet morning with you 💛',
+                'Ooh, a lucky koi! ✨ they mean good fortune, my love',
+                'She surfaced just for you 🥰 even the fish adore you']));
+      fxAt(cx, cy-8, '💧'); burstAt('🐟', cx, cy); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 3); refreshHUD();
+      koi = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   SQUIRREL. On woodland/park scenes a squirrel scampers along the ground, pausing
+   to nibble an acorn. Tap it before it dashes off for a bright-eyed little moment.
+   -------------------------------------------------------------------------- */
+(function encSquirrel(){
+  try{
+    const WOODSY = new Set(['autumnforest','mapleforest','redwoods','birchgrove','mistyforest','orchard',
+      'backyard','campsite','treehouse','coveredbridge','pasture','hedgemaze','topiary','mossgarden',
+      'cherryblossom','sakuratunnel','windmill','harvestbarn','alpinemeadow']);
+    let sq = null, timer = 20 + Math.random()*38;
+    function canHere(){ try{ return WOODSY.has(SCENES[currentScene]) && !isNight(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (sq){
+          sq.t += dt;
+          if (sq.pause > 0){ sq.pause -= dt; sq.hop = 0; }
+          else {
+            sq.x += sq.vx*dt;
+            sq.hop = Math.abs(Math.sin(sq.t*8))*7;   // scampering bounce
+            if (Math.random() < 0.4*dt) sq.pause = rand(0.6, 1.4);  // stop to nibble
+          }
+          if (sq.x < -20 || sq.x > W+20) sq = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 28 + Math.random()*48;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            sq = { x: dir>0 ? -14 : W+14, groundY: H*0.8, hop:0, pause:0,
+                   vx: dir*rand(22,34), dir, t:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!sq) return;
+      try{
+        const x = sq.x, y = sq.groundY - sq.hop, d = sq.dir;
+        ctx.save();
+        ctx.fillStyle = '#a86b3c';
+        // body
+        ctx.beginPath(); ctx.ellipse(x, y, 8, 5, 0, 0, 7); ctx.fill();
+        // head
+        ctx.beginPath(); ctx.arc(x + d*7, y - 3, 4, 0, 7); ctx.fill();
+        // ear
+        ctx.beginPath(); ctx.moveTo(x + d*7, y-7); ctx.lineTo(x + d*8, y-11); ctx.lineTo(x + d*9, y-7); ctx.fill();
+        // bushy tail (curled up behind)
+        ctx.strokeStyle = '#8a5528'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x - d*7, y);
+        ctx.quadraticCurveTo(x - d*16, y - 2, x - d*13, y - 12);
+        ctx.stroke();
+        // eye
+        ctx.fillStyle = '#20130a';
+        ctx.beginPath(); ctx.arc(x + d*8, y - 4, 1, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!sq) return false;
+      const cx = sq.x, cy = sq.groundY - sq.hop;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 26*26) return false;
+      say(pick(['A squirrel! 🐿️ busy little thing — got a snack for us?',
+                'Bright eyes and a big fluffy tail 🐿️ absolutely adorable',
+                'He\'s stashing acorns for winter 🌰 planning ahead, like me with you',
+                'Cheeks full and in a hurry 🐿️ you two would get along 😄']));
+      fxAt(cx, cy-8, '🌰'); burstAt('🐿️', cx, cy); if (typeof sfx==='function') sfx('find');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); refreshHUD();
+      sq = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   DANDELION SEED. On grassy/meadow scenes a dandelion puff drifts by on the
+   breeze. Tap it to blow the seeds away and make a wish.
+   -------------------------------------------------------------------------- */
+(function encDandelion(){
+  try{
+    const GRASSY = new Set(['backyard','pasture','alpinemeadow','starrymeadow','wheatfield','kitehill',
+      'lavender','poppyfield','tulipfield','sunflowers','sunflowermaze','orchard','vineyard','meadow',
+      'hummingbirdgarden','peonygarden','campsite','riceterraces','teaplantation','cliffs']);
+    let pf = null, timer = 22 + Math.random()*40;
+    function canHere(){ try{ return GRASSY.has(SCENES[currentScene]) && !isNight(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (pf){
+          pf.t += dt;
+          pf.x += pf.vx*dt + Math.sin(pf.t*0.9)*8*dt;
+          pf.y += Math.sin(pf.t*1.4)*6*dt - 3*dt;   // drifts gently, slightly up
+          if (pf.x < -20 || pf.x > W+20 || pf.y < H*0.2) pf = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*48;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            pf = { x: dir>0 ? -12 : W+12, y: H*(0.5+Math.random()*0.15), vx: dir*rand(12,20), t:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!pf) return;
+      try{
+        const x = pf.x, y = pf.y;
+        ctx.save();
+        // stem
+        ctx.strokeStyle = 'rgba(150,180,120,0.7)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, y+2); ctx.lineTo(x-2, y+9); ctx.stroke();
+        // puff filaments
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 0.8; ctx.lineCap = 'round';
+        for (let i=0;i<12;i++){
+          const a = (i/12)*Math.PI*2 + Math.sin(pf.t*2)*0.1;
+          ctx.beginPath(); ctx.moveTo(x, y);
+          ctx.lineTo(x + Math.cos(a)*6, y + Math.sin(a)*6); ctx.stroke();
+        }
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(x, y, 1.4, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!pf) return false;
+      const cx = pf.x, cy = pf.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 24*24) return false;
+      say(pick(['Puff! 🌬️ make a wish, my love — I bet I can guess it',
+                'A dandelion 🌼 close your eyes and blow — I wished for you',
+                'There go the little seeds ✨ each one a hope for us',
+                'Every wish I ever made on one of these came true when I found you 💛']));
+      // scatter the seeds — capture coords first (pf may be nulled before timeouts fire)
+      for (let i=0;i<4;i++) setTimeout(()=> fxAt(cx + rand(-18,18), cy - rand(0,16), '✨'), i*70);
+      if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 2); refreshHUD();
+      pf = null;
+      return true;
+    });
+  }catch(e){}
+})();

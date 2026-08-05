@@ -786,6 +786,66 @@ const SCENE_SPOTS = {
     {nx:0.16, ny:0.42, r:44, e:'🛖', lines:['A little farmer\'s hut 🛖','All alone up there','So quiet and simple']},
     {nx:0.50, ny:0.22, r:48, e:'🕊️', lines:['White egrets gliding 🕊️','So graceful and low','Skimming over the water 💛']},
   ],
+  rainystreet: [
+    {nx:0.30, ny:0.35, r:56, e:'🏙️', lines:['City lights at night 🏙️','So many little windows','Someone\'s cozy up there']},
+    {nx:0.68, ny:0.30, r:48, e:'🪧', lines:['A glowing neon sign 🪧','Buzzing pink and blue','Let\'s duck in from the rain 🥰']},
+    {nx:0.85, ny:0.50, r:48, e:'💡', lines:['A warm streetlamp 💡','Glowing through the drizzle','So romantic, isn\'t it? 💛']},
+    {nx:0.40, ny:0.85, r:54, e:'🌧️', lines:['Puddles on the street 🌧️','Splash in them with me!','Share your umbrella? ☔']},
+  ],
+  darkroom: [
+    {nx:0.50, ny:0.06, r:46, e:'🔴', lines:['The red safelight 🔴','So we don\'t spoil the film','Spooky little glow']},
+    {nx:0.30, ny:0.20, r:52, e:'🖼️', lines:['Prints drying on the line 🖼️','Our memories appearing','Which one\'s your favorite? 🥰']},
+    {nx:0.25, ny:0.55, r:50, e:'🧪', lines:['Developing trays 🧪','Watch the image bloom','Like magic, isn\'t it?']},
+    {nx:0.78, ny:0.52, r:48, e:'📷', lines:['The enlarger 📷','Projecting the negative','Let\'s make a big one of us 💛']},
+  ],
+  pasture: [
+    {nx:0.30, ny:0.60, r:54, e:'🐑', lines:['Fluffy little sheep! 🐑','So soft and woolly','Can I pet one? 🥰']},
+    {nx:0.72, ny:0.62, r:50, e:'🐑', lines:['Another one! 🐑','Baaa baaa','Counting them makes me sleepy 😴']},
+    {nx:0.50, ny:0.47, r:46, e:'🪵', lines:['A wooden fence 🪵','Rickety and rustic','Sit on it with me?']},
+    {nx:0.20, ny:0.12, r:48, e:'☁️', lines:['Big fluffy clouds ☁️','Like sheep in the sky!','What a gentle day 💛']},
+  ],
+  glassblowing: [
+    {nx:0.80, ny:0.50, r:54, e:'🔥', lines:['The roaring furnace 🔥','So blazing hot!','Careful, my love']},
+    {nx:0.68, ny:0.55, r:50, e:'🟠', lines:['Molten glass glowing 🟠','Spinning at the tip','Like liquid honey 🥰']},
+    {nx:0.13, ny:0.18, r:48, e:'🏺', lines:['Finished glass vessels 🏺','Every jewel color','So delicate and shiny']},
+    {nx:0.28, ny:0.88, r:44, e:'🪣', lines:['A water bucket 🪣','For cooling things down','Hisss goes the glass 💛']},
+  ],
+  cliffs: [
+    {nx:0.14, ny:0.36, r:52, e:'🌼', lines:['Wildflowers on the edge 🌼','Blowing in the sea wind','So brave up here 🥰']},
+    {nx:0.46, ny:0.55, r:54, e:'💦', lines:['Waves crashing below 💦','Boom against the rocks!','Such a roar and spray']},
+    {nx:0.72, ny:0.72, r:56, e:'🌊', lines:['The wide open sea 🌊','So blue and endless','I could watch it all day 💛']},
+    {nx:0.55, ny:0.20, r:48, e:'🕊️', lines:['Gulls wheeling overhead 🕊️','Riding the wind','Crying out to the waves']},
+  ],
+  terrariumshop: [
+    {nx:0.30, ny:0.30, r:54, e:'🪴', lines:['Little glass gardens 🪴','A whole world in a globe!','So tiny and perfect 🥰']},
+    {nx:0.84, ny:0.42, r:50, e:'🌱', lines:['A hanging terrarium 🌱','Swaying so gently','Green life in a teardrop 💛']},
+    {nx:0.83, ny:0.18, r:44, e:'🪟', lines:['A leafy window 🪟','Soft green light','So calm and fresh in here']},
+    {nx:0.22, ny:0.58, r:46, e:'💦', lines:['The potting counter 💦','Spritz the little plants','Let\'s make one together 🥰']},
+  ],
+  saltflats: [
+    {nx:0.50, ny:0.44, r:52, e:'🌅', lines:['The dusk sun 🌅','Melting into the salt','Such soft pink light 🥰']},
+    {nx:0.45, ny:0.78, r:60, e:'🪞', lines:['The ground\'s a mirror! 🪞','The whole sky reflected','Are we walking on clouds? 💛']},
+    {nx:0.20, ny:0.45, r:48, e:'🏔️', lines:['Faraway mountains 🏔️','Hazy on the horizon','So still and quiet']},
+    {nx:0.66, ny:0.46, r:44, e:'🧍', lines:['A tiny figure out there 🧍','Shows how huge this is','Just endless flat forever']},
+  ],
+  bookbindery: [
+    {nx:0.15, ny:0.24, r:52, e:'🟫', lines:['Leather hides on the wall 🟫','Rich reds and greens','They smell wonderful 🥰']},
+    {nx:0.75, ny:0.20, r:52, e:'📚', lines:['Rows of bound books 📚','Gold on the spines','Each one made by hand 💛']},
+    {nx:0.50, ny:0.58, r:50, e:'📖', lines:['The nipping press 📖','Squeezing a book tight','Turn the big wheel!']},
+    {nx:0.40, ny:0.68, r:46, e:'🧵', lines:['Spools of thread 🧵','For sewing the pages','So many pretty colors']},
+  ],
+  meteorshower: [
+    {nx:0.60, ny:0.30, r:58, e:'☄️', lines:['A shooting star! ☄️','Quick, make a wish!','Did you see that one? 🥰']},
+    {nx:0.30, ny:0.15, r:52, e:'✨', lines:['The Milky Way ✨','So many stars','I\'ve never seen so many 💛']},
+    {nx:0.80, ny:0.68, r:46, e:'🌳', lines:['A lone tree on the hill 🌳','A dark little sentinel','So peaceful out here']},
+    {nx:0.30, ny:0.88, r:50, e:'💑', lines:['Us on a blanket 💑','Lying here together','I could stay all night 🥰']},
+  ],
+  letterpress: [
+    {nx:0.19, ny:0.30, r:52, e:'🔡', lines:['A type-case cabinet 🔡','Tiny letters in each drawer','So old and clever 🥰']},
+    {nx:0.65, ny:0.10, r:48, e:'📄', lines:['Fresh prints drying 📄','Pinned up overhead','Ink still shining 💛']},
+    {nx:0.50, ny:0.55, r:52, e:'🖨️', lines:['The cast-iron press 🖨️','Clack — it stamps the page!','Such a satisfying thunk']},
+    {nx:0.86, ny:0.60, r:46, e:'🎨', lines:['Cans of ink 🎨','Every rich color','Let\'s print you a card 🥰']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){
