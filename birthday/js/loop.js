@@ -132,6 +132,14 @@ function loop(ts){
   }
 
   if (started){
+    // cheat check: refresh active state, expire when time's up
+    if (cheatActive && Date.now() >= cheatExpires) {
+      cheatActive = false;
+      try { localStorage.removeItem('bpet_cheat'); } catch(e){}
+    }
+    if (cheatActive) {
+      state.hunger = 100; state.fun = 100; state.love = 100; state.energy = 100;
+    } else {
     // needs decay (relaxed mode halves the drain)
     const dm = (settings && settings.relaxed) ? 0.5 : 1;
     state.hunger = clamp(state.hunger - CONFIG.decay.hunger*dt*dm);
@@ -140,6 +148,7 @@ function loop(ts){
     // energy drains ~2x faster at night unless she's resting
     if (!pet.resting) state.energy = clamp(state.energy - CONFIG.decay.energy*dt*(isNight()?2:1)*dm);
     else state.energy = clamp(state.energy + 9*dt);   // recover while resting
+    }
     // Reset overfed/overdraw only when stats drop significantly below full
     if (state.hunger < 80) state.overfed = 0;
     if (state.fun < 80) state.overdraw = 0;

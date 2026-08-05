@@ -59,6 +59,23 @@ const pet = {
    over the scene each frame. EXTRA_TAPS: fn(px,py) on a stage tap — return true
    to consume the tap (skip the default walk-to-spot). All are wrapped in try/catch. */
 const EXTRA_UPDATERS = [], EXTRA_DRAWERS = [], EXTRA_TAPS = [];
+
+/* ---------- cheat: ?pchkfa — full bars for 24h, no decay ---------- */
+let cheatActive = false, cheatExpires = 0;
+(function checkCheat(){
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('pchkfa')) {
+    cheatExpires = Date.now() + 24 * 60 * 60 * 1000;
+    try { localStorage.setItem('bpet_cheat', String(cheatExpires)); } catch(e){}
+    // redirect to clean URL
+    const clean = window.location.pathname;
+    window.history.replaceState(null, '', clean);
+  }
+  try {
+    const stored = localStorage.getItem('bpet_cheat');
+    if (stored && Date.now() < Number(stored)) { cheatActive = true; cheatExpires = Number(stored); }
+  } catch(e){}
+})();
 const CHARACTER_TAPS = [];  // visible roaming characters get priority over Krystal's tap box
 
 /* ---------- save / load ---------- */
