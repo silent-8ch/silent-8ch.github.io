@@ -7288,6 +7288,229 @@ function csGenStretching(){
   };
 }
 
+/* 11) High Five */
+function csGenHighFive(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.42;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+  let friendX = W + 40;
+
+  return {
+    id: 'gen_high_five',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          const progress = Math.min(1, cs.stepT / 1.3);
+          friendX = W + 40 - (W + 40 - W * 0.58) * progress;
+          const frame = Math.floor(cs.stepT * 4) % 4;
+          csDrawChar(friend, friendX, fY, 'left', charH, frame);
+          csDrawExpression('krystal', 'look', kx, fY, charH);
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'highfive', W * 0.58, fY, charH);
+          csDrawExpression('krystal', 'highfive', kx, fY, charH);
+          csDrawBubble(W * 0.50, fY - charH - 4, null, 'High five! ✋');
+      }, onStart(cs){
+          try{ sfx('tap'); }catch(e){}
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          const progress = Math.min(1, cs.stepT / 1.5);
+          friendX = W * 0.58 + (W + 40 - W * 0.58) * progress;
+          const frame = Math.floor(cs.stepT * 4) % 4;
+          csDrawChar(friend, friendX, fY, 'right', charH, frame);
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "Yeah! \uD83D\uDE0E");
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* 12) Delivery */
+function csGenDelivery(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.40;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+  let friendX = W + 40;
+
+  return {
+    id: 'gen_delivery',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          const progress = Math.min(1, cs.stepT / 1.5);
+          friendX = W + 40 - (W + 40 - W * 0.62) * progress;
+          const frame = Math.floor(cs.stepT * 4) % 4;
+          csDrawChar(friend, friendX, fY, 'left', charH, frame);
+          csDrawChar('krystal', kx, fY, 'right', charH, 0);
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'carry', W * 0.62, fY, charH);
+          csDrawExpression('krystal', 'surprised', kx, fY, charH);
+          csDrawBubble(W * 0.62, fY - charH - 4, friendName, 'Special delivery for you! \uD83D\uDCE6');
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'give', W * 0.58, fY, charH);
+          csDrawExpression('krystal', 'surprised', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'For me?! What is it??');
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'laugh', W * 0.58, fY, charH);
+          csDrawExpression('krystal', 'cheer', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', "I love it!! Thank you!! \uD83D\uDC9B");
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 6);
+      }},
+    ]
+  };
+}
+
+/* 13) Sneaking Up */
+function csGenSneakingUp(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.40;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+
+  return {
+    id: 'gen_sneaking_up',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          const progress = Math.min(1, cs.stepT / 1.8);
+          const fx = W + 40 - (W + 40 - W * 0.62) * progress;
+          csDrawExpression(friend, 'sneak', fx, fY, charH);
+          csDrawExpression('krystal', 'think', kx, fY, charH);
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'sneak', W * 0.62, fY, charH);
+          csDrawExpression('krystal', 'look', kx, fY, charH);
+          if (cs.stepT > 0.8){
+            csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Huh? Is someone there...?');
+          }
+      }},
+      { dur: 1.2, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'cheer', W * 0.58, fY, charH);
+          csDrawExpression('krystal', 'startled', kx, fY, charH);
+          csDrawBubble(W * 0.58, fY - charH - 4, friendName, 'BOO! \uD83D\uDC7B');
+      }, onStart(cs){
+          try{ sfx('tap'); }catch(e){}
+      }},
+      { dur: 1.8, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'laugh', W * 0.58, fY, charH);
+          csDrawExpression('krystal', 'laugh', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'You got me!! \uD83D\uDE02');
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* 14) Nap Time */
+function csGenNapTime(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.42;
+  const friend = csPickCompanion();
+
+  return {
+    id: 'gen_nap_time',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'shrug', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', '*yaaawn* So sleepy...');
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'sit', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Just gonna rest my eyes...');
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'sleep', kx, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, null, 'z z z \uD83D\uDCA4');
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'sleep', kx, fY, charH);
+          const progress = Math.min(1, cs.stepT / 1.2);
+          const fx = W + 40 - (W + 40 - W * 0.58) * progress;
+          csDrawExpression(friend, 'sneak', fx, fY, charH);
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'sleep', kx, fY, charH);
+          csDrawExpression(friend, 'give', W * 0.55, fY, charH);
+          csDrawBubble(W * 0.55, fY - charH - 4, null, '*tucks blanket* \uD83E\uDDE1');
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 5);
+      }},
+    ]
+  };
+}
+
+/* 15) Trip and Catch */
+function csGenTripAndCatch(){
+  const charH = 80, fY = H * 0.72 + 10;
+  const kx = W * 0.42;
+  const friend = csPickCompanion();
+  const friendName = friend.charAt(0).toUpperCase() + friend.slice(1);
+
+  return {
+    id: 'gen_trip_and_catch',
+    chars: ['krystal', friend],
+    skipable: true,
+    steps: [
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          const frame = Math.floor(cs.stepT * 4) % 4;
+          csDrawChar('krystal', kx, fY, 'right', charH, frame);
+          csDrawChar(friend, W * 0.62, fY, 'left', charH, 0);
+      }},
+      { dur: 1.2, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'trip', kx, fY, charH);
+          csDrawExpression(friend, 'startled', W * 0.60, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'Whoa—!');
+      }},
+      { dur: 1.5, draw(cs){
+          csCurrentBg();
+          csDrawExpression(friend, 'pull', W * 0.55, fY, charH);
+          csDrawExpression('krystal', 'interact', kx, fY, charH);
+          csDrawBubble(W * 0.55, fY - charH - 4, friendName, 'Gotcha!');
+      }},
+      { dur: 2.0, draw(cs){
+          csCurrentBg();
+          csDrawExpression('krystal', 'embarrassed', kx, fY, charH);
+          csDrawExpression(friend, 'laugh', W * 0.58, fY, charH);
+          csDrawBubble(kx, fY - charH - 4, 'Krystal', 'That was so embarrassing... \uD83D\uDE33');
+      }, onStart(cs){
+          csHearts(cs, kx, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
 const GENERIC_CUTSCENES = [
   csGenThinkingOutLoud,
   csGenFriendlyWave,
@@ -7299,6 +7522,11 @@ const GENERIC_CUTSCENES = [
   csGenCloudPointing,
   csGenHummingTune,
   csGenStretching,
+  csGenHighFive,
+  csGenDelivery,
+  csGenSneakingUp,
+  csGenNapTime,
+  csGenTripAndCatch,
 ];
 
 /* ============================================================================
@@ -7354,6 +7582,11 @@ const CUTSCENE_CATALOG = [
   { id: 'gen_cloud_pointing',    name: 'Cloud Pointing',        description: 'That cloud looks like a cookie!',              scenes: ['any'],  chars: ['krystal','?'] },
   { id: 'gen_humming_tune',      name: 'Humming a Tune',        description: 'A song stuck in her head.',                    scenes: ['any'],  chars: ['krystal'] },
   { id: 'gen_stretching',        name: 'Stretching',            description: 'A big stretch before adventure.',              scenes: ['any'],  chars: ['krystal'] },
+  { id: 'gen_high_five',         name: 'High Five',             description: 'Up top!',                                      scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_delivery',          name: 'Delivery',              description: 'A surprise package arrives.',                   scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_sneaking_up',       name: 'Sneaking Up',           description: 'BOO! Got you!',                                scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_nap_time',          name: 'Nap Time',              description: 'Sweet dreams and a cozy blanket.',             scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'gen_trip_and_catch',    name: 'Trip and Catch',        description: 'Oops! Nice save though.',                      scenes: ['any'],  chars: ['krystal','?'] },
 ];
 
 /* ============================================================================
