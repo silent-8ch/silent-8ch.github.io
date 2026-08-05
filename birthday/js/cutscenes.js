@@ -555,12 +555,467 @@ function csStargazing(){
 }
 
 /* ============================================================================
+   CUTSCENE 3: BEACH SUNSET PICNIC  (triggers at 'beach' or 'moonbeach')
+   ============================================================================ */
+function csBeachSunsetPicnic(){
+  const groundY = H * 0.68;
+  const charH = 80;
+  const blanketX = W * 0.50, blanketY = groundY + 18;
+  const fY = blanketY + 4;
+
+  const krystal = { x: blanketX,       feetY: fY, name: 'krystal' };
+  const paul    = { x: blanketX - 52,  feetY: fY, name: 'paul' };
+  const wade    = { x: blanketX + 56,  feetY: fY + 6, name: 'wade' };
+
+  // sun position — sinks slowly over the cutscene
+  function sunY(cs){ return H * 0.22 + cs.totalT * 1.8; }
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    const sy = sunY(cs);
+    // warm sunset sky
+    const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+    sky.addColorStop(0, '#1b2a5c');
+    sky.addColorStop(0.35, '#d45b3e');
+    sky.addColorStop(0.65, '#f0944e');
+    sky.addColorStop(1, '#fcd07a');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, groundY);
+
+    // sun
+    const sunGlow = ctx.createRadialGradient(W * 0.72, sy, 4, W * 0.72, sy, 52);
+    sunGlow.addColorStop(0, 'rgba(255,220,100,.9)');
+    sunGlow.addColorStop(0.5, 'rgba(255,160,60,.35)');
+    sunGlow.addColorStop(1, 'rgba(255,100,40,0)');
+    ctx.fillStyle = sunGlow; ctx.beginPath(); ctx.arc(W * 0.72, sy, 52, 0, 7); ctx.fill();
+    ctx.fillStyle = '#ffe480'; ctx.beginPath(); ctx.arc(W * 0.72, sy, 16, 0, 7); ctx.fill();
+
+    // ocean — horizon line with gentle shimmer
+    const ocean = ctx.createLinearGradient(0, groundY - 30, 0, groundY);
+    ocean.addColorStop(0, '#3a6090'); ocean.addColorStop(1, '#4a80a8');
+    ctx.fillStyle = ocean; ctx.fillRect(0, groundY - 30, W, 30);
+    // sun reflection on water
+    ctx.fillStyle = 'rgba(255,200,80,.18)';
+    ctx.fillRect(W * 0.55, groundY - 28, W * 0.34, 26);
+    // gentle wave lines
+    ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++){
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 8){
+        ctx.lineTo(x, groundY - 26 + i * 7 + Math.sin(t * 1.8 + x * 0.05 + i) * 2);
+      }
+      ctx.stroke();
+    }
+
+    // sandy beach
+    const sand = ctx.createLinearGradient(0, groundY, 0, H);
+    sand.addColorStop(0, '#e8d5a0'); sand.addColorStop(1, '#d4bf82');
+    ctx.fillStyle = sand; ctx.fillRect(0, groundY, W, H - groundY);
+
+    // picnic blanket
+    ctx.fillStyle = '#c44455';
+    roundRect(blanketX - 60, blanketY - 4, 120, 16, 4); ctx.fill();
+    ctx.fillStyle = '#d55566';
+    roundRect(blanketX - 56, blanketY - 2, 112, 12, 3); ctx.fill();
+    // blanket check pattern
+    ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++){
+      const lx = blanketX - 48 + i * 24;
+      ctx.beginPath(); ctx.moveTo(lx, blanketY - 2); ctx.lineTo(lx, blanketY + 10); ctx.stroke();
+    }
+
+    // a little picnic basket to the left
+    ctx.fillStyle = '#8b6933';
+    roundRect(blanketX - 72, blanketY - 2, 14, 10, 2); ctx.fill();
+    ctx.strokeStyle = '#6b4f23'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(blanketX - 65, blanketY - 4, 7, Math.PI, 0); ctx.stroke();
+  }
+
+  function drawChars(){
+    csDrawChar('paul',    paul.x,    paul.feetY,    'right', charH, 0);
+    csDrawChar('krystal', krystal.x, krystal.feetY, 'down',  charH, 0);
+    csDrawChar('wade',    wade.x,    wade.feetY,    'left',  charH * 0.95, 0);
+  }
+
+  return {
+    chars: ['krystal', 'paul', 'wade'],
+    skipable: true,
+    steps: [
+      // Step 1: Quiet scene — golden hour, everyone on the blanket
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars();
+          csDrawBubble(krystal.x, krystal.feetY - charH - 4, 'Krystal', "This sunset is so pretty...");
+      }},
+      // Step 2: Wade breaks the peace
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars();
+          csDrawBubble(wade.x, wade.feetY - charH * 0.95 - 4, 'Wade', 'Know what else is pretty? This sandwich.');
+      }},
+      // Step 3: Everyone laughs
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars();
+          csDrawBubble(paul.x, paul.feetY - charH - 4, 'Paul', 'Wade, you are unbelievable 😂');
+      }},
+      // Step 4: Krystal leans on Paul — cozy moment
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          // draw Krystal slightly closer to Paul to suggest leaning
+          csDrawChar('paul',    paul.x,          paul.feetY,    'right', charH, 0);
+          csDrawChar('krystal', krystal.x - 18,  krystal.feetY, 'left',  charH, 0);
+          csDrawChar('wade',    wade.x,          wade.feetY,    'left',  charH * 0.95, 0);
+          csDrawBubble(krystal.x - 18, krystal.feetY - charH - 4, 'Krystal', "I could stay here forever 🥰");
+      }, onStart(cs){
+          csHearts(cs, paul.x, paul.feetY - charH * 0.7, 4);
+          csHearts(cs, krystal.x - 18, krystal.feetY - charH * 0.7, 5);
+      }},
+      // Step 5: Warm closing — hearts float, sun dips lower
+      { dur: 2.0, draw(cs){
+          drawBg(cs);
+          csDrawChar('paul',    paul.x,          paul.feetY,    'right', charH, 0);
+          csDrawChar('krystal', krystal.x - 18,  krystal.feetY, 'left',  charH, 0);
+          csDrawChar('wade',    wade.x,          wade.feetY,    'left',  charH * 0.95, 0);
+          csDrawBubble(wade.x, wade.feetY - charH * 0.95 - 4, 'Wade', "...okay yeah, this is nice too.");
+      }, onStart(cs){
+          csHearts(cs, wade.x, wade.feetY - charH * 0.6, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 4: BAKERY MISHAP  (triggers at 'bakery' or 'gingerbreadkitchen')
+   ============================================================================ */
+function csBakeryMishap(){
+  const groundY = H * 0.72;
+  const charH = 80;
+  const counterY = groundY - 8;
+  const krystalX = W * 0.38, lunaX = W * 0.62;
+
+  // flour explosion particles
+  let flourParticles = [];
+
+  function spawnFlour(cx, cy, n){
+    for (let i = 0; i < n; i++){
+      const ang = Math.random() * Math.PI * 2;
+      const spd = 30 + Math.random() * 80;
+      flourParticles.push({
+        x: cx + rand(-14, 14), y: cy + rand(-10, 10),
+        vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd - 20,
+        r: 1.5 + Math.random() * 3,
+        life: 1.2 + Math.random() * 1.5,
+        maxLife: 1.2 + Math.random() * 1.5,
+      });
+    }
+  }
+
+  function drawBg(cs){
+    // warm bakery interior
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#f5e6d0'); wall.addColorStop(1, '#e8d4b8');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // tile floor
+    ctx.fillStyle = '#c8a882'; ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 24){
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = groundY; y < H; y += 24){
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    // counter / table
+    ctx.fillStyle = '#a67c52';
+    roundRect(W * 0.22, counterY, W * 0.56, 14, 3); ctx.fill();
+    ctx.fillStyle = '#c49a6c';
+    roundRect(W * 0.24, counterY + 2, W * 0.52, 10, 2); ctx.fill();
+
+    // mixing bowl on counter
+    ctx.fillStyle = '#ddd';
+    ctx.beginPath(); ctx.arc(W * 0.50, counterY - 2, 12, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#f0ece0';
+    ctx.beginPath(); ctx.arc(W * 0.50, counterY - 2, 9, Math.PI, 0); ctx.fill();
+
+    // little shelf with jars on the wall
+    ctx.fillStyle = '#a67c52'; ctx.fillRect(W * 0.08, H * 0.18, W * 0.26, 4);
+    ctx.fillStyle = '#e8c87a';
+    for (let i = 0; i < 3; i++){
+      const jx = W * 0.12 + i * 18;
+      roundRect(jx, H * 0.08, 10, 22, 2); ctx.fill();
+    }
+
+    // warm glow from the oven area (right wall)
+    const ovenGlow = ctx.createRadialGradient(W * 0.88, groundY - 20, 4, W * 0.88, groundY - 20, 50);
+    ovenGlow.addColorStop(0, 'rgba(255,160,60,.2)'); ovenGlow.addColorStop(1, 'rgba(255,160,60,0)');
+    ctx.fillStyle = ovenGlow; ctx.beginPath(); ctx.arc(W * 0.88, groundY - 20, 50, 0, 7); ctx.fill();
+  }
+
+  function drawFlour(cs, dt){
+    for (let i = flourParticles.length - 1; i >= 0; i--){
+      const p = flourParticles[i];
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vy += 40 * dt; // gravity
+      p.life -= dt;
+      if (p.life <= 0){ flourParticles.splice(i, 1); continue; }
+      const a = Math.min(1, p.life / p.maxLife * 1.5);
+      ctx.fillStyle = `rgba(255,250,240,${a.toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill();
+    }
+  }
+
+  function drawChars(covered){
+    csDrawChar('krystal', krystalX, counterY + charH * 0.15, 'right', charH, 0);
+    csDrawChar('luna',    lunaX,    counterY + charH * 0.15, 'left',  charH * 0.9, 0);
+    // if covered in flour, overlay a translucent white layer on the characters
+    if (covered){
+      ctx.fillStyle = 'rgba(255,250,240,.28)';
+      ctx.fillRect(krystalX - 22, counterY + charH * 0.15 - charH, 44, charH);
+      ctx.fillRect(lunaX - 20, counterY + charH * 0.15 - charH * 0.9, 40, charH * 0.9);
+    }
+  }
+
+  return {
+    chars: ['krystal', 'luna'],
+    skipable: true,
+    steps: [
+      // Step 1: Setting the scene — mixing batter
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(false);
+          csDrawBubble(krystalX, counterY + charH * 0.15 - charH - 4, 'Krystal', "Okay, just a little more flour...");
+      }},
+      // Step 2: Luna goes for it
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars(false);
+          csDrawBubble(lunaX, counterY + charH * 0.15 - charH * 0.9 - 4, 'Luna', "I got it! Stand back!");
+      }},
+      // Step 3: BOOM — flour explosion!
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(true); drawFlour(cs, 0);
+          // white flash on explosion start
+          if (cs.stepT < 0.3){
+            const flash = Math.max(0, 1 - cs.stepT / 0.3);
+            ctx.fillStyle = `rgba(255,250,240,${(flash * 0.6).toFixed(2)})`;
+            ctx.fillRect(0, 0, W, H);
+          }
+      }, onStart(cs){
+          spawnFlour(W * 0.50, counterY - 10, 60);
+          try{ sfx('tap'); }catch(e){}
+      }, update(cs, dt){
+          drawFlour(cs, dt);
+      }},
+      // Step 4: Aftermath — both covered, laughing
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(true); drawFlour(cs, 0);
+          csDrawBubble(lunaX, counterY + charH * 0.15 - charH * 0.9 - 4, 'Luna', "Nailed it!");
+      }, update(cs, dt){
+          drawFlour(cs, dt);
+      }},
+      // Step 5: Krystal's reaction — hearts
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawChars(true); drawFlour(cs, 0);
+          csDrawBubble(krystalX, counterY + charH * 0.15 - charH - 4, 'Krystal', "We're a mess! \ud83d\ude02");
+      }, onStart(cs){
+          csHearts(cs, krystalX, counterY - charH * 0.5, 4);
+          csHearts(cs, lunaX, counterY - charH * 0.4, 4);
+      }, update(cs, dt){
+          drawFlour(cs, dt);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
+   CUTSCENE 5: LIBRARY GHOST  (triggers at 'library' or 'arcanelibrary')
+   ============================================================================ */
+function csLibraryGhost(){
+  const groundY = H * 0.74;
+  const charH = 80;
+  const fY = groundY + 10;
+  const krystalX = W * 0.42, williamX = W * 0.62;
+
+  // ghost orb state
+  let ghostOrb = null;
+  // falling book state
+  let fallingBook = null;
+
+  function drawBg(cs){
+    const t = cs.totalT;
+    // dim library interior
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#2a2438'); wall.addColorStop(1, '#3a3248');
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, groundY);
+
+    // wooden floor
+    const floor = ctx.createLinearGradient(0, groundY, 0, H);
+    floor.addColorStop(0, '#4a3c2e'); floor.addColorStop(1, '#3a2e22');
+    ctx.fillStyle = floor; ctx.fillRect(0, groundY, W, H - groundY);
+    // floor planks
+    ctx.strokeStyle = 'rgba(0,0,0,.1)'; ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 30){
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // tall bookshelves on left
+    ctx.fillStyle = '#3e2e1e';
+    ctx.fillRect(4, H * 0.06, 50, groundY - H * 0.06);
+    // book rows
+    const bookCols = ['#8b3a3a','#2e5a3e','#3a4a7a','#8a6a2a','#5a3a6a','#6a4a2a','#3a5a5a'];
+    for (let row = 0; row < 6; row++){
+      const ry = H * 0.10 + row * 28;
+      // shelf plank
+      ctx.fillStyle = '#5a4430'; ctx.fillRect(6, ry + 20, 46, 3);
+      for (let b = 0; b < 5; b++){
+        const bx = 8 + b * 9;
+        const bh = 14 + ((row * 7 + b * 3) % 6);
+        ctx.fillStyle = bookCols[(row * 5 + b) % bookCols.length];
+        ctx.fillRect(bx, ry + 20 - bh, 7, bh);
+      }
+    }
+
+    // tall bookshelf on right
+    ctx.fillStyle = '#3e2e1e';
+    ctx.fillRect(W - 54, H * 0.06, 50, groundY - H * 0.06);
+    for (let row = 0; row < 6; row++){
+      const ry = H * 0.10 + row * 28;
+      ctx.fillStyle = '#5a4430'; ctx.fillRect(W - 52, ry + 20, 46, 3);
+      for (let b = 0; b < 5; b++){
+        const bx = W - 50 + b * 9;
+        const bh = 14 + ((row * 5 + b * 7) % 6);
+        ctx.fillStyle = bookCols[(row * 3 + b * 2 + 1) % bookCols.length];
+        ctx.fillRect(bx, ry + 20 - bh, 7, bh);
+      }
+    }
+
+    // dim candle glow in the center
+    const candleGlow = ctx.createRadialGradient(W * 0.5, groundY - 30, 2, W * 0.5, groundY - 30, 70);
+    candleGlow.addColorStop(0, 'rgba(255,200,120,.18)');
+    candleGlow.addColorStop(1, 'rgba(255,200,120,0)');
+    ctx.fillStyle = candleGlow; ctx.beginPath(); ctx.arc(W * 0.5, groundY - 30, 70, 0, 7); ctx.fill();
+
+    // candle on a small table
+    ctx.fillStyle = '#5a4430'; roundRect(W * 0.47, groundY - 6, 24, 8, 2); ctx.fill();
+    ctx.fillStyle = '#eee'; ctx.fillRect(W * 0.50 + 4, groundY - 18, 4, 12);
+    // flame
+    const flicker = 0.7 + 0.3 * Math.sin(t * 9);
+    ctx.fillStyle = '#ffa830';
+    ctx.beginPath(); ctx.arc(W * 0.50 + 6, groundY - 19 - 3 * flicker, 2.5, 0, 7); ctx.fill();
+    ctx.fillStyle = '#ffe070';
+    ctx.beginPath(); ctx.arc(W * 0.50 + 6, groundY - 19 - 3 * flicker, 1.2, 0, 7); ctx.fill();
+
+    // dust motes floating
+    ctx.fillStyle = 'rgba(255,240,200,.12)';
+    for (let i = 0; i < 8; i++){
+      const mx = (i * 53 + Math.sin(t * 0.4 + i * 2) * 20) % W;
+      const my = (i * 41 + Math.cos(t * 0.3 + i) * 16) % (groundY * 0.8) + 20;
+      ctx.beginPath(); ctx.arc(mx, my, 1, 0, 7); ctx.fill();
+    }
+  }
+
+  function drawFallingBook(cs){
+    if (!fallingBook) return;
+    const fb = fallingBook;
+    const elapsed = cs.totalT - fb.start;
+    if (elapsed < 0 || elapsed > fb.dur) return;
+    const p = elapsed / fb.dur;
+    const bx = fb.x;
+    const by = fb.startY + p * (groundY - fb.startY - 6);
+    const rot = p * 2.5;
+    ctx.save();
+    ctx.translate(bx, by); ctx.rotate(rot);
+    ctx.fillStyle = '#8b3a3a'; ctx.fillRect(-5, -3, 10, 6);
+    ctx.fillStyle = '#eee'; ctx.fillRect(-4, -2, 8, 4);
+    ctx.restore();
+    // landed
+    if (p > 0.9){
+      ctx.fillStyle = '#8b3a3a'; ctx.fillRect(fb.x - 5, groundY - 4, 10, 4);
+    }
+  }
+
+  function drawGhostOrb(cs){
+    if (!ghostOrb) return;
+    const elapsed = cs.totalT - ghostOrb.start;
+    if (elapsed < 0 || elapsed > ghostOrb.dur) return;
+    const p = elapsed / ghostOrb.dur;
+    // orb drifts from right shelf to left shelf
+    const ox = W * 0.75 - p * W * 0.50;
+    const oy = H * 0.30 + Math.sin(p * Math.PI * 3) * 18;
+    const brightness = Math.sin(p * Math.PI);
+    const glow = ctx.createRadialGradient(ox, oy, 1, ox, oy, 20 + brightness * 10);
+    glow.addColorStop(0, `rgba(180,220,255,${(0.5 * brightness).toFixed(2)})`);
+    glow.addColorStop(0.5, `rgba(140,180,255,${(0.2 * brightness).toFixed(2)})`);
+    glow.addColorStop(1, 'rgba(140,180,255,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(ox, oy, 20 + brightness * 10, 0, 7); ctx.fill();
+    ctx.fillStyle = `rgba(220,240,255,${(0.7 * brightness).toFixed(2)})`;
+    ctx.beginPath(); ctx.arc(ox, oy, 3, 0, 7); ctx.fill();
+  }
+
+  function drawChars(williamHiding){
+    if (williamHiding){
+      // William behind Krystal — draw him slightly behind and peeking
+      csDrawChar('william', krystalX + 16, fY + 2, 'left', charH * 0.85, 0);
+      csDrawChar('krystal', krystalX, fY, 'up', charH, 0);
+    } else {
+      csDrawChar('krystal', krystalX, fY, 'right', charH, 0);
+      csDrawChar('william', williamX, fY, 'left',  charH * 0.95, 0);
+    }
+  }
+
+  return {
+    chars: ['krystal', 'william'],
+    skipable: true,
+    steps: [
+      // Step 1: Quiet library — peaceful moment
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawChars(false);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It's so quiet in here...");
+      }},
+      // Step 2: A book falls off the shelf!
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawFallingBook(cs); drawChars(false);
+          if (cs.stepT > 0.5){
+            csDrawBubble(williamX, fY - charH * 0.95 - 4, 'William', "What was THAT?!");
+          }
+      }, onStart(cs){
+          fallingBook = { x: W - 36, startY: H * 0.20, dur: 0.5, start: cs.totalT };
+          try{ sfx('tap'); }catch(e){}
+      }},
+      // Step 3: Krystal reacts
+      { dur: 2.0, draw(cs){
+          drawBg(cs); drawFallingBook(cs); drawChars(false);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "Did you see that?!");
+      }},
+      // Step 4: Ghost orb drifts across — William hides behind Krystal
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawGhostOrb(cs); drawFallingBook(cs); drawChars(true);
+          if (cs.stepT > 0.8){
+            csDrawBubble(krystalX + 16, fY - charH * 0.85 - 4, 'William', "I'm not scared... you're scared!");
+          }
+      }, onStart(cs){
+          ghostOrb = { start: cs.totalT, dur: 2.2 };
+      }},
+      // Step 5: Krystal laughs it off
+      { dur: 2.5, draw(cs){
+          drawBg(cs); drawGhostOrb(cs); drawFallingBook(cs); drawChars(true);
+          csDrawBubble(krystalX, fY - charH - 4, 'Krystal', "It's just the wind... right? \ud83d\udc40");
+      }, onStart(cs){
+          csHearts(cs, krystalX, fY - charH * 0.7, 3);
+      }},
+    ]
+  };
+}
+
+/* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
    ============================================================================ */
 const CUTSCENE_MAP = {
-  campsite:     [csCampfireStory],
-  starrymeadow: [csStargazing],
-  observatory:  [csStargazing],
+  campsite:          [csCampfireStory],
+  starrymeadow:      [csStargazing],
+  observatory:       [csStargazing],
+  beach:             [csBeachSunsetPicnic],
+  moonbeach:         [csBeachSunsetPicnic],
+  bakery:            [csBakeryMishap],
+  gingerbreadkitchen:[csBakeryMishap],
+  library:           [csLibraryGhost],
+  arcanelibrary:     [csLibraryGhost],
 };
 
 /* ============================================================================
