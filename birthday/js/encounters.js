@@ -1099,3 +1099,227 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   BUNNY. On meadow/grassy/garden scenes a little rabbit hops across the ground,
+   pausing to twitch its nose. Tap it before it bounds away for a soft, sweet moment.
+   -------------------------------------------------------------------------- */
+(function encBunny(){
+  try{
+    const GRASSY = new Set(['backyard','pasture','alpinemeadow','starrymeadow','kitehill','lavender',
+      'poppyfield','tulipfield','sunflowers','sunflowermaze','clover','orchard','vineyard','topiary',
+      'hedgemaze','cherryblossom','peonygarden','hummingbirdgarden','campsite','nursery','mossgarden']);
+    let bun = null, timer = 20 + Math.random()*38;
+    function canHere(){ try{ return GRASSY.has(SCENES[currentScene]) && !isNight(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (bun){
+          bun.t += dt;
+          if (bun.pause > 0){ bun.pause -= dt; bun.hop = 0; }
+          else {
+            bun.x += bun.vx*dt;
+            bun.hop = Math.abs(Math.sin(bun.t*6))*16;   // big springy hops
+            if (Math.random() < 0.4*dt) bun.pause = rand(0.7, 1.6);  // stop to sniff
+          }
+          if (bun.x < -20 || bun.x > W+20) bun = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*48;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            bun = { x: dir>0 ? -14 : W+14, groundY: H*0.8, hop:0, pause:0,
+                    vx: dir*rand(24,36), dir, t:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!bun) return;
+      try{
+        const x = bun.x, y = bun.groundY - bun.hop, d = bun.dir;
+        ctx.save();
+        ctx.fillStyle = '#e6ddd2';
+        // body
+        ctx.beginPath(); ctx.ellipse(x, y, 8, 6, 0, 0, 7); ctx.fill();
+        // head
+        ctx.beginPath(); ctx.arc(x + d*7, y - 4, 4.5, 0, 7); ctx.fill();
+        // ears
+        ctx.beginPath(); ctx.ellipse(x + d*6, y - 12, 2, 6, -d*0.2, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x + d*9, y - 12, 2, 6, d*0.2, 0, 7); ctx.fill();
+        // tail
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(x - d*8, y + 1, 3, 0, 7); ctx.fill();
+        // eye
+        ctx.fillStyle = '#2a1c14';
+        ctx.beginPath(); ctx.arc(x + d*8, y - 5, 1, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!bun) return false;
+      const cx = bun.x, cy = bun.groundY - bun.hop;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 28*28) return false;
+      say(pick(['A bunny! 🐰 look at that twitchy little nose — melting 🥰',
+                'So soft and shy 🐰 come here, sweet thing',
+                'Hop hop hop 🐇 she\'s as cute as you, and that\'s saying a lot',
+                'A wild rabbit trusted us 🐰 lucky, lucky day 💗']));
+      fxAt(cx, cy-10, '🐰'); hearts(); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 3); refreshHUD();
+      bun = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   FROG. On pond/lily scenes a frog sits on a lily pad, then springs across with
+   a plop. Tap it for a cheerful ribbit and a lucky little wish.
+   -------------------------------------------------------------------------- */
+(function encFrog(){
+  try{
+    const PONDY = new Set(['koipond','lotuspond','duckpond','waterlily','river','bayou','zengarden',
+      'watermill','riceterraces','mossgarden','bamboo','bambootearoom','willowispmarsh','fairyring',
+      'greenhouse','tidepools','cranberrybog']);
+    let frog = null, timer = 22 + Math.random()*40;
+    function canHere(){ try{ return PONDY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (frog){
+          frog.t += dt;
+          if (frog.wait > 0){ frog.wait -= dt; frog.hop = 0; }
+          else {
+            frog.x += frog.vx*dt;
+            frog.hop = Math.sin(Math.min(Math.PI, frog.leap*Math.PI))*22;
+            frog.leap += dt*1.4;
+            if (frog.leap >= 1){ frog.leap = 0; frog.wait = rand(1.0, 2.2); }  // land, rest
+          }
+          if (frog.x < -20 || frog.x > W+20) frog = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*50;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            frog = { x: dir>0 ? -14 : W+14, groundY: H*0.78, hop:0, wait: rand(0.4,1.0),
+                     leap:0, vx: dir*rand(20,30), dir, t:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!frog) return;
+      try{
+        const x = frog.x, y = frog.groundY - frog.hop, d = frog.dir;
+        ctx.save();
+        // lily pad shadow when resting
+        if (frog.hop < 2){
+          ctx.fillStyle = 'rgba(60,120,70,0.5)';
+          ctx.beginPath(); ctx.ellipse(x, frog.groundY + 5, 13, 4, 0, 0, 7); ctx.fill();
+        }
+        ctx.fillStyle = '#5fae4e';
+        // body
+        ctx.beginPath(); ctx.ellipse(x, y, 8, 6, 0, 0, 7); ctx.fill();
+        // eyes on top
+        ctx.beginPath(); ctx.arc(x - d*3, y - 6, 2.4, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + d*3, y - 6, 2.4, 0, 7); ctx.fill();
+        ctx.fillStyle = '#20130a';
+        ctx.beginPath(); ctx.arc(x - d*3, y - 6, 1, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + d*3, y - 6, 1, 0, 7); ctx.fill();
+        // back legs
+        ctx.strokeStyle = '#4a9640'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x - d*6, y+3); ctx.lineTo(x - d*10, y+5); ctx.stroke();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!frog) return false;
+      const cx = frog.x, cy = frog.groundY - frog.hop;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 28*28) return false;
+      say(pick(['Ribbit! 🐸 a frog on a lily pad — kiss it and see? 😘',
+                'Plop! 🐸 he\'s showing off his jumps for you',
+                'A little green friend 🐸 they say it means happy rain and luck',
+                'Silly hoppy thing 🐸 you\'d name him in two seconds, I know you 🥰']));
+      fxAt(cx, cy-10, '🐸'); burstAt('💚', cx, cy); if (typeof sfx==='function') sfx('find');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); refreshHUD();
+      frog = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   COMET. On space/observatory/night scenes a comet drifts slowly across the sky,
+   trailing a long glowing tail. Tap it to make a big, once-in-a-lifetime wish.
+   -------------------------------------------------------------------------- */
+(function encComet(){
+  try{
+    const SPACEY = new Set(['observatory','planetarium','planetlab','aurora','moontemple','starrymeadow',
+      'nightgarden','rooftop','rooftoppool','moonlitjetty','moonbeach','harbornight','skygondola',
+      'wizardtower','runecircle','arcanelibrary','mountain','alpinemeadow','campsite']);
+    let com = null, timer = 34 + Math.random()*54;
+    function nightish(){ try{ return typeof isNight==='function' ? isNight() : (currentHour() >= 19 || currentHour() < 6); }catch(e){ return true; } }
+    function canHere(){ try{ const s = SCENES[currentScene]; if (!SPACEY.has(s)) return false;
+      // always-dark scenes read fine by day; outdoor ones need night
+      const alwaysDark = (s==='observatory'||s==='planetarium'||s==='planetlab'||s==='aurora'||
+        s==='wizardtower'||s==='runecircle'||s==='arcanelibrary'||s==='moontemple');
+      return alwaysDark || nightish(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (com){
+          com.t += dt; com.x += com.vx*dt; com.y += com.vy*dt;
+          com.glow = 0.7 + 0.3*Math.sin(com.t*4);
+          if (com.x < -60 || com.x > W+60) com = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 46 + Math.random()*66;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            const sy = H*(0.1+Math.random()*0.14);
+            com = { x: dir>0 ? -34 : W+34, y: sy, vx: dir*rand(26,40), vy: rand(4,10),
+                    dir, t:0, glow:1, len: rand(40,60) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!com) return;
+      try{
+        const x = com.x, y = com.y, d = com.dir, g = com.glow;
+        const tx = x - d*com.len, ty = y - com.len*0.18;
+        ctx.save();
+        const grad = ctx.createLinearGradient(x, y, tx, ty);
+        grad.addColorStop(0, 'rgba(180,220,255,'+(0.85*g)+')');
+        grad.addColorStop(1, 'rgba(180,220,255,0)');
+        ctx.strokeStyle = grad; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(tx, ty); ctx.stroke();
+        // glowing head
+        ctx.globalAlpha = 0.3*g; ctx.fillStyle = '#dff0ff';
+        ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.fill();
+        ctx.globalAlpha = 1; ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!com) return false;
+      const cx = com.x, cy = com.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 32*32) return false;
+      say(pick(['A comet! ☄️ it won\'t pass again for ages — wish big, my love',
+                'Once in a lifetime, and we caught it together ☄️💫',
+                'Whole galaxies out there, and I only want this — you 💗',
+                'Make the biggest wish you\'ve got ☄️ I\'ll spend my life helping it come true']));
+      fxAt(cx, cy-10, '☄️'); hearts(); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 3); refreshHUD();
+      com = null;
+      return true;
+    });
+  }catch(e){}
+})();

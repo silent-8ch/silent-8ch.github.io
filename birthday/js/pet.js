@@ -906,6 +906,66 @@ const SCENE_SPOTS = {
     {nx:0.50, ny:0.58, r:54, e:'🧵', lines:['The big floor loom 🧵','Clack, clack, clack','The shuttle flies across']},
     {nx:0.19, ny:0.90, r:44, e:'🧺', lines:['A basket of yarn balls 🧺','So round and cozy','The cat would love these 🐱']},
   ],
+  frozenfalls: [
+    {nx:0.50, ny:0.42, r:60, e:'🧊', lines:['A frozen waterfall! 🧊','Caught mid-tumble','Time just stopped it 🥰']},
+    {nx:0.35, ny:0.12, r:48, e:'❄️', lines:['Icicles on the ledge ❄️','Sharp and glittering','Don\'t stand under them!']},
+    {nx:0.55, ny:0.88, r:54, e:'⛸️', lines:['The frozen pool ⛸️','Cracked and glassy','Would it hold us?']},
+    {nx:0.12, ny:0.82, r:46, e:'🌲', lines:['Snow-laden pines 🌲','Bowed under the white','So hushed out here 💛']},
+  ],
+  fencing: [
+    {nx:0.23, ny:0.25, r:52, e:'🪟', lines:['Tall arched windows 🪟','Grand and echoey','Such a stately hall 🥰']},
+    {nx:0.08, ny:0.30, r:46, e:'⚔️', lines:['A rack of foils ⚔️','All lined up neat','On guard, my love!']},
+    {nx:0.50, ny:0.75, r:56, e:'🤺', lines:['Two fencers! 🤺','Lunge and parry','So quick and graceful']},
+    {nx:0.50, ny:0.52, r:44, e:'🚦', lines:['The scoring box 🚦','Green light — a touch!','Did I win that one? 😄']},
+  ],
+  geyser: [
+    {nx:0.50, ny:0.42, r:58, e:'💦', lines:['The geyser erupts! 💦','Whoosh — up it goes!','Right on schedule 🥰']},
+    {nx:0.20, ny:0.68, r:52, e:'🌈', lines:['A rainbow hot spring 🌈','Those colors are real!','Nature painted this 💛']},
+    {nx:0.80, ny:0.72, r:48, e:'♨️', lines:['A steaming pool ♨️','So warm and misty','Careful, it\'s scalding']},
+    {nx:0.50, ny:0.92, r:48, e:'🪵', lines:['The boardwalk 🪵','Stay on the path!','Hold my hand across']},
+  ],
+  ballroom: [
+    {nx:0.50, ny:0.10, r:54, e:'✨', lines:['The grand chandelier ✨','Dripping with light','So dazzling above us 🥰']},
+    {nx:0.16, ny:0.30, r:48, e:'🪟', lines:['Golden draped windows 🪟','So tall and regal','Fit for a palace 💛']},
+    {nx:0.35, ny:0.72, r:56, e:'💃', lines:['Waltzing couples 💃','Spinning so gracefully','Dance with me? 🥰']},
+    {nx:0.92, ny:0.72, r:44, e:'🎻', lines:['A cello in the corner 🎻','The orchestra plays','Our song, my love']},
+  ],
+  volcano: [
+    {nx:0.50, ny:0.28, r:56, e:'🌋', lines:['The glowing crater! 🌋','So fierce and bright','Awesome and a little scary 🥰']},
+    {nx:0.50, ny:0.12, r:48, e:'💨', lines:['A towering ash plume 💨','Billowing to the stars','You can feel the power']},
+    {nx:0.42, ny:0.50, r:50, e:'🔥', lines:['Lava running down 🔥','Glowing rivers of fire','So mesmerizing']},
+    {nx:0.55, ny:0.76, r:48, e:'🟠', lines:['A molten pool 🟠','Bubbling orange-hot','Stay back with me, love 💛']},
+  ],
+  fireworks: [
+    {nx:0.54, ny:0.20, r:56, e:'🎆', lines:['Fireworks! 🎆','Oooh, look at that one!','So many colors 🥰']},
+    {nx:0.26, ny:0.26, r:50, e:'🎇', lines:['Another burst! 🎇','Boom — I felt it!','My favorite part 💛']},
+    {nx:0.80, ny:0.62, r:48, e:'🏙️', lines:['The city skyline 🏙️','Twinkling across the water','Such a perfect night']},
+    {nx:0.48, ny:0.90, r:48, e:'💑', lines:['Us on the dock 💑','Watching together','I never want to leave 🥰']},
+  ],
+  chesshall: [
+    {nx:0.75, ny:0.10, r:50, e:'🏆', lines:['A shelf of trophies 🏆','So many champions','Someday you and me?']},
+    {nx:0.50, ny:0.14, r:44, e:'💡', lines:['A green banker\'s lamp 💡','Casting a warm pool','So studious and cozy 🥰']},
+    {nx:0.50, ny:0.60, r:54, e:'♟️', lines:['A game mid-play ♟️','Whose move is it?','I think you\'ve got me 😄']},
+    {nx:0.64, ny:0.62, r:42, e:'⏱️', lines:['The chess clock ⏱️','Tick tock — hurry!','No pressure, love 💛']},
+  ],
+  coralreef: [
+    {nx:0.45, ny:0.18, r:52, e:'☀️', lines:['Sunbeams from above ☀️','Dancing through the water','So bright and warm 🥰']},
+    {nx:0.15, ny:0.80, r:54, e:'🪸', lines:['Colorful coral! 🪸','Every shape and hue','A whole little city 💛']},
+    {nx:0.60, ny:0.40, r:56, e:'🐠', lines:['A school of fish! 🐠','Swishing all together','So many colors 🥰']},
+    {nx:0.50, ny:0.55, r:44, e:'🫧', lines:['Rising bubbles 🫧','Wobbling to the top','Pop, pop, pop']},
+  ],
+  boxinggym: [
+    {nx:0.30, ny:0.20, r:50, e:'🏆', lines:['Championship banners 🏆','Hung up so proud','This place has history']},
+    {nx:0.70, ny:0.72, r:56, e:'🥊', lines:['The boxing ring 🥊','Ropes and canvas','Ding ding — round one!']},
+    {nx:0.20, ny:0.45, r:52, e:'🥊', lines:['The heavy bag 🥊','Swinging back and forth','Give it a whack! 🥰']},
+    {nx:0.14, ny:0.46, r:42, e:'🧤', lines:['Red gloves on a peg 🧤','Worn and ready','Wanna spar with me? 😄']},
+  ],
+  biobay: [
+    {nx:0.80, ny:0.14, r:48, e:'🌙', lines:['A slender crescent moon 🌙','So low and bright','Just for us tonight 🥰']},
+    {nx:0.50, ny:0.58, r:58, e:'🌊', lines:['The waves are glowing! 🌊','Blue-green light in the sea','I can\'t believe it\'s real 💛']},
+    {nx:0.40, ny:0.74, r:50, e:'✨', lines:['Glowing plankton ✨','Sparkling in the shallows','Like fallen stars']},
+    {nx:0.30, ny:0.82, r:46, e:'👣', lines:['Glowing footprints 👣','Left in the wet sand','Let\'s make some of our own 🥰']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){

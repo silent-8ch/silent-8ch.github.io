@@ -4266,3 +4266,234 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 26). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   61) HAMMER THE FORGE  —  at the blacksmith's an anvil holds a glowing bar. Tap
+   it to bring the hammer down: sparks fly, the metal glows, and every few strikes
+   a finished piece rings out. Scene-gated; off to the side.
+   -------------------------------------------------------------------------- */
+(function fxForge(){
+  try{
+    const AT = new Set(['forge','blacksmith','smithy','blacksmithforge']);
+    let fg = null;                       // {x,y,hammer,heat,cd,strikes,sparks:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ fg = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.72, H*0.78), hammer:0, heat:0.3, cd:0, strikes:0, sparks:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ fg = null; return; }
+      if (!fg) build();
+      if (fg.cd > 0) fg.cd -= dt;
+      if (fg.hammer > 0) fg.hammer -= dt;
+      fg.heat = Math.max(0.3, fg.heat - dt*0.7);
+      for (let i=fg.sparks.length-1;i>=0;i--){
+        const s = fg.sparks[i];
+        s.t += dt; s.x += s.vx*dt; s.y += s.vy*dt; s.vy += 240*dt;
+        if (s.t >= s.life) fg.sparks.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!fg || !here()) return;
+      const x = fg.x, y = fg.y;
+      ctx.save();
+      // stump
+      ctx.fillStyle = '#5a4030'; ctx.fillRect(x-10, y+2, 20, 9);
+      // anvil
+      ctx.fillStyle = '#3a3f46';
+      ctx.fillRect(x-14, y-10, 30, 5);                              // top slab
+      ctx.beginPath(); ctx.moveTo(x+16, y-10); ctx.lineTo(x+25, y-7); ctx.lineTo(x+16, y-4.5); ctx.closePath(); ctx.fill();  // horn
+      ctx.fillRect(x-6, y-5, 12, 4);                                // waist
+      ctx.fillRect(x-12, y-1, 24, 4);                              // foot
+      // hot bar on the face
+      const hc = fg.heat;
+      if (hc > 0.32){
+        const g = ctx.createRadialGradient(x-1, y-12, 0, x-1, y-12, 12);
+        g.addColorStop(0, 'rgba(255,180,90,'+(0.5*hc).toFixed(3)+')'); g.addColorStop(1, 'rgba(255,120,50,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x-1, y-12, 12, 0, 7); ctx.fill();
+      }
+      ctx.fillStyle = 'rgb('+Math.round(120+hc*135)+','+Math.round(50+hc*90)+',40)';
+      ctx.fillRect(x-9, y-13, 15, 3);
+      // hammer (swings down on strike)
+      const p = fg.hammer > 0 ? fg.hammer/0.26 : 0;                 // 1 just after strike -> 0
+      const ang = -1.25*(1-p);
+      ctx.save(); ctx.translate(x+3, y-30); ctx.rotate(ang);
+      ctx.strokeStyle = '#7a5a3a'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,16); ctx.stroke();
+      ctx.fillStyle = '#555b63'; ctx.fillRect(-5, 15, 10, 5);
+      ctx.restore();
+      // sparks
+      for (const s of fg.sparks){
+        const a = Math.max(0, 1 - s.t/s.life);
+        ctx.fillStyle = 'rgba(255,'+Math.round(160+90*a)+',80,'+a.toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(s.x, s.y, 1.3*a+0.5, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!fg || !here()) return false;
+        if (px < fg.x - 16 || px > fg.x + 26 || py < fg.y - 34 || py > fg.y + 12) return false;
+        if (fg.cd > 0) return true;
+        fg.cd = 0.18; fg.hammer = 0.26; fg.heat = 1; fg.strikes++;
+        const ix = fg.x - 2, iy = fg.y - 13;                        // capture impact coords first
+        for (let i=0;i<9;i++) fg.sparks.push({ x: ix, y: iy, vx: rand(-95,95), vy: rand(-150,-40), t:0, life: rand(0.4,0.8) });
+        if (fg.sparks.length > 60) fg.sparks.splice(0, fg.sparks.length-60);
+        if (typeof sfx === 'function') sfx('tap');
+        if (fg.strikes % 4 === 0){
+          const hx = ix, hy = iy - 6;
+          if (typeof burstAt === 'function') burstAt(pick(['✨','⚙️','🔥']), hx, hy);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['A fine blade! 🗡️','Forged with love 🔥','Look what we made! ✨','Strong and true 💪']));
+          try{ state.energy = clamp(state.energy + 4); state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          try{ state.energy = clamp(state.energy + 1); state.fun = clamp(state.fun + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   62) THE BUBBLING BEAKER  —  in the science lab a flask of colored liquid sits on
+   the bench. Tap it to add a drop: it fizzes, bubbles race to the top, and the
+   brew shifts to a brand-new color. Harmless, delightful science. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxBeaker(){
+  try{
+    const AT = new Set(['sciencelab','laboratory','chemlab','apothecarylab']);
+    const HUES = ['#57d977','#57b6ff','#ff6bd0','#ffd166','#b07bff','#ff8a5c'];
+    let bk = null;                       // {x,y,hi,fizz,cd,bubbles:[]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ bk = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), hi:0, fizz:0, cd:0, bubbles:[] }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ bk = null; return; }
+      if (!bk) build();
+      if (bk.cd > 0) bk.cd -= dt;
+      if (bk.fizz > 0) bk.fizz -= dt;
+      for (let i=bk.bubbles.length-1;i>=0;i--){
+        const b = bk.bubbles[i]; b.by += b.vy*dt; b.bx += Math.sin(b.by*0.4)*4*dt;
+        if (b.by < bk.y - 9) bk.bubbles.splice(i,1);
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!bk || !here()) return;
+      const x = bk.x, y = bk.y;
+      function bodyPath(){ ctx.beginPath(); ctx.moveTo(x-14, y); ctx.lineTo(x+14, y); ctx.lineTo(x+5, y-22); ctx.lineTo(x-5, y-22); ctx.closePath(); }
+      ctx.save();
+      // glass body
+      bodyPath(); ctx.fillStyle = 'rgba(220,235,240,0.22)'; ctx.fill();
+      // liquid + bubbles (clipped to the flask)
+      ctx.save(); bodyPath(); ctx.clip();
+      ctx.fillStyle = HUES[bk.hi]; ctx.fillRect(x-16, y-9, 32, 12);
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      for (const b of bk.bubbles){ ctx.beginPath(); ctx.arc(x + b.bx, b.by, b.r, 0, 7); ctx.fill(); }
+      if (bk.fizz > 0){                                             // foam at the surface
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        for (let i=-3;i<=3;i++){ ctx.beginPath(); ctx.arc(x + i*3, y-9 + Math.sin(i+bk.fizz*10), 1.6, 0, 7); ctx.fill(); }
+      }
+      ctx.restore();
+      // outline
+      bodyPath(); ctx.strokeStyle = 'rgba(180,205,215,0.6)'; ctx.lineWidth = 1; ctx.stroke();
+      // neck + rim
+      ctx.fillStyle = 'rgba(220,235,240,0.3)'; ctx.fillRect(x-4, y-30, 8, 9);
+      ctx.fillStyle = '#cfe0e6'; ctx.fillRect(x-5, y-31, 10, 2);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!bk || !here()) return false;
+        if (px < bk.x - 15 || px > bk.x + 15 || py < bk.y - 32 || py > bk.y + 3) return false;
+        if (bk.cd > 0) return true;
+        bk.cd = 0.4; bk.hi = (bk.hi + 1) % HUES.length; bk.fizz = 0.8;
+        for (let i=0;i<7;i++) bk.bubbles.push({ bx: rand(-10,10), by: bk.y - 1, vy: rand(-16,-30), r: rand(1,2.4) });
+        const px2 = bk.x, py2 = bk.y - 26;                          // capture first
+        if (typeof sfx === 'function') sfx('draw');
+        if (typeof fxAt === 'function') fxAt(px2, py2, pick(['🧪','💨','✨']));
+        if (typeof say === 'function') say(pick(['Fizz fizz! 🧪','A new color! 🥰','Science is fun ✨','What does this one do? 😄']));
+        try{ state.fun = clamp(state.fun + 3); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   63) THE GRANDFATHER CLOCK  —  in the clockmaker's shop a tall clock stands in the
+   corner. Tap it to set the pendulum swinging; it sways and softly chimes, notes
+   drifting up, before easing back to a gentle tick. Scene-gated; tall and narrow
+   so it keeps to the side.
+   -------------------------------------------------------------------------- */
+(function fxGrandClock(){
+  try{
+    const AT = new Set(['clockmaker','clockshop','clocktower','clockwork']);
+    let ck = null;                       // {x,y,topY,pivotY,bobLen,amp,phase,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const y = rand(H*0.74, H*0.80);
+      let caseH = y - H*0.30; if (caseH < H*0.24) caseH = H*0.24;
+      const topY = y - caseH;
+      ck = { x: Math.max(W*0.16, Math.min(W*0.86, W*0.82)), y, topY, pivotY: topY + caseH*0.44, bobLen: caseH*0.33, amp:0.12, phase:0, cd:0 };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ ck = null; return; }
+      if (!ck) build();
+      if (ck.cd > 0) ck.cd -= dt;
+      ck.phase += dt*2.4;
+      ck.amp += (0.12 - ck.amp) * Math.min(1, dt*0.5);              // eases back to a gentle idle swing
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!ck || !here()) return;
+      const x = ck.x, y = ck.y, topY = ck.topY;
+      ctx.save();
+      // case
+      ctx.fillStyle = '#6a4a2e'; ctx.fillRect(x-13, topY, 26, y - topY);
+      // crown
+      ctx.fillStyle = '#7a5636'; ctx.beginPath(); ctx.moveTo(x-14, topY); ctx.lineTo(x+14, topY); ctx.lineTo(x+9, topY-8); ctx.lineTo(x-9, topY-8); ctx.closePath(); ctx.fill();
+      // pendulum window (dark inset)
+      ctx.fillStyle = '#2e2016'; ctx.fillRect(x-9, topY+30, 18, (y-6) - (topY+30));
+      // pendulum
+      const ang = ck.amp * Math.sin(ck.phase);
+      const bx = x + Math.sin(ang)*ck.bobLen, by = ck.pivotY + Math.cos(ang)*ck.bobLen;
+      ctx.strokeStyle = '#caa24a'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(x, ck.pivotY); ctx.lineTo(bx, by); ctx.stroke();
+      ctx.fillStyle = '#e0b84a'; ctx.beginPath(); ctx.arc(bx, by, 4.5, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.arc(bx-1.2, by-1.2, 1.4, 0, 7); ctx.fill();
+      // face
+      const fy = topY + 16;
+      ctx.fillStyle = '#f3ead0'; ctx.beginPath(); ctx.arc(x, fy, 10, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(x, fy, 10, 0, 7); ctx.stroke();
+      ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(x, fy); ctx.lineTo(x, fy-6); ctx.moveTo(x, fy); ctx.lineTo(x+5, fy+2); ctx.stroke();   // hands
+      ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.arc(x, fy, 1.2, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!ck || !here()) return false;
+        if (px < ck.x - 15 || px > ck.x + 15 || py < ck.topY - 8 || py > ck.y) return false;
+        if (ck.cd > 0){ ck.amp = Math.min(0.55, ck.amp + 0.12); return true; }
+        ck.cd = 1.4; ck.amp = 0.5;
+        const cx = ck.x, cy = ck.topY + 6;                          // capture BEFORE deferred use
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function'){ for (let i=0;i<3;i++){ const dx = rand(-8,8); setTimeout(function(){ try{ fxAt(cx+dx, cy - i*4, pick(['🕰️','♪','✨'])); }catch(e){} }, i*150); } }
+        if (typeof say === 'function') say(pick(['Tick, tock… 🕰️','It chimes so sweetly ♪','Time stands still with you 🥰','Listen — our song ✨']));
+        try{ state.love = clamp(state.love + 3); state.energy = clamp(state.energy + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
