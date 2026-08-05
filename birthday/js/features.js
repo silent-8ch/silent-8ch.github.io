@@ -113,6 +113,10 @@ const TRINKET_POOL = (()=>{
   g(['astralgarden'], ['🌌','💎','🦋']);
   g(['starpool'], ['🌙','🕯️','✨']);
   g(['enchantedclock'], ['⏳','⚙️','🔔']);
+  g(['gasstation'], ['⛽','🚗','🌅']);
+  g(['grocerystore'], ['🛒','🍎','🧾']);
+  g(['bedroom'], ['🛏️','💤','📖']);
+  g(['office'], ['💼','☕','📎']);
   return map;
 })();
 const TRINKET_DEFAULT = ['💛','🍀','✨'];

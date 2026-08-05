@@ -64,6 +64,10 @@ const THOUGHT_SCENE = (()=>{
   g(['snowycabin','icepond','frozenfalls','icebergbay'], ['❄️','☃️']);
   g(['artstudio','pottery','sewingstudio','weaving','stainedglass','glassblowing','luthier','bookbindery','letterpress','cobbler'], ['🎨','✏️','💡']);
   g(['crystalcave','tarotparlor','enchantedforest','wizardtower','fortuneteller','runecircle','arcanelibrary','fairyring','alchemylab','witchcottage','moontemple','willowispmarsh','enchantedmirrorhall','potionkitchen','crystalgrotto','potionlab','spiritshrine','shadowtheater','dreamweaverloom','astralgarden','starpool','enchantedclock'], ['🔮','✨','🌙']);
+  g(['gasstation'], ['⛽','🚗','🌅']);
+  g(['grocerystore'], ['🛒','🍎','😋']);
+  g(['bedroom'], ['💤','🛏️','📖']);
+  g(['office'], ['💼','☕','📎']);
   return map;
 })();
 let thoughtTimer = 7;

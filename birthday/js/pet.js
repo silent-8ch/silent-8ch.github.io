@@ -341,6 +341,10 @@ const SCENE_INTERACT = (()=>{
   g(['astralgarden'], {lines:['Flowers growing among the stars! 🌸','We\'re floating in space 🌌','Everything sparkles here ✨'], emoji:'🌌', fun:5});
   g(['starpool'], {lines:['The reflections are so still 🌙','Make a wish in the water ✨','Sacred and beautiful 🥰'], emoji:'🌙', love:5});
   g(['enchantedclock'], {lines:['Listen to the ticking ⏰','Time feels different here ✨','The gears are mesmerizing ⚙️'], emoji:'⚙️', fun:5});
+  g(['gasstation'], {lines:['Fill it up! ⛽','The lights are warm 🌅','Late-night stop 🚗'], emoji:'⛽', energy:5});
+  g(['grocerystore'], {lines:['So many choices! 🛒','What should we get? 🥕','Aisle after aisle 😋'], emoji:'🛒', hunger:5});
+  g(['bedroom'], {lines:['So cozy in here 🛏️','Just want to curl up 😴','Home sweet home 💛'], emoji:'🛏️', energy:5});
+  g(['office'], {lines:['Another day at work 💼','Don\'t forget your coffee ☕','Cubicle life 🖥️'], emoji:'💼', fun:4});
   return map;
 })();
 const AMBIENT = ["It's lovely here 💛", 'I like it here.', 'So pretty ✨', 'Look over there!', "Let's stay a while 🥰", 'Where to next?', 'I\'m so glad you\'re here 💛', 'This spot feels like ours.', 'Can we come back here again?', 'Everything is nicer with you.', 'Ooh, what\'s over there?', 'I could stay here forever with you 🥰', 'This feels like a little dream 💭', 'My favorite place is wherever you are.', 'Let\'s make a memory here 📸', 'I\'m so happy right now 😊', 'Hold my hand? 🤝', 'What a perfect little moment 💛', 'I never want this to end 🥰', 'You always take me somewhere lovely.', 'Pinch me — this is too nice 😊', 'Just you and me and the view 💫', 'I feel so safe with you here.', 'Thank you for today 💛', 'Let\'s remember this one 🌟', 'Everywhere is prettier with you.', 'I\'m exactly where I want to be 😊', 'You always know the loveliest spots.'];
@@ -1678,6 +1682,30 @@ const SCENE_SPOTS = {
     {nx:0.14, ny:0.38, r:50, e:'⚙️', lines:['Enormous gears turning ⚙️','So intricate and old','I hear them clicking ✨']},
     {nx:0.70, ny:0.74, r:46, e:'⏳', lines:['An hourglass! ⏳','The sand is falling slowly','Time is so beautiful here 💛']},
     {nx:0.50, ny:0.10, r:48, e:'🪟', lines:['Moonlight through the window 🪟','So dim and mysterious','The tower is dreaming 🥰']},
+  ],
+  gasstation: [
+    {nx:0.30, ny:0.58, r:52, e:'⛽', lines:['The gas pumps ⛽','Beep boop, fill it up','That gasoline smell 🤭']},
+    {nx:0.74, ny:0.40, r:54, e:'🏪', lines:['The convenience store 🏪','Snacks inside? 😋','Open 24 hours ✨']},
+    {nx:0.82, ny:0.76, r:48, e:'🚗', lines:['A parked car 🚗','Nice color!','Road trip vibes 🛣️']},
+    {nx:0.30, ny:0.20, r:50, e:'🌅', lines:['The dusk sky 🌅','So warm and pretty','Golden hour 💛']},
+  ],
+  grocerystore: [
+    {nx:0.24, ny:0.62, r:54, e:'🍎', lines:['Fresh produce! 🍎','So colorful 🥕','Pick the ripe ones 🍊']},
+    {nx:0.74, ny:0.40, r:50, e:'🛒', lines:['The aisles go on forever 🛒','So much to choose from','What aisle is it in? 🤔']},
+    {nx:0.44, ny:0.78, r:48, e:'🛒', lines:['Our shopping cart 🛒','Getting full!','One more thing? 😄']},
+    {nx:0.90, ny:0.58, r:46, e:'💳', lines:['The checkout counter 💳','Beep beep 🔊','Paper or plastic? 🛍️']},
+  ],
+  bedroom: [
+    {nx:0.74, ny:0.56, r:56, e:'🛏️', lines:['So comfy 🛏️','Five more minutes? 😴','The coziest bed 💛']},
+    {nx:0.52, ny:0.58, r:46, e:'💡', lines:['The little lamp 💡','Warm glow ✨','Perfect for reading 📖']},
+    {nx:0.30, ny:0.28, r:52, e:'🪟', lines:['Stars outside 🪟','The moon tonight 🌙','So peaceful out there 🥰']},
+    {nx:0.10, ny:0.44, r:48, e:'📚', lines:['The bookshelf 📚','So many stories','Read to me? 🥰']},
+  ],
+  office: [
+    {nx:0.24, ny:0.56, r:52, e:'🖥️', lines:['The work computer 🖥️','So many emails 📧','Spreadsheets forever 😅']},
+    {nx:0.72, ny:0.56, r:52, e:'🖥️', lines:['Another monitor 🖥️','Meeting in 5 minutes 📋','Almost done for the day 💪']},
+    {nx:0.49, ny:0.32, r:48, e:'💧', lines:['The water cooler 💧','Stay hydrated! 🥤','Office gossip spot 🤭']},
+    {nx:0.94, ny:0.60, r:44, e:'🪴', lines:['The office plant 🪴','Hanging in there 🌿','A touch of green 💚']},
   ],
 };
 // nearest hotspot hit for the current scene, or null

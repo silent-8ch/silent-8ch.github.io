@@ -81,6 +81,8 @@ const SCENE_LABELS = {
   spiritshrine:'Spirit Shrine', shadowtheater:'Shadow Theater',
   dreamweaverloom:'Dreamweaver\'s Loom', astralgarden:'Astral Garden',
   starpool:'Star Pool', enchantedclock:'Enchanted Clocktower',
+  gasstation:'Gas Station', grocerystore:'Grocery Store',
+  bedroom:'Cozy Bedroom', office:'Office',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 const FAMILY_LOCATION_DEBUG = (()=>{
