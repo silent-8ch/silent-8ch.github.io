@@ -3171,3 +3171,266 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 21). Three scene-gated micro-interactions. No
+   always-on overlays; each lives only in its scenes, taps false-on-miss.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   46) SHAKE THE SNOW GLOBE  —  in the snow-globe shop, ski lodge, or crystal cave
+   a little snow globe rests on a shelf. Tap it to give it a shake: the snow inside
+   bursts up in a swirling flurry and then drifts gently back down to settle over a
+   tiny pine tree. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxSnowGlobe(){
+  try{
+    const PLACES = new Set(['snowglobeshop','skilodge','crystalcave']);
+    let gl = null;                       // {x,y,r,shake,cd,flakes:[{lx,ly,vx,vy,s}]}
+    function here(){ try{ return (typeof SCENES!=='undefined') && PLACES.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const x = Math.max(W*0.16, Math.min(W*0.84, W*0.20));
+      const y = rand(H*0.66, H*0.72), r = 20, flakes = [];
+      for (let i=0;i<18;i++){
+        const a = rand(0, Math.PI*2), m = rand(0, r-6);
+        flakes.push({ lx: Math.cos(a)*m, ly: Math.sin(a)*m, vx:0, vy:0, s: rand(0.7,1.5) });
+      }
+      gl = { x, y, r, shake:0, cd:0, flakes };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ gl = null; return; }
+      if (!gl) build();
+      if (gl.cd > 0) gl.cd -= dt;
+      if (gl.shake > 0) gl.shake -= dt;
+      const r = gl.r;
+      for (const f of gl.flakes){
+        f.vy += 30 * dt * f.s;                 // gravity
+        f.vx *= 0.94; if (f.vy > 34) f.vy = 34;
+        f.lx += f.vx * dt; f.ly += f.vy * dt;
+        const d = Math.hypot(f.lx, f.ly) || 1;
+        if (d > r-5){ const k = (r-5)/d; f.lx *= k; f.ly *= k; f.vx *= 0.4; f.vy *= 0.4; }
+      }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!gl || !here()) return;
+      const wob = gl.shake > 0 ? Math.sin(gl.shake*40) * 1.6 : 0;
+      const x = gl.x + wob, cy = gl.y - gl.r, r = gl.r;
+      ctx.save();
+      // wooden base
+      ctx.fillStyle = '#6a4a34';
+      if (typeof roundRect === 'function'){ roundRect(x-r*0.8, gl.y-4, r*1.6, 8, 2); ctx.fill(); } else ctx.fillRect(x-r*0.8, gl.y-4, r*1.6, 8);
+      ctx.fillStyle = '#8a6244'; ctx.fillRect(x-r*0.55, gl.y-8, r*1.1, 5);
+      // glass dome fill
+      ctx.beginPath(); ctx.arc(x, cy, r, 0, 7);
+      const g = ctx.createRadialGradient(x-r*0.3, cy-r*0.3, 2, x, cy, r);
+      g.addColorStop(0, 'rgba(210,235,255,0.55)'); g.addColorStop(1, 'rgba(150,190,230,0.35)');
+      ctx.fillStyle = g; ctx.fill();
+      // clip to the glass, then draw the little scene + snow
+      ctx.save(); ctx.clip();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(x-r+2, cy+r-8, r*2-4, 8);   // snow floor
+      ctx.fillStyle = '#2f6b3a';
+      ctx.beginPath(); ctx.moveTo(x, cy-2); ctx.lineTo(x-6, cy+8); ctx.lineTo(x+6, cy+8); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x, cy-8); ctx.lineTo(x-5, cy+2); ctx.lineTo(x+5, cy+2); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fff';
+      for (const f of gl.flakes){ ctx.beginPath(); ctx.arc(x+f.lx, cy+f.ly, 1.4*f.s, 0, 7); ctx.fill(); }
+      ctx.restore();
+      // glass rim + highlight
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(x, cy, r, 0, 7); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x, cy, r-3, Math.PI*1.15, Math.PI*1.5); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!gl || !here()) return false;
+        const cy = gl.y - gl.r;
+        if (Math.hypot(px - gl.x, py - cy) > gl.r + 6) return false;
+        gl.shake = 0.5;
+        for (const f of gl.flakes){ f.vx = rand(-55,55); f.vy = rand(-130,-30); }   // a good shake
+        if (gl.cd <= 0){
+          gl.cd = 1.0;
+          if (typeof sfx === 'function') sfx('tap');
+          if (typeof fxAt === 'function') fxAt(gl.x, cy - gl.r - 4, pick(['❄️','✨','💙']));
+          if (typeof say === 'function') say(pick(['A little snowstorm! ❄️','So pretty when it swirls ✨','Shake it again? 🥰','Our own tiny winter 💙']));
+          try{ state.fun = clamp(state.fun + 3); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   47) STARGAZE THROUGH THE TELESCOPE  —  at the observatory or planetarium a little
+   telescope stands on its tripod. Tap it to peer through: a constellation twinkles
+   into view across the upper sky for a few seconds, then gently fades. A wish, and
+   a warm word. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxTelescope(){
+  try{
+    const PLACES = new Set(['observatory','planetarium']);
+    let ts = null;                       // {x,y,view,cd,stars:[],ang}
+    function here(){ try{ return (typeof SCENES!=='undefined') && PLACES.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      ts = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.80)), y: rand(H*0.70, H*0.76), view:0, cd:0, stars:[], ang:-0.9 };
+    }
+    function newConstellation(){
+      const stars = [], n = 5 + Math.floor(Math.random()*3);
+      let sx = rand(W*0.2, W*0.4), sy = rand(H*0.12, H*0.24);
+      for (let i=0;i<n;i++){
+        stars.push({ x: sx, y: sy, tw: rand(0,Math.PI*2) });
+        sx = Math.max(W*0.14, Math.min(W*0.72, sx + rand(14,34)*(Math.random()<0.5?-1:1) + 16));
+        sy = Math.max(H*0.08, Math.min(H*0.34, sy + rand(-16,16)));
+      }
+      ts.stars = stars;
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ ts = null; return; }
+      if (!ts) build();
+      if (ts.cd > 0) ts.cd -= dt;
+      if (ts.view > 0){ ts.view -= dt; for (const s of ts.stars) s.tw += dt*4; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!ts || !here()) return;
+      const x = ts.x, y = ts.y;
+      // constellation while viewing (fade in fast, hold, fade out at the end)
+      if (ts.view > 0 && ts.stars.length){
+        const alpha = Math.max(0, Math.min(1, ts.view < 0.6 ? ts.view/0.6 : 1));
+        ctx.save();
+        ctx.strokeStyle = 'rgba(200,220,255,' + (0.35*alpha).toFixed(3) + ')'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i=0;i<ts.stars.length;i++){ const s = ts.stars[i]; if (i===0) ctx.moveTo(s.x,s.y); else ctx.lineTo(s.x,s.y); }
+        ctx.stroke();
+        for (const s of ts.stars){
+          const tw = 0.6 + 0.4*Math.sin(s.tw);
+          const gg = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,6);
+          gg.addColorStop(0,'rgba(255,255,240,'+(alpha*tw).toFixed(3)+')');
+          gg.addColorStop(1,'rgba(255,255,240,0)');
+          ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(s.x,s.y,6,0,7); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,'+alpha.toFixed(3)+')'; ctx.beginPath(); ctx.arc(s.x,s.y,1.4,0,7); ctx.fill();
+        }
+        ctx.restore();
+      }
+      // telescope: tripod + tube
+      ctx.save();
+      ctx.strokeStyle = '#4a3b2a'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x, y-4); ctx.lineTo(x-8, y+14);
+      ctx.moveTo(x, y-4); ctx.lineTo(x+8, y+14);
+      ctx.moveTo(x, y-4); ctx.lineTo(x+2, y+14);
+      ctx.stroke();
+      const ang = ts.ang + (ts.view>0 ? Math.sin(ts.view*3)*0.03 : 0);
+      ctx.save(); ctx.translate(x, y-4); ctx.rotate(ang);
+      ctx.fillStyle = '#b8b0c8';
+      if (typeof roundRect === 'function'){ roundRect(-4, -3, 26, 7, 3); ctx.fill(); } else ctx.fillRect(-4,-3,26,7);
+      ctx.fillStyle = '#8a82a0'; ctx.beginPath(); ctx.ellipse(22, 0.5, 2.4, 4, 0, 0, 7); ctx.fill();   // objective lens
+      ctx.fillStyle = '#d4cbe4'; ctx.fillRect(-6, -2.5, 4, 6);                                          // eyepiece
+      ctx.restore();
+      ctx.fillStyle = '#6a5a44'; ctx.beginPath(); ctx.arc(x, y-4, 2.4, 0, 7); ctx.fill();               // pivot
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!ts || !here()) return false;
+        if (px < ts.x - 12 || px > ts.x + 26 || py < ts.y - 16 || py > ts.y + 16) return false;
+        if (ts.cd > 0) return true;
+        ts.cd = 1.2; ts.view = 2.6; newConstellation();
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof fxAt === 'function') fxAt(ts.x, ts.y - 18, pick(['🔭','🌟','✨']));
+        if (typeof say === 'function') say(pick(['Look — a constellation! 🌟','I see stars… make a wish ✨','Our own little sky 🔭','I named that one after you 💫']));
+        try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   48) LIGHT THE CANDLES  —  in the candle workshop or the snowy cabin a little row
+   of candles waits. Tap each unlit one to light it: a flame flickers up with a warm
+   glow. Light them all for a birthday cheer + a shower of hearts; after a while they
+   burn down and can be lit again. Scene-gated, progressive.
+   -------------------------------------------------------------------------- */
+(function fxCandles(){
+  try{
+    const PLACES = new Set(['candleshop','snowycabin']);
+    let row = null;                      // {x,y,cands:[{lx,h,lit,fl}],cd,allT}
+    function here(){ try{ return (typeof SCENES!=='undefined') && PLACES.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){
+      const n = 5, cands = [];
+      for (let i=0;i<n;i++) cands.push({ lx: i*13, h: 16 + (i%2)*4, lit:false, fl: rand(0,Math.PI*2) });
+      row = { x: Math.max(W*0.12, Math.min(W*0.5, W*0.16)), y: rand(H*0.70, H*0.76), cands, cd:0, allT:0 };
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ row = null; return; }
+      if (!row) build();
+      if (row.cd > 0) row.cd -= dt;
+      for (const c of row.cands) if (c.lit) c.fl += dt*8;
+      if (row.allT > 0){ row.allT -= dt; if (row.allT <= 0){ for (const c of row.cands) c.lit = false; } }   // burn down & reset
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!row || !here()) return;
+      ctx.save();
+      for (const c of row.cands){
+        const cx = row.x + c.lx, base = row.y, top = base - c.h;
+        ctx.fillStyle = '#f3e6d0'; ctx.fillRect(cx-3, top, 6, c.h);                 // body
+        ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.fillRect(cx+1, top, 2, c.h);        // shading
+        ctx.strokeStyle = '#3a2a20'; ctx.lineWidth = 1;                             // wick
+        ctx.beginPath(); ctx.moveTo(cx, top); ctx.lineTo(cx, top-3); ctx.stroke();
+        if (c.lit){
+          const fl = 0.7 + 0.3*Math.sin(c.fl) + 0.1*Math.sin(c.fl*2.7);
+          const gr = ctx.createRadialGradient(cx, top-6, 0, cx, top-6, 16);          // glow
+          gr.addColorStop(0, 'rgba(255,200,110,'+(0.28*fl).toFixed(3)+')');
+          gr.addColorStop(1, 'rgba(255,200,110,0)');
+          ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(cx, top-6, 16, 0, 7); ctx.fill();
+          const fh = 7*fl;                                                           // flame
+          ctx.fillStyle = '#ffcf6b';
+          ctx.beginPath(); ctx.moveTo(cx, top-3-fh); ctx.quadraticCurveTo(cx+2.4, top-3-fh*0.4, cx, top-3); ctx.quadraticCurveTo(cx-2.4, top-3-fh*0.4, cx, top-3-fh); ctx.fill();
+          ctx.fillStyle = '#fff2c0';
+          ctx.beginPath(); ctx.moveTo(cx, top-3-fh*0.7); ctx.quadraticCurveTo(cx+1.2, top-3-fh*0.25, cx, top-3); ctx.quadraticCurveTo(cx-1.2, top-3-fh*0.25, cx, top-3-fh*0.7); ctx.fill();
+        }
+      }
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!row || !here()) return false;
+        for (const c of row.cands){
+          const cx = row.x + c.lx, base = row.y, top = base - c.h;
+          if (px >= cx-6 && px <= cx+6 && py >= top-12 && py <= base+2){
+            if (c.lit) return true;                       // already lit — consume quietly
+            c.lit = true;
+            if (typeof sfx === 'function') sfx('tap');
+            if (typeof fxAt === 'function') fxAt(cx, top-10, pick(['🕯️','✨','💛']));
+            const allLit = row.cands.every(k => k.lit);
+            if (allLit){
+              row.allT = 12;                              // glow a while, then reset
+              if (row.cd <= 0){
+                row.cd = 1.5;
+                if (typeof sfx === 'function') sfx('find');
+                if (typeof say === 'function') say(pick(['All aglow — make a wish! 🎂','Happy birthday, my love 💛','So warm and cozy ✨','Every one lit, just for you 🥰']));
+                if (typeof hearts === 'function') hearts();
+                try{ state.love = clamp(state.love + 6); state.fun = clamp(state.fun + 3); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+              }
+            } else {
+              if (typeof say === 'function' && Math.random() < 0.5) say(pick(['One more… 🕯️','Warm and glowy ✨','Light them all? 🥰']));
+              try{ state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+            }
+            return true;
+          }
+        }
+        return false;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();

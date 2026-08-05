@@ -607,6 +607,66 @@ const SCENE_SPOTS = {
     {nx:0.60, ny:0.18, r:50, e:'☀️', lines:['Bright blue sky ☀️','So cheerful','What a day 🥰']},
     {nx:0.50, ny:0.80, r:52, e:'🌾', lines:['A little path 🌾','Wander with me','Where does it go?']},
   ],
+  balloons: [
+    {nx:0.30, ny:0.28, r:58, e:'🎈', lines:['That big red one! 🎈','Up, up we go! 🥰','Ride it with me?']},
+    {nx:0.62, ny:0.17, r:50, e:'🎈', lines:['Golden balloon 🎈','Floating so high','I wish we could hop aboard']},
+    {nx:0.82, ny:0.34, r:48, e:'🎈', lines:['A little blue one 🎈','Drifting so gently','Bye bye! 👋']},
+    {nx:0.50, ny:0.80, r:60, e:'🌼', lines:['Wildflower meadow 🌼','So soft to sit in','Let\'s picnic here 🧺']},
+  ],
+  sewingstudio: [
+    {nx:0.20, ny:0.20, r:54, e:'🧵', lines:['That patchwork quilt! 🧵','So many little colors','Every square a memory 💛']},
+    {nx:0.72, ny:0.16, r:48, e:'🧶', lines:['A rack of thread 🧶','Which color today?','So neat and tidy']},
+    {nx:0.44, ny:0.54, r:52, e:'🪡', lines:['The sewing machine 🪡','Whirr whirr whirr','I could make you something 🥰']},
+    {nx:0.87, ny:0.78, r:48, e:'👗', lines:['A dress form 👗','Almost a person!','What shall we make it wear?']},
+  ],
+  pumpkinpatch: [
+    {nx:0.28, ny:0.55, r:52, e:'🎃', lines:['The scarecrow! 🎃','He\'s guarding the field','Say hi to him 👋']},
+    {nx:0.14, ny:0.78, r:60, e:'🎃', lines:['Such a fat pumpkin! 🎃','Perfect for carving','Let\'s take this one home 🥰']},
+    {nx:0.42, ny:0.84, r:52, e:'🎃', lines:['So many pumpkins! 🎃','Orange everywhere','Pick your favorite']},
+    {nx:0.65, ny:0.90, r:48, e:'🌾', lines:['A cozy hay bale 🌾','Let\'s sit a while','Smells like autumn 🍂']},
+  ],
+  toyshop: [
+    {nx:0.30, ny:0.24, r:54, e:'🧸', lines:['A little teddy bear! 🧸','So soft and huggable','Can we keep him? 🥰']},
+    {nx:0.82, ny:0.18, r:48, e:'🪁', lines:['A hanging kite 🪁','Twirling up there','I\'d love to fly it with you']},
+    {nx:0.30, ny:0.74, r:54, e:'🐴', lines:['A rocking horse! 🐴','Giddy up!','Rock rock rock 🥰']},
+    {nx:0.73, ny:0.72, r:46, e:'🧱', lines:['Stacked blocks 🧱','Don\'t topple them!','Let\'s build higher']},
+  ],
+  observatory: [
+    {nx:0.50, ny:0.25, r:56, e:'🌟', lines:['Stars through the slit ✨','The dome is open!','So many of them 🌟']},
+    {nx:0.50, ny:0.20, r:44, e:'🌙', lines:['The moon! 🌙','Look how clear','Make a wish 🥰']},
+    {nx:0.66, ny:0.55, r:54, e:'🔭', lines:['The big telescope 🔭','Let me peek!','Show me a planet 🪐']},
+    {nx:0.16, ny:0.58, r:48, e:'🖥️', lines:['The control desk 🖥️','So many blinking lights','What does this button do?']},
+  ],
+  winecellar: [
+    {nx:0.24, ny:0.42, r:60, e:'🍷', lines:['The wine rack 🍷','So dusty and old','Which vintage, love?']},
+    {nx:0.82, ny:0.72, r:52, e:'🛢️', lines:['Oak barrels 🛢️','They smell wonderful','Aging away down here']},
+    {nx:0.50, ny:0.60, r:48, e:'🕯️', lines:['A little candle 🕯️','So cozy and warm','Just us two down here 🥰']},
+    {nx:0.50, ny:0.55, r:44, e:'🥂', lines:['Two glasses 🥂','A toast to us 💛','To you, my love']},
+  ],
+  bamboo: [
+    {nx:0.30, ny:0.35, r:60, e:'🎋', lines:['Tall bamboo 🎋','Swaying so gently','Listen to it whisper']},
+    {nx:0.60, ny:0.40, r:56, e:'🌿', lines:['So green and calm 🌿','Breathe it in','So peaceful with you 🥰']},
+    {nx:0.50, ny:0.85, r:50, e:'🪨', lines:['Stepping stones 🪨','Hop with me!','Careful, careful']},
+    {nx:0.85, ny:0.72, r:46, e:'🏮', lines:['A stone lantern 🏮','Glowing softly','Guiding our way 💛']},
+  ],
+  clockmaker: [
+    {nx:0.24, ny:0.24, r:56, e:'🕰️', lines:['So many clocks! 🕰️','All ticking together','Tick tock tick tock']},
+    {nx:0.86, ny:0.55, r:54, e:'⏰', lines:['The grandfather clock ⏰','Watch the pendulum','Swing, swing, swing']},
+    {nx:0.28, ny:0.58, r:52, e:'⚙️', lines:['Tiny gears ⚙️','So delicate!','How do they fit together?']},
+    {nx:0.72, ny:0.16, r:44, e:'🕐', lines:['A little wall clock 🕐','Right on time','What hour is it, love?']},
+  ],
+  diner: [
+    {nx:0.50, ny:0.08, r:50, e:'💗', lines:['The neon sign! 💗','So retro and pink','Let\'s grab a booth 🥰']},
+    {nx:0.35, ny:0.44, r:52, e:'🥤', lines:['Milkshakes! 🥤','Two straws, one shake?','Strawberry for me 💗']},
+    {nx:0.92, ny:0.52, r:52, e:'🎶', lines:['The jukebox 🎶','Pick a song for us','Let\'s slow dance 💃']},
+    {nx:0.35, ny:0.70, r:44, e:'🍒', lines:['A shiny stool 🍒','Spin me around!','Wheee 🥰']},
+  ],
+  icecreamparlor: [
+    {nx:0.18, ny:0.20, r:50, e:'📋', lines:['The scoops menu 📋','So many flavors!','What are you getting? 🥰']},
+    {nx:0.55, ny:0.58, r:60, e:'🍨', lines:['The ice cream case! 🍨','Every color of the rainbow','One of each? 😋']},
+    {nx:0.50, ny:0.48, r:46, e:'🍒', lines:['A tall sundae 🍒','With a cherry on top!','Share it with me?']},
+    {nx:0.16, ny:0.86, r:46, e:'🍦', lines:['A soda-fountain stool 🍦','Spin, spin, spin','Sit close to me 🥰']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){

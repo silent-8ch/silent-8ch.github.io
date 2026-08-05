@@ -83,3 +83,203 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   PAPER BOAT. On watery scenes a little folded paper boat drifts across the
+   surface, bobbing on the ripples. Tap it to send a tiny wish sailing downstream.
+   -------------------------------------------------------------------------- */
+(function encPaperBoat(){
+  try{
+    const WATERY = new Set(['river','beach','marina','koipond','duckpond','lotuspond','waterlily',
+      'harbornight','fishingdock','moonlitjetty','driftwoodbeach','moonbeach','watermill','tidepools',
+      'lighthouse','fireflypier','biobay','waterfall','frozenfalls','icepond','bayou','cliffs']);
+    let boat = null, timer = 25 + Math.random()*45;
+    function canHere(){ try{ return WATERY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (boat){
+          boat.t += dt; boat.x += boat.vx*dt;
+          boat.bob = Math.sin(boat.t*2.2)*3;
+          boat.tilt = Math.sin(boat.t*2.2 + 0.5)*0.06;
+          if (boat.x < -40 || boat.x > W+40) boat = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 35 + Math.random()*55;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            boat = { x: dir>0 ? -26 : W+26, y: H*(0.70+Math.random()*0.06),
+                     vx: dir*rand(12,20), t:0, bob:0, tilt:0, dir };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!boat) return;
+      try{
+        const x = boat.x, y = boat.y + boat.bob;
+        ctx.save();
+        ctx.translate(x, y); ctx.rotate(boat.tilt);
+        // hull
+        ctx.fillStyle = '#fbf4e6'; ctx.strokeStyle = '#c9b48a'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-15, 2); ctx.lineTo(15, 2); ctx.lineTo(9, 9); ctx.lineTo(-9, 9); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        // sail (folded peak)
+        ctx.beginPath();
+        ctx.moveTo(-13, 2); ctx.lineTo(0, -14); ctx.lineTo(13, 2); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(0, 2); ctx.stroke();  // fold crease
+        // little wake reflection
+        ctx.restore();
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x-16, y+11); ctx.lineTo(x+16, y+11); ctx.stroke();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!boat) return false;
+      const dx = px - boat.x, dy = py - (boat.y + boat.bob);
+      if (dx*dx + dy*dy > 30*30) return false;
+      say(pick(['A little paper boat 🛶 I put a wish in it, just for you 💛',
+                'Sail safe, tiny boat 🛶 carry my love downstream',
+                'I folded that one thinking of you 💌',
+                'Wherever it drifts, I hope it finds you happy 🥰']));
+      burstAt('💧', boat.x, boat.y); hearts(); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 2); refreshHUD();
+      boat.vx *= 1.6;  // give it a happy little push onward
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   DUSK FIREFLY. As evening falls over gardens & meadows a single firefly drifts
+   in, glowing on and off. Tap to gently cup it in your hands for a warm wish.
+   -------------------------------------------------------------------------- */
+(function encFirefly(){
+  try{
+    const GLOWABLE = new Set(['backyard','lavender','peonygarden','poppyfield','hummingbirdgarden',
+      'starrymeadow','nightgarden','sunflowers','sunflowermaze','tulipfield','cherryblossom',
+      'bonsaigarden','mossgarden','pasture','orchard','vineyard','teahouse','zengarden','koipond']);
+    let fly = null, timer = 20 + Math.random()*40;
+    function dusk(){ try{ return typeof currentHour==='function' ? currentHour() >= 18.5 || currentHour() < 5 : (typeof isNight==='function' && isNight()); }catch(e){ return false; } }
+    function canHere(){ try{ return GLOWABLE.has(SCENES[currentScene]) && dusk(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (fly){
+          fly.t += dt; fly.life -= dt;
+          fly.x += fly.vx*dt + Math.sin(fly.t*1.3)*8*dt;
+          fly.y += fly.vy*dt + Math.cos(fly.t*1.7)*6*dt;
+          // gentle steering to stay on stage
+          if (fly.x < 30) fly.vx += 6*dt; if (fly.x > W-30) fly.vx -= 6*dt;
+          if (fly.y < H*0.35) fly.vy += 5*dt; if (fly.y > H*0.72) fly.vy -= 5*dt;
+          fly.glow = 0.45 + 0.55*Math.max(0, Math.sin(fly.t*2.4));
+          if (fly.life <= 0) fly = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*50;
+          if (canHere()){
+            fly = { x: rand(W*0.2, W*0.8), y: rand(H*0.45, H*0.65),
+                    vx: rand(-10,10), vy: rand(-6,6), t:0, glow:1, life: rand(12,20) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!fly) return;
+      try{
+        const g = fly.glow;
+        ctx.save();
+        ctx.globalAlpha = 0.25*g;
+        ctx.fillStyle = '#eaff8a';
+        ctx.beginPath(); ctx.arc(fly.x, fly.y, 9, 0, 7); ctx.fill();
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = '#fffbcf';
+        ctx.beginPath(); ctx.arc(fly.x, fly.y, 2.2, 0, 7); ctx.fill();
+        ctx.globalAlpha = g;
+        ctx.fillStyle = '#d8ff6b';
+        ctx.beginPath(); ctx.arc(fly.x, fly.y, 3.4, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!fly) return false;
+      const dx = px - fly.x, dy = py - fly.y;
+      if (dx*dx + dy*dy > 24*24) return false;
+      say(pick(['A firefly! 🌟 Cup it soft and make a wish',
+                'I caught one for you — quick, wish 💫',
+                'Little lantern in the dark 🪔 like you are for me',
+                'Warm and blinking, just like my heart around you ✨']));
+      fxAt(fly.x, fly.y-6, '✨'); burstAt('🌟', fly.x, fly.y); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 3); refreshHUD();
+      fly = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   SPECIAL SNOWFLAKE. On snowy/wintry scenes one perfect snowflake tumbles down,
+   swaying as it falls. Catch it on your fingertip before it lands.
+   -------------------------------------------------------------------------- */
+(function encSnowflake(){
+  try{
+    const WINTRY = new Set(['snowycabin','skilodge','icepond','iceskatingrink','igloo','winterchalet',
+      'frozenfalls','icebergbay','reindeerbarn','penguincove','snowglobeshop','crystalcave','mountain',
+      'aurora','cavehotspring','gingerbreadkitchen']);
+    let flake = null, timer = 22 + Math.random()*40;
+    function canHere(){ try{ return WINTRY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (flake){
+          flake.t += dt;
+          flake.y += flake.vy*dt;
+          flake.x += Math.sin(flake.t*1.6)*16*dt;
+          flake.spin += dt*1.2;
+          if (flake.y > H*0.9) flake = null;  // it settled — missed this one
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 32 + Math.random()*48;
+          if (canHere()){
+            flake = { x: rand(W*0.2, W*0.8), y: -14, vy: rand(26,40), t:0, spin:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!flake) return;
+      try{
+        ctx.save();
+        ctx.translate(flake.x, flake.y); ctx.rotate(flake.spin);
+        ctx.strokeStyle = '#eaf6ff'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+        for (let i=0;i<6;i++){
+          ctx.rotate(Math.PI/3);
+          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-8); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0,-5); ctx.lineTo(3,-7); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0,-5); ctx.lineTo(-3,-7); ctx.stroke();
+        }
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!flake) return false;
+      const dx = px - flake.x, dy = py - flake.y;
+      if (dx*dx + dy*dy > 26*26) return false;
+      say(pick(['Caught it! ❄️ No two are alike — like you 🥰',
+                'A perfect snowflake, just for a second 💙',
+                'Look — it landed right on us before it melted ✨',
+                'One in a billion, and it fell to you 💗']));
+      fxAt(flake.x, flake.y-6, '❄️'); burstAt('✨', flake.x, flake.y); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 2); refreshHUD();
+      flake = null;
+      return true;
+    });
+  }catch(e){}
+})();

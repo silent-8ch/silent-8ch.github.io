@@ -137,65 +137,84 @@ function buildCollection(){
 }
 /* ---- achievements + toasts ---- */
 const ACHIEVEMENTS = [
-  {id:'first_hug', icon:'🤗', name:'First Hug',       desc:'Give her a hug',            test:()=> (state.hugs||0) >= 1},
-  {id:'hug_50',    icon:'💞', name:'Hug Champion',    desc:'50 hugs',                  test:()=> (state.hugs||0) >= 50},
-  {id:'cookie_25', icon:'🍪', name:'Cookie Lover',    desc:'25 cookies',               test:()=> (state.feeds||0) >= 25},
-  {id:'cookie_100',icon:'🎂', name:'Cookie Monster',  desc:'100 cookies',              test:()=> (state.feeds||0) >= 100},
-  {id:'artist',    icon:'🎨', name:'Little Artist',   desc:'Draw together 25 times',   test:()=> (state.draws||0) >= 25},
-  {id:'napper',    icon:'😴', name:'Cozy Napper',     desc:'Rest 5 times',             test:()=> (state.rests||0) >= 5},
-  {id:'explorer',  icon:'🧭', name:'Explorer',        desc:'Visit 50 places',          test:()=> visited.size >= 50},
-  {id:'globetrot', icon:'🗺️', name:'Globetrotter',    desc:'Visit every place',        test:()=> visited.size >= SCENES.length},
-  {id:'collector', icon:'🧺', name:'Treasure Hunter', desc:'Collect 10 kinds',         test:()=> collectedKinds() >= 10},
-  {id:'week',      icon:'🔥', name:'Week Together',    desc:'A 7-day streak',           test:()=> (meta.streak||0) >= 7},
-  {id:'month',     icon:'🌟', name:'A Month of Us',   desc:'30 days together',         test:()=> (meta.totalDays||0) >= 30},
-  {id:'first_draw',  icon:'✏️', name:'First Doodle',    desc:'Draw together once',       test:()=> (state.draws||0) >= 1},
-  {id:'first_cookie',icon:'🍪', name:'First Cookie',    desc:'Share a cookie',           test:()=> (state.feeds||0) >= 1},
-  {id:'first_nap',   icon:'💤', name:'First Nap',       desc:'Take a rest',              test:()=> (state.rests||0) >= 1},
-  {id:'draw_100',    icon:'🖼️', name:'Master Artist',    desc:'Draw together 100 times',  test:()=> (state.draws||0) >= 100},
-  {id:'rest_25',     icon:'🛌', name:'Well Rested',     desc:'Rest 25 times',            test:()=> (state.rests||0) >= 25},
-  {id:'hug_200',     icon:'🫂', name:'Endless Hugs',    desc:'200 hugs',                 test:()=> (state.hugs||0) >= 200},
-  {id:'wanderer',    icon:'🌱', name:'Wanderer',        desc:'Visit 10 places',          test:()=> visited.size >= 10},
-  {id:'sightseer',   icon:'🧳', name:'Sightseer',       desc:'Visit 25 places',          test:()=> visited.size >= 25},
-  {id:'curator',     icon:'🔮', name:'Curator',         desc:'Collect 25 kinds',         test:()=> collectedKinds() >= 25},
-  {id:'completion',  icon:'🏅', name:'Completionist',   desc:'Collect every kind',       test:()=> collectedKinds() >= TRINKETS_ALL.length},
-  {id:'streak_3',    icon:'✨', name:'Three in a Row',  desc:'A 3-day streak',           test:()=> (meta.streak||0) >= 3},
-  {id:'fortnight',   icon:'🗓️', name:'Two Weeks of Us', desc:'14 days together',         test:()=> (meta.totalDays||0) >= 14},
-  {id:'season',      icon:'🌷', name:'A Season Together',desc:'90 days together',         test:()=> (meta.totalDays||0) >= 90},
-  {id:'gallery',     icon:'🎨', name:'Gallery Opening', desc:'Save a drawing on the pad',test:()=> (typeof gallery!=='undefined') && gallery.length >= 1},
-  {id:'feed_50',     icon:'🧁', name:'Sweet Tooth',      desc:'50 cookies',               test:()=> (state.feeds||0) >= 50},
-  {id:'feed_250',    icon:'🎂', name:'Endless Snacks',   desc:'250 cookies',              test:()=> (state.feeds||0) >= 250},
-  {id:'draw_50',     icon:'🖍️', name:'Doodle Duo',       desc:'Draw together 50 times',   test:()=> (state.draws||0) >= 50},
-  {id:'hug_25',      icon:'🤗', name:'Warm Heart',       desc:'25 hugs',                  test:()=> (state.hugs||0) >= 25},
-  {id:'hug_500',     icon:'💗', name:'A Thousand Arms',  desc:'500 hugs',                 test:()=> (state.hugs||0) >= 500},
-  {id:'rest_10',     icon:'🌙', name:'Sleepyhead',       desc:'Rest 10 times',            test:()=> (state.rests||0) >= 10},
-  {id:'rest_50',     icon:'🛏️', name:'Dream Weaver',     desc:'Rest 50 times',            test:()=> (state.rests||0) >= 50},
-  {id:'visit_75',    icon:'🧭', name:'Pathfinder',       desc:'Visit 75 places',          test:()=> visited.size >= 75},
-  {id:'visit_100',   icon:'🏆', name:'Century Traveler', desc:'Visit 100 places',         test:()=> visited.size >= 100},
-  {id:'collect_50',  icon:'💠', name:'Grand Collector',  desc:'Collect 50 kinds',         test:()=> collectedKinds() >= 50},
-  {id:'streak_14',   icon:'🔥', name:'Two-Week Streak',  desc:'A 14-day streak',          test:()=> (meta.streak||0) >= 14},
-  {id:'days_180',    icon:'🌻', name:'Half a Year of Us',desc:'180 days together',        test:()=> (meta.totalDays||0) >= 180},
-  {id:'days_365',    icon:'🎉', name:'A Whole Year',     desc:'365 days together',        test:()=> (meta.totalDays||0) >= 365},
-  {id:'gallery_full',icon:'🖼️', name:'Full Gallery',     desc:'Fill the drawing gallery', test:()=> (typeof gallery!=='undefined') && gallery.length >= 6},
-  {id:'draw_250',    icon:'🎭', name:'Prolific Painter',  desc:'Draw together 250 times',  test:()=> (state.draws||0) >= 250},
-  {id:'collect_75',  icon:'🗃️', name:'Master Collector',  desc:'Collect 75 kinds',         test:()=> collectedKinds() >= 75},
-  {id:'streak_30',   icon:'🌟', name:'Month-Long Streak', desc:'A 30-day streak',          test:()=> (meta.streak||0) >= 30},
-  {id:'feed_500',    icon:'🍩', name:'Snack Legend',      desc:'500 cookies',              test:()=> (state.feeds||0) >= 500},
-  {id:'rest_100',    icon:'😴', name:'Hundred Naps',      desc:'Rest 100 times',           test:()=> (state.rests||0) >= 100},
-  {id:'days_120',    icon:'📅', name:'Four Months of Us', desc:'120 days together',        test:()=> (meta.totalDays||0) >= 120},
-  {id:'draw_500',    icon:'🏛️', name:'Gallery Legend',    desc:'Draw together 500 times',  test:()=> (state.draws||0) >= 500},
-  {id:'hug_1000',    icon:'💘', name:'Infinite Hugs',     desc:'1000 hugs',                test:()=> (state.hugs||0) >= 1000},
-  {id:'days_270',    icon:'🍂', name:'Three Seasons',     desc:'270 days together',        test:()=> (meta.totalDays||0) >= 270},
-  {id:'feed_1000',   icon:'🍰', name:'Cookie Royalty',    desc:'1000 cookies',             test:()=> (state.feeds||0) >= 1000},
-  {id:'days_500',    icon:'💫', name:'Five Hundred Days',  desc:'500 days together',        test:()=> (meta.totalDays||0) >= 500},
-  {id:'draw_1000',   icon:'🌌', name:'Living Masterpiece', desc:'Draw together 1000 times', test:()=> (state.draws||0) >= 1000},
-  {id:'rest_200',    icon:'🌜', name:'Sweetest Dreams',    desc:'Rest 200 times',           test:()=> (state.rests||0) >= 200},
-  {id:'streak_60',   icon:'☄️', name:'Two-Month Streak',   desc:'A 60-day streak',          test:()=> (meta.streak||0) >= 60},
-  {id:'days_730',    icon:'🎇', name:'Two Years Together',  desc:'730 days together',        test:()=> (meta.totalDays||0) >= 730},
-  {id:'streak_90',   icon:'🔆', name:'Season-Long Streak',  desc:'A 90-day streak',          test:()=> (meta.streak||0) >= 90},
-  {id:'days_1000',   icon:'👑', name:'A Thousand Days',     desc:'1000 days together',       test:()=> (meta.totalDays||0) >= 1000},
-  {id:'hug_100',     icon:'💝', name:'Hundred Hugs',       desc:'100 hugs',                 test:()=> (state.hugs||0) >= 100},
-  {id:'visit_130',   icon:'🌍', name:'World Wanderer',     desc:'Visit 130 places',         test:()=> visited.size >= 130},
+  {id:'first_hug', icon:'🤗', name:'First Hug',       desc:'Give her a hug',            metric:'hugs',    goal:1,    test:()=> (state.hugs||0) >= 1},
+  {id:'hug_50',    icon:'💞', name:'Hug Champion',    desc:'50 hugs',                  metric:'hugs',    goal:50,   test:()=> (state.hugs||0) >= 50},
+  {id:'cookie_25', icon:'🍪', name:'Cookie Lover',    desc:'25 cookies',               metric:'feeds',   goal:25,   test:()=> (state.feeds||0) >= 25},
+  {id:'cookie_100',icon:'🎂', name:'Cookie Monster',  desc:'100 cookies',              metric:'feeds',   goal:100,  test:()=> (state.feeds||0) >= 100},
+  {id:'artist',    icon:'🎨', name:'Little Artist',   desc:'Draw together 25 times',   metric:'draws',   goal:25,   test:()=> (state.draws||0) >= 25},
+  {id:'napper',    icon:'😴', name:'Cozy Napper',     desc:'Rest 5 times',             metric:'rests',   goal:5,    test:()=> (state.rests||0) >= 5},
+  {id:'explorer',  icon:'🧭', name:'Explorer',        desc:'Visit 50 places',          metric:'visits',  goal:50,   test:()=> visited.size >= 50},
+  {id:'globetrot', icon:'🗺️', name:'Globetrotter',    desc:'Visit every place',        metric:'visits',  goal:()=>SCENES.length, test:()=> visited.size >= SCENES.length},
+  {id:'collector', icon:'🧺', name:'Treasure Hunter', desc:'Collect 10 kinds',         metric:'collect', goal:10,   test:()=> collectedKinds() >= 10},
+  {id:'week',      icon:'🔥', name:'Week Together',    desc:'A 7-day streak',           metric:'streak',  goal:7,    test:()=> (meta.streak||0) >= 7},
+  {id:'month',     icon:'🌟', name:'A Month of Us',   desc:'30 days together',         metric:'days',    goal:30,   test:()=> (meta.totalDays||0) >= 30},
+  {id:'first_draw',  icon:'✏️', name:'First Doodle',    desc:'Draw together once',       metric:'draws',   goal:1,    test:()=> (state.draws||0) >= 1},
+  {id:'first_cookie',icon:'🍪', name:'First Cookie',    desc:'Share a cookie',           metric:'feeds',   goal:1,    test:()=> (state.feeds||0) >= 1},
+  {id:'first_nap',   icon:'💤', name:'First Nap',       desc:'Take a rest',              metric:'rests',   goal:1,    test:()=> (state.rests||0) >= 1},
+  {id:'draw_100',    icon:'🖼️', name:'Master Artist',    desc:'Draw together 100 times',  metric:'draws',   goal:100,  test:()=> (state.draws||0) >= 100},
+  {id:'rest_25',     icon:'🛌', name:'Well Rested',     desc:'Rest 25 times',            metric:'rests',   goal:25,   test:()=> (state.rests||0) >= 25},
+  {id:'hug_200',     icon:'🫂', name:'Endless Hugs',    desc:'200 hugs',                 metric:'hugs',    goal:200,  test:()=> (state.hugs||0) >= 200},
+  {id:'wanderer',    icon:'🌱', name:'Wanderer',        desc:'Visit 10 places',          metric:'visits',  goal:10,   test:()=> visited.size >= 10},
+  {id:'sightseer',   icon:'🧳', name:'Sightseer',       desc:'Visit 25 places',          metric:'visits',  goal:25,   test:()=> visited.size >= 25},
+  {id:'curator',     icon:'🔮', name:'Curator',         desc:'Collect 25 kinds',         metric:'collect', goal:25,   test:()=> collectedKinds() >= 25},
+  {id:'completion',  icon:'🏅', name:'Completionist',   desc:'Collect every kind',       metric:'collect', goal:()=>TRINKETS_ALL.length, test:()=> collectedKinds() >= TRINKETS_ALL.length},
+  {id:'streak_3',    icon:'✨', name:'Three in a Row',  desc:'A 3-day streak',           metric:'streak',  goal:3,    test:()=> (meta.streak||0) >= 3},
+  {id:'fortnight',   icon:'🗓️', name:'Two Weeks of Us', desc:'14 days together',         metric:'days',    goal:14,   test:()=> (meta.totalDays||0) >= 14},
+  {id:'season',      icon:'🌷', name:'A Season Together',desc:'90 days together',         metric:'days',    goal:90,   test:()=> (meta.totalDays||0) >= 90},
+  {id:'gallery',     icon:'🎨', name:'Gallery Opening', desc:'Save a drawing on the pad',metric:'gallery', goal:1,    test:()=> (typeof gallery!=='undefined') && gallery.length >= 1},
+  {id:'feed_50',     icon:'🧁', name:'Sweet Tooth',      desc:'50 cookies',               metric:'feeds',   goal:50,   test:()=> (state.feeds||0) >= 50},
+  {id:'feed_250',    icon:'🎂', name:'Endless Snacks',   desc:'250 cookies',              metric:'feeds',   goal:250,  test:()=> (state.feeds||0) >= 250},
+  {id:'draw_50',     icon:'🖍️', name:'Doodle Duo',       desc:'Draw together 50 times',   metric:'draws',   goal:50,   test:()=> (state.draws||0) >= 50},
+  {id:'hug_25',      icon:'🤗', name:'Warm Heart',       desc:'25 hugs',                  metric:'hugs',    goal:25,   test:()=> (state.hugs||0) >= 25},
+  {id:'hug_500',     icon:'💗', name:'A Thousand Arms',  desc:'500 hugs',                 metric:'hugs',    goal:500,  test:()=> (state.hugs||0) >= 500},
+  {id:'rest_10',     icon:'🌙', name:'Sleepyhead',       desc:'Rest 10 times',            metric:'rests',   goal:10,   test:()=> (state.rests||0) >= 10},
+  {id:'rest_50',     icon:'🛏️', name:'Dream Weaver',     desc:'Rest 50 times',            metric:'rests',   goal:50,   test:()=> (state.rests||0) >= 50},
+  {id:'visit_75',    icon:'🧭', name:'Pathfinder',       desc:'Visit 75 places',          metric:'visits',  goal:75,   test:()=> visited.size >= 75},
+  {id:'visit_100',   icon:'🏆', name:'Century Traveler', desc:'Visit 100 places',         metric:'visits',  goal:100,  test:()=> visited.size >= 100},
+  {id:'collect_50',  icon:'💠', name:'Grand Collector',  desc:'Collect 50 kinds',         metric:'collect', goal:50,   test:()=> collectedKinds() >= 50},
+  {id:'streak_14',   icon:'🔥', name:'Two-Week Streak',  desc:'A 14-day streak',          metric:'streak',  goal:14,   test:()=> (meta.streak||0) >= 14},
+  {id:'days_180',    icon:'🌻', name:'Half a Year of Us',desc:'180 days together',        metric:'days',    goal:180,  test:()=> (meta.totalDays||0) >= 180},
+  {id:'days_365',    icon:'🎉', name:'A Whole Year',     desc:'365 days together',        metric:'days',    goal:365,  test:()=> (meta.totalDays||0) >= 365},
+  {id:'gallery_full',icon:'🖼️', name:'Full Gallery',     desc:'Fill the drawing gallery', metric:'gallery', goal:6,    test:()=> (typeof gallery!=='undefined') && gallery.length >= 6},
+  {id:'draw_250',    icon:'🎭', name:'Prolific Painter',  desc:'Draw together 250 times',  metric:'draws',   goal:250,  test:()=> (state.draws||0) >= 250},
+  {id:'collect_75',  icon:'🗃️', name:'Master Collector',  desc:'Collect 75 kinds',         metric:'collect', goal:75,   test:()=> collectedKinds() >= 75},
+  {id:'streak_30',   icon:'🌟', name:'Month-Long Streak', desc:'A 30-day streak',          metric:'streak',  goal:30,   test:()=> (meta.streak||0) >= 30},
+  {id:'feed_500',    icon:'🍩', name:'Snack Legend',      desc:'500 cookies',              metric:'feeds',   goal:500,  test:()=> (state.feeds||0) >= 500},
+  {id:'rest_100',    icon:'😴', name:'Hundred Naps',      desc:'Rest 100 times',           metric:'rests',   goal:100,  test:()=> (state.rests||0) >= 100},
+  {id:'days_120',    icon:'📅', name:'Four Months of Us', desc:'120 days together',        metric:'days',    goal:120,  test:()=> (meta.totalDays||0) >= 120},
+  {id:'draw_500',    icon:'🏛️', name:'Gallery Legend',    desc:'Draw together 500 times',  metric:'draws',   goal:500,  test:()=> (state.draws||0) >= 500},
+  {id:'hug_1000',    icon:'💘', name:'Infinite Hugs',     desc:'1000 hugs',                metric:'hugs',    goal:1000, test:()=> (state.hugs||0) >= 1000},
+  {id:'days_270',    icon:'🍂', name:'Three Seasons',     desc:'270 days together',        metric:'days',    goal:270,  test:()=> (meta.totalDays||0) >= 270},
+  {id:'feed_1000',   icon:'🍰', name:'Cookie Royalty',    desc:'1000 cookies',             metric:'feeds',   goal:1000, test:()=> (state.feeds||0) >= 1000},
+  {id:'days_500',    icon:'💫', name:'Five Hundred Days',  desc:'500 days together',        metric:'days',    goal:500,  test:()=> (meta.totalDays||0) >= 500},
+  {id:'draw_1000',   icon:'🌌', name:'Living Masterpiece', desc:'Draw together 1000 times', metric:'draws',   goal:1000, test:()=> (state.draws||0) >= 1000},
+  {id:'rest_200',    icon:'🌜', name:'Sweetest Dreams',    desc:'Rest 200 times',           metric:'rests',   goal:200,  test:()=> (state.rests||0) >= 200},
+  {id:'streak_60',   icon:'☄️', name:'Two-Month Streak',   desc:'A 60-day streak',          metric:'streak',  goal:60,   test:()=> (meta.streak||0) >= 60},
+  {id:'days_730',    icon:'🎇', name:'Two Years Together',  desc:'730 days together',        metric:'days',    goal:730,  test:()=> (meta.totalDays||0) >= 730},
+  {id:'streak_90',   icon:'🔆', name:'Season-Long Streak',  desc:'A 90-day streak',          metric:'streak',  goal:90,   test:()=> (meta.streak||0) >= 90},
+  {id:'days_1000',   icon:'👑', name:'A Thousand Days',     desc:'1000 days together',       metric:'days',    goal:1000, test:()=> (meta.totalDays||0) >= 1000},
+  {id:'hug_100',     icon:'💝', name:'Hundred Hugs',       desc:'100 hugs',                 metric:'hugs',    goal:100,  test:()=> (state.hugs||0) >= 100},
+  {id:'visit_130',   icon:'🌍', name:'World Wanderer',     desc:'Visit 130 places',         metric:'visits',  goal:130,  test:()=> visited.size >= 130},
 ];
+function achCurrent(metric){
+  try{
+    switch(metric){
+      case 'hugs':    return (state.hugs||0);
+      case 'feeds':   return (state.feeds||0);
+      case 'draws':   return (state.draws||0);
+      case 'rests':   return (state.rests||0);
+      case 'visits':  return (typeof visited!=='undefined') ? visited.size : 0;
+      case 'collect': return collectedKinds();
+      case 'streak':  return (meta.streak||0);
+      case 'days':    return (meta.totalDays||0);
+      case 'gallery': return (typeof gallery!=='undefined') ? gallery.length : 0;
+    }
+  }catch(e){}
+  return 0;
+}
+function achGoal(a){
+  try{ return (typeof a.goal==='function') ? a.goal() : a.goal; }catch(e){ return a.goal||1; }
+}
 let achieved = (function(){ try{ const r=localStorage.getItem('bpet_achieved'); if(r) return new Set(JSON.parse(r)); }catch(e){} return new Set(); })();
 function saveAchieved(){ try{ localStorage.setItem('bpet_achieved', JSON.stringify([...achieved])); }catch(e){} }
 let toastQueue = [], toastBusy = false;
@@ -393,7 +412,15 @@ function buildSettings(){
   ACHIEVEMENTS.forEach(a=>{
     const got=achieved.has(a.id);
     const row=document.createElement('div'); row.className='achRow'+(got?'':' locked');
-    row.innerHTML=`<span class="ai">${a.icon}</span><span>${a.name}<small>${a.desc}</small></span>`;
+    if (a.metric){
+      let goal=achGoal(a); if(!(goal>0)) goal=1;
+      let cur=got ? goal : Math.min(achCurrent(a.metric), goal);
+      if(!(cur>=0)) cur=0;
+      const pct=Math.max(0, Math.min(100, Math.round(cur/goal*100)));
+      row.innerHTML=`<span class="ai">${a.icon}</span><span>${a.name}<small>${a.desc}</small><span class="pbar"><i style="width:${pct}%"></i></span></span><span class="achCount" style="font-size:11px;opacity:.7;white-space:nowrap;margin-left:6px">${cur} / ${goal}</span>`;
+    } else {
+      row.innerHTML=`<span class="ai">${a.icon}</span><span>${a.name}<small>${a.desc}</small></span>`;
+    }
     list.appendChild(row);
   });
 }
