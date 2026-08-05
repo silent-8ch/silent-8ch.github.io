@@ -1026,6 +1026,66 @@ const SCENE_SPOTS = {
     {nx:0.76, ny:0.16, r:46, e:'☀️', lines:['A pale polar sun ☀️','So low and soft','It barely warms us']},
     {nx:0.60, ny:0.46, r:46, e:'🏔️', lines:['A glacier wall 🏔️','Stretched across the sea','So ancient and still']},
   ],
+  candyshop: [
+    {nx:0.30, ny:0.24, r:54, e:'🍬', lines:['Jars of candy! 🍬','Every color imaginable','Which one first? 🥰']},
+    {nx:0.16, ny:0.55, r:48, e:'🔴', lines:['A gumball machine 🔴','Got a coin for me?','Round and colorful 😄']},
+    {nx:0.72, ny:0.55, r:46, e:'🍭', lines:['Spiral lollipops 🍭','So swirly and sweet','One for each of us? 💛']},
+    {nx:0.55, ny:0.60, r:50, e:'🍫', lines:['The display case 🍫','So many treats','I want to try them all 😋']},
+  ],
+  prairiestorm: [
+    {nx:0.40, ny:0.14, r:56, e:'⛈️', lines:['Big storm clouds ⛈️','So dark and heavy','Hold me close, love 🥰']},
+    {nx:0.62, ny:0.30, r:50, e:'⚡', lines:['Lightning! ⚡','Did you see that flash?','Count for the thunder…']},
+    {nx:0.20, ny:0.60, r:48, e:'🏚️', lines:['A lone barn 🏚️','Weathering the storm','Cozy shelter inside']},
+    {nx:0.84, ny:0.58, r:44, e:'🌀', lines:['A windmill spinning 🌀','Whirling in the wind','Round and round it goes']},
+  ],
+  millinery: [
+    {nx:0.30, ny:0.28, r:54, e:'👒', lines:['Rows of pretty hats 👒','So many styles!','Try one on me? 🥰']},
+    {nx:0.10, ny:0.55, r:46, e:'🪞', lines:['An oval mirror 🪞','Do I look elegant?','You always think so 💛']},
+    {nx:0.60, ny:0.62, r:46, e:'🎀', lines:['Spools of ribbon 🎀','Such lovely colors','For trimming the hats']},
+    {nx:0.80, ny:0.60, r:44, e:'🎩', lines:['A hat in progress 🎩','With a swaying plume','Almost finished!']},
+  ],
+  hedgemaze: [
+    {nx:0.50, ny:0.28, r:50, e:'🏰', lines:['A grand manor 🏰','Way off on the horizon','So stately and proud 🥰']},
+    {nx:0.28, ny:0.50, r:56, e:'🌳', lines:['The hedge maze! 🌳','So many twists','Don\'t let go of my hand 💛']},
+    {nx:0.50, ny:0.55, r:48, e:'⛲', lines:['A fountain at the center 🌊','We found the middle!','Make a wish 🥰']},
+    {nx:0.10, ny:0.90, r:44, e:'🍃', lines:['Topiary balls 🍃','Trimmed so round','Guarding the entrance']},
+  ],
+  optician: [
+    {nx:0.25, ny:0.28, r:54, e:'👓', lines:['Walls of eyeglasses 👓','So many frames!','Which suit me? 🥰']},
+    {nx:0.82, ny:0.28, r:46, e:'🔤', lines:['An eye chart 🔤','Can you read the bottom?','E… F… P… 😄']},
+    {nx:0.50, ny:0.55, r:50, e:'🕶️', lines:['The eye-test machine 🕶️','Better one, or two?','So many little lenses']},
+    {nx:0.14, ny:0.68, r:44, e:'🔍', lines:['Trial lenses 🔍','Clink, clink','All lined up 💛']},
+  ],
+  cornmaze: [
+    {nx:0.78, ny:0.14, r:50, e:'☀️', lines:['Hazy autumn sun ☀️','Low and golden','Such a crisp day 🥰']},
+    {nx:0.40, ny:0.52, r:58, e:'🌽', lines:['Tall corn walls 🌽','Which way now?','I think we\'re lost 😄']},
+    {nx:0.50, ny:0.58, r:46, e:'👨‍🌾', lines:['A scarecrow! 👨‍🌾','Standing guard','He knows the way out 💛']},
+    {nx:0.36, ny:0.90, r:46, e:'🎃', lines:['Pumpkins at the gate 🎃','Fat and orange','Let\'s pick one after']},
+  ],
+  petshop: [
+    {nx:0.18, ny:0.30, r:52, e:'🐠', lines:['Bubbly fish tanks 🐠','So many colors','I could watch for hours 🥰']},
+    {nx:0.50, ny:0.72, r:56, e:'🐶', lines:['Puppies! 🐶','Look at those wagging tails','Can we take one home? 🥺']},
+    {nx:0.82, ny:0.28, r:46, e:'🐦', lines:['A little bird 🐦','Swinging on its perch','Tweet tweet! 💛']},
+    {nx:0.85, ny:0.60, r:42, e:'🦴', lines:['Shelves of pet toys 🦴','Treats and squeaky things','So much to spoil them with']},
+  ],
+  balloonfest: [
+    {nx:0.50, ny:0.38, r:60, e:'🎈', lines:['A huge balloon! 🎈','Rising with the dawn','Let\'s float away in it 🥰']},
+    {nx:0.20, ny:0.52, r:50, e:'🎈', lines:['A blue-striped one 🎈','Drifting so gently','So many colors up there 💛']},
+    {nx:0.80, ny:0.34, r:48, e:'🎈', lines:['One climbing high 🎈','Whoosh — the burner!','Higher and higher']},
+    {nx:0.50, ny:0.85, r:50, e:'⛰️', lines:['Misty hills below ⛰️','Soft in the morning light','What a magical morning 🥰']},
+  ],
+  nursery: [
+    {nx:0.14, ny:0.18, r:48, e:'🌙', lines:['A moon nightlight 🌙','Glowing so softly','So peaceful in here 🥰']},
+    {nx:0.50, ny:0.58, r:54, e:'👶', lines:['A little crib 👶','Someone\'s fast asleep','Shhh, so precious 💛']},
+    {nx:0.50, ny:0.18, r:46, e:'⭐', lines:['A spinning mobile ⭐','Little stars and clouds','Round and round, so soothing']},
+    {nx:0.65, ny:0.62, r:44, e:'🎠', lines:['A rocking horse 🎠','And alphabet blocks','So many sweet little toys']},
+  ],
+  nightmarket: [
+    {nx:0.50, ny:0.06, r:50, e:'💡', lines:['Strings of lights 💡','Glowing over the street','So festive tonight 🥰']},
+    {nx:0.16, ny:0.44, r:54, e:'🍜', lines:['A food stall! 🍜','Steam rising off the pots','Mmm, smells amazing 😋']},
+    {nx:0.84, ny:0.40, r:48, e:'🏮', lines:['A paper lantern 🏮','Swaying warm and red','So cozy and glowing 💛']},
+    {nx:0.50, ny:0.30, r:46, e:'🌃', lines:['Rooftops behind 🌃','Dark against the night','The whole town\'s out']},
+  ],
 };
 // nearest hotspot hit for the current scene, or null
 function spotAt(px, py){

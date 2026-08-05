@@ -1534,3 +1534,218 @@ function encNowSec(){ try{ return (performance && performance.now ? performance.
     });
   }catch(e){}
 })();
+
+/* ----------------------------------------------------------------------------
+   FLOATING FEATHER. On breezy/bird scenes a soft feather see-saws down through
+   the air. Catch it before it lands for a light, tender little wish.
+   -------------------------------------------------------------------------- */
+(function encFeather(){
+  try{
+    const AIRY = new Set(['aviary','petshop','backyard','beach','pasture','alpinemeadow','kitehill',
+      'cliffs','lighthouse','marina','rooftop','rooftoppool','birchgrove','treehouse','campsite',
+      'butterflydome','greenhouse','sunroom','balloonfest','balloonride','skygondola','windmill']);
+    const FC = ['#f4f0e6','#e8dfff','#dfeeff','#ffe9ef'];
+    let fea = null, timer = 22 + Math.random()*40;
+    function canHere(){ try{ return AIRY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (fea){
+          fea.t += dt;
+          fea.y += fea.vy*dt;
+          fea.x += Math.sin(fea.t*1.5)*30*dt;      // wide see-saw drift
+          fea.rot = Math.sin(fea.t*1.5)*0.7;
+          if (fea.y > H*0.86) fea = null;           // landed — missed
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*48;
+          if (canHere()){
+            fea = { x: rand(W*0.2, W*0.8), y: -12, vy: rand(16,26), t:0, rot:0, col: pick(FC) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!fea) return;
+      try{
+        ctx.save();
+        ctx.translate(fea.x, fea.y); ctx.rotate(fea.rot);
+        // quill
+        ctx.strokeStyle = 'rgba(120,100,80,0.6)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, -9); ctx.lineTo(0, 9); ctx.stroke();
+        // vane
+        ctx.fillStyle = fea.col;
+        ctx.beginPath();
+        ctx.moveTo(0, -9);
+        ctx.quadraticCurveTo(6, -2, 0, 9);
+        ctx.quadraticCurveTo(-6, -2, 0, -9);
+        ctx.fill();
+        // barb lines
+        ctx.strokeStyle = 'rgba(150,140,130,0.5)'; ctx.lineWidth = 0.6;
+        for (let i=-6;i<=6;i+=3){
+          ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo((i<0? -1:1)* (4-Math.abs(i)*0.3), i+2); ctx.stroke();
+        }
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!fea) return false;
+      const cx = fea.x, cy = fea.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 26*26) return false;
+      say(pick(['Caught it! 🪶 a stray feather — they say an angel passed by',
+                'So light it\'s barely there 🪶 tuck it somewhere to remember today',
+                'A little wish on a feather 🕊️ soft as how I feel about you',
+                'Right into your hand 🪶 like it was always meant for you 💗']));
+      fxAt(cx, cy-6, '🪶'); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 2); refreshHUD();
+      fea = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   HEDGEHOG. On autumn/woodland scenes a little hedgehog trundles along the ground,
+   snuffling. Tap it before it curls away for a prickly-but-sweet moment.
+   -------------------------------------------------------------------------- */
+(function encHedgehog(){
+  try{
+    const WOODSY = new Set(['autumnforest','mapleforest','redwoods','birchgrove','mistyforest','orchard',
+      'backyard','campsite','treehouse','coveredbridge','pumpkinpatch','harvestbarn','cornmaze',
+      'hedgemaze','mossgarden','herbshed','cidermill','windmill','pasture']);
+    let hog = null, timer = 22 + Math.random()*40;
+    function canHere(){ try{ return WOODSY.has(SCENES[currentScene]); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (hog){
+          hog.t += dt;
+          if (hog.pause > 0){ hog.pause -= dt; hog.bob = Math.sin(hog.t*8)*0.6; }
+          else {
+            hog.x += hog.vx*dt;
+            hog.bob = Math.sin(hog.t*10)*1.2;
+            if (Math.random() < 0.35*dt) hog.pause = rand(0.6, 1.3);  // snuffle stop
+          }
+          if (hog.x < -20 || hog.x > W+20) hog = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*48;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            hog = { x: dir>0 ? -14 : W+14, groundY: H*0.81, bob:0, pause:0,
+                    vx: dir*rand(16,26), dir, t:0 };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!hog) return;
+      try{
+        const x = hog.x, y = hog.groundY + hog.bob, d = hog.dir;
+        ctx.save();
+        // spiky back
+        ctx.fillStyle = '#7a5c40';
+        ctx.beginPath(); ctx.ellipse(x, y, 9, 6, 0, 0, 7); ctx.fill();
+        ctx.strokeStyle = '#4d3824'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+        for (let i=-6;i<=6;i+=2.5){
+          ctx.beginPath(); ctx.moveTo(x - d*i*0.6, y - 4); ctx.lineTo(x - d*i*0.6 - d*1.5, y - 9); ctx.stroke();
+        }
+        // face
+        ctx.fillStyle = '#d8c2a6';
+        ctx.beginPath(); ctx.ellipse(x + d*8, y + 1, 4, 3.5, 0, 0, 7); ctx.fill();
+        // nose + eye
+        ctx.fillStyle = '#20130a';
+        ctx.beginPath(); ctx.arc(x + d*11, y + 1, 1.3, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + d*7, y - 1, 1, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!hog) return false;
+      const cx = hog.x, cy = hog.groundY + hog.bob;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 26*26) return false;
+      say(pick(['A hedgehog! 🦔 prickly outside, soft little heart — reminds me of no one 😄',
+                'Snuffle snuffle 🦔 the most determined tiny creature',
+                'He\'s hunting for beetles under the leaves 🍂 mind the spikes!',
+                'Aww, he unrolled just for you 🦔 he can tell you\'re kind 💛']));
+      fxAt(cx, cy-10, '🦔'); burstAt('🍂', cx, cy); if (typeof sfx==='function') sfx('find');
+      state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 3); refreshHUD();
+      hog = null;
+      return true;
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   WILL-O'-WISP. On marsh/fairy/enchanted scenes a pale teal spirit-flame bobs
+   and drifts low over the ground. Tap it to make a quiet, mysterious wish.
+   -------------------------------------------------------------------------- */
+(function encWisp(){
+  try{
+    const ENCHANTED = new Set(['willowispmarsh','fairyring','bayou','mistyforest','mushroomglade',
+      'runecircle','witchcottage','moontemple','crystalcave','cavehotspring','tidalcave','nightgarden',
+      'wizardtower','arcanelibrary','enchantedmirrorhall','bamboo','redwoods','mossgarden']);
+    let wisp = null, timer = 22 + Math.random()*40;
+    function darkish(){ try{ const s = SCENES[currentScene];
+      const alwaysDark = (s==='crystalcave'||s==='tidalcave'||s==='cavehotspring'||s==='wizardtower'||
+        s==='arcanelibrary'||s==='enchantedmirrorhall'||s==='runecircle'||s==='moontemple'||s==='witchcottage');
+      if (alwaysDark) return true;
+      return typeof isNight==='function' ? isNight() : (currentHour() >= 18.5 || currentHour() < 6);
+    }catch(e){ return true; } }
+    function canHere(){ try{ return ENCHANTED.has(SCENES[currentScene]) && darkish(); }catch(e){ return false; } }
+    EXTRA_UPDATERS.push(function(dt){
+      try{
+        if (wisp){
+          wisp.t += dt; wisp.life -= dt;
+          wisp.x += wisp.vx*dt + Math.sin(wisp.t*0.8)*10*dt;
+          wisp.y = wisp.baseY + Math.sin(wisp.t*1.6)*14;
+          wisp.glow = 0.55 + 0.45*Math.sin(wisp.t*2.2);
+          if (wisp.life <= 0 || wisp.x < -20 || wisp.x > W+20) wisp = null;
+          return;
+        }
+        timer -= dt;
+        if (timer <= 0){
+          timer = 30 + Math.random()*50;
+          if (canHere()){
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            const by = H*(0.6+Math.random()*0.12);
+            wisp = { x: dir>0 ? -12 : W+12, baseY: by, y: by, vx: dir*rand(8,14),
+                     t:0, glow:1, life: rand(10,16) };
+          }
+        }
+      }catch(e){}
+    });
+    EXTRA_DRAWERS.push(function(){
+      if (!wisp) return;
+      try{
+        const x = wisp.x, y = wisp.y, g = wisp.glow;
+        ctx.save();
+        ctx.globalAlpha = 0.25*g; ctx.fillStyle = '#6bffd0';
+        ctx.beginPath(); ctx.arc(x, y, 13, 0, 7); ctx.fill();
+        ctx.globalAlpha = 0.6*g; ctx.fillStyle = '#a6ffe6';
+        ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fill();
+        ctx.globalAlpha = 0.95; ctx.fillStyle = '#eafff8';
+        ctx.beginPath(); ctx.arc(x, y, 2.4, 0, 7); ctx.fill();
+        ctx.restore();
+      }catch(e){}
+    });
+    EXTRA_TAPS.push(function(px, py){
+      if (!wisp) return false;
+      const cx = wisp.x, cy = wisp.y;
+      const dx = px - cx, dy = py - cy;
+      if (dx*dx + dy*dy > 26*26) return false;
+      say(pick(['A will-o\'-wisp 🪷 old tales say to follow — but I\'d only follow you',
+                'A little spirit-light ✨ make a secret wish, my love',
+                'Careful, they lead wanderers astray 💚 good thing I\'m already home, with you',
+                'Cool and glowing 🌫️ the marsh is full of quiet magic tonight']));
+      fxAt(cx, cy-8, '✨'); burstAt('💚', cx, cy); if (typeof sfx==='function') sfx('find');
+      state.love = clamp(state.love + 5); state.fun = clamp(state.fun + 3); refreshHUD();
+      wisp = null;
+      return true;
+    });
+  }catch(e){}
+})();

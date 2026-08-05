@@ -4709,3 +4709,239 @@ function fxWalkHerTo(px, py){
     });
   }catch(e){}
 })();
+
+/* ============================================================================
+   FEATURES (Thread A, Round 28). Three more scene-gated micro-interactions, on
+   fresh scenes. No always-on overlays; each self-clears on scene change and its
+   tap returns false on a miss. Deferred callbacks capture coords first.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   67) DEVELOP A PHOTO  —  in the darkroom a print soaks in the tray under the red
+   safelight. Tap to agitate it and the image slowly surfaces — a little heart of
+   us — until it's fully developed. Tap once more to start a fresh print. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxDarkroom(){
+  try{
+    const AT = new Set(['darkroom','photolab']);
+    let dr = null;                       // {x,y,dev,g,cd,rip}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ dr = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), dev:0, g:0, cd:0, rip:0 }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ dr = null; return; }
+      if (!dr) build();
+      if (dr.cd > 0) dr.cd -= dt;
+      dr.rip += dt;
+      dr.g += (dr.dev - dr.g) * Math.min(1, dt*3);
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!dr || !here()) return;
+      const x = dr.x, y = dr.y, g = dr.g;
+      ctx.save();
+      // tray
+      ctx.fillStyle = '#2a2028';
+      ctx.beginPath(); ctx.ellipse(x, y, 20, 8, 0, 0, 7); ctx.fill();
+      // developer fluid
+      ctx.fillStyle = 'rgba(90,30,30,0.7)'; ctx.beginPath(); ctx.ellipse(x, y, 17, 6, 0, 0, 7); ctx.fill();
+      // paper
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(x, y, 17, 6, 0, 0, 7); ctx.clip();
+      const bob = Math.sin(dr.rip*2)*0.6;
+      ctx.fillStyle = 'rgba(230,225,215,0.85)'; ctx.fillRect(x-11, y-4+bob, 22, 9);
+      // the surfacing image — a little heart + initials
+      if (g > 0.05){
+        ctx.globalAlpha = Math.min(1, g);
+        ctx.fillStyle = '#6a4030';
+        const hx = x-3, hy = y-1+bob, s = 2.3;
+        ctx.beginPath();
+        ctx.moveTo(hx, hy+ s*1.4);
+        ctx.bezierCurveTo(hx - s*1.6, hy - s*0.3, hx - s*0.6, hy - s*1.4, hx, hy - s*0.4);
+        ctx.bezierCurveTo(hx + s*0.6, hy - s*1.4, hx + s*1.6, hy - s*0.3, hx, hy + s*1.4);
+        ctx.fill();
+        ctx.font = '5px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('P+K', x+6, y-1+bob);
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+      // red safelight hint (small, cornered — not a full overlay)
+      const sg = ctx.createRadialGradient(x+22, y-16, 0, x+22, y-16, 14);
+      sg.addColorStop(0, 'rgba(255,60,60,0.18)'); sg.addColorStop(1, 'rgba(255,60,60,0)');
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(x+22, y-16, 14, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!dr || !here()) return false;
+        if (px < dr.x - 20 || px > dr.x + 20 || py < dr.y - 10 || py > dr.y + 9) return false;
+        if (dr.cd > 0) return true;
+        dr.cd = 0.3;
+        const rx = dr.x, ry = dr.y - 6;                             // capture first
+        if (dr.dev >= 1){ dr.dev = 0; if (typeof fxAt === 'function') fxAt(rx, ry, '🌊'); return true; }  // fresh blank print
+        dr.dev = Math.min(1, dr.dev + 0.34);
+        if (typeof fxAt === 'function') fxAt(rx + rand(-6,6), ry, pick(['💧','✨']));
+        if (dr.dev >= 1){
+          if (typeof burstAt === 'function') burstAt(pick(['📷','💛','✨']), rx, ry-4);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['There we are! 📷','Look — us 🥰','It came out perfectly 💛','A keeper ✨']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          if (typeof sfx === 'function') sfx('draw');
+          if (typeof say === 'function' && Math.random() < 0.5) say(pick(['Coming into focus… ✨','Agitate, agitate 🌊','I see a shape 🥰']));
+          try{ state.love = clamp(state.love + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   68) THE SEWING MACHINE  —  in the sewing studio a machine sits threaded and
+   ready. Tap it to run a seam: the needle bobs, the fabric feeds, and a little
+   heart of stitches fills in stitch by stitch until it's finished. Scene-gated.
+   -------------------------------------------------------------------------- */
+(function fxSewingMachine(){
+  try{
+    const AT = new Set(['sewingstudio','tailorshop','quiltshop','sewingroom']);
+    const N = 14;
+    let sm = null;                       // {x,y,run,stitch,ph,cd}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ sm = { x: Math.max(W*0.16, Math.min(W*0.84, W*0.78)), y: rand(H*0.70, H*0.76), run:0, stitch:0, ph:0, cd:0 }; }
+    function heartPt(t){ // t in 0..1 around a small heart, returns [dx,dy]
+      const a = t*Math.PI*2;
+      const hx = 16*Math.pow(Math.sin(a),3);
+      const hy = 13*Math.cos(a) - 5*Math.cos(2*a) - 2*Math.cos(3*a) - Math.cos(4*a);
+      return [hx*0.28, -hy*0.28];
+    }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ sm = null; return; }
+      if (!sm) build();
+      if (sm.cd > 0) sm.cd -= dt;
+      if (sm.run > 0){ sm.run -= dt; sm.ph += dt*30; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!sm || !here()) return;
+      const x = sm.x, y = sm.y;
+      ctx.save();
+      // fabric with the stitched heart
+      ctx.fillStyle = '#f3ead8'; ctx.fillRect(x-16, y-4, 32, 12);
+      ctx.fillStyle = '#c94f6d';
+      const done = Math.round(sm.stitch * N);
+      for (let i=0;i<done;i++){ const p = heartPt(i/N); ctx.beginPath(); ctx.arc(x + p[0], y + 2 + p[1], 0.9, 0, 7); ctx.fill(); }
+      // machine base + arm
+      ctx.fillStyle = '#3a6ea5';
+      ctx.fillRect(x-18, y+6, 36, 5);                              // bed
+      ctx.fillRect(x-16, y-24, 7, 30);                            // pillar
+      ctx.fillRect(x-16, y-24, 30, 7);                            // arm
+      ctx.fillStyle = '#2f5a86'; ctx.beginPath(); ctx.arc(x+13, y-20, 4, 0, 7); ctx.fill();   // hand wheel
+      // needle head + needle bobbing
+      ctx.fillStyle = '#2f5a86'; ctx.fillRect(x+6, y-20, 8, 10);
+      const nb = sm.run > 0 ? Math.abs(Math.sin(sm.ph))*4 : 0;
+      ctx.strokeStyle = '#c9ccd2'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(x+10, y-10); ctx.lineTo(x+10, y-2 + nb); ctx.stroke();
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!sm || !here()) return false;
+        if (px < sm.x - 20 || px > sm.x + 20 || py < sm.y - 26 || py > sm.y + 12) return false;
+        if (sm.cd > 0) return true;
+        sm.cd = 0.25; sm.run = 0.9;
+        if (sm.stitch >= 1){ sm.stitch = 0; if (typeof sfx === 'function') sfx('draw'); return true; }  // fresh patch
+        sm.stitch = Math.min(1, sm.stitch + 0.34);
+        const hx = sm.x, hy = sm.y - 4;                             // capture first
+        if (sm.stitch >= 1){
+          if (typeof burstAt === 'function') burstAt(pick(['🧵','❤️','✨']), hx, hy);
+          if (typeof sfx === 'function') sfx('find');
+          if (typeof say === 'function') say(pick(['A little heart, all done! ❤️','Stitched with love 🧵','Made just for you 🥰','Ta-da! ✨']));
+          try{ state.love = clamp(state.love + 4); state.fun = clamp(state.fun + 2); state.energy = clamp(state.energy + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        } else {
+          if (typeof sfx === 'function') sfx('draw');
+          if (typeof say === 'function' && Math.random() < 0.5) say(pick(['Rrr-rrr goes the needle 🧵','Almost there ✨','Steady hands 😌']));
+          try{ state.fun = clamp(state.fun + 1); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        }
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
+
+/* ----------------------------------------------------------------------------
+   69) THE PUPPET THEATER  —  in the puppet theater a curtained little stage waits.
+   Tap it and a puppet pops up from behind the drapes to wave and take a bow, then
+   ducks back down. Scene-gated; the stage sits up to the side.
+   -------------------------------------------------------------------------- */
+(function fxPuppetTheater(){
+  try{
+    const AT = new Set(['puppettheater','puppetshow','marionette']);
+    const COLORS = ['#ff8fab','#8ad3ff','#ffd166','#9be59b','#c8a2ff'];
+    let pt = null;                       // {x,y,pop,ph,cd,col}
+    function here(){ try{ return (typeof SCENES!=='undefined') && AT.has(SCENES[currentScene]); }catch(e){ return false; } }
+    function build(){ pt = { x: Math.max(W*0.2, Math.min(W*0.8, W*0.74)), y: rand(H*0.38, H*0.46), pop:0, ph:0, cd:0, col: pick(COLORS) }; }
+
+    EXTRA_UPDATERS.push(function(dt){
+      if (!here()){ pt = null; return; }
+      if (!pt) build();
+      if (pt.cd > 0) pt.cd -= dt;
+      if (pt.pop > 0){ pt.pop -= dt; pt.ph += dt*8; }
+    });
+
+    EXTRA_DRAWERS.push(function(){
+      if (!pt || !here()) return;
+      const x = pt.x, y = pt.y, w = 46, h = 40;
+      const left = x - w/2, top = y - h/2, floor = y + h/2 - 4;
+      ctx.save();
+      // stage box
+      ctx.fillStyle = '#5a3a2a'; ctx.fillRect(left-3, top-3, w+6, h+6);
+      ctx.fillStyle = '#1e1420'; ctx.fillRect(left, top, w, h);
+      // puppet rising in the opening (drawn before curtains so drapes frame it)
+      if (pt.pop > 0){
+        const rise = Math.max(0, Math.min(1, Math.min((2.0-pt.pop)/0.25, pt.pop/0.3, 1)));
+        const py = floor - rise*24;
+        const wave = Math.sin(pt.ph)*0.6;
+        ctx.save();
+        // body
+        ctx.fillStyle = pt.col; ctx.beginPath(); ctx.moveTo(x-6, floor); ctx.lineTo(x+6, floor); ctx.lineTo(x+4, py+6); ctx.lineTo(x-4, py+6); ctx.closePath(); ctx.fill();
+        // head
+        ctx.fillStyle = '#ffe0c2'; ctx.beginPath(); ctx.arc(x, py, 6, 0, 7); ctx.fill();
+        // eyes + smile
+        ctx.fillStyle = '#3a2a20'; ctx.beginPath(); ctx.arc(x-2, py-1, 0.9, 0, 7); ctx.arc(x+2, py-1, 0.9, 0, 7); ctx.fill();
+        ctx.strokeStyle = '#3a2a20'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.arc(x, py+1, 2.4, 0.2, Math.PI-0.2); ctx.stroke();
+        // waving arm
+        ctx.strokeStyle = pt.col; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x+4, py+8); ctx.lineTo(x+9, py+2 - wave*4); ctx.stroke();
+        ctx.restore();
+      }
+      // curtains (drapes framing the opening)
+      ctx.fillStyle = '#a33';
+      ctx.beginPath(); ctx.moveTo(left, top); ctx.lineTo(left+13, top); ctx.quadraticCurveTo(left+7, top+h*0.5, left+11, floor); ctx.lineTo(left, floor); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(left+w, top); ctx.lineTo(left+w-13, top); ctx.quadraticCurveTo(left+w-7, top+h*0.5, left+w-11, floor); ctx.lineTo(left+w, floor); ctx.closePath(); ctx.fill();
+      // valance
+      ctx.fillStyle = '#c0392b'; ctx.fillRect(left, top, w, 7);
+      ctx.fillStyle = '#e0b84a'; ctx.fillRect(left, top+7, w, 1.5);
+      ctx.restore();
+    });
+
+    EXTRA_TAPS.push(function(px, py){
+      try{
+        if (!pt || !here()) return false;
+        const w = 46, h = 40;
+        if (px < pt.x - w/2 - 3 || px > pt.x + w/2 + 3 || py < pt.y - h/2 - 3 || py > pt.y + h/2 + 3) return false;
+        if (pt.cd > 0) return true;
+        pt.cd = 1.2; pt.pop = 2.0; pt.ph = 0; pt.col = pick(COLORS);
+        const bx = pt.x, by = pt.y - 18;                            // capture first
+        if (typeof sfx === 'function') sfx('find');
+        if (typeof burstAt === 'function') burstAt(pick(['🎭','👏','✨']), bx, by);
+        if (typeof say === 'function') say(pick(['Ta-daa! 🎭','Take a bow! 👏','Hello up there! 🥰','Encore! ✨']));
+        try{ state.fun = clamp(state.fun + 4); state.love = clamp(state.love + 2); if (typeof refreshHUD==='function') refreshHUD(); }catch(e){}
+        return true;
+      }catch(e){ return false; }
+    });
+  }catch(e){}
+})();
