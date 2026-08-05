@@ -39,7 +39,7 @@ const CONFIG = {
    To add/replace a sheet later, just edit the entry (src / cols / rows / fps).
    ---------------------------------------------------------------------------- */
 const SHEETS = {
-  walk: { src:"k-walking3.png", cols:4, rows:4, fps:8, displayH:150, footInset:0.07,
+  walk: { src:"sprites/walking-all/krystal-walk.png", cols:4, rows:4, fps:8, displayH:150, footInset:0.07,
           rowMap:{ down:0, left:1, right:2, up:3 } },
   eat:  { src:"k-eating.png",   cols:4, rows:1, fps:7, displayH:158, footInset:0.11 },
   draw: { src:"k-drawing.png",  cols:4, rows:1, fps:6, displayH:158, footInset:0.00 },
@@ -114,4 +114,3 @@ const TREATS = [
   {e:'🥧', n:'Pie',        l:['Pie! 🥧','Warm and cozy','A little slice?']},
 ];
 let offerTreat = TREATS[0];
-

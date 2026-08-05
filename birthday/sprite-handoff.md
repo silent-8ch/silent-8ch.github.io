@@ -8,7 +8,7 @@ Create warm, recognizable pixel-art sprites for a birthday game starring Krystal
 
 ## Consolidated original-photo reference
 
-- Use `outputs/people-original-photo-reference.png` as the primary visual source for new character sprites.
+- Use `reference-photos.png` as the primary visual source for new character sprites.
 - This contact sheet contains the seven original, unaltered photographs: two Krystal references and one each for Luna, Wade, Paul, Luke, and William.
 - Base identity and clothing decisions on these original photographs, not on previously generated sprites.
 - The contact sheet only resizes the photographs proportionally and adds labels; it does not redraw, retouch, crop, stylize, or otherwise reinterpret the people.
@@ -16,8 +16,8 @@ Create warm, recognizable pixel-art sprites for a birthday game starring Krystal
 
 ### Reference priority for future Codex tasks
 
-1. `outputs/people-original-photo-reference.png` for identity, age, facial features, hair, body proportions, skin tone, and clothing.
-2. The individual original `codex-clipboard-...` photographs when a closer view is needed.
+1. `reference-photos.png` for identity, age, facial features, hair, body proportions, skin tone, and clothing.
+2. The original photographs, if they are attached again, when a closer view is needed.
 3. Existing generated sprites only for pixel-art style, canvas dimensions, palette, pose, and animation timing.
 
 Do not use generated sprites as the identity source for another generation. They are derivatives and may contain accumulated inaccuracies.
@@ -29,7 +29,7 @@ Do not use generated sprites as the identity source for another generation. They
 - Transparent PNG output.
 - Krystal's standard outfit is a green Gators swim-team T-shirt, dark forest-green open cardigan/sweater, dusty-mauve ankle-length dress, and brown flip-flops.
 - Krystal has light skin, an oval face, large brown eyes, expressive dark eyebrows, and extremely long straight dark-brown hair.
-- Existing compact animation sheets are 256 px wide. Four-frame front-facing sheets are approximately 256 x 85 px.
+- Current directional walk sheets are 1024 x 1024 (four 256 px cells across and four rows).
 - Hug sprites use matching transparent 64 x 96 px canvases.
 
 ## People
@@ -90,19 +90,42 @@ Do not use generated sprites as the identity source for another generation. They
 - Remove mini-golf clubs, canes, phones, and other handheld objects.
 - Align both characters on the same foot baseline and overlap their visible hands/torsos to complete the hug.
 
-## Existing Krystal animations
+## Current walking animations
 
-- Walk: `outputs/birthday-game-sprites/wife-walk-template-256.png`
-- Eating, item-neutral: `outputs/birthday-game-sprites/wife-eating-template-256.png`
-- Drawing in an open sketchbook: `outputs/birthday-game-sprites/wife-drawing-template-256.png`
-- Crying: `outputs/birthday-game-sprites/wife-crying-template-256.png`
+All walk sheets are transparent 1024 x 1024 PNGs arranged as a strict 4 x 4
+grid (256 x 256 per frame). Rows are down, left, right, and up. Every row has
+four frames. Frames are automatically centered and pinned to pixel 236 inside
+each cell by `tools/process-walk-sprites.swift`; do not hand-adjust them.
+
+- Krystal: `sprites/walking-all/krystal-walk.png` (active player sheet)
+- Luna: `sprites/walking-all/luna-walk.png`
+- Wade: `sprites/walking-all/wade-walk.png`
+- Paul: `sprites/walking-all/paul-walk.png`
+- Luke: `sprites/walking-all/luke-walk.png`
+- William: `sprites/walking-all/william-walk.png`
+- Generation sources are retained beside the processed files as
+  `*-walk-source.png`.
+
+To reprocess a source:
+
+```sh
+CLANG_MODULE_CACHE_PATH=/tmp/codex-swift-module-cache \
+SWIFT_MODULECACHE_PATH=/tmp/codex-swift-module-cache \
+swift tools/process-walk-sprites.swift INPUT.png OUTPUT.png
+```
+
+## Other Krystal animations
+
+- Eating, item-neutral: `k-eating.png`
+- Drawing in an open sketchbook: `k-drawing.png`
+- Crying: `k-crying.png`
 
 ## Important continuation notes
 
-- When prompting image generation, attach the original-photo contact sheet and identify each named panel explicitly.
+- When prompting image generation, attach `reference-photos.png` and identify each named panel explicitly.
 - Use generated assets as style references only; never substitute them for original photographic identity references.
 - Preserve each person's age, build, hairstyle, and pictured outfit.
 - Favor recognizable silhouette and hair over excessive facial detail at low resolution.
 - Keep all new sprites visually consistent with the existing compact assets.
 - The eating animation intentionally contains no food or utensil so items can be overlaid later.
-- If the original reference photos are unavailable in a new task, attach them again; the temporary `codex-clipboard-...` paths may not persist across environments.
+- The individual temporary `codex-clipboard-...` paths are not present in this repository; use the consolidated contact sheet or attach originals again for closer detail.
