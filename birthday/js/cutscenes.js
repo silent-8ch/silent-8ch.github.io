@@ -53,7 +53,7 @@ function csDrawChar(name, x, feetY, dir, h, frame){
 /* ---------- Expression sprites ----------
    Each expression PNG is a 4-frame horizontal strip (1024x256, so 256x256 per frame).
    Lazily loaded, keyed by "name:expression" (e.g. "krystal:laugh"). */
-const EXPR_LIST = ['beckon','cheer','embarrassed','inspect','laugh','nod','point','sad','scared','search','shake','shrug','surprised','talk','think','wave'];
+const EXPR_LIST = ['beckon','carry','cheer','crouch','doorway','embarrassed','give','highfive','hug','inspect','interact','laugh','look','nod','point','pull','push','run','sad','scared','search','shake','shrug','sit','sleep','sneak','startled','surprised','talk','think','trip','wave'];
 const csExprSprites = {};
 
 function csLoadExpression(name, expression){
