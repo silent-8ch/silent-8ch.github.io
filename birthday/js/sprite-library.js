@@ -175,7 +175,22 @@
       const dx = (previewSize - dw) / 2, dy = (previewSize - dh) / 2;
       const newAncX = Math.round(((cx - dx) / dw) * 100) / 100;
       const newAncY = Math.round(((cy - dy) / dh) * 100) / 100;
-      lib.querySelector('#slAnchorVal').textContent = `anchorX:${newAncX}, anchorY:${newAncY}`;
+      // Apply to live registry so it takes effect immediately
+      s.anchorX = newAncX;
+      s.anchorY = newAncY;
+      lib.querySelector('#slAnchorVal').textContent = `anchorX:${newAncX}, anchorY:${newAncY} ✓`;
+      // Save to DB
+      if (isLocal) {
+        fetch('/api/sprite-anchors', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ sprite: s.name, anchorX: newAncX, anchorY: newAncY })
+        }).then(() => {
+          lib.querySelector('#slAnchorVal').textContent += ' (saved)';
+        }).catch(() => {
+          lib.querySelector('#slAnchorVal').textContent += ' (DB error)';
+        });
+      }
       anchorMode = false;
       lib.querySelector('#slAnchorBtn').textContent = 'Set anchor point (click preview)';
     });

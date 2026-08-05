@@ -47,6 +47,8 @@ class Handler(SimpleHTTPRequestHandler):
             self._save_position()
         elif parsed.path == '/api/sprite-flags':
             self._save_flag()
+        elif parsed.path == '/api/sprite-anchors':
+            self._save_anchor()
         else:
             self.send_error(404)
 
@@ -149,6 +151,27 @@ class Handler(SimpleHTTPRequestHandler):
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                     ON DUPLICATE KEY UPDATE notes=%s, src=%s, cols=%s, fps=%s, default_size=%s, resolved=0
                 """, (sprite, flag, notes, src, cols, fps, default_size, notes, src, cols, fps, default_size))
+            db.commit()
+            self._json_response({'ok': True})
+        finally:
+            db.close()
+
+    def _save_anchor(self):
+        data = self._read_body()
+        sprite = data.get('sprite')
+        ax = data.get('anchorX')
+        ay = data.get('anchorY')
+        if not sprite or ax is None or ay is None:
+            self._json_response({'error': 'sprite, anchorX, anchorY required'}, 400)
+            return
+        db = get_db()
+        try:
+            with db.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO sprite_anchors (sprite_name, anchor_x, anchor_y)
+                    VALUES (%s, %s, %s)
+                    ON DUPLICATE KEY UPDATE anchor_x=%s, anchor_y=%s, applied=0
+                """, (sprite, ax, ay, ax, ay))
             db.commit()
             self._json_response({'ok': True})
         finally:
