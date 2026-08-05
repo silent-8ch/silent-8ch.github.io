@@ -305,6 +305,76 @@ function applyNightVignette(scene){
   ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
 }
 
+/* ---- one clock-driven sky: the sun arcs east→overhead→west through the day,
+   the moon takes over at night. Only drawn over scenes that show an open,
+   general daytime sky (SCENE_SKY). Dark / self-lit / interior / nocturnal /
+   fixed-golden-hour scenes are deliberately left out so their own art stands. */
+// only true daytime-blue-sky scenes — anything painted at a fixed dawn / dusk /
+// golden-hour (vineyard, savanna, marina, wheatfield, desert, sunflowers…) is left
+// out on purpose so a midday sun never fights its own sky.
+const SCENE_SKY = new Set([
+  'beach','backyard','river','cherryblossom','autumnforest','lavender','rooftop',
+  'zengarden','tidepools','balloons','waterfall','pumpkinpatch','tulipfield','mountain',
+  'waterlily','pasture','orchard','windmill','topiary','koipond','cliffs','coveredbridge',
+  'canyon','alpinemeadow','frozenfalls','geyser','teaplantation','cranberrybog','icebergbay',
+  'hedgemaze','cornmaze','farmersmarket','kitehill','flowermarket','sunflowermaze','poppyfield',
+  'treehouse','hummingbirdgarden','lotuspond','birchgrove','balloonride','bonsaigarden',
+  'peonygarden','duckpond','beekeepergarden','citrusgrove','watermill','cranberryharvest',
+  'mapleforest','skygondola','driftwoodbeach',
+]);
+// where the sun / moon sits right now: a low→high→low arc that also travels
+// side to side, so it genuinely rises on one edge and sets on the other.
+function celestialArc(u){
+  u = Math.max(0, Math.min(1, u));
+  const horizon = H*0.44, peak = H*0.075;
+  const alt = Math.sin(u*Math.PI);              // 0 at the horizon, 1 at its highest
+  return { x: W*(0.13 + 0.74*u), y: horizon - alt*(horizon-peak), alt };
+}
+function celestialEdgeFade(u){ return Math.max(0, Math.min(1, Math.min(u, 1-u)*7)); }
+function drawSun(x, y, alt, a){
+  const cr = 255, cg = Math.round(150 + 90*alt), cb = Math.round(70 + 110*alt); // orange low → bright high
+  const r = 22 + (1-alt)*7;                      // looks a touch larger near the horizon
+  ctx.save();
+  const g = ctx.createRadialGradient(x,y,0, x,y,r*3.3);
+  g.addColorStop(0,    `rgba(${cr},${cg},${cb},${(0.5*a).toFixed(3)})`);
+  g.addColorStop(0.42, `rgba(${cr},${cg},${cb},${(0.16*a).toFixed(3)})`);
+  g.addColorStop(1,    `rgba(${cr},${cg},${cb},0)`);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x,y,r*3.3,0,7); ctx.fill();
+  ctx.globalAlpha = a; ctx.fillStyle = `rgb(${cr},${cg},${cb})`;
+  ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+  ctx.restore();
+}
+function drawMoon(x, y, a){
+  const r = 17;
+  ctx.save();
+  const g = ctx.createRadialGradient(x,y,0, x,y,r*3);
+  g.addColorStop(0, `rgba(220,230,255,${(0.34*a).toFixed(3)})`);
+  g.addColorStop(1, 'rgba(220,230,255,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x,y,r*3,0,7); ctx.fill();
+  ctx.globalAlpha = a; ctx.fillStyle = '#eef2ff';
+  ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+  ctx.fillStyle = 'rgba(198,208,238,0.7)';           // soft craters
+  ctx.beginPath(); ctx.arc(x-5,y-4,3,0,7);   ctx.fill();
+  ctx.beginPath(); ctx.arc(x+4,y+3,2.2,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(x-2,y+6,1.6,0,7); ctx.fill();
+  ctx.restore();
+}
+function drawCelestial(scene){
+  if (!SCENE_SKY.has(scene)) return;
+  const h = currentHour();
+  // SUN — up roughly 5:00 → 19:30, fading in/out at the horizon
+  if (h >= 5 && h <= 19.5){
+    const u = (h - 5) / 14.5, p = celestialArc(u), a = celestialEdgeFade(u);
+    if (a > 0.01) drawSun(p.x, p.y, p.alt, a);
+  }
+  // MOON — up roughly 19:00 → 6:30 (wraps past midnight), crossing the same arc
+  const mh = (h + 24 - 19) % 24;      // hours since 19:00
+  if (mh <= 11.5){
+    const u = mh / 11.5, p = celestialArc(u), a = celestialEdgeFade(u);
+    if (a > 0.01) drawMoon(p.x, p.y, a);
+  }
+}
+
 /* ---- ambient shooting star: a faint streak now and then at night ---- */
 let shoot = null, shootTimer = 9 + Math.random()*14;
 function updateShootingStar(dt){
@@ -357,6 +427,7 @@ function render(){
     draw();
     if (!SCENE_SELF_PET.has(scene)) drawPet();   // scenes that don't place her themselves
     applyDayNight(scene);                        // global time-of-day tint over scene + pet
+    drawCelestial(scene);                        // the one sun/moon, arcing with the real clock
     applyNightVignette(scene);                   // cozy edge-darkening after dark
     drawShootingStar();                          // rare bright streak across the night sky
     for (const f of EXTRA_DRAWERS){ try{ f(); }catch(e){} }   // add-on overlays (js/extras.js)

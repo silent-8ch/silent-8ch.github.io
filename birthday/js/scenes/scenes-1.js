@@ -17,12 +17,7 @@ function drawBeach(){
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, W, H * 0.45);
 
-  // Sun
-  const sunX = W * 0.82, sunY = H * 0.10;
-  ctx.fillStyle = '#fff4b0';
-  ctx.beginPath(); ctx.arc(sunX, sunY, 28, 0, 7); ctx.fill();
-  ctx.fillStyle = 'rgba(255,244,176,.3)';
-  ctx.beginPath(); ctx.arc(sunX, sunY, 42, 0, 7); ctx.fill();
+  // (sun is now the global clock-driven one — see drawCelestial in birthday.js)
 
   // Clouds
   drawCloud(W * 0.15 + Math.sin(t * 0.15) * 8, H * 0.08, 0.9);
@@ -1527,11 +1522,9 @@ registerScene('pottery', drawPottery);
 function drawLavender(){
   const t = sceneTime, horizon = H*0.42;
 
-  // sky + sun
+  // sky (sun is the global clock-driven one — see drawCelestial in birthday.js)
   const sky=ctx.createLinearGradient(0,0,0,horizon); sky.addColorStop(0,'#8fc0e8'); sky.addColorStop(1,'#f2e4c0');
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizon);
-  ctx.fillStyle='rgba(255,242,192,.3)'; ctx.beginPath(); ctx.arc(W*0.22,H*0.14,30,0,7); ctx.fill();
-  ctx.fillStyle='#fff2c0'; ctx.beginPath(); ctx.arc(W*0.22,H*0.14,20,0,7); ctx.fill();
 
   // distant hills + lone tree
   ctx.fillStyle='#b8c9a0'; ctx.beginPath(); ctx.moveTo(0,horizon); ctx.quadraticCurveTo(W*0.4,horizon-24,W*0.7,horizon-6); ctx.quadraticCurveTo(W*0.9,horizon-18,W,horizon-4); ctx.lineTo(W,horizon); ctx.closePath(); ctx.fill();
