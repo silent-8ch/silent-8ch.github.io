@@ -204,12 +204,14 @@ func savePNG(_ bitmap: Bitmap, to output: String) throws {
     }
 }
 
-func process(_ input: String, _ output: String) throws {
+func process(_ input: String, _ output: String, retainOnlyLargest: Bool = true) throws {
     var source = try loadPNG(input)
     removeChromaKey(&source)
-    for row in 0..<rows {
-        for column in 0..<columns {
-            retainLargestComponent(&source, column: column, row: row)
+    if retainOnlyLargest {
+        for row in 0..<rows {
+            for column in 0..<columns {
+                retainLargestComponent(&source, column: column, row: row)
+            }
         }
     }
 
@@ -267,7 +269,7 @@ func process(_ input: String, _ output: String) throws {
     print("processed \(input) -> \(output) (scale \(String(format: "%.3f", scale)))")
 }
 
-func splitActions(_ input: String, outputDirectory: String, names: [String]) throws {
+func splitActions(_ input: String, outputDirectory: String, names: [String], retainOnlyLargest: Bool = true) throws {
     guard names.count == rows else {
         throw NSError(domain: "WalkSprite", code: 11,
                       userInfo: [NSLocalizedDescriptionKey: "Exactly four action names are required"])
@@ -276,7 +278,7 @@ func splitActions(_ input: String, outputDirectory: String, names: [String]) thr
                                             withIntermediateDirectories: true)
     let atlasPath = URL(fileURLWithPath: outputDirectory)
         .appendingPathComponent(".processed-atlas.png").path
-    try process(input, atlasPath)
+    try process(input, atlasPath, retainOnlyLargest: retainOnlyLargest)
     let atlas = try loadPNG(atlasPath)
     for row in 0..<rows {
         var sheet = Bitmap(width: atlas.width, height: outputCell,
@@ -353,6 +355,9 @@ do {
     } else if CommandLine.arguments.count == 8 && CommandLine.arguments[1] == "--split-actions" {
         try splitActions(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
                          names: Array(CommandLine.arguments[4...7]))
+    } else if CommandLine.arguments.count == 8 && CommandLine.arguments[1] == "--split-actions-grouped" {
+        try splitActions(CommandLine.arguments[2], outputDirectory: CommandLine.arguments[3],
+                         names: Array(CommandLine.arguments[4...7]), retainOnlyLargest: false)
     } else if CommandLine.arguments.count == 3 {
         try process(CommandLine.arguments[1], CommandLine.arguments[2])
     } else {

@@ -19,6 +19,14 @@
     tableChair:  {src:base+'table-chair.png',cols:1,fps:0,defaultSize:65},
     teacup:      {src:base+'teacup.png',cols:1,fps:0,defaultSize:22},
     umbrella:    {src:base+'umbrella.png',cols:1,fps:0,defaultSize:65},
+    jellyfish: {src:base+'jellyfish.png',cols:4,fps:5,defaultSize:42},
+    parrot:    {src:base+'parrot.png',cols:4,fps:7,defaultSize:38},
+    crab:      {src:base+'crab.png',cols:4,fps:7,defaultSize:30},
+    whaleShark:{src:base+'whale-shark.png',cols:4,fps:5,defaultSize:90},
+    bunny:     {src:base+'bunny.png',cols:4,fps:7,defaultSize:40},
+    kittens:   {src:base+'kittens.png',cols:4,fps:6,defaultSize:44},
+    fireflies: {src:base+'fireflies.png',cols:4,fps:5,defaultSize:30},
+    reindeer:  {src:base+'reindeer.png',cols:4,fps:6,defaultSize:78},
   };
   for(const [name,config] of Object.entries(assets)) SpriteRenderer.register(name,config);
 })();
