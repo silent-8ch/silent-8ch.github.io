@@ -45,6 +45,20 @@
     archedWindow: {anchorX:.5, anchorY:.92},
     balconyOverlay: {anchorX:.5, anchorY:.88},
     bayWindow: {anchorX:.5, anchorY:.92},
+    brickChimney: {anchorX:.5, anchorY:.78},
+    brickWallCorner: {anchorX:.5, anchorY:.7},
+    cottageWindow: {anchorX:.49, anchorY:.9},
+    dockEdge: {anchorX:.5, anchorY:.92},
+    doorway: {anchorX:.5, anchorY:.92},
+    doubleDoor: {anchorX:.5, anchorY:.92},
+    emptyMarketStall: {anchorX:.51, anchorY:.77},
+    fenceCorner: {anchorX:.5, anchorY:.78},
+    flowerBoxWindow: {anchorX:.5, anchorY:.92},
+    gardenGazebo: {anchorX:.5, anchorY:.77},
+    gardenShed: {anchorX:.51, anchorY:.78},
+    grassCurbEdge: {anchorX:.5, anchorY:.92},
+    grassDirtEdge: {anchorX:.49, anchorY:.92},
+    ironGate: {anchorX:.5, anchorY:.9},
   };
   for (const [name, anc] of Object.entries(anchorOverrides)) {
     const sp = SpriteRenderer.getSprite(name);
