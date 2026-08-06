@@ -58,6 +58,8 @@
       const frame=Math.max(0,Math.min(sprite.cols-1,object.frame|0));
       const tinted=getTintedFrame(sprite,frame,object.tint,object.tintAmount);
       context.save();context.globalAlpha*=object.alpha;context.translate(object.x,object.y);context.scale(object.flipX?-1:1,1);
+      const crop=sprite.cropTop||0;
+      if(crop>0){const ch=height*(1-crop);context.beginPath();context.rect(-width*object.anchorX,-height*object.anchorY+height*crop,width,ch);context.clip();};
       context.drawImage(tinted||sprite.image,tinted?0:frame*sprite.fw,0,sprite.fw,sprite.fh,-width*object.anchorX,-height*object.anchorY,width,height);context.restore();
     }
     function drawPhase(phase){assertPhase(phase);const scene=getScene();const list=[...objects.values(),...submitted].filter(object=>object.phase===phase&&visible(object,scene)).sort((a,b)=>((a.depth??a.y)-(b.depth??b.y))||(a.order-b.order));for(const object of list)drawObject(object)}
