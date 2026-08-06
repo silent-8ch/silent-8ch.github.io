@@ -17,6 +17,12 @@
         }
       }
     }).catch(() => {});
+    fetch('/api/sprite-fps').then(r => r.json()).then(rows => {
+      for (const r of rows) {
+        const sprite = SpriteRenderer.getSprite(r.sprite_name);
+        if (sprite) sprite.fps = r.fps;
+      }
+    }).catch(() => {});
   }
 
   let libOpen = false;
@@ -44,6 +50,14 @@
         <button id="slPrev" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">◀ Prev</button>
         <button id="slNext" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Next ▶</button>
         <span id="slAnchorVal" style="font-family:monospace;font-size:10px;color:#4fc3f7;"></span>
+      </div>
+      <div id="slFps" style="margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <label style="color:#aaa;font-size:10px;">FPS:</label>
+        <button id="slFpsDn" style="font-size:12px;padding:1px 8px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">−</button>
+        <span id="slFpsVal" style="font-family:monospace;font-size:12px;color:#4fc3f7;min-width:40px;text-align:center;">--</span>
+        <button id="slFpsUp" style="font-size:12px;padding:1px 8px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">+</button>
+        <button id="slFpsSave" style="font-size:10px;padding:2px 8px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Save</button>
+        <span id="slFpsStatus" style="font-size:10px;color:#66bb6a;"></span>
       </div>
       <div style="margin-bottom:6px;">
         <label style="color:#aaa;font-size:10px;">Flag problem:</label>
@@ -241,6 +255,36 @@
     lib.querySelector('#slAnchorBtn').onclick = () => {
       anchorMode = !anchorMode;
       lib.querySelector('#slAnchorBtn').textContent = anchorMode ? 'Click on the preview...' : 'Set anchor point (click preview)';
+    };
+
+    // FPS control
+    const fpsEl = lib.querySelector('#slFps');
+    const fpsVal = lib.querySelector('#slFpsVal');
+    fpsEl.style.display = s.cols > 1 ? '' : 'none';
+    fpsVal.textContent = s.fps;
+    function adjustFps(delta) {
+      s.fps = Math.max(0, Math.round((s.fps + delta) * 10) / 10);
+      fpsVal.textContent = s.fps;
+      // Restart preview with new fps
+      if (previewAnim) { clearTimeout(previewAnim); previewAnim = null; }
+      frame = 0;
+      drawPreview();
+    }
+    lib.querySelector('#slFpsDn').onclick = () => adjustFps(-0.5);
+    lib.querySelector('#slFpsUp').onclick = () => adjustFps(0.5);
+    lib.querySelector('#slFpsSave').onclick = () => {
+      if (isLocal) {
+        fetch('/api/sprite-fps', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ sprite: s.name, fps: s.fps })
+        }).then(() => {
+          lib.querySelector('#slFpsStatus').textContent = '✓';
+          setTimeout(() => lib.querySelector('#slFpsStatus').textContent = '', 2000);
+        }).catch(() => {
+          lib.querySelector('#slFpsStatus').textContent = 'DB error';
+        });
+      }
     };
 
     // Prev / Next navigation

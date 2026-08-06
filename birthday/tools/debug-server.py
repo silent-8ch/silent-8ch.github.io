@@ -40,6 +40,8 @@ class Handler(SimpleHTTPRequestHandler):
             self._get_all_positions()
         elif parsed.path == '/api/sprite-anchors':
             self._get_anchors()
+        elif parsed.path == '/api/sprite-fps':
+            self._get_fps()
         else:
             super().do_GET()
 
@@ -51,6 +53,8 @@ class Handler(SimpleHTTPRequestHandler):
             self._save_flag()
         elif parsed.path == '/api/sprite-anchors':
             self._save_anchor()
+        elif parsed.path == '/api/sprite-fps':
+            self._save_fps()
         else:
             self.send_error(404)
 
@@ -133,6 +137,26 @@ class Handler(SimpleHTTPRequestHandler):
         finally:
             db.close()
 
+    def _save_fps(self):
+        data = self._read_body()
+        sprite = data.get('sprite')
+        fps = data.get('fps')
+        if not sprite or fps is None:
+            self._json_response({'error': 'sprite, fps required'}, 400)
+            return
+        db = get_db()
+        try:
+            with db.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO sprite_fps (sprite_name, fps)
+                    VALUES (%s, %s)
+                    ON DUPLICATE KEY UPDATE fps=%s, applied=0
+                """, (sprite, fps, fps))
+            db.commit()
+            self._json_response({'ok': True})
+        finally:
+            db.close()
+
     def _save_flag(self):
         data = self._read_body()
         sprite = data.get('sprite')
@@ -163,6 +187,16 @@ class Handler(SimpleHTTPRequestHandler):
         try:
             with db.cursor() as cur:
                 cur.execute("SELECT sprite_name, anchor_x, anchor_y, no_anchor, reason FROM sprite_anchors")
+                rows = cur.fetchall()
+            self._json_response(rows)
+        finally:
+            db.close()
+
+    def _get_fps(self):
+        db = get_db()
+        try:
+            with db.cursor() as cur:
+                cur.execute("SELECT sprite_name, fps FROM sprite_fps")
                 rows = cur.fetchall()
             self._json_response(rows)
         finally:
