@@ -9116,8 +9116,8 @@ const CUTSCENE_MAP = {
 /* ============================================================================
    RANDOM TRIGGER SYSTEM
    ============================================================================ */
-let csTriggerTimer = 20 + Math.random() * 20;
-function resetCsTrigger(){ csTriggerTimer = 20 + Math.random() * 20; }
+let csTriggerTimer = 180 + Math.random() * 120;
+function resetCsTrigger(){ csTriggerTimer = 180 + Math.random() * 120; }
 
 // Debug: force-trigger a cutscene for the current scene (press X cycles through them)
 let csDebugIdx = 0;
@@ -9141,7 +9141,7 @@ function forceCutscene(){
     if (cutscene || birthday || DEBUG_MODE) return;
     csTriggerTimer -= dt;
     if (csTriggerTimer > 0) return;
-    csTriggerTimer = 20 + Math.random() * 20;   // reset to 20-40 seconds
+    csTriggerTimer = 180 + Math.random() * 120;   // reset to 20-40 seconds
 
     // don't trigger if pet is busy
     if (pet.animLock > 0 || pet.resting || isCrying()) return;
