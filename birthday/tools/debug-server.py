@@ -38,6 +38,8 @@ class Handler(SimpleHTTPRequestHandler):
             self._get_positions(parse_qs(parsed.query))
         elif parsed.path == '/api/sprite-positions/all':
             self._get_all_positions()
+        elif parsed.path == '/api/sprite-anchors':
+            self._get_anchors()
         else:
             super().do_GET()
 
@@ -153,6 +155,16 @@ class Handler(SimpleHTTPRequestHandler):
                 """, (sprite, flag, notes, src, cols, fps, default_size, notes, src, cols, fps, default_size))
             db.commit()
             self._json_response({'ok': True})
+        finally:
+            db.close()
+
+    def _get_anchors(self):
+        db = get_db()
+        try:
+            with db.cursor() as cur:
+                cur.execute("SELECT sprite_name, anchor_x, anchor_y FROM sprite_anchors")
+                rows = cur.fetchall()
+            self._json_response(rows)
         finally:
             db.close()
 

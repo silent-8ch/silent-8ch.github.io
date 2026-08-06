@@ -5,6 +5,19 @@
   if (!new URLSearchParams(window.location.search).has('debug')) return;
   const isLocal = window.location.hostname === 'localhost';
 
+  // Load saved anchors from DB and apply to live registry
+  if (isLocal) {
+    fetch('/api/sprite-anchors').then(r => r.json()).then(rows => {
+      for (const r of rows) {
+        const sprite = SpriteRenderer.getSprite(r.sprite_name);
+        if (sprite) {
+          sprite.anchorX = r.anchor_x;
+          sprite.anchorY = r.anchor_y;
+        }
+      }
+    }).catch(() => {});
+  }
+
   let libOpen = false;
   let libFilter = '';
   let selectedSprite = null;
