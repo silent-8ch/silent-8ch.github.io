@@ -9,6 +9,7 @@
   if (isLocal) {
     fetch('/api/sprite-anchors').then(r => r.json()).then(rows => {
       for (const r of rows) {
+        if (r.no_anchor) continue;  // skip flat textures
         const sprite = SpriteRenderer.getSprite(r.sprite_name);
         if (sprite) {
           sprite.anchorX = r.anchor_x;
@@ -108,6 +109,8 @@
   function showDetail(s) {
     const detail = lib.querySelector('#slDetail');
     detail.style.display = '';
+    const isTexture = s.renderMode === 'texture' || s.category === 'natural' || s.category === 'paths' || s.category === 'floors' || s.category === 'walls' || s.category === 'roofs' || s.category === 'structural' || s.category === 'water' || s.category === 'rugs' || s.category === 'decorative';
+    lib.querySelector('#slAnchor').style.display = isTexture ? 'none' : '';
     const stats = lib.querySelector('#slStats');
     const size = s.defaultSize || s.defaultWidth || '?';
     const phase = s.phase || 'actors';
@@ -158,7 +161,8 @@
       const dx = (previewSize - dw) / 2, dy = (previewSize - dh) / 2;
       const col = frame % s.cols;
       pctx.drawImage(s.image, col * s.fw, 0, s.fw, s.fh, dx, dy, dw, dh);
-      // Anchor point — large visible crosshair + ground line + label
+      // Anchor point — large visible crosshair + ground line + label (skip for textures)
+      if (isTexture) { /* no anchor display for flat textures */ } else {
       const ax = s.anchorX ?? 0.5, ay = s.anchorY ?? 1;
       const ancX = dx + dw * ax;
       const ancY = dy + dh * ay;
@@ -183,6 +187,7 @@
       pctx.font = 'bold 11px monospace';
       pctx.textAlign = 'left';
       pctx.fillText(`anchor (${ax}, ${ay})`, ancX + 10, ancY - 10);
+      }
       // Frame counter
       pctx.fillStyle = '#555';
       pctx.font = '9px monospace';

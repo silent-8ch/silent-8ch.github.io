@@ -162,7 +162,7 @@ class Handler(SimpleHTTPRequestHandler):
         db = get_db()
         try:
             with db.cursor() as cur:
-                cur.execute("SELECT sprite_name, anchor_x, anchor_y FROM sprite_anchors")
+                cur.execute("SELECT sprite_name, anchor_x, anchor_y, no_anchor, reason FROM sprite_anchors")
                 rows = cur.fetchall()
             self._json_response(rows)
         finally:
