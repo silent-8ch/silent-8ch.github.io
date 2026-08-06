@@ -252,9 +252,7 @@
         selectedSprite = sprites[next].name;
         buildList();
         showDetail(sprites[next]);
-        // Scroll the list to keep selection visible
-        const rows = lib.querySelector('#slList').children;
-        if (rows[next]) rows[next].scrollIntoView({ block: 'nearest' });
+        lib.scrollTop = 0;
       }
     }
     lib.querySelector('#slPrev').onclick = () => navigateSprite(-1);
