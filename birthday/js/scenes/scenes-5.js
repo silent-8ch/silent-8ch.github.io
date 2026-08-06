@@ -7060,3 +7060,202 @@ function drawTownSquare(){
   }
 }
 registerScene('townsquare', drawTownSquare, true);
+
+/* ── COTTAGE GARDEN (outdoor · warm afternoon · lush garden) ── */
+function drawCottageGarden(){
+  const t = sceneTime;
+  const groundY = H * 0.48;
+
+  // ---- warm afternoon sky (skyDay sprite) ----
+  SpriteRenderer.preload('skyDay');
+  const skyTex = SpriteRenderer.getSprite('skyDay');
+  if (skyTex && skyTex.ready) {
+    ctx.drawImage(skyTex.image, 0, 0, skyTex.fw, skyTex.fh, 0, 0, W, groundY);
+  } else {
+    ctx.fillStyle = '#6aaad8';
+    ctx.fillRect(0, 0, W, groundY);
+  }
+
+  // clouds
+  drawSpriteCloud(W * 0.18 + Math.sin(t * 0.1) * 8, H * 0.07, 0.8);
+  drawSpriteCloud(W * 0.65 + Math.sin(t * 0.07 + 3) * 10, H * 0.11, 0.6);
+
+  // ---- ground: tiled springGrass sprite ----
+  SpriteRenderer.preload('springGrass');
+  SpriteRenderer.preload('packedPath');
+  const grassTex = SpriteRenderer.getSprite('springGrass');
+  const pathTex = SpriteRenderer.getSprite('packedPath');
+  const ts = 64;
+  if (grassTex && grassTex.ready) {
+    for (let ty = groundY; ty < H; ty += ts)
+      for (let tx = 0; tx < W; tx += ts) {
+        const dw = Math.min(ts, W - tx);
+        const dh = Math.min(ts, H - ty);
+        ctx.drawImage(grassTex.image, 0, 0, grassTex.fw * (dw / ts), grassTex.fh * (dh / ts), tx, ty, dw, dh);
+      }
+  } else {
+    ctx.fillStyle = '#6a9a3a';
+    ctx.fillRect(0, groundY, W, H - groundY);
+  }
+
+  // ---- winding garden path clipped from packedPath sprite ----
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(W * 0.38, groundY);
+  ctx.quadraticCurveTo(W * 0.32, groundY + 40, W * 0.42, groundY + 80);
+  ctx.quadraticCurveTo(W * 0.54, groundY + 130, W * 0.46, H);
+  ctx.lineTo(W * 0.58, H);
+  ctx.quadraticCurveTo(W * 0.66, groundY + 130, W * 0.54, groundY + 80);
+  ctx.quadraticCurveTo(W * 0.44, groundY + 40, W * 0.50, groundY);
+  ctx.closePath();
+  ctx.clip();
+  if (pathTex && pathTex.ready) {
+    for (let ty = groundY; ty < H; ty += ts)
+      for (let tx = 0; tx < W; tx += ts) {
+        const dw = Math.min(ts, W - tx);
+        const dh = Math.min(ts, H - ty);
+        ctx.drawImage(pathTex.image, 0, 0, pathTex.fw * (dw / ts), pathTex.fh * (dh / ts), tx, ty, dw, dh);
+      }
+  } else {
+    ctx.fillStyle = '#c4a06a';
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // ---- cottage facade (left background) ----
+  SpriteRenderer.preload('whiteSiding');
+  SpriteRenderer.preload('cedarShingles');
+  const wallTex = SpriteRenderer.getSprite('whiteSiding');
+  const roofTex = SpriteRenderer.getSprite('cedarShingles');
+  // wall — whiteSiding texture clipped to wall rect
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, groundY - 90, W * 0.42, 92);
+  ctx.clip();
+  if (wallTex && wallTex.ready) {
+    for (let ty = groundY - 90; ty < groundY + 2; ty += ts)
+      for (let tx = 0; tx < W * 0.42; tx += ts)
+        ctx.drawImage(wallTex.image, 0, 0, wallTex.fw, wallTex.fh, tx, ty, ts, ts);
+  } else {
+    ctx.fillStyle = '#e8dcc0'; ctx.fillRect(0, groundY - 90, W * 0.42, 92);
+  }
+  ctx.restore();
+  // roof eave — cedarShingles clipped to eave strip
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(-8, groundY - 88);
+  ctx.lineTo(W * 0.46, groundY - 88);
+  ctx.lineTo(W * 0.42, groundY - 96);
+  ctx.lineTo(-4, groundY - 96);
+  ctx.closePath();
+  ctx.clip();
+  if (roofTex && roofTex.ready) {
+    for (let tx = -8; tx < W * 0.46; tx += ts)
+      ctx.drawImage(roofTex.image, 0, 0, roofTex.fw, roofTex.fh, tx, groundY - 96, ts, ts);
+  } else {
+    ctx.fillStyle = '#7a5a3a'; ctx.fill();
+  }
+  ctx.restore();
+  // gable peak — cedarShingles clipped to triangle
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(W * 0.04, groundY - 96);
+  ctx.lineTo(W * 0.21, groundY - 130);
+  ctx.lineTo(W * 0.38, groundY - 96);
+  ctx.closePath();
+  ctx.clip();
+  if (roofTex && roofTex.ready) {
+    for (let tx = 0; tx < W * 0.38; tx += ts)
+      for (let ty = groundY - 130; ty < groundY - 96; ty += ts)
+        ctx.drawImage(roofTex.image, 0, 0, roofTex.fw, roofTex.fh, tx, ty, ts, ts);
+  } else {
+    ctx.fillStyle = '#6a4a2e'; ctx.fill();
+  }
+  ctx.restore();
+
+  // architecture sprites on the cottage
+  SpriteRenderer.submit({sprite:'cottageWindow', phase:'background', x:W * 0.10, y:groundY - 10, frame:0});
+  SpriteRenderer.submit({sprite:'flowerBoxWindow', phase:'background', x:W * 0.30, y:groundY - 10, frame:0});
+  SpriteRenderer.submit({sprite:'woodDoor', phase:'background', x:W * 0.21, y:groundY + 2, frame:0});
+  SpriteRenderer.submit({sprite:'brickChimney', phase:'background', x:W * 0.08, y:groundY - 126, frame:0});
+
+  // ---- garden gazebo (right background) ----
+  SpriteRenderer.submit({sprite:'gardenGazebo', phase:'background', x:W * 0.82, y:groundY + 16, frame:0});
+
+  // ---- fence along the path ----
+  SpriteRenderer.submit({sprite:'fence', x:W * 0.68, y:groundY + 32, frame:0});
+  SpriteRenderer.submit({sprite:'woodGate', x:W * 0.44, y:groundY + 8, frame:0});
+
+  // ---- trees ----
+  SpriteRenderer.submit({sprite:'tree', x:W * 0.94, y:groundY + 20, frame:0});
+  SpriteRenderer.submit({sprite:'tree', x:-W * 0.04, y:groundY + 14, frame:1, tint:'#4a6a2a', tintAmount:0.15});
+
+  // ---- flowers & bushes scattered in garden beds ----
+  SpriteRenderer.submit({sprite:'floweringBush', x:W * 0.14, y:groundY + 34, frame:0});
+  SpriteRenderer.submit({sprite:'floweringBush', x:W * 0.72, y:groundY + 58, frame:1});
+  SpriteRenderer.submit({sprite:'wildflowers', x:W * 0.26, y:groundY + 50, frame:0});
+  SpriteRenderer.submit({sprite:'wildflowers', x:W * 0.60, y:groundY + 40, frame:1});
+  SpriteRenderer.submit({sprite:'wildflowers', x:W * 0.84, y:groundY + 72, frame:2});
+  SpriteRenderer.submit({sprite:'grassTuft', x:W * 0.08, y:groundY + 66, frame:0});
+  SpriteRenderer.submit({sprite:'grassTuft', x:W * 0.54, y:groundY + 90, frame:1});
+  SpriteRenderer.submit({sprite:'pottedPlant', x:W * 0.34, y:groundY + 4, frame:0});
+  SpriteRenderer.submit({sprite:'mailbox', x:W * 0.52, y:groundY + 14, frame:0});
+
+  // ---- park bench under the gazebo ----
+  SpriteRenderer.submit({sprite:'parkBench', x:W * 0.82, y:groundY + 56, frame:0});
+
+  // ---- animals ----
+  // butterfly drifting lazily over flowers
+  SpriteRenderer.submit({sprite:'butterfly', anchorY:0.5,
+    x:W * 0.30 + Math.sin(t * 0.8) * 24,
+    y:groundY + 28 + Math.cos(t * 1.1) * 12,
+    frame:Math.floor(t * 8) % 4});
+  SpriteRenderer.submit({sprite:'butterfly', anchorY:0.5,
+    x:W * 0.70 + Math.sin(t * 0.6 + 2) * 18,
+    y:groundY + 44 + Math.cos(t * 0.9 + 1) * 10,
+    frame:Math.floor(t * 8 + 2) % 4});
+
+  // bird on the cottage roof, occasionally flapping
+  const birdFlap = (t % 10 > 8);
+  SpriteRenderer.submit({sprite:'bird', phase:'background', x:W * 0.16, y:groundY - 100,
+    frame: birdFlap ? Math.floor(t * 6) % 4 : 0});
+  // second bird flying across
+  SpriteRenderer.submit({sprite:'bird', anchorY:0.5,
+    x:W * 0.50 + Math.sin(t * 0.3) * 40,
+    y:H * 0.12 + Math.sin(t * 0.5) * 6,
+    width:18, height:18,
+    frame:Math.floor(t * 6) % 4, flipX:true});
+
+  // bunny nibbling near wildflowers
+  const bunnyHop = Math.sin(t * 1.5) * 4;
+  SpriteRenderer.submit({sprite:'bunny',
+    x:W * 0.62 + Math.sin(t * 0.4) * 12,
+    y:groundY + 68 + bunnyHop,
+    frame:Math.floor(t * 5) % 4});
+
+  // kittens playing near the gazebo
+  SpriteRenderer.submit({sprite:'kittens',
+    x:W * 0.88, y:groundY + 80,
+    frame:Math.floor(t * 6) % 4});
+
+  // ---- pennant flags on the gazebo ----
+  SpriteRenderer.submit({sprite:'pennantFlags', phase:'background',
+    x:W * 0.82, y:groundY - 20,
+    frame:Math.floor(t * 4) % 4});
+
+  // ---- gentle afternoon mist (fogMist sprite) ----
+  SpriteRenderer.submit({sprite:'fogMist', phase:'overlay',
+    x:W * 0.50, y:H * 0.30, anchorX:0.5, anchorY:0.5,
+    width:W, height:64, alpha:0.12, frame:Math.floor(t * 2) % 4});
+
+  // ---- floating pollen / fireflies ----
+  SpriteRenderer.submit({sprite:'fireflies', phase:'overlay', anchorY:0.5,
+    x:W * 0.25 + Math.sin(t * 0.4) * 20,
+    y:groundY + 14 + Math.sin(t * 0.6) * 12,
+    alpha:0.4, frame:Math.floor(t * 5) % 4});
+  SpriteRenderer.submit({sprite:'fireflies', phase:'overlay', anchorY:0.5,
+    x:W * 0.72 + Math.sin(t * 0.3 + 2) * 16,
+    y:groundY + 40 + Math.sin(t * 0.5 + 1) * 10,
+    alpha:0.35, frame:Math.floor(t * 5 + 2) % 4});
+}
+registerScene('cottagegarden', drawCottageGarden);

@@ -86,6 +86,7 @@ const SCENE_LABELS = {
   school:'Elementary School', policestation:'Police Station',
   sewer:'Sewer Tunnel', highrise:'High-Rise Apartment',
   townsquare:'Town Square ✨',
+  cottagegarden:'Cottage Garden',
 };
 function sceneLabel(n){ return SCENE_LABELS[n] || (n.charAt(0).toUpperCase()+n.slice(1)); }
 const FAMILY_LOCATION_DEBUG = (()=>{
