@@ -8703,7 +8703,318 @@ const CUTSCENE_CATALOG = [
   { id: 'gen_arm_wrestling',    name: 'Arm Wrestling',       description: 'Krystal never loses!',                          scenes: ['any'],  chars: ['krystal','?'] },
   { id: 'gen_looking_up',       name: 'Looking Up',          description: 'What IS that up there?',                        scenes: ['any'],  chars: ['krystal','?'] },
   { id: 'gen_sharing_umbrella', name: 'Sharing Umbrella',    description: 'Room for two under here.',                      scenes: ['any'],  chars: ['krystal','?'] },
+  { id: 'dance_number',         name: 'The Big Dance Number', description: 'All six on stage — formations, solos, spotlight, confetti finale!', scenes: ['ballroom','balletstudio','jazzclub','carnival'], chars: ['krystal','paul','luna','wade','luke','william'] },
 ];
+
+/* ============================================================================
+   CUTSCENE: DANCE NUMBER  (triggers at ballroom, balletstudio, jazzclub, carnival)
+   All 6 characters — elaborate choreographed dance with formations, spotlights,
+   musical notes, and a confetti finale. ~25 seconds.
+   ============================================================================ */
+function csDanceNumber(){
+  const charH = 100;
+  const stageY = H * 0.82;
+  const cx = W / 2;
+  // Character positions for formations
+  const chars = ['krystal','paul','luna','wade','luke','william'];
+  const names = ['Krystal','Paul','Luna','Wade','Luke','William'];
+
+  // Confetti particles
+  const confetti = [];
+  const confettiColors = ['#ef5350','#4fc3f7','#ffa726','#66bb6a','#ab47bc','#fff176'];
+
+  // Musical notes floating up
+  const notes = [];
+  const noteChars = ['♪','♫','♬','🎵','🎶'];
+
+  // Spotlight state
+  let spotX = cx, spotR = 60;
+
+  function drawStage(cs) {
+    const t = cs.totalT;
+    // Dark background with colored stage lights
+    ctx.fillStyle = '#0a0812';
+    ctx.fillRect(0, 0, W, H);
+
+    // Stage floor — polished wood gradient
+    const floor = ctx.createLinearGradient(0, H * 0.68, 0, H);
+    floor.addColorStop(0, '#3a2a1a');
+    floor.addColorStop(0.3, '#4a3a28');
+    floor.addColorStop(1, '#2a1a10');
+    ctx.fillStyle = floor;
+    ctx.fillRect(0, H * 0.68, W, H * 0.32);
+
+    // Stage edge line
+    ctx.strokeStyle = '#6a5a4a';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, H * 0.68); ctx.lineTo(W, H * 0.68); ctx.stroke();
+
+    // Colored stage lights on ceiling — rotating hues
+    for (let i = 0; i < 5; i++) {
+      const lx = W * (0.1 + i * 0.2);
+      const hue = ((t * 30 + i * 72) % 360);
+      const glow = ctx.createRadialGradient(lx, 0, 0, lx, H * 0.3, H * 0.4);
+      glow.addColorStop(0, `hsla(${hue},70%,60%,.15)`);
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, W, H * 0.7);
+      // Light fixture
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.arc(lx, 6, 6, 0, 7); ctx.fill();
+      ctx.fillStyle = `hsl(${hue},70%,60%)`;
+      ctx.beginPath(); ctx.arc(lx, 8, 3, 0, 7); ctx.fill();
+    }
+
+    // Main spotlight
+    const spot = ctx.createRadialGradient(spotX, H * 0.5, 0, spotX, H * 0.5, spotR * 2);
+    spot.addColorStop(0, 'rgba(255,250,220,.12)');
+    spot.addColorStop(0.5, 'rgba(255,250,220,.04)');
+    spot.addColorStop(1, 'transparent');
+    ctx.fillStyle = spot;
+    ctx.fillRect(0, 0, W, H);
+
+    // Floor reflection of spotlight
+    ctx.fillStyle = 'rgba(255,250,220,.06)';
+    ctx.beginPath(); ctx.ellipse(spotX, stageY + 10, spotR, 12, 0, 0, 7); ctx.fill();
+
+    // Floating musical notes
+    ctx.font = '16px serif';
+    ctx.textAlign = 'center';
+    for (const n of notes) {
+      ctx.fillStyle = `rgba(255,255,200,${n.a})`;
+      ctx.fillText(n.ch, n.x, n.y);
+    }
+
+    // Confetti
+    for (const c of confetti) {
+      ctx.save();
+      ctx.translate(c.x, c.y);
+      ctx.rotate(c.rot);
+      ctx.fillStyle = c.col;
+      ctx.fillRect(-3, -1.5, 6, 3);
+      ctx.restore();
+    }
+  }
+
+  function updateNotes(cs) {
+    if (Math.random() < 0.15) {
+      notes.push({
+        ch: pick(noteChars),
+        x: rand(30, W - 30),
+        y: H * 0.7,
+        vx: rand(-8, 8),
+        vy: rand(-30, -50),
+        a: 1
+      });
+    }
+    for (let i = notes.length - 1; i >= 0; i--) {
+      const n = notes[i];
+      n.x += n.vx * 0.016;
+      n.y += n.vy * 0.016;
+      n.a -= 0.012;
+      if (n.a <= 0) notes.splice(i, 1);
+    }
+  }
+
+  function spawnConfetti() {
+    for (let i = 0; i < 8; i++) {
+      confetti.push({
+        x: rand(0, W), y: rand(-20, -60),
+        vx: rand(-30, 30), vy: rand(40, 100),
+        rot: rand(0, 6.28), vr: rand(-3, 3),
+        col: pick(confettiColors), a: 1
+      });
+    }
+  }
+
+  function updateConfetti() {
+    for (let i = confetti.length - 1; i >= 0; i--) {
+      const c = confetti[i];
+      c.x += c.vx * 0.016; c.y += c.vy * 0.016;
+      c.rot += c.vr * 0.016;
+      c.vx += rand(-2, 2);
+      if (c.y > H + 20) confetti.splice(i, 1);
+    }
+  }
+
+  // Draw all characters at given positions with expressions
+  function drawFormation(positions, expressions) {
+    for (let i = 0; i < chars.length; i++) {
+      const p = positions[i];
+      if (!p) continue;
+      const expr = expressions ? expressions[i] : null;
+      if (expr) {
+        csDrawExpression(chars[i], expr, p.x, p.y, charH);
+      } else {
+        csDrawChar(chars[i], p.x, p.y, p.dir || 'down', charH, p.frame || 0);
+      }
+    }
+  }
+
+  // Formation generators
+  function lineFormation(y, spacing) {
+    const startX = cx - (chars.length - 1) * spacing / 2;
+    return chars.map((_, i) => ({ x: startX + i * spacing, y }));
+  }
+
+  function vFormation(tipX, tipY, spread, depth) {
+    return [
+      { x: tipX, y: tipY },                           // Krystal at front
+      { x: tipX - spread, y: tipY + depth },           // Paul
+      { x: tipX + spread, y: tipY + depth },           // Luna
+      { x: tipX - spread * 1.8, y: tipY + depth * 2 }, // Wade
+      { x: tipX + spread * 1.8, y: tipY + depth * 2 }, // Luke
+      { x: tipX, y: tipY + depth * 2.5 },              // William
+    ];
+  }
+
+  function circleFormation(centerX, centerY, radius, t) {
+    return chars.map((_, i) => ({
+      x: centerX + Math.cos(t + i * Math.PI * 2 / chars.length) * radius,
+      y: centerY + Math.sin(t + i * Math.PI * 2 / chars.length) * radius * 0.4,
+    }));
+  }
+
+  function pairsFormation(y) {
+    return [
+      { x: cx - 60, y }, { x: cx - 40, y },   // Krystal + Paul
+      { x: cx + 20, y: y + 10 }, { x: cx + 40, y: y + 10 },  // Luna + Wade
+      { x: cx - 20, y: y + 20 }, { x: cx + 60, y: y + 20 },  // Luke + William
+    ];
+  }
+
+  return {
+    id: 'dance_number',
+    chars: chars,
+    skipable: true,
+    steps: [
+      // Step 1: Curtain up — everyone walks in from the sides (3s)
+      { dur: 3, draw(cs) {
+        drawStage(cs); updateNotes(cs);
+        const p = Math.min(1, cs.stepT / 2);
+        const positions = chars.map((_, i) => ({
+          x: (i % 2 === 0 ? -40 : W + 40) + (i % 2 === 0 ? 1 : -1) * p * ((i % 2 === 0 ? -40 : W + 40) - (cx - 75 + (i * 30))),
+          y: stageY,
+        }));
+        // Walking animation
+        const frame = Math.floor(cs.totalT * 4) % 4;
+        for (let i = 0; i < chars.length; i++) {
+          const dir = i % 2 === 0 ? 'right' : 'left';
+          csDrawChar(chars[i], positions[i].x, positions[i].y, dir, charH, frame);
+        }
+        spotX = cx; spotR = 100;
+        csDrawBubble(cx, H * 0.25, null, '🎶 Places, everyone! 🎶');
+      }},
+
+      // Step 2: Line formation — synchronized wave (3s)
+      { dur: 3, draw(cs) {
+        drawStage(cs); updateNotes(cs);
+        const pos = lineFormation(stageY, 50);
+        const expressions = chars.map((_, i) => {
+          const waveTime = (cs.stepT * 3 - i * 0.3);
+          return waveTime > 0 && waveTime < 1.5 ? 'wave' : 'cheer';
+        });
+        drawFormation(pos, expressions);
+        spotX = cx + Math.sin(cs.totalT * 2) * 40;
+        csDrawBubble(cx, H * 0.25, 'Krystal', 'Five, six, seven, eight!');
+      }},
+
+      // Step 3: V-formation — step forward (3s)
+      { dur: 3, draw(cs) {
+        drawStage(cs); updateNotes(cs);
+        const pos = vFormation(cx, stageY - 30, 45, 20);
+        const expressions = ['cheer','point','cheer','wave','laugh','cheer'];
+        drawFormation(pos, expressions);
+        spotX = cx; spotR = 80;
+        csDrawBubble(cx, H * 0.15, 'Paul', 'Follow her lead!');
+      }},
+
+      // Step 4: Circle formation — spinning around (4s)
+      { dur: 4, draw(cs) {
+        drawStage(cs); updateNotes(cs);
+        const pos = circleFormation(cx, stageY - 10, 70, cs.totalT * 1.5);
+        const expressions = chars.map(() => 'cheer');
+        drawFormation(pos, expressions);
+        spotX = cx; spotR = 120;
+      }},
+
+      // Step 5: Pairs dance — twirling together (3s)
+      { dur: 3, draw(cs) {
+        drawStage(cs); updateNotes(cs);
+        const basePos = pairsFormation(stageY);
+        // Add gentle swaying
+        const pos = basePos.map((p, i) => ({
+          x: p.x + Math.sin(cs.totalT * 3 + i) * 8,
+          y: p.y + Math.cos(cs.totalT * 2.5 + i) * 4,
+        }));
+        const expressions = ['laugh','laugh','cheer','cheer','wave','wave'];
+        drawFormation(pos, expressions);
+        spotX = cx + Math.sin(cs.totalT * 1.5) * 60;
+        csDrawBubble(cx - 50, H * 0.30, 'Luna', 'This is so fun!');
+      }},
+
+      // Step 6: Wade does a silly solo in the spotlight (3s)
+      { dur: 3, draw(cs) {
+        drawStage(cs); updateNotes(cs);
+        // Others in a line in the back, watching
+        const backLine = lineFormation(stageY + 10, 44);
+        const backExpr = ['laugh','laugh','laugh',null,'laugh','laugh'];
+        // Wade in front doing silly moves
+        const wadeX = cx + Math.sin(cs.stepT * 4) * 50;
+        const wadeExpr = cs.stepT % 1 < 0.3 ? 'trip' : cs.stepT % 1 < 0.6 ? 'cheer' : 'wave';
+        for (let i = 0; i < chars.length; i++) {
+          if (i === 3) continue; // skip Wade in back line
+          csDrawExpression(chars[i], backExpr[i] || 'laugh', backLine[i].x, backLine[i].y, charH);
+        }
+        csDrawExpression('wade', wadeExpr, wadeX, stageY - 20, charH * 1.1);
+        spotX = wadeX; spotR = 70;
+        csDrawBubble(wadeX, stageY - charH * 1.1 - 10, 'Wade', 'Watch THIS!');
+      }},
+
+      // Step 7: Everyone joins back — big synchronized move (3s)
+      { dur: 3, draw(cs) {
+        drawStage(cs); updateNotes(cs);
+        const pos = lineFormation(stageY, 48);
+        // Synchronized expression changes
+        const phase = Math.floor(cs.stepT * 3) % 4;
+        const syncExpr = ['cheer','wave','highfive','point'][phase];
+        const expressions = chars.map(() => syncExpr);
+        drawFormation(pos, expressions);
+        spotX = cx; spotR = 140;
+        csDrawBubble(cx, H * 0.20, null, '🎵 And a ONE and a TWO! 🎵');
+      }},
+
+      // Step 8: Grand finale — V formation + confetti + hearts (3s)
+      { dur: 3, draw(cs) {
+        drawStage(cs); updateNotes(cs);
+        spawnConfetti(); updateConfetti();
+        const pos = vFormation(cx, stageY - 20, 50, 18);
+        const expressions = chars.map(() => 'cheer');
+        drawFormation(pos, expressions);
+        spotX = cx; spotR = 160;
+        // Hearts burst
+        if (cs.stepT < 0.5) {
+          csHearts(cs, cx, stageY - 60, 6);
+        }
+        csDrawBubble(cx, H * 0.12, null, '✨ AMAZING! ✨');
+      }, onStart(cs) {
+        csHearts(cs, cx, stageY - 60, 8);
+      }},
+
+      // Step 9: Bow — everyone bows (2.5s)
+      { dur: 2.5, draw(cs) {
+        drawStage(cs); updateConfetti();
+        const pos = lineFormation(stageY, 48);
+        // Bow animation: crouch down then back up
+        const bowPhase = cs.stepT < 1.2 ? 'nod' : 'wave';
+        const expressions = chars.map(() => bowPhase);
+        drawFormation(pos, expressions);
+        spotX = cx; spotR = 160;
+        csDrawBubble(cx, H * 0.15, 'Krystal', 'Thank you, thank you! 🥰');
+      }},
+    ]
+  };
+}
 
 /* ============================================================================
    CUTSCENE REGISTRY  —  map scene names to cutscene factory functions
@@ -8734,8 +9045,8 @@ const CUTSCENE_MAP = {
   icebergbay:        [csSnowballFight],
   musicroom:         [csMusicJam],
   recordshop:        [csMusicJam, csKaraokeNight],
-  jazzclub:          [csMusicJam, csKaraokeNight],
-  carnival:          [csKaraokeNight],
+  jazzclub:          [csMusicJam, csKaraokeNight, csDanceNumber],
+  carnival:          [csKaraokeNight, csDanceNumber],
   artstudio:         [csPaintingTogether],
   pottery:           [csPaintingTogether],
   hedgemaze:         [csHideAndSeek],
@@ -8755,8 +9066,8 @@ const CUTSCENE_MAP = {
   treehouse:         [csPillowFort, csBoardGameNight],
   sunroom:           [csPillowFort],
   igloo:             [csPillowFort, csBoardGameNight],
-  balletstudio:      [csDanceLesson],
-  ballroom:          [csDanceLesson],
+  balletstudio:      [csDanceLesson, csDanceNumber],
+  ballroom:          [csDanceLesson, csDanceNumber],
   fireflies:         [csFireflyCatching],
   fireflypier:       [csFireflyCatching],
   nightgarden:       [csFireflyCatching],
