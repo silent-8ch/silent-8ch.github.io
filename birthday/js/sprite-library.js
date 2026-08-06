@@ -43,9 +43,11 @@
     <div id="slDetail" style="padding:10px;display:none;">
       <div id="slPreview" style="text-align:center;padding:10px;background:#111;border-radius:4px;margin-bottom:8px;position:relative;min-height:420px;"></div>
       <div id="slStats" style="font-family:monospace;font-size:10px;color:#aaa;margin-bottom:8px;"></div>
-      <div id="slAnchor" style="margin-bottom:8px;">
+      <div id="slAnchor" style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         <button id="slAnchorBtn" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Set anchor point (click preview)</button>
-        <span id="slAnchorVal" style="font-family:monospace;font-size:10px;color:#4fc3f7;margin-left:6px;"></span>
+        <button id="slPrev" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">◀ Prev</button>
+        <button id="slNext" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;">Next ▶</button>
+        <span id="slAnchorVal" style="font-family:monospace;font-size:10px;color:#4fc3f7;"></span>
       </div>
       <div style="margin-bottom:6px;">
         <label style="color:#aaa;font-size:10px;">Flag problem:</label>
@@ -239,6 +241,23 @@
       anchorMode = !anchorMode;
       lib.querySelector('#slAnchorBtn').textContent = anchorMode ? 'Click on the preview...' : 'Set anchor point (click preview)';
     };
+
+    // Prev / Next navigation
+    function navigateSprite(dir) {
+      const sprites = getAllSprites().filter(sp => !libFilter || sp.name.toLowerCase().includes(libFilter));
+      const idx = sprites.findIndex(sp => sp.name === s.name);
+      const next = idx + dir;
+      if (next >= 0 && next < sprites.length) {
+        selectedSprite = sprites[next].name;
+        buildList();
+        showDetail(sprites[next]);
+        // Scroll the list to keep selection visible
+        const rows = lib.querySelector('#slList').children;
+        if (rows[next]) rows[next].scrollIntoView({ block: 'nearest' });
+      }
+    }
+    lib.querySelector('#slPrev').onclick = () => navigateSprite(-1);
+    lib.querySelector('#slNext').onclick = () => navigateSprite(1);
 
     // Save flag
     lib.querySelector('#slSaveFlag').onclick = () => {
