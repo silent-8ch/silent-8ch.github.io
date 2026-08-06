@@ -212,6 +212,9 @@
       }
       anchorMode = false;
       lib.querySelector('#slAnchorBtn').textContent = 'Set anchor point (click preview)';
+      // Redraw preview with new anchor
+      frame = 0;
+      drawPreview();
     });
 
     lib.querySelector('#slAnchorBtn').onclick = () => {
