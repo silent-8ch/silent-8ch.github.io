@@ -909,6 +909,8 @@ function registerScene(name, drawFn, selfPet){
 
 // Debug: press 1/2/3 to switch scenes, c to toggle crying
 document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName||'').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
   if (e.key === '1') { currentScene = 0; sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }
   if (e.key === '2') { currentScene = 1; sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }
   if (e.key === '3') { currentScene = 2; sceneChangeTimer = 60; if(typeof resetCsTrigger==='function') resetCsTrigger(); }

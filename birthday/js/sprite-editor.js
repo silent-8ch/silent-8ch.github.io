@@ -178,6 +178,8 @@
 
   // Toggle with E key, pause with Space, resize with [ ]
   document.addEventListener('keydown', e => {
+    const tag = (e.target.tagName||'').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
     if (e.key === 'e' || e.key === 'E') {
       editorOpen = !editorOpen;
       panel.style.display = editorOpen ? '' : 'none';

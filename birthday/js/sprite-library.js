@@ -87,6 +87,8 @@
 
   // Toggle with L key
   document.addEventListener('keydown', e => {
+    const tag = (e.target.tagName||'').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
     if (e.key === 'l' || e.key === 'L') {
       libOpen = !libOpen;
       lib.style.display = libOpen ? '' : 'none';
