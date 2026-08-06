@@ -2173,36 +2173,55 @@ function fxWalkHerTo(px, py){
     });
 
     // draw a sprite frame directly onto canvas (EXTRA_DRAWERS runs after sprite phases)
-    function drawSpriteDirect(name, cx, cy, w, h, frame){
+    // tint uses an offscreen canvas so source-atop only affects the sprite, not the scene
+    let _tintBuf = null;
+    function drawSpriteDirect(name, cx, cy, w, h, frame, tint, tintAmt){
       SpriteRenderer.preload(name);
       const s = SpriteRenderer.getSprite(name);
       if (!s || !s.ready) return;
       const f = (frame || 0) % (s.cols || 1);
-      ctx.drawImage(s.image, f * s.fw, 0, s.fw, s.fh, cx - w * 0.5, cy - h, w, h);
+      const dx = cx - w * 0.5, dy = cy - h;
+      if (tint && tintAmt > 0) {
+        if (!_tintBuf) _tintBuf = document.createElement('canvas');
+        _tintBuf.width = s.fw; _tintBuf.height = s.fh;
+        const tc = _tintBuf.getContext('2d');
+        tc.clearRect(0, 0, s.fw, s.fh);
+        tc.drawImage(s.image, f * s.fw, 0, s.fw, s.fh, 0, 0, s.fw, s.fh);
+        tc.globalCompositeOperation = 'source-atop';
+        tc.globalAlpha = tintAmt;
+        tc.fillStyle = tint;
+        tc.fillRect(0, 0, s.fw, s.fh);
+        tc.globalAlpha = 1;
+        tc.globalCompositeOperation = 'source-over';
+        ctx.drawImage(_tintBuf, 0, 0, s.fw, s.fh, dx, dy, w, h);
+      } else {
+        ctx.drawImage(s.image, f * s.fw, 0, s.fw, s.fh, dx, dy, w, h);
+      }
     }
 
     EXTRA_DRAWERS.push(function(){
       if (!sc || !onSand()) return;
       const x = sc.x, base = sc.y;
+      const sand = '#e6c896';
       if (sc.stage === 0){
         // sand mound
-        drawSpriteDirect('rockBoulder', x, base + 4, 48, 30, 2);
+        drawSpriteDirect('rockBoulder', x, base + 4, 48, 30, 2, sand, 0.7);
       } else {
         // main keep (stage>=1)
-        drawSpriteDirect('stoneFoundation', x, base, 36, 20, 0);
+        drawSpriteDirect('stoneFoundation', x, base, 36, 20, 0, sand, 0.7);
         if (sc.stage >= 2){
           // corner towers
-          drawSpriteDirect('stoneColumn', x - 14, base - 16, 12, 26, 0);
-          drawSpriteDirect('stoneColumn', x + 14, base - 16, 12, 26, 0);
+          drawSpriteDirect('stoneColumn', x - 14, base - 16, 12, 26, 0, sand, 0.7);
+          drawSpriteDirect('stoneColumn', x + 14, base - 16, 12, 26, 0, sand, 0.7);
           // battlements
-          drawSpriteDirect('lowStoneCorner', x - 14, base - 38, 14, 6, 0);
-          drawSpriteDirect('lowStoneCorner', x + 14, base - 38, 14, 6, 0);
+          drawSpriteDirect('lowStoneCorner', x - 14, base - 38, 14, 6, 0, sand, 0.7);
+          drawSpriteDirect('lowStoneCorner', x + 14, base - 38, 14, 6, 0, sand, 0.7);
         }
         if (sc.stage >= 3){
           // door
-          drawSpriteDirect('archedDoor', x, base, 12, 16, 0);
+          drawSpriteDirect('archedDoor', x, base, 12, 16, 0, sand, 0.5);
           // central tower + flag
-          drawSpriteDirect('stoneColumn', x, base - 18, 12, 30, 0);
+          drawSpriteDirect('stoneColumn', x, base - 18, 12, 30, 0, sand, 0.7);
           drawSpriteDirect('pennantFlags', x, base - 46, 18, 18, Math.floor(sc.flag * 4));
         }
       }
