@@ -39,4 +39,15 @@
       });
     }
   }
+  // Baked anchor overrides from debug editor
+  const anchorOverrides = {
+    archedDoor: {anchorX:.51, anchorY:.92},
+    archedWindow: {anchorX:.5, anchorY:.92},
+    balconyOverlay: {anchorX:.5, anchorY:.88},
+    bayWindow: {anchorX:.5, anchorY:.92},
+  };
+  for (const [name, anc] of Object.entries(anchorOverrides)) {
+    const sp = SpriteRenderer.getSprite(name);
+    if (sp) { sp.anchorX = anc.anchorX; sp.anchorY = anc.anchorY; }
+  }
 })();
