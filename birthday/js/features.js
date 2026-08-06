@@ -511,8 +511,27 @@ function activeAccessory(){
   return 'none';
 }
 // cx = head center x, topY = top of head, s = pixel scale
+const _hatSprites = {};
+function _loadHat(kind) {
+  if (_hatSprites[kind]) return _hatSprites[kind];
+  const img = new Image();
+  const rec = { img, ready: false };
+  _hatSprites[kind] = rec;
+  img.onload = () => { rec.ready = true; };
+  img.src = 'sprites/accessories/' + kind + '.png';
+  return rec;
+}
+
 function drawAccessory(kind, cx, topY, s){
   if (!kind || kind==='none') return;
+  // Try sprite-based hat first
+  const hat = _loadHat(kind);
+  if (hat.ready) {
+    const size = 22 * s;  // scale relative to character
+    ctx.drawImage(hat.img, cx - size / 2, topY - size * 0.3, size, size);
+    return;
+  }
+  // Fallback to canvas primitives while sprite loads
   ctx.save();
   if (kind==='party'){
     ctx.fillStyle='#e0556a'; ctx.beginPath(); ctx.moveTo(cx-9*s,topY+6*s); ctx.lineTo(cx+9*s,topY+6*s); ctx.lineTo(cx,topY-16*s); ctx.closePath(); ctx.fill();
