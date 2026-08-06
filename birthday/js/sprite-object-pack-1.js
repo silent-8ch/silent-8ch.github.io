@@ -13,7 +13,7 @@
     /* static props — cols:4 for multi-image sheets */
     book:        {src:base+'book.png',cols:4,fps:0,defaultSize:28,anchorX:.51,anchorY:.68},
     bush:        {src:base+'bush.png',cols:4,fps:0,defaultSize:55},
-    cookingPot:  {src:base+'cooking-pot.png',cols:4,fps:0,defaultSize:38},
+    cookingPot:  {src:base+'cooking-pot.png',cols:4,fps:0,defaultSize:38,anchorX:.49,anchorY:.85},
     giftBox:     {src:base+'gift-box.png',cols:4,fps:0,defaultSize:36},
     pottedPlant: {src:base+'potted-plant.png',cols:1,fps:0,defaultSize:65},
     tableChair:  {src:base+'table-chair.png',cols:1,fps:0,defaultSize:65},
@@ -42,7 +42,7 @@
     marketAwning:  {src:base+'market-awning.png',cols:4,fps:3,defaultSize:116,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:88,depth:24},depthOffset:0},
     doorway:       {src:base+'doorway.png',cols:4,fps:2,defaultSize:112,phase:'ground',anchorX:.5,anchorY:.92,footprint:{width:70,depth:18},depthOffset:0},
     flowerWindow:  {src:base+'flower-window.png',cols:4,fps:0,defaultSize:108,phase:'ground',anchorX:.5,anchorY:.92,footprint:{width:86,depth:16},depthOffset:0},
-    pennantFlags:  {src:base+'pennant-flags.png',cols:4,fps:4,defaultSize:82,phase:'ground',anchorX:.5,anchorY:1,footprint:{width:22,depth:12},depthOffset:0},
+    pennantFlags:  {src:base+'pennant-flags.png',cols:4,fps:4,defaultSize:82,phase:'ground',anchorX:.29,anchorY:.91,footprint:{width:22,depth:12},depthOffset:0},/* NOTE: sprite has floating shelf artifact at top of all frames */
     waterRipple:   {src:base+'water-ripple.png',cols:4,fps:5,defaultSize:68,phase:'ground',anchorX:.5,anchorY:.5,footprint:{width:60,depth:20},depthOffset:-10},
   };
   for(const [name,config] of Object.entries(assets)) SpriteRenderer.register(name,config);

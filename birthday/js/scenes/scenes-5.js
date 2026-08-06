@@ -6906,9 +6906,9 @@ function drawTownSquare(){
 
   // ---- background buildings (architecture sprites) ----
   // Left building: plaster wall + shingle roof + shop window + storefront door
-  SpriteRenderer.submit({sprite:'plasterWallCorner', phase:'background', x:W * 0.12, y:groundY + 4, frame:0});
-  SpriteRenderer.submit({sprite:'shingleEave', phase:'background', x:W * 0.12, y:groundY - 68, frame:0});
-  SpriteRenderer.submit({sprite:'shopWindow', phase:'background', x:W * 0.06, y:groundY - 10, frame:0});
+  SpriteRenderer.submit({sprite:'plasterWallCorner', phase:'background', x:113, y:234, frame:0});
+  SpriteRenderer.submit({sprite:'shingleEave', phase:'background', x:170, y:182, frame:0});
+  SpriteRenderer.submit({sprite:'shopWindow', phase:'background', x:239, y:200, frame:0});
   SpriteRenderer.submit({sprite:'storefrontDoor', phase:'background', x:W * 0.20, y:groundY + 2, frame:0});
   SpriteRenderer.submit({sprite:'storefrontCanopy', phase:'foreground', x:W * 0.12, y:groundY - 20, frame:0});
 
@@ -6924,7 +6924,7 @@ function drawTownSquare(){
 
   // ---- trees (tall, edges) ----
   SpriteRenderer.submit({sprite:'tree', x:W * 0.04, y:groundY + 24, frame:0});
-  SpriteRenderer.submit({sprite:'tree', x:W * 0.96, y:groundY + 24, frame:0});
+  SpriteRenderer.submit({sprite:'tree', x:365, y:255, frame:0});
 
   // ---- props ----
   SpriteRenderer.submit({sprite:'streetlamp', x:W * 0.26, y:groundY + 28, frame:0});

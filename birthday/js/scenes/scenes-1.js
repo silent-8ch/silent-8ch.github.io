@@ -1144,11 +1144,10 @@ function drawCampsite(){
   // fireflies drifting above the campsite
   SpriteRenderer.submit({sprite:'fireflies',phase:'actors',x:W*0.60+Math.sin(t*0.6)*18,y:groundY+20+Math.sin(t*0.9)*12,anchorY:0.5,frame:Math.floor(t*5)%4});
   // tree at the edge of the campsite
-  SpriteRenderer.submit({sprite:'tree',x:W*0.92,y:groundY+48,frame:Math.floor(sceneTime*2)%4});
-  // grass tuft near the fire
-  SpriteRenderer.submit({sprite:'grassTuft',x:W*0.52,y:groundY+78,frame:Math.floor(sceneTime*3)%4});
-  SpriteRenderer.submit({sprite:'dirtPath',x:W*0.50,y:groundY+50,frame:0});
-  SpriteRenderer.submit({sprite:'grassDirtEdge',x:W*0.50,y:groundY+90,frame:1});
+  SpriteRenderer.submit({sprite:'tree',x:37,y:296,frame:Math.floor(sceneTime*2)%4});
+  SpriteRenderer.submit({sprite:'grassTuft',x:180,y:302,frame:Math.floor(sceneTime*3)%4});
+  SpriteRenderer.submit({sprite:'dirtPath',x:170,y:333,frame:0});
+  SpriteRenderer.submit({sprite:'grassDirtEdge',x:144,y:384,width:165,height:165,frame:1});
 }
 registerScene('campsite', drawCampsite);
 
