@@ -117,9 +117,22 @@ function drawBeach(){
 
   // Cookie plate on the sand
   SpriteRenderer.submit({sprite:'cookingPot',phase:'ground',x:W*0.20,y:H*0.82,anchorY:1,width:36,height:36,frame:0});
-  // Sand castle (boulder with sand tint + pennant flag on top)
-  SpriteRenderer.submit({sprite:'rockBoulder',phase:'ground',x:W*0.88,y:H*0.88,anchorY:1,width:40,height:40,frame:0,tint:'#d4b06a',tintAmount:0.6});
-  SpriteRenderer.submit({sprite:'pennantFlags',phase:'ground',x:W*0.88,y:H*0.76,anchorY:1,width:28,height:28,frame:Math.floor(t*4)%4});
+  // Sand castle — composed from architecture sprites tinted sand-colored
+  const sandTint = '#d4b06a', sandAmt = 0.7;
+  const castleX = W * 0.88, castleBase = H * 0.88;
+  // wide base wall
+  SpriteRenderer.submit({sprite:'stoneFoundation',phase:'ground',x:castleX,y:castleBase,anchorY:1,width:44,height:22,frame:0,tint:sandTint,tintAmount:sandAmt});
+  // left tower
+  SpriteRenderer.submit({sprite:'stoneColumn',phase:'ground',x:castleX-14,y:castleBase-18,anchorY:1,width:16,height:28,frame:0,tint:sandTint,tintAmount:sandAmt});
+  // right tower
+  SpriteRenderer.submit({sprite:'stoneColumn',phase:'ground',x:castleX+14,y:castleBase-18,anchorY:1,width:16,height:28,frame:0,tint:sandTint,tintAmount:sandAmt});
+  // center keep (taller)
+  SpriteRenderer.submit({sprite:'stoneColumn',phase:'ground',x:castleX,y:castleBase-20,anchorY:1,width:14,height:34,frame:0,tint:sandTint,tintAmount:sandAmt});
+  // battlements — low stone corners on top of each tower
+  SpriteRenderer.submit({sprite:'lowStoneCorner',phase:'ground',x:castleX-14,y:castleBase-42,anchorY:1,width:18,height:8,frame:0,tint:sandTint,tintAmount:sandAmt});
+  SpriteRenderer.submit({sprite:'lowStoneCorner',phase:'ground',x:castleX+14,y:castleBase-42,anchorY:1,width:18,height:8,frame:0,tint:sandTint,tintAmount:sandAmt});
+  // flag on top of center keep
+  SpriteRenderer.submit({sprite:'pennantFlags',phase:'ground',x:castleX,y:castleBase-52,anchorY:1,width:20,height:20,frame:Math.floor(t*4)%4});
 
   // sprite birds gliding over the water
   SpriteRenderer.submit({sprite:'bird',phase:'background',x:W*0.3+Math.sin(t*0.4)*30,y:H*0.26+Math.sin(t*0.6)*6,width:16,height:16,anchorY:0.5,frame:Math.floor(t*6)%4});

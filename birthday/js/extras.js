@@ -2172,40 +2172,40 @@ function fxWalkHerTo(px, py){
       if (sc.cd > 0) sc.cd -= dt; if (sc.doneT > 0) sc.doneT -= dt; sc.flag += dt;
     });
 
+    // draw a sprite frame directly onto canvas (EXTRA_DRAWERS runs after sprite phases)
+    function drawSpriteDirect(name, cx, cy, w, h, frame){
+      SpriteRenderer.preload(name);
+      const s = SpriteRenderer.getSprite(name);
+      if (!s || !s.ready) return;
+      const f = (frame || 0) % (s.cols || 1);
+      ctx.drawImage(s.image, f * s.fw, 0, s.fw, s.fh, cx - w * 0.5, cy - h, w, h);
+    }
+
     EXTRA_DRAWERS.push(function(){
       if (!sc || !onSand()) return;
-      const x = sc.x, base = sc.y, sand = '#e6c896', sand2 = '#d8b579';
-      ctx.save();
-      ctx.fillStyle = 'rgba(0,0,0,0.12)';
-      ctx.beginPath(); ctx.ellipse(x, base+3, 24, 5, 0, 0, 7); ctx.fill();
+      const x = sc.x, base = sc.y;
       if (sc.stage === 0){
-        ctx.fillStyle = sand; ctx.beginPath(); ctx.ellipse(x, base, 16, 8, 0, 0, 7); ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.beginPath(); ctx.ellipse(x-4, base-2, 5, 2.5, 0, 0, 7); ctx.fill();
+        // sand mound
+        drawSpriteDirect('rockBoulder', x, base + 4, 48, 30, 2);
       } else {
         // main keep (stage>=1)
-        ctx.fillStyle = sand; ctx.fillRect(x-14, base-16, 28, 16);
+        drawSpriteDirect('stoneFoundation', x, base, 36, 20, 0);
         if (sc.stage >= 2){
           // corner towers
-          ctx.fillRect(x-20, base-22, 8, 22);
-          ctx.fillRect(x+12, base-22, 8, 22);
-          // crenellations
-          ctx.fillStyle = sand2;
-          for (const tx of [x-20, x+12]){ ctx.fillRect(tx, base-25, 2.5, 3); ctx.fillRect(tx+3, base-25, 2.5, 3); ctx.fillRect(tx+6, base-25, 2, 3); }
+          drawSpriteDirect('stoneColumn', x - 14, base - 16, 12, 26, 0);
+          drawSpriteDirect('stoneColumn', x + 14, base - 16, 12, 26, 0);
+          // battlements
+          drawSpriteDirect('lowStoneCorner', x - 14, base - 38, 14, 6, 0);
+          drawSpriteDirect('lowStoneCorner', x + 14, base - 38, 14, 6, 0);
         }
         if (sc.stage >= 3){
           // door
-          ctx.fillStyle = sand2; ctx.beginPath(); ctx.moveTo(x-4, base); ctx.lineTo(x-4, base-7); ctx.arc(x, base-7, 4, Math.PI, 0); ctx.lineTo(x+4, base); ctx.closePath(); ctx.fill();
+          drawSpriteDirect('archedDoor', x, base, 12, 16, 0);
           // central tower + flag
-          ctx.fillStyle = sand; ctx.fillRect(x-5, base-26, 10, 12);
-          ctx.strokeStyle = '#7a5a35'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, base-26); ctx.lineTo(x, base-36); ctx.stroke();
-          const wave = Math.sin(sc.flag*5)*2;
-          ctx.fillStyle = '#e0556a'; ctx.beginPath(); ctx.moveTo(x, base-36); ctx.lineTo(x+9+wave, base-33.5); ctx.lineTo(x, base-31); ctx.closePath(); ctx.fill();
-          // a shell and a starfish at the base
-          ctx.font = '10px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillText('🐚', x-24, base+2); ctx.fillText('⭐', x+24, base+1);
+          drawSpriteDirect('stoneColumn', x, base - 18, 12, 30, 0);
+          drawSpriteDirect('pennantFlags', x, base - 46, 18, 18, Math.floor(sc.flag * 4));
         }
       }
-      ctx.restore();
     });
 
     EXTRA_TAPS.push(function(px, py){
