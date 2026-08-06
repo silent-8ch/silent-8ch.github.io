@@ -36,10 +36,6 @@
       <b>📚 Sprite Library</b>
       <span id="slClose" style="cursor:pointer;font-size:14px;">✕</span>
     </div>
-    <div style="padding:6px 10px;border-bottom:1px solid #222;">
-      <input id="slFilter" type="text" placeholder="Filter sprites..." style="width:100%;padding:4px 8px;background:#111;border:1px solid #333;border-radius:3px;color:#fff;font-size:11px;">
-    </div>
-    <div id="slList" style="max-height:35vh;overflow-y:auto;border-bottom:1px solid #333;"></div>
     <div id="slDetail" style="padding:10px;display:none;">
       <div id="slPreview" style="text-align:center;padding:10px;background:#111;border-radius:4px;margin-bottom:8px;position:relative;min-height:420px;"></div>
       <div id="slStats" style="font-family:monospace;font-size:10px;color:#aaa;margin-bottom:8px;"></div>
@@ -65,6 +61,10 @@
       <button id="slSaveFlag" style="font-size:10px;padding:3px 10px;background:#333;color:#fff;border:1px solid #555;border-radius:3px;cursor:pointer;margin-top:4px;">Save flag to DB</button>
       <span id="slSaveStatus" style="font-size:10px;color:#66bb6a;margin-left:6px;"></span>
     </div>
+    <div style="padding:6px 10px;border-bottom:1px solid #222;">
+      <input id="slFilter" type="text" placeholder="Filter sprites..." style="width:100%;padding:4px 8px;background:#111;border:1px solid #333;border-radius:3px;color:#fff;font-size:11px;">
+    </div>
+    <div id="slList" style="flex:1;overflow-y:auto;"></div>
   `;
   document.body.appendChild(lib);
 
