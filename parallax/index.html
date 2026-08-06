@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walk</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+  canvas { display: block; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+(() => {
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+
+  const WALK_SPEED = 60;
+  const TILE_VARIANTS = 3;
+  const CROSSFADE_PX = 100;
+
+  const LAYER_DEFS = [
+    { key: 'mountains',  speed: 0.05, yStart: 0.10, height: 0.55 },
+    { key: 'hills',      speed: 0.10, yStart: 0.25, height: 0.50 },
+    { key: 'skyline',    speed: 0.18, yStart: 0.30, height: 0.50 },
+    { key: 'industrial', speed: 0.28, yStart: 0.35, height: 0.50 },
+    { key: 'suburbs',    speed: 0.40, yStart: 0.40, height: 0.48 },
+    { key: 'farms',      speed: 0.55, yStart: 0.48, height: 0.45 },
+    { key: 'trees',      speed: 0.75, yStart: 0.55, height: 0.42 },
+    { key: 'forest',     speed: 1.0,  yStart: 0.62, height: 0.38 },
+  ];
+
+  const GROUND_Y = 0.88;
+  const SPRITE_SHEET = '../birthday/sprites/walking-all/paul-walk.png';
+  const SPRITE_FRAME = 256;
+  const WALK_ROW = 2;
+  const WALK_FRAMES = 4;
+  const WALK_FPS = 10;
+  const CHAR_H_RATIO = 0.22;
+
+  let W, H;
+  let scrollOffset = 0;
+  let spriteImg = null;
+  let spriteLoaded = false;
+  let frameIndex = 0;
+  let frameTimer = 0;
+
+  // --- Deterministic PRNG for tile sequences ---
+  function mulberry32(seed) {
+    return () => {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  // For each layer, precompute a long tile index sequence so the same
+  // tile-slot always shows the same variant (no flicker on recompute).
+  const SEQUENCE_LEN = 200;
+  const layerAssets = {};
+  const tileSequences = {};
+
+  function buildSequence(key, count) {
+    const rng = mulberry32(key.length * 7 + key.charCodeAt(0) * 31);
+    const seq = [];
+    let last = -1;
+    for (let i = 0; i < SEQUENCE_LEN; i++) {
+      let idx = Math.floor(rng() * count);
+      if (count > 1 && idx === last) idx = (idx + 1) % count;
+      seq.push(idx);
+      last = idx;
+    }
+    return seq;
+  }
+
+  // Load sprite
+  const sImg = new Image();
+  sImg.onload = () => { spriteLoaded = true; spriteImg = sImg; };
+  sImg.src = SPRITE_SHEET;
+
+  // Load tile variants
+  LAYER_DEFS.forEach(layer => {
+    layerAssets[layer.key] = [];
+    for (let i = 1; i <= TILE_VARIANTS; i++) {
+      const img = new Image();
+      img.onload = () => {
+        layerAssets[layer.key].push(img);
+        tileSequences[layer.key] = buildSequence(layer.key, layerAssets[layer.key].length);
+      };
+      img.src = `assets/${layer.key}_${i}.png`;
+    }
+  });
+
+  // --- Resize ---
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // --- Sky ---
+  let skyGrad = null;
+  let skyGradH = 0;
+  function drawSky() {
+    if (skyGradH !== H) {
+      skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+      skyGrad.addColorStop(0, '#0a0015');
+      skyGrad.addColorStop(0.25, '#1a0a3e');
+      skyGrad.addColorStop(0.45, '#3a1a1e');
+      skyGrad.addColorStop(0.65, '#8a4a1e');
+      skyGrad.addColorStop(0.80, '#ca8a3e');
+      skyGrad.addColorStop(1, '#eaaa4e');
+      skyGradH = H;
+    }
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    const sunX = W * 0.75, sunY = H * 0.25;
+    const sunGrad = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, Math.min(W, H) * 0.18);
+    sunGrad.addColorStop(0, 'rgba(255, 230, 170, 1)');
+    sunGrad.addColorStop(0.2, 'rgba(255, 200, 120, 0.6)');
+    sunGrad.addColorStop(0.5, 'rgba(255, 160, 80, 0.15)');
+    sunGrad.addColorStop(1, 'rgba(255, 150, 50, 0)');
+    ctx.fillStyle = sunGrad;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // --- Image tile layer: offset-based, no mutation ---
+  function drawTileLayer(layer) {
+    const pool = layerAssets[layer.key];
+    const seq = tileSequences[layer.key];
+    if (!pool.length || !seq) return false;
+
+    const y = layer.yStart * H;
+    const h = layer.height * H;
+    const offset = scrollOffset * layer.speed;
+
+    // All tiles have the same drawW (based on first image aspect)
+    const aspect = pool[0].width / pool[0].height;
+    const drawW = h * aspect;
+    if (drawW <= 0) return false;
+
+    // Which tile slot is at the left edge of the screen?
+    const firstSlot = Math.floor(offset / drawW);
+    const slotOffset = offset - firstSlot * drawW;
+
+    // Draw enough tiles to cover the screen
+    const needed = Math.ceil((W + slotOffset) / drawW) + 1;
+    for (let i = 0; i < needed; i++) {
+      const slot = firstSlot + i;
+      const seqIdx = ((slot % SEQUENCE_LEN) + SEQUENCE_LEN) % SEQUENCE_LEN;
+      const imgIdx = seq[seqIdx] % pool.length;
+      const img = pool[imgIdx];
+      const x = Math.round(i * drawW - slotOffset);
+
+      ctx.globalAlpha = 1;
+      ctx.drawImage(img, x, y, drawW, h);
+
+      // Crossfade at left edge of each tile (blend with previous)
+      if (i > 0 && CROSSFADE_PX > 0) {
+        const prevSlot = slot - 1;
+        const prevSeqIdx = ((prevSlot % SEQUENCE_LEN) + SEQUENCE_LEN) % SEQUENCE_LEN;
+        const prevImg = pool[seq[prevSeqIdx] % pool.length];
+        // Draw fading strip of previous tile overlapping into this tile
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, CROSSFADE_PX, h);
+        ctx.clip();
+        // Previous tile drawn at its position, fading out
+        const prevX = x - drawW;
+        // Use a gradient alpha: full at x, zero at x + CROSSFADE_PX
+        // Approximate with 4 strips for performance
+        const strips = 4;
+        const stripW = CROSSFADE_PX / strips;
+        for (let s = strips - 1; s >= 0; s--) {
+          ctx.globalAlpha = 1 - (s + 0.5) / strips;
+          ctx.drawImage(prevImg, prevX, y, drawW, h);
+        }
+        ctx.restore();
+      }
+    }
+    ctx.globalAlpha = 1;
+    return true;
+  }
+
+  // --- Procedural fallbacks ---
+  // Use integer-snapped seed to avoid jitter
+  function stableSeed(pos, spacing) {
+    return Math.round(pos / spacing);
+  }
+
+  const procedural = {
+    mountains(y, h, offset) {
+      ctx.fillStyle = '#2d1b4e';
+      ctx.beginPath();
+      ctx.moveTo(-10, y + h);
+      const segW = 200;
+      const startX = -(offset % segW) - segW;
+      for (let px = startX; px < W + segW * 2; px += segW) {
+        const seed = stableSeed(px + offset, segW);
+        const peakH = h * (0.4 + 0.5 * Math.sin(seed * 1.7 + 0.3));
+        ctx.lineTo(px + segW * 0.5, y + h - peakH);
+        ctx.lineTo(px + segW, y + h - h * 0.08);
+      }
+      ctx.lineTo(W + 10, y + h);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(220, 210, 230, 0.25)';
+      for (let px = startX; px < W + segW * 2; px += segW) {
+        const seed = stableSeed(px + offset, segW);
+        const peakH = h * (0.4 + 0.5 * Math.sin(seed * 1.7 + 0.3));
+        if (peakH > h * 0.6) {
+          const peakX = px + segW * 0.5;
+          const peakY = y + h - peakH;
+          ctx.beginPath();
+          ctx.moveTo(peakX, peakY);
+          ctx.lineTo(peakX - segW * 0.1, peakY + peakH * 0.12);
+          ctx.lineTo(peakX + segW * 0.1, peakY + peakH * 0.12);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+    },
+
+    hills(y, h, offset) {
+      ctx.fillStyle = '#1a4a2e';
+      ctx.beginPath();
+      ctx.moveTo(-10, y + h);
+      const step = 4;
+      for (let px = -10; px <= W + 10; px += step) {
+        const wx = px + offset;
+        const hy = y + h - h * 0.6 * (
+          0.3 + 0.3 * Math.sin(wx * 0.008) +
+          0.2 * Math.sin(wx * 0.015 + 1.5) +
+          0.15 * Math.sin(wx * 0.003 + 3.0)
+        );
+        ctx.lineTo(px, hy);
+      }
+      ctx.lineTo(W + 10, y + h);
+      ctx.closePath();
+      ctx.fill();
+    },
+
+    skyline(y, h, offset) {
+      const bw = 42;
+      const startX = -(offset % bw) - bw;
+      for (let bx = startX; bx < W + bw; bx += bw) {
+        const seed = stableSeed(bx + offset, bw);
+        const bh = h * (0.3 + 0.5 * Math.abs(Math.sin(seed * 1.94)));
+        const w = bw * (0.5 + 0.4 * Math.abs(Math.cos(seed * 2.1)));
+        ctx.fillStyle = '#2a2a3a';
+        ctx.fillRect(Math.round(bx), y + h - bh, Math.round(w), bh);
+        ctx.fillStyle = 'rgba(255, 200, 100, 0.12)';
+        for (let wy = y + h - bh + 6; wy < y + h - 4; wy += 8) {
+          for (let wx = Math.round(bx) + 4; wx < Math.round(bx + w) - 4; wx += 7) {
+            if (Math.sin(wx * 7.3 + wy * 3.1 + seed) > 0.2) ctx.fillRect(wx, wy, 3, 4);
+          }
+        }
+      }
+    },
+
+    industrial(y, h, offset) {
+      const uw = 80;
+      const startX = -(offset % uw) - uw;
+      for (let bx = startX; bx < W + uw; bx += uw) {
+        const seed = stableSeed(bx + offset, uw);
+        ctx.fillStyle = '#3a2a1a';
+        const wh = h * (0.25 + 0.2 * Math.abs(Math.sin(seed * 2.3)));
+        ctx.fillRect(Math.round(bx), y + h - wh, Math.round(uw * 0.7), wh);
+        if (seed % 3 === 0) {
+          const sh = h * 0.7;
+          ctx.fillRect(Math.round(bx + uw * 0.6), y + h - sh, 8, sh);
+        }
+      }
+    },
+
+    suburbs(y, h, offset) {
+      const hw = 60;
+      const startX = -(offset % hw) - hw;
+      for (let bx = startX; bx < W + hw; bx += hw) {
+        const seed = stableSeed(bx + offset, hw);
+        const hh = h * (0.2 + 0.15 * Math.abs(Math.sin(seed * 4.1)));
+        const rx = Math.round(bx);
+        ctx.fillStyle = `hsl(${30 + (seed * 37) % 20}, 30%, ${35 + (seed * 13) % 15}%)`;
+        ctx.fillRect(rx + 8, y + h - hh, hw - 16, hh);
+        ctx.fillStyle = '#4a2a1a';
+        ctx.beginPath();
+        ctx.moveTo(rx + 4, y + h - hh);
+        ctx.lineTo(rx + hw / 2, y + h - hh - h * 0.12);
+        ctx.lineTo(rx + hw - 4, y + h - hh);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 220, 100, 0.3)';
+        ctx.fillRect(rx + hw / 2 - 5, y + h - hh + 8, 10, 8);
+      }
+    },
+
+    farms(y, h, offset) {
+      ctx.fillStyle = '#2a5a1a';
+      ctx.fillRect(0, y, W, h);
+      ctx.strokeStyle = 'rgba(60, 120, 30, 0.4)';
+      ctx.lineWidth = 1;
+      const rowSp = 8;
+      const startX = -(offset % rowSp);
+      for (let rx = startX; rx < W; rx += rowSp) {
+        const x = Math.round(rx);
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + h); ctx.stroke();
+      }
+      const barnSp = 500;
+      const bStart = -(offset % barnSp) - barnSp;
+      for (let bx = bStart; bx < W + barnSp; bx += barnSp) {
+        const rx = Math.round(bx);
+        const bh = h * 0.45;
+        ctx.fillStyle = '#6a2210';
+        ctx.fillRect(rx, y + h - bh, 50, bh);
+        ctx.fillStyle = '#4a1a0a';
+        ctx.beginPath();
+        ctx.moveTo(rx - 5, y + h - bh);
+        ctx.lineTo(rx + 25, y + h - bh - h * 0.2);
+        ctx.lineTo(rx + 55, y + h - bh);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#8a8a7a';
+        ctx.fillRect(rx + 60, y + h - bh * 1.2, 12, bh * 1.2);
+        ctx.beginPath();
+        ctx.arc(rx + 66, y + h - bh * 1.2, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+
+    trees(y, h, offset) {
+      const sp = 45;
+      const startX = -(offset % sp) - sp;
+      for (let tx = startX; tx < W + sp; tx += sp) {
+        const seed = stableSeed(tx + offset, sp);
+        const th = h * (0.5 + 0.35 * Math.abs(Math.sin(seed * 2.7)));
+        const tw = 6 + (seed % 4);
+        const cr = th * 0.35;
+        const cx = Math.round(tx + sp / 2);
+        ctx.fillStyle = '#3a2a1a';
+        ctx.fillRect(cx - tw / 2, y + h - th, tw, th);
+        const g = 60 + (seed * 17) % 60;
+        ctx.fillStyle = `rgb(${20 + (seed * 7) % 30}, ${g}, ${10 + (seed * 3) % 20})`;
+        ctx.beginPath(); ctx.arc(cx, y + h - th, cr, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx - cr * 0.4, y + h - th + cr * 0.3, cr * 0.7, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + cr * 0.5, y + h - th + cr * 0.2, cr * 0.65, 0, Math.PI * 2); ctx.fill();
+      }
+    },
+
+    forest(y, h, offset) {
+      ctx.fillStyle = '#0a2a00';
+      ctx.fillRect(0, y + h * 0.3, W, h * 0.7);
+      const sp = 25;
+      const startX = -(offset % sp) - sp;
+      for (let tx = startX; tx < W + sp; tx += sp) {
+        const seed = stableSeed(tx + offset, sp);
+        const th = h * (0.7 + 0.25 * Math.abs(Math.sin(seed * 3.1)));
+        const tw = 8 + (seed % 6);
+        const cx = Math.round(tx);
+        ctx.fillStyle = `rgb(${30 + (seed * 5) % 20}, ${20 + (seed * 3) % 15}, ${10 + (seed * 2) % 10})`;
+        ctx.fillRect(cx - tw / 2, y + h - th, tw, th);
+        const cr = 20 + (seed % 15);
+        ctx.fillStyle = `rgb(${10 + (seed * 4) % 20}, ${40 + (seed * 11) % 50}, ${5 + (seed * 2) % 15})`;
+        ctx.beginPath(); ctx.arc(cx, y + h - th - cr * 0.3, cr, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx - cr * 0.5, y + h - th + 5, cr * 0.8, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + cr * 0.6, y + h - th + 3, cr * 0.7, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = '#0a3a05';
+      const fSp = 15;
+      const fStart = -(offset % fSp) - fSp;
+      for (let fx = fStart; fx < W + fSp; fx += fSp) {
+        const fh = 8 + Math.abs(Math.sin(fx * 0.3 + offset * 0.01)) * 12;
+        const rx = Math.round(fx);
+        ctx.beginPath();
+        ctx.moveTo(rx, y + h); ctx.lineTo(rx + 4, y + h - fh); ctx.lineTo(rx + 8, y + h);
+        ctx.fill();
+      }
+    }
+  };
+
+  // --- Ground ---
+  function drawGround() {
+    const y = GROUND_Y * H;
+    const grad = ctx.createLinearGradient(0, y, 0, H);
+    grad.addColorStop(0, '#5a4a30');
+    grad.addColorStop(0.3, '#3a2a18');
+    grad.addColorStop(1, '#1a1008');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, y, W, H - y);
+    ctx.strokeStyle = 'rgba(80, 60, 30, 0.3)';
+    ctx.lineWidth = 1;
+    const off = -(scrollOffset % 20);
+    for (let lx = off; lx < W; lx += 20) {
+      const rx = Math.round(lx);
+      ctx.beginPath(); ctx.moveTo(rx, y + 2); ctx.lineTo(rx - 10, H); ctx.stroke();
+    }
+  }
+
+  // --- Character ---
+  function drawCharacter(dt) {
+    if (!spriteLoaded) return;
+    frameTimer += dt;
+    if (frameTimer >= 1 / WALK_FPS) {
+      frameTimer -= 1 / WALK_FPS;
+      frameIndex = (frameIndex + 1) % WALK_FRAMES;
+    }
+    const charH = H * CHAR_H_RATIO;
+    const charW = charH;
+    const charX = Math.round(W * 0.3 - charW / 2);
+    const charY = Math.round(GROUND_Y * H - charH + Math.sin(scrollOffset * 0.08) * 2);
+
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(
+      spriteImg,
+      frameIndex * SPRITE_FRAME, WALK_ROW * SPRITE_FRAME,
+      SPRITE_FRAME, SPRITE_FRAME,
+      charX, charY, charW, charH
+    );
+    ctx.imageSmoothingEnabled = true;
+  }
+
+  // --- Atmosphere ---
+  function drawAtmosphere() {
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, 'rgba(180, 120, 60, 0)');
+    grad.addColorStop(0.5, 'rgba(180, 120, 60, 0.02)');
+    grad.addColorStop(0.85, 'rgba(180, 120, 60, 0.05)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = 'rgba(255, 220, 150, 0.12)';
+    for (let i = 0; i < 25; i++) {
+      const px = ((i * 137.5 + scrollOffset * 0.15 * (0.5 + i * 0.015)) % (W + 20)) - 10;
+      const py = (i * 89.3 + Math.sin(scrollOffset * 0.008 + i) * 30) % H;
+      ctx.beginPath();
+      ctx.arc(px, py, 1 + (i % 3), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // --- Main loop ---
+  let lastTime = 0;
+
+  function frame(time) {
+    const dt = Math.min((time - lastTime) / 1000, 0.05);
+    lastTime = time;
+    scrollOffset += WALK_SPEED * dt;
+
+    ctx.clearRect(0, 0, W, H);
+    drawSky();
+
+    for (const layer of LAYER_DEFS) {
+      const hasImages = drawTileLayer(layer);
+      if (!hasImages && procedural[layer.key]) {
+        procedural[layer.key](layer.yStart * H, layer.height * H, scrollOffset * layer.speed);
+      }
+    }
+
+    drawGround();
+    drawAtmosphere();
+    drawCharacter(dt);
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
