@@ -85,8 +85,9 @@
     const reg = SpriteRenderer.getRegistry();
     const list = [];
     for (const [name, cfg] of reg) {
-      cfg._name = name;  // ensure name is on the original record
-      list.push(cfg);    // use the live registry record, not a copy
+      if (cfg.renderMode === 'texture' || cfg.renderMode === 'tile') continue;
+      cfg._name = name;
+      list.push(cfg);
     }
     return list.sort((a, b) => (a._name || a.name || '').localeCompare(b._name || b.name || ''));
   }
