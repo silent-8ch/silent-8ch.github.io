@@ -134,6 +134,7 @@ resize(); window.addEventListener('resize', resize);
 // ─── State ────────────────────────────────────────────────
 const spell = { element:'fire', shape:'burst', power:'spark', casting:'tap' };
 let gameState = 'build', activeElement = 'fire';
+let gravityWells = [];
 
 // ─── Scroll ──────────────────────────────────────────────
 let scroll = []; // [{element, shape, power}, ...]
@@ -413,7 +414,7 @@ function finishCast(success){
   if(castCleanup){castCleanup();castCleanup=null;}
   castOverlay.classList.remove('active');
   if(success){gameState='result';chainCount=1;castScrollSequence(1);}
-  else{gameState='build';document.getElementById('build-panel').classList.remove('hidden');}
+  else{gameState='build';gravityWells.length=0;document.getElementById('build-panel').classList.remove('hidden');}
 }
 
 function castScrollSequence(chainMult){
@@ -446,7 +447,7 @@ function castScrollSequence(chainMult){
 
   clearTimeout(chainTimer);
   const comboExtra = combos.length * 700;
-  chainTimer=setTimeout(()=>{chainCount=0;document.getElementById('chain-btn').classList.remove('visible');disp.classList.remove('visible');gameState='build';document.getElementById('build-panel').classList.remove('hidden');},totalSeqTime+comboExtra+4500);
+  chainTimer=setTimeout(()=>{chainCount=0;document.getElementById('chain-btn').classList.remove('visible');disp.classList.remove('visible');gravityWells.length=0;gameState='build';document.getElementById('build-panel').classList.remove('hidden');},totalSeqTime+comboExtra+4500);
 }
 
 document.getElementById('chain-btn').addEventListener('click',()=>{
@@ -588,6 +589,10 @@ function render() {
   // Pending spawns
   for(let i=pending.length-1;i>=0;i--){if(--pending[i].delay<=0){pending[i].fn();pending.splice(i,1);}}
 
+  // ─── Gravity wells ──────────────────────────────────
+  for(let i=gravityWells.length-1;i>=0;i--){const w=gravityWells[i];w.life--;if(w.life<=0){gravityWells.splice(i,1);continue;}const wa=w.life/w.maxLife;ctx.globalAlpha=wa*0.15;ctx.fillStyle=glow;ctx.beginPath();ctx.arc(w.x,w.y,20+15*(1-wa),0,Math.PI*2);ctx.fill();}
+  for(const p of particles){for(const w of gravityWells){const dx=w.x-p.x,dy=w.y-p.y,dist=Math.sqrt(dx*dx+dy*dy)||1,f=Math.min(0.3/(dist+10),2);p.vx+=(dx/dist)*f;p.vy+=(dy/dist)*f;}}
+
   // ─── Particles (additive) ───────────────────────────
   ctx.globalCompositeOperation='lighter';
   for(let i=particles.length-1;i>=0;i--){
@@ -717,6 +722,8 @@ document.addEventListener('gesturestart',e=>e.preventDefault());
 document.addEventListener('gesturechange',e=>e.preventDefault());
 document.addEventListener('gestureend',e=>e.preventDefault());
 document.addEventListener('dblclick',e=>e.preventDefault());
+// Gravity wells — tap in result phase to attract particles
+canvas.addEventListener('pointerdown',e=>{if(gameState!=='result')return;if(gravityWells.length>=5)gravityWells.shift();gravityWells.push({x:e.clientX,y:e.clientY,life:120,maxLife:120});});
 // Prevent focus zoom on all buttons (delegation catches dynamic buttons too)
 document.addEventListener('touchend',e=>{if(e.target.closest('button'))e.target.blur();});
 </script>
