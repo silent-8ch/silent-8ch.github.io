@@ -12,21 +12,28 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 #spell-name{position:absolute;top:14px;left:50px;right:50px;text-align:center;font-size:20px;letter-spacing:3px;text-transform:uppercase;color:#fff;pointer-events:none;z-index:10;transition:text-shadow 0.5s}
 #power-pips{position:absolute;top:42px;left:0;right:0;text-align:center;font-size:12px;letter-spacing:6px;pointer-events:none;z-index:10;color:#aa8844}
 
+#combo-display{position:absolute;top:65px;left:0;right:0;text-align:center;font-size:32px;font-weight:bold;letter-spacing:4px;text-transform:uppercase;pointer-events:none;z-index:10;opacity:0;transition:opacity 0.2s}
+#combo-display.visible{opacity:1}
+
 #book-btn{position:absolute;top:12px;right:12px;width:44px;height:44px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;font-size:22px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;color:#ddd;-webkit-tap-highlight-color:transparent}
 
 #build-panel{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(8,8,18,0.97) 28%);padding:32px 10px 16px;z-index:10;transition:transform 0.4s ease}
 #build-panel.hidden{transform:translateY(110%)}
-.prop-row{margin-bottom:8px}
+.prop-row{margin-bottom:7px}
 .prop-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#665;margin-bottom:3px;padding-left:4px}
 .prop-options{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none}
 .prop-options::-webkit-scrollbar{display:none}
-.prop-btn{flex-shrink:0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:7px 12px;color:#999;font-size:13px;font-family:inherit;cursor:pointer;transition:all 0.25s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.prop-btn{flex-shrink:0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:6px 11px;color:#999;font-size:12px;font-family:inherit;cursor:pointer;transition:all 0.25s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .prop-btn:active{transform:scale(0.94)}
 .prop-btn.selected{background:rgba(255,255,255,0.14);color:#fff}
 
-#cast-btn{display:block;margin:10px auto 0;background:radial-gradient(circle,rgba(255,200,100,0.15),rgba(255,150,50,0.05));border:2px solid rgba(255,200,100,0.35);border-radius:28px;padding:11px 44px;color:#eec87a;font-size:16px;font-family:inherit;letter-spacing:5px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;-webkit-tap-highlight-color:transparent;animation:pulse-btn 2.5s ease-in-out infinite}
+#cast-btn{display:block;margin:8px auto 0;background:radial-gradient(circle,rgba(255,200,100,0.15),rgba(255,150,50,0.05));border:2px solid rgba(255,200,100,0.35);border-radius:28px;padding:10px 40px;color:#eec87a;font-size:15px;font-family:inherit;letter-spacing:5px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;-webkit-tap-highlight-color:transparent;animation:pulse-btn 2.5s ease-in-out infinite}
 @keyframes pulse-btn{0%,100%{box-shadow:0 0 8px rgba(255,200,100,0.1)}50%{box-shadow:0 0 24px rgba(255,200,100,0.25)}}
 #cast-btn:active{transform:scale(0.95)}
+
+#chain-btn{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(255,100,50,0.25),rgba(255,100,50,0.05));border:2px solid rgba(255,100,50,0.5);border-radius:28px;padding:12px 36px;color:#ff8844;font-size:18px;font-family:inherit;letter-spacing:4px;text-transform:uppercase;cursor:pointer;z-index:12;display:none;-webkit-tap-highlight-color:transparent;animation:pulse-chain 0.6s ease-in-out infinite}
+@keyframes pulse-chain{0%,100%{box-shadow:0 0 10px rgba(255,100,50,0.2);transform:translateX(-50%) scale(1)}50%{box-shadow:0 0 30px rgba(255,100,50,0.5);transform:translateX(-50%) scale(1.05)}}
+#chain-btn.visible{display:block}
 
 #cast-overlay{position:absolute;top:0;left:0;right:0;bottom:0;z-index:15;display:none;pointer-events:none}
 #cast-overlay.active{display:block;pointer-events:auto}
@@ -58,7 +65,9 @@ body.shake{animation:shake 0.15s ease 2}
 <canvas id="c"></canvas>
 <div id="spell-name"></div>
 <div id="power-pips"></div>
+<div id="combo-display"></div>
 <button id="book-btn">📖</button>
+<button id="chain-btn">⚡ Chain!</button>
 
 <div id="build-panel">
   <div class="prop-row">
@@ -70,17 +79,25 @@ body.shake{animation:shake 0.15s ease 2}
       <button class="prop-btn" data-val="nature">🌿 Nature</button>
       <button class="prop-btn" data-val="shadow">🌑 Shadow</button>
       <button class="prop-btn" data-val="star">✨ Star</button>
+      <button class="prop-btn" data-val="ice">❄️ Ice</button>
+      <button class="prop-btn" data-val="blood">🩸 Blood</button>
+      <button class="prop-btn" data-val="wind">💨 Wind</button>
+      <button class="prop-btn" data-val="chaos">🌈 Chaos</button>
     </div>
   </div>
   <div class="prop-row">
     <div class="prop-label">Shape</div>
     <div class="prop-options" data-prop="shape">
       <button class="prop-btn selected" data-val="burst">💥 Burst</button>
-      <button class="prop-btn" data-val="beam">💫 Beam</button>
+      <button class="prop-btn" data-val="beam">➡️ Beam</button>
       <button class="prop-btn" data-val="shield">🛡 Shield</button>
       <button class="prop-btn" data-val="vortex">🌀 Vortex</button>
       <button class="prop-btn" data-val="rain">🌧 Rain</button>
       <button class="prop-btn" data-val="wave">🌊 Wave</button>
+      <button class="prop-btn" data-val="spiral">🌪 Spiral</button>
+      <button class="prop-btn" data-val="nova">💫 Nova</button>
+      <button class="prop-btn" data-val="fountain">⛲ Fountain</button>
+      <button class="prop-btn" data-val="orbit">🪐 Orbit</button>
     </div>
   </div>
   <div class="prop-row">
@@ -89,6 +106,7 @@ body.shake{animation:shake 0.15s ease 2}
       <button class="prop-btn selected" data-val="spark">✦ Spark</button>
       <button class="prop-btn" data-val="surge">✦✦ Surge</button>
       <button class="prop-btn" data-val="storm">✦✦✦ Storm</button>
+      <button class="prop-btn" data-val="cataclysm">✦✦✦✦ Cataclysm</button>
     </div>
   </div>
   <div class="prop-row">
@@ -99,6 +117,9 @@ body.shake{animation:shake 0.15s ease 2}
       <button class="prop-btn" data-val="draw">✏️ Draw</button>
       <button class="prop-btn" data-val="hold">✊ Hold</button>
       <button class="prop-btn" data-val="shake">🫨 Shake</button>
+      <button class="prop-btn" data-val="slash">⚔️ Slash</button>
+      <button class="prop-btn" data-val="spin">🔄 Spin</button>
+      <button class="prop-btn" data-val="clap">👏 Clap</button>
     </div>
   </div>
   <button id="cast-btn">Cast Spell</button>
@@ -122,13 +143,10 @@ body.shake{animation:shake 0.15s ease 2}
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 let W, H;
-
 function resize() {
   const dpr = window.devicePixelRatio || 1;
-  W = window.innerWidth;
-  H = window.innerHeight;
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 resize();
@@ -136,95 +154,57 @@ window.addEventListener('resize', resize);
 
 // ─── Spell state ──────────────────────────────────────────
 const spell = { element: 'fire', shape: 'burst', power: 'spark', casting: 'tap' };
-let gameState = 'build'; // build | casting | result
+let gameState = 'build';
 
 // ─── Element configs ──────────────────────────────────────
 const ELEMENTS = {
-  fire: {
-    colors: ['#ff3300','#ff6600','#ff9900','#ffcc00','#ff4400'],
-    gravity: -0.04,
-    glow: '#ff6600',
-    adj: ['Blazing','Infernal','Scorching','Embered']
-  },
-  water: {
-    colors: ['#0055ee','#0099ff','#00ccff','#00eeff','#3388ff'],
-    gravity: 0.04,
-    glow: '#0099ff',
-    adj: ['Frozen','Tidal','Abyssal','Torrential']
-  },
-  lightning: {
-    colors: ['#ffff33','#ffffff','#ddddff','#ffee66','#eeeeff'],
-    gravity: 0,
-    glow: '#ffee44',
-    adj: ['Crackling','Voltaic','Thundering','Arc']
-  },
-  nature: {
-    colors: ['#00bb44','#66ff33','#44dd00','#22cc55','#88ff22'],
-    gravity: 0.015,
-    glow: '#44dd33',
-    adj: ['Verdant','Wild','Ancient','Blooming']
-  },
-  shadow: {
-    colors: ['#8800cc','#aa22ff','#cc55ff','#7700bb','#dd77ff'],
-    gravity: -0.015,
-    glow: '#aa44ff',
-    adj: ['Void','Spectral','Phantom','Dark']
-  },
-  star: {
-    colors: ['#ffdd22','#ffffff','#ffffaa','#ffcc44','#fff4cc'],
-    gravity: -0.025,
-    glow: '#ffdd44',
-    adj: ['Astral','Celestial','Radiant','Cosmic']
-  }
+  fire:      { colors: ['#ff3300','#ff6600','#ff9900','#ffcc00','#ff4400'], gravity: -0.04, glow: '#ff6600', adj: ['Blazing','Infernal','Scorching','Embered'] },
+  water:     { colors: ['#0055ee','#0099ff','#00ccff','#00eeff','#3388ff'], gravity: 0.04,  glow: '#0099ff', adj: ['Frozen','Tidal','Abyssal','Torrential'] },
+  lightning: { colors: ['#ffff33','#ffffff','#ddddff','#ffee66','#eeeeff'], gravity: 0,     glow: '#ffee44', adj: ['Crackling','Voltaic','Thundering','Arc'] },
+  nature:    { colors: ['#00bb44','#66ff33','#44dd00','#22cc55','#88ff22'], gravity: 0.015, glow: '#44dd33', adj: ['Verdant','Wild','Ancient','Blooming'] },
+  shadow:    { colors: ['#8800cc','#aa22ff','#cc55ff','#7700bb','#dd77ff'], gravity: -0.015,glow: '#aa44ff', adj: ['Void','Spectral','Phantom','Dark'] },
+  star:      { colors: ['#ffdd22','#ffffff','#ffffaa','#ffcc44','#fff4cc'], gravity: -0.025,glow: '#ffdd44', adj: ['Astral','Celestial','Radiant','Cosmic'] },
+  ice:       { colors: ['#88ddff','#aaeeff','#ffffff','#66ccff','#ccf4ff'], gravity: 0.03,  glow: '#88ddff', adj: ['Glacial','Frostbitten','Crystal','Shattered'] },
+  blood:     { colors: ['#cc0000','#990000','#ff2222','#880022','#dd3333'], gravity: 0.06,  glow: '#cc2222', adj: ['Crimson','Sanguine','Scarlet','Wrathful'] },
+  wind:      { colors: ['#ccddee','#eeeeff','#aabbcc','#ddeeff','#ffffff'], gravity: 0,     glow: '#bbccdd', adj: ['Gale','Tempest','Zephyr','Howling'] },
+  chaos:     { colors: ['#ff0066','#00ff88','#ffaa00','#0088ff','#ff00ff','#00ffff'], gravity: 0, glow: '#ff44aa', adj: ['Chaotic','Unstable','Entropic','Wild'] }
 };
 
 const SHAPES = {
-  burst: 'Burst', beam: 'Beam', shield: 'Shield',
-  vortex: 'Vortex', rain: 'Rain', wave: 'Wave'
+  burst:'Burst', beam:'Beam', shield:'Shield', vortex:'Vortex', rain:'Rain',
+  wave:'Wave', spiral:'Spiral', nova:'Nova', fountain:'Fountain', orbit:'Orbit'
 };
 
 const POWERS = {
-  spark:  { count: 150,  size: 4, life: 80  },
-  surge:  { count: 400, size: 5.5, life: 110  },
-  storm:  { count: 800, size: 7, life: 150 }
+  spark:     { count: 150,  size: 4,   life: 80 },
+  surge:     { count: 400,  size: 5.5, life: 110 },
+  storm:     { count: 800,  size: 7,   life: 150 },
+  cataclysm: { count: 1200, size: 9,   life: 200 }
 };
-const POWER_NAMES = { spark: 'Spark', surge: 'Surge', storm: 'Storm' };
+const POWER_NAMES = { spark:'Spark', surge:'Surge', storm:'Storm', cataclysm:'Cataclysm' };
 
 // ─── Particles ────────────────────────────────────────────
 let particles = [];
-let pending = []; // { delay, fn }
+let pending = [];
+const MAX_PARTICLES = 3500;
 
 class Particle {
   constructor(x, y, vx, vy, color, size, life, gravity, drag) {
-    this.x = x; this.y = y;
-    this.vx = vx; this.vy = vy;
-    this.color = color;
-    this.size = size;
-    this.life = life;
-    this.maxLife = life;
-    this.gravity = gravity;
-    this.drag = drag || 0.985;
-    this.tx = []; // trail x
-    this.ty = []; // trail y
-    this.wobble = 0;
-    this.wobbleSpeed = 0;
-    this.flicker = 0;
+    this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+    this.color = color; this.size = size;
+    this.life = life; this.maxLife = life;
+    this.gravity = gravity; this.drag = drag || 0.985;
+    this.tx = []; this.ty = [];
+    this.wobble = 0; this.wobbleSpeed = 0; this.flicker = 0;
+    this.element = '';
   }
   update() {
-    this.tx.push(this.x);
-    this.ty.push(this.y);
+    this.tx.push(this.x); this.ty.push(this.y);
     if (this.tx.length > 10) { this.tx.shift(); this.ty.shift(); }
-    this.x += this.vx;
-    this.y += this.vy;
+    this.x += this.vx; this.y += this.vy;
     this.vy += this.gravity;
-    this.vx *= this.drag;
-    this.vy *= this.drag;
-    // Element-specific wobble
-    if (this.wobbleSpeed) {
-      this.wobble += this.wobbleSpeed;
-      this.x += Math.sin(this.wobble) * 0.6;
-    }
-    // Flicker (fire)
+    this.vx *= this.drag; this.vy *= this.drag;
+    if (this.wobbleSpeed) { this.wobble += this.wobbleSpeed; this.x += Math.sin(this.wobble) * 0.6; }
     if (this.flicker) this.size *= (0.9 + Math.random() * 0.2);
     this.life--;
   }
@@ -235,53 +215,42 @@ class Particle {
 // ─── Ambient stars ────────────────────────────────────────
 const stars = [];
 for (let i = 0; i < 70; i++) {
-  stars.push({
-    x: Math.random(), y: Math.random() * 0.75,
-    s: Math.random() * 1.4 + 0.4,
-    phase: Math.random() * Math.PI * 2,
-    speed: Math.random() * 0.015 + 0.005
-  });
+  stars.push({ x: Math.random(), y: Math.random() * 0.75, s: Math.random() * 1.4 + 0.4,
+    phase: Math.random() * Math.PI * 2, speed: Math.random() * 0.015 + 0.005 });
 }
 
-// ─── Rune animation state ─────────────────────────────────
-let runeAngle = 0;
-let runePulse = 0; // 0-1, decays
-let runeBreath = 0;
+// ─── Rune state ───────────────────────────────────────────
+let runeAngle = 0, runePulse = 0, runeBreath = 0;
+
+// ─── Chain state ──────────────────────────────────────────
+let chainCount = 0;
+let chainTimer = null;
 
 // ─── Spell name ───────────────────────────────────────────
 function getSpellName() {
   const el = ELEMENTS[spell.element];
   const hash = spell.element.charCodeAt(0) + spell.shape.charCodeAt(0);
-  const adj = el.adj[hash % el.adj.length];
-  return adj + ' ' + SHAPES[spell.shape];
+  return el.adj[hash % el.adj.length] + ' ' + SHAPES[spell.shape];
 }
 
 function refreshUI() {
   document.getElementById('spell-name').textContent = getSpellName();
-  document.getElementById('spell-name').style.textShadow =
-    '0 0 20px ' + ELEMENTS[spell.element].glow + '80';
-  const pips = { spark: '✦', surge: '✦ ✦', storm: '✦ ✦ ✦' };
-  document.getElementById('power-pips').textContent = pips[spell.power];
-  document.getElementById('power-pips').style.color = ELEMENTS[spell.element].glow;
-  // Recolor all selected buttons
   const glow = ELEMENTS[spell.element].glow;
+  document.getElementById('spell-name').style.textShadow = '0 0 20px ' + glow + '80';
+  const pips = { spark:'✦', surge:'✦ ✦', storm:'✦ ✦ ✦', cataclysm:'✦ ✦ ✦ ✦' };
+  document.getElementById('power-pips').textContent = pips[spell.power];
+  document.getElementById('power-pips').style.color = glow;
   document.querySelectorAll('.prop-btn.selected').forEach(b => {
-    b.style.color = '#fff';
-    b.style.borderColor = glow;
-    b.style.boxShadow = '0 0 10px ' + glow + '50';
+    b.style.color = '#fff'; b.style.borderColor = glow; b.style.boxShadow = '0 0 10px ' + glow + '50';
   });
   document.querySelectorAll('.prop-btn:not(.selected)').forEach(b => {
-    b.style.color = '#999';
-    b.style.borderColor = 'rgba(255,255,255,0.12)';
-    b.style.boxShadow = 'none';
+    b.style.color = '#999'; b.style.borderColor = 'rgba(255,255,255,0.12)'; b.style.boxShadow = 'none';
   });
-  // Cast button glow
   const btn = document.getElementById('cast-btn');
-  btn.style.borderColor = glow + '60';
-  btn.style.color = glow;
+  btn.style.borderColor = glow + '60'; btn.style.color = glow;
 }
 
-// ─── UI event handlers ────────────────────────────────────
+// ─── UI handlers ──────────────────────────────────────────
 document.querySelectorAll('.prop-options').forEach(row => {
   row.addEventListener('click', e => {
     const btn = e.target.closest('.prop-btn');
@@ -306,6 +275,7 @@ let castCleanup = null;
 
 document.getElementById('cast-btn').addEventListener('click', () => {
   if (gameState !== 'build') return;
+  chainCount = 0;
   gameState = 'casting';
   document.getElementById('build-panel').classList.add('hidden');
   castOverlay.classList.add('active');
@@ -317,19 +287,59 @@ function finishCast(success) {
   castOverlay.classList.remove('active');
   if (success) {
     gameState = 'result';
+    chainCount++;
+    const chainMult = 1 + (chainCount - 1) * 0.2;
     screenFlash(ELEMENTS[spell.element].glow);
     document.body.classList.add('shake');
     setTimeout(() => document.body.classList.remove('shake'), 400);
-    emitSpell();
-    setTimeout(() => {
-      gameState = 'build';
-      document.getElementById('build-panel').classList.remove('hidden');
-    }, 4500);
+    emitSpell(chainMult);
+    showChainUI();
+    resetChainTimer();
   } else {
     gameState = 'build';
     document.getElementById('build-panel').classList.remove('hidden');
   }
 }
+
+function showChainUI() {
+  document.getElementById('chain-btn').classList.add('visible');
+  const glow = ELEMENTS[spell.element].glow;
+  const chainBtn = document.getElementById('chain-btn');
+  chainBtn.style.borderColor = glow;
+  chainBtn.style.color = glow;
+  const disp = document.getElementById('combo-display');
+  if (chainCount > 1) {
+    disp.textContent = 'CHAIN ×' + chainCount;
+    disp.style.color = glow;
+    disp.style.textShadow = '0 0 25px ' + glow;
+    disp.classList.add('visible');
+  } else {
+    disp.classList.remove('visible');
+  }
+}
+
+function resetChainTimer() {
+  clearTimeout(chainTimer);
+  chainTimer = setTimeout(() => {
+    chainCount = 0;
+    document.getElementById('chain-btn').classList.remove('visible');
+    document.getElementById('combo-display').classList.remove('visible');
+    gameState = 'build';
+    document.getElementById('build-panel').classList.remove('hidden');
+  }, 4500);
+}
+
+document.getElementById('chain-btn').addEventListener('click', () => {
+  if (gameState !== 'result') return;
+  chainCount++;
+  const chainMult = 1 + (chainCount - 1) * 0.2;
+  screenFlash(ELEMENTS[spell.element].glow);
+  document.body.classList.add('shake');
+  setTimeout(() => document.body.classList.remove('shake'), 400);
+  emitSpell(chainMult);
+  showChainUI();
+  resetChainTimer();
+});
 
 function screenFlash(color) {
   const f = document.getElementById('flash');
@@ -338,7 +348,7 @@ function screenFlash(color) {
   setTimeout(() => f.classList.remove('active'), 350);
 }
 
-// ─── Gesture implementations ──────────────────────────────
+// ─── Gestures ─────────────────────────────────────────────
 let gestureState = {};
 
 function startGesture() {
@@ -349,6 +359,9 @@ function startGesture() {
   else if (m === 'draw') gestureDraw();
   else if (m === 'hold') gestureHold();
   else if (m === 'shake') gestureShake();
+  else if (m === 'slash') gestureSlash();
+  else if (m === 'spin') gestureSpin();
+  else if (m === 'clap') gestureClap();
 }
 
 function gestureTap() {
@@ -360,11 +373,8 @@ function gestureTap() {
     if (Math.sqrt(dx * dx + dy * dy) < 90) {
       gestureState.taps++;
       runePulse = 1;
-      if (gestureState.taps >= 3) {
-        finishCast(true);
-      } else {
-        castInst.textContent = 'Tap ' + (3 - gestureState.taps) + ' more!';
-      }
+      if (gestureState.taps >= 3) finishCast(true);
+      else castInst.textContent = 'Tap ' + (3 - gestureState.taps) + ' more!';
     }
   };
   castOverlay.addEventListener('pointerdown', handler);
@@ -386,16 +396,12 @@ function gestureSwipe() {
   };
   castOverlay.addEventListener('pointerdown', down);
   castOverlay.addEventListener('pointerup', up);
-  castCleanup = () => {
-    castOverlay.removeEventListener('pointerdown', down);
-    castOverlay.removeEventListener('pointerup', up);
-  };
+  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointerup', up); };
 }
 
 function gestureDraw() {
   castInst.textContent = 'Draw a circle around the rune!';
-  let pts = [];
-  let drawing = false;
+  let pts = [], drawing = false;
   const down = e => { drawing = true; pts = [{ x: e.clientX, y: e.clientY }]; };
   const move = e => { if (drawing) pts.push({ x: e.clientX, y: e.clientY }); };
   const up = () => {
@@ -404,204 +410,248 @@ function gestureDraw() {
       const first = pts[0], last = pts[pts.length - 1];
       const closeDist = Math.sqrt((first.x - last.x) ** 2 + (first.y - last.y) ** 2);
       let totalDist = 0;
-      for (let i = 1; i < pts.length; i++) {
-        totalDist += Math.sqrt((pts[i].x - pts[i - 1].x) ** 2 + (pts[i].y - pts[i - 1].y) ** 2);
-      }
-      if (closeDist < 120 && totalDist > 180) {
-        finishCast(true);
-        return;
-      }
+      for (let i = 1; i < pts.length; i++) totalDist += Math.sqrt((pts[i].x - pts[i-1].x)**2 + (pts[i].y - pts[i-1].y)**2);
+      if (closeDist < 120 && totalDist > 180) { finishCast(true); return; }
     }
-    castInst.textContent = 'Try again — draw a circle!';
-    pts = [];
+    castInst.textContent = 'Try again — draw a circle!'; pts = [];
   };
   gestureState.getDrawPoints = () => drawing ? pts : [];
   castOverlay.addEventListener('pointerdown', down);
   castOverlay.addEventListener('pointermove', move);
   castOverlay.addEventListener('pointerup', up);
-  castCleanup = () => {
-    castOverlay.removeEventListener('pointerdown', down);
-    castOverlay.removeEventListener('pointermove', move);
-    castOverlay.removeEventListener('pointerup', up);
-  };
+  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointermove', move); castOverlay.removeEventListener('pointerup', up); };
 }
 
 function gestureHold() {
   gestureState.holdProgress = 0;
   castInst.textContent = 'Press and hold the rune!';
   let holding = false;
-  const down = e => {
-    const c = castCenter();
-    const dx = e.clientX - c.x, dy = e.clientY - c.y;
-    if (Math.sqrt(dx * dx + dy * dy) < 90) holding = true;
-  };
-  const up = () => {
-    holding = false;
-    if (gestureState.holdProgress < 1) {
-      gestureState.holdProgress = 0;
-      castInst.textContent = 'Press and hold the rune!';
-    }
-  };
+  const down = e => { const c = castCenter(), dx = e.clientX - c.x, dy = e.clientY - c.y; if (Math.sqrt(dx*dx+dy*dy) < 90) holding = true; };
+  const up = () => { holding = false; if (gestureState.holdProgress < 1) { gestureState.holdProgress = 0; castInst.textContent = 'Press and hold the rune!'; } };
   const tick = () => {
     if (gameState !== 'casting' || spell.casting !== 'hold') return;
     if (holding) {
       gestureState.holdProgress = Math.min(1, gestureState.holdProgress + 0.012);
       castInst.textContent = 'Charging… ' + Math.floor(gestureState.holdProgress * 100) + '%';
-      if (gestureState.holdProgress >= 1) {
-        finishCast(true);
-        return;
-      }
+      if (gestureState.holdProgress >= 1) { finishCast(true); return; }
     }
     requestAnimationFrame(tick);
   };
   castOverlay.addEventListener('pointerdown', down);
   castOverlay.addEventListener('pointerup', up);
-  castCleanup = () => {
-    castOverlay.removeEventListener('pointerdown', down);
-    castOverlay.removeEventListener('pointerup', up);
-    holding = false;
-  };
+  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointerup', up); holding = false; };
   requestAnimationFrame(tick);
 }
 
 function gestureShake() {
   gestureState.shakes = 0;
-  castInst.textContent = 'Shake your device! (or wiggle your mouse)';
-
-  // Device motion
-  const motionHandler = e => {
-    const a = e.accelerationIncludingGravity;
-    if (!a) return;
-    if (Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z) > 18) {
-      gestureState.shakes++;
-      if (gestureState.shakes >= 10) finishCast(true);
-    }
-  };
+  castInst.textContent = 'Shake your device! (or wiggle mouse)';
+  const motionHandler = e => { const a = e.accelerationIncludingGravity; if (!a) return; if (Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)>18) { gestureState.shakes++; if (gestureState.shakes>=10) finishCast(true); } };
   window.addEventListener('devicemotion', motionHandler);
-
-  // Mouse wiggle fallback
   let lastX = null, dir = 0;
   const moveHandler = e => {
-    if (lastX !== null) {
-      const d = Math.sign(e.clientX - lastX);
-      if (d !== 0 && d !== dir) {
-        dir = d;
-        gestureState.shakes++;
-        castInst.textContent = 'Shake! ' + Math.min(gestureState.shakes, 12) + ' / 12';
-        if (gestureState.shakes >= 12) finishCast(true);
-      }
-    }
+    if (lastX !== null) { const d = Math.sign(e.clientX - lastX); if (d !== 0 && d !== dir) { dir = d; gestureState.shakes++; castInst.textContent = 'Shake! ' + Math.min(gestureState.shakes,12) + '/12'; if (gestureState.shakes >= 12) finishCast(true); } }
     lastX = e.clientX;
   };
   castOverlay.addEventListener('pointermove', moveHandler);
+  castCleanup = () => { window.removeEventListener('devicemotion', motionHandler); castOverlay.removeEventListener('pointermove', moveHandler); };
+}
 
-  castCleanup = () => {
-    window.removeEventListener('devicemotion', motionHandler);
-    castOverlay.removeEventListener('pointermove', moveHandler);
+function gestureSlash() {
+  castInst.textContent = 'Slash across the screen! ⚔️';
+  let startTime = 0, startPos = null;
+  const down = e => { startTime = Date.now(); startPos = { x: e.clientX, y: e.clientY }; };
+  const up = e => {
+    if (!startPos) return;
+    const dt = Date.now() - startTime;
+    const dx = e.clientX - startPos.x, dy = e.clientY - startPos.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 120 && dt < 500) {
+      gestureState.swipeAngle = Math.atan2(dy, dx);
+      finishCast(true);
+    } else {
+      castInst.textContent = 'Faster! Slash hard! ⚔️';
+    }
+    startPos = null;
   };
+  castOverlay.addEventListener('pointerdown', down);
+  castOverlay.addEventListener('pointerup', up);
+  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointerup', up); };
+}
+
+function gestureSpin() {
+  gestureState.spinProgress = 0;
+  castInst.textContent = 'Spin your finger in circles!';
+  let spinning = false, lastAngle = null;
+  const c_ref = castCenter();
+  const down = () => { spinning = true; lastAngle = null; };
+  const move = e => {
+    if (!spinning) return;
+    const dx = e.clientX - c_ref.x, dy = e.clientY - c_ref.y;
+    const angle = Math.atan2(dy, dx);
+    if (lastAngle !== null) {
+      let delta = angle - lastAngle;
+      while (delta > Math.PI) delta -= Math.PI * 2;
+      while (delta < -Math.PI) delta += Math.PI * 2;
+      gestureState.spinProgress += Math.abs(delta);
+      const pct = Math.min(gestureState.spinProgress / (Math.PI * 4), 1);
+      castInst.textContent = 'Spin! ' + Math.floor(pct * 100) + '%';
+      if (pct >= 1) finishCast(true);
+    }
+    lastAngle = angle;
+  };
+  const up = () => { spinning = false; lastAngle = null; };
+  castOverlay.addEventListener('pointerdown', down);
+  castOverlay.addEventListener('pointermove', move);
+  castOverlay.addEventListener('pointerup', up);
+  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointermove', move); castOverlay.removeEventListener('pointerup', up); };
+}
+
+function gestureClap() {
+  gestureState.clapTaps = 0;
+  gestureState.clapTime = 0;
+  castInst.textContent = 'Double-tap fast! 👏';
+  const handler = () => {
+    const now = Date.now();
+    if (gestureState.clapTaps === 0) {
+      gestureState.clapTaps = 1;
+      gestureState.clapTime = now;
+      castInst.textContent = 'Again! 👏';
+    } else if (now - gestureState.clapTime < 500) {
+      finishCast(true);
+    } else {
+      gestureState.clapTaps = 1;
+      gestureState.clapTime = now;
+      castInst.textContent = 'Faster! 👏';
+    }
+  };
+  castOverlay.addEventListener('pointerdown', handler);
+  castCleanup = () => castOverlay.removeEventListener('pointerdown', handler);
 }
 
 // ─── Emit spell ───────────────────────────────────────────
-function emitSpell() {
+function emitSpell(chainMult) {
   const el = ELEMENTS[spell.element];
   const pw = POWERS[spell.power];
   const c = castCenter();
-  const count = pw.count;
+  let count = Math.floor(pw.count * (chainMult || 1));
+  const room = MAX_PARTICLES - particles.length;
+  if (count > room) count = Math.max(30, room);
 
-  // Stagger rates: 0 = all at once, higher = more spread out
-  const stagger = { burst: 0, beam: 0.4, shield: 0, vortex: 0.2, rain: 0.6, wave: 0.5 };
-  const staggerRate = stagger[spell.shape];
-
-  for (let i = 0; i < count; i++) {
-    const delay = Math.floor(staggerRate * i);
-    if (delay === 0) {
-      spawnParticle(i, count, c, el, pw);
-    } else {
-      pending.push({ delay, fn: () => spawnParticle(i, count, c, el, pw) });
+  if (spell.shape === 'nova') {
+    const half = Math.floor(count / 2);
+    for (let i = 0; i < half; i++) spawnParticle(i, half, c, el, pw, 'nova-in');
+    for (let i = 0; i < half; i++) {
+      const idx = i;
+      pending.push({ delay: 35, fn: () => spawnParticle(idx, half, c, el, pw, 'nova-out') });
     }
+    return;
+  }
+
+  const stagger = { burst:0, beam:0.4, shield:0, vortex:0.2, rain:0.6, wave:0.5, spiral:0.15, fountain:0.3, orbit:0 };
+  const rate = stagger[spell.shape] || 0;
+  for (let i = 0; i < count; i++) {
+    const delay = Math.floor(rate * i);
+    if (delay === 0) spawnParticle(i, count, c, el, pw);
+    else pending.push({ delay, fn: () => spawnParticle(i, count, c, el, pw) });
   }
 }
 
-function spawnParticle(i, count, c, el, pw) {
+function spawnParticle(i, count, c, el, pw, shapeOverride) {
+  if (particles.length >= MAX_PARTICLES) return;
+  const shape = shapeOverride || spell.shape;
   const color = el.colors[Math.floor(Math.random() * el.colors.length)];
   const size = pw.size * (0.5 + Math.random() * 0.8);
   const life = pw.life * (0.6 + Math.random() * 0.6);
   let x = c.x, y = c.y, vx = 0, vy = 0;
 
-  switch (spell.shape) {
+  switch (shape) {
     case 'burst': {
-      const a = Math.random() * Math.PI * 2;
-      const spd = 3 + Math.random() * 9;
-      vx = Math.cos(a) * spd;
-      vy = Math.sin(a) * spd;
-      break;
+      const a = Math.random() * Math.PI * 2, spd = 3 + Math.random() * 9;
+      vx = Math.cos(a) * spd; vy = Math.sin(a) * spd; break;
     }
     case 'beam': {
       const dir = gestureState.swipeAngle != null ? gestureState.swipeAngle : 0;
-      const spread = (Math.random() - 0.5) * 0.6;
-      const spd = 5 + Math.random() * 9;
-      vx = Math.cos(dir + spread) * spd;
-      vy = Math.sin(dir + spread) * spd;
-      break;
+      const spread = (Math.random() - 0.5) * 0.6, spd = 5 + Math.random() * 9;
+      vx = Math.cos(dir + spread) * spd; vy = Math.sin(dir + spread) * spd; break;
     }
     case 'shield': {
-      const a = (i / count) * Math.PI * 2;
-      const r = 90 + Math.random() * 50;
-      x = c.x + Math.cos(a) * r;
-      y = c.y + Math.sin(a) * r;
-      vx = Math.cos(a) * (0.8 + Math.random() * 1.5);
-      vy = Math.sin(a) * (0.8 + Math.random() * 1.5);
-      break;
+      const a = (i / count) * Math.PI * 2, r = 90 + Math.random() * 50;
+      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
+      vx = Math.cos(a) * (0.8 + Math.random() * 1.5); vy = Math.sin(a) * (0.8 + Math.random() * 1.5); break;
     }
     case 'vortex': {
-      const a = (i / count) * Math.PI * 8 + Math.random() * 0.4;
-      const r = (i / count) * 180;
-      x = c.x + Math.cos(a) * r;
-      y = c.y + Math.sin(a) * r;
-      vx = Math.cos(a + Math.PI * 0.45) * (2.5 + Math.random() * 2);
-      vy = Math.sin(a + Math.PI * 0.45) * (2.5 + Math.random() * 2);
-      break;
+      const a = (i / count) * Math.PI * 8 + Math.random() * 0.4, r = (i / count) * 180;
+      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
+      vx = Math.cos(a + Math.PI * 0.45) * (2.5 + Math.random() * 2); vy = Math.sin(a + Math.PI * 0.45) * (2.5 + Math.random() * 2); break;
     }
     case 'rain': {
-      x = Math.random() * W;
-      y = -10 - Math.random() * 150;
-      vx = (Math.random() - 0.5) * 1.2;
-      vy = 3 + Math.random() * 5;
-      break;
+      x = Math.random() * W; y = -10 - Math.random() * 150;
+      vx = (Math.random() - 0.5) * 1.2; vy = 3 + Math.random() * 5; break;
     }
     case 'wave': {
-      x = -30 - Math.random() * 50;
-      y = c.y - 120 + Math.random() * 240;
-      vx = 4 + Math.random() * 7;
-      vy = Math.sin(i * 0.12) * 3;
-      break;
+      x = -30 - Math.random() * 50; y = c.y - 120 + Math.random() * 240;
+      vx = 4 + Math.random() * 7; vy = Math.sin(i * 0.12) * 3; break;
+    }
+    case 'spiral': {
+      const arms = 3, arm = i % arms, t = i / count;
+      const a = arm * (Math.PI * 2 / arms) + t * Math.PI * 6;
+      const r = t * 160;
+      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
+      vx = Math.cos(a) * (1 + t * 4); vy = Math.sin(a) * (1 + t * 4); break;
+    }
+    case 'nova-in': {
+      const a = Math.random() * Math.PI * 2, r = 130 + Math.random() * 100;
+      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
+      const spd = 4 + Math.random() * 4;
+      vx = -Math.cos(a) * spd; vy = -Math.sin(a) * spd; break;
+    }
+    case 'nova-out': {
+      const a = Math.random() * Math.PI * 2, spd = 4 + Math.random() * 10;
+      vx = Math.cos(a) * spd; vy = Math.sin(a) * spd; break;
+    }
+    case 'fountain': {
+      const spreadX = (Math.random() - 0.5) * 4;
+      vx = spreadX; vy = -(7 + Math.random() * 7); break;
+    }
+    case 'orbit': {
+      const a = Math.random() * Math.PI * 2, r = 40 + Math.random() * 120;
+      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
+      const orbitSpd = 2 + Math.random() * 2.5;
+      vx = Math.cos(a + Math.PI / 2) * orbitSpd; vy = Math.sin(a + Math.PI / 2) * orbitSpd; break;
     }
   }
 
   const p = new Particle(x, y, vx, vy, color, size, life, el.gravity, 0.99);
+  p.element = spell.element;
 
   // Element-specific behaviors
   if (spell.element === 'water') p.wobbleSpeed = 0.08 + Math.random() * 0.06;
   if (spell.element === 'fire') p.flicker = 1;
+  if (spell.element === 'wind') { p.vx *= 1.6; p.vy *= 1.6; p.drag = 0.975; }
+  if (spell.element === 'blood') p.drag = 0.98;
+
   if (spell.element === 'lightning') {
-    // Jagged motion: random velocity offsets each frame
-    p._origUpdate = p.update;
-    p.update = function() {
-      this._origUpdate.call(this);
-      if (Math.random() < 0.3) {
-        this.vx += (Math.random() - 0.5) * 3;
-        this.vy += (Math.random() - 0.5) * 3;
-      }
-    };
+    const orig = p.update.bind(p);
+    p.update = function() { orig(); if (Math.random() < 0.3) { this.vx += (Math.random()-0.5)*3; this.vy += (Math.random()-0.5)*3; } };
   }
   if (spell.element === 'shadow') {
-    p._origAlpha = Object.getOwnPropertyDescriptor(Particle.prototype, 'alpha');
-    Object.defineProperty(p, 'alpha', {
-      get() {
-        const base = Math.max(0, this.life / this.maxLife);
-        return base * (0.5 + Math.sin(this.life * 0.4) * 0.5); // pulse
-      }
-    });
+    Object.defineProperty(p, 'alpha', { get() { const base = Math.max(0, this.life / this.maxLife); return base * (0.5 + Math.sin(this.life * 0.4) * 0.5); } });
+  }
+  if (spell.element === 'chaos') {
+    const orig = p.update.bind(p);
+    p.update = function() { orig(); if (Math.random() < 0.15) this.color = el.colors[Math.floor(Math.random()*el.colors.length)]; this.gravity = (Math.random()-0.5)*0.08; };
+  }
+
+  // Shape-specific update overrides
+  if (shape === 'orbit') {
+    const orig = p.update.bind(p);
+    p.update = function() {
+      orig();
+      const dx = c.x - this.x, dy = c.y - this.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      this.vx += (dx / dist) * 0.18; this.vy += (dy / dist) * 0.18;
+    };
   }
 
   particles.push(p);
@@ -613,264 +663,207 @@ function render() {
   ctx.fillStyle = '#080812';
   ctx.fillRect(0, 0, W, H);
 
-  // Subtle ambient wash in element color
   const glow = ELEMENTS[spell.element].glow;
   const c = castCenter();
+
+  // Ambient wash
   const grad = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, Math.max(W, H) * 0.5);
-  grad.addColorStop(0, glow + '0a');
-  grad.addColorStop(1, 'transparent');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W, H);
+  grad.addColorStop(0, glow + '0a'); grad.addColorStop(1, 'transparent');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
 
-  // Ambient stars
-  for (const s of stars) {
-    s.phase += s.speed;
-    const a = 0.25 + Math.sin(s.phase) * 0.2;
-    ctx.beginPath();
-    ctx.arc(s.x * W, s.y * H, s.s, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(180,180,240,' + a + ')';
-    ctx.fill();
-  }
+  // Stars
+  for (const s of stars) { s.phase += s.speed; const a = 0.25 + Math.sin(s.phase) * 0.2; ctx.beginPath(); ctx.arc(s.x*W, s.y*H, s.s, 0, Math.PI*2); ctx.fillStyle = 'rgba(180,180,240,'+a+')'; ctx.fill(); }
 
-  // Rune circle (always visible in build mode, prominent in casting)
+  // Rune
   if (gameState === 'build' || gameState === 'casting') {
-    runeAngle += 0.008;
-    runeBreath += 0.025;
+    runeAngle += 0.008; runeBreath += 0.025;
     if (runePulse > 0) runePulse *= 0.92;
-    const baseAlpha = gameState === 'casting' ? 0.45 : 0.15;
-    const alpha = baseAlpha + runePulse * 0.5;
-    drawRune(c.x, c.y, alpha, glow);
+    drawRune(c.x, c.y, (gameState === 'casting' ? 0.45 : 0.15) + runePulse * 0.5, glow);
   }
 
-  // Hold progress ring
+  // Hold ring
   if (gameState === 'casting' && spell.casting === 'hold' && gestureState.holdProgress > 0) {
-    ctx.save();
-    ctx.strokeStyle = glow;
-    ctx.lineWidth = 5;
-    ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    ctx.arc(c.x, c.y, 82, -Math.PI / 2, -Math.PI / 2 + gestureState.holdProgress * Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
+    ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = 5; ctx.globalAlpha = 0.7;
+    ctx.beginPath(); ctx.arc(c.x, c.y, 82, -Math.PI/2, -Math.PI/2 + gestureState.holdProgress * Math.PI * 2); ctx.stroke(); ctx.restore();
   }
-
   // Tap dots
   if (gameState === 'casting' && spell.casting === 'tap') {
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath();
-      ctx.arc(c.x + (i - 1) * 22, c.y + 100, i < gestureState.taps ? 6 : 4, 0, Math.PI * 2);
-      ctx.fillStyle = glow;
-      ctx.globalAlpha = i < gestureState.taps ? 0.85 : 0.2;
-      ctx.fill();
-    }
+    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(c.x+(i-1)*22, c.y+100, i<gestureState.taps?6:4, 0, Math.PI*2); ctx.fillStyle = glow; ctx.globalAlpha = i<gestureState.taps?0.85:0.2; ctx.fill(); }
     ctx.globalAlpha = 1;
   }
-
   // Draw trace
   if (gameState === 'casting' && spell.casting === 'draw' && gestureState.getDrawPoints) {
     const pts = gestureState.getDrawPoints();
-    if (pts.length > 1) {
-      ctx.strokeStyle = glow;
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.globalAlpha = 0.7;
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
-    // Guide circle
-    ctx.strokeStyle = glow;
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.15;
-    ctx.setLineDash([6, 8]);
-    ctx.beginPath();
-    ctx.arc(c.x, c.y, 65, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.globalAlpha = 1;
+    if (pts.length > 1) { ctx.strokeStyle = glow; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = 0.7; ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke(); ctx.globalAlpha = 1; }
+    ctx.strokeStyle = glow; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.15; ctx.setLineDash([6,8]); ctx.beginPath(); ctx.arc(c.x, c.y, 65, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
   }
-
   // Shake meter
   if (gameState === 'casting' && spell.casting === 'shake') {
-    const total = 12;
-    const filled = Math.min(gestureState.shakes || 0, total);
-    const bw = 140, bh = 10;
-    ctx.fillStyle = 'rgba(255,255,255,0.1)';
-    ctx.fillRect(c.x - bw / 2, c.y + 90, bw, bh);
-    ctx.fillStyle = glow;
-    ctx.globalAlpha = 0.7;
-    ctx.fillRect(c.x - bw / 2, c.y + 90, bw * (filled / total), bh);
-    ctx.globalAlpha = 1;
+    const total = 12, filled = Math.min(gestureState.shakes||0, total), bw = 140, bh = 10;
+    ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(c.x-bw/2, c.y+90, bw, bh);
+    ctx.fillStyle = glow; ctx.globalAlpha = 0.7; ctx.fillRect(c.x-bw/2, c.y+90, bw*(filled/total), bh); ctx.globalAlpha = 1;
+  }
+  // Spin progress ring
+  if (gameState === 'casting' && spell.casting === 'spin' && gestureState.spinProgress > 0) {
+    const pct = Math.min(gestureState.spinProgress / (Math.PI * 4), 1);
+    ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = 5; ctx.globalAlpha = 0.7;
+    ctx.beginPath(); ctx.arc(c.x, c.y, 82, -Math.PI/2, -Math.PI/2 + pct * Math.PI * 2); ctx.stroke(); ctx.restore();
   }
 
-  // Process pending particle spawns
-  for (let i = pending.length - 1; i >= 0; i--) {
-    if (--pending[i].delay <= 0) {
-      pending[i].fn();
-      pending.splice(i, 1);
-    }
-  }
+  // Pending
+  for (let i = pending.length - 1; i >= 0; i--) { if (--pending[i].delay <= 0) { pending[i].fn(); pending.splice(i, 1); } }
 
-  // Particles (additive blending)
+  // ─── Particles ────────────────────────────────────────
   ctx.globalCompositeOperation = 'lighter';
 
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
     p.update();
     if (p.dead) { particles.splice(i, 1); continue; }
-
     const a = p.alpha;
 
     // Trail
     if (p.tx.length > 1) {
-      ctx.strokeStyle = p.color;
-      ctx.lineWidth = p.size * 0.7;
-      ctx.globalAlpha = a * 0.3;
-      ctx.beginPath();
-      ctx.moveTo(p.tx[0], p.ty[0]);
-      for (let t = 1; t < p.tx.length; t++) ctx.lineTo(p.tx[t], p.ty[t]);
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
+      ctx.strokeStyle = p.color; ctx.lineWidth = p.size * (p.element === 'blood' ? 1.2 : 0.7); ctx.globalAlpha = a * (p.element === 'blood' ? 0.5 : 0.3);
+      ctx.beginPath(); ctx.moveTo(p.tx[0], p.ty[0]); for (let t = 1; t < p.tx.length; t++) ctx.lineTo(p.tx[t], p.ty[t]); ctx.lineTo(p.x, p.y); ctx.stroke();
     }
 
     // Outer glow
-    ctx.globalAlpha = a * 0.12;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size * 6, 0, Math.PI * 2);
-    ctx.fillStyle = p.color;
-    ctx.fill();
-
+    ctx.globalAlpha = a * 0.12; ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 6, 0, Math.PI * 2); ctx.fill();
     // Mid glow
     ctx.globalAlpha = a * 0.25;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2); ctx.fill();
 
-    // Core
+    // Core — ice draws diamonds, everything else circles
     ctx.globalAlpha = a * 0.95;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // Fire embers — secondary particles
-  if (spell.element === 'fire' && gameState === 'result') {
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      if (!p.dead && Math.random() < 0.04 && particles.length < 1200) {
-        const ember = new Particle(
-          p.x, p.y,
-          (Math.random() - 0.5) * 1.2,
-          -0.8 - Math.random() * 1.5,
-          '#ffcc00', 2, 25, -0.03, 0.97
-        );
-        particles.push(ember);
-      }
+    if (p.element === 'ice') {
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.PI / 4);
+      ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2); ctx.restore();
+    } else {
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
     }
   }
 
-  // Lightning bolts between nearby particles
-  if (spell.element === 'lightning' && gameState === 'result' && Math.random() < 0.3) {
-    const live = particles.filter(p => !p.dead && p.alpha > 0.25);
-    if (live.length > 2) {
-      const a = live[Math.floor(Math.random() * live.length)];
-      const b = live[Math.floor(Math.random() * live.length)];
-      const d = Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
-      if (d < 200 && d > 10) {
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.5 + Math.random();
-        ctx.globalAlpha = 0.6;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        const segs = 4 + Math.floor(Math.random() * 4);
-        for (let s = 1; s <= segs; s++) {
-          const t = s / (segs + 1);
-          const jx = (Math.random() - 0.5) * 35;
-          const jy = (Math.random() - 0.5) * 35;
-          ctx.lineTo(a.x + (b.x - a.x) * t + jx, a.y + (b.y - a.y) * t + jy);
+  // ─── Element secondary effects ────────────────────────
+  if (gameState === 'result' || chainCount > 0) {
+    const liveParticles = particles;
+
+    // Fire embers
+    if (spell.element === 'fire') {
+      for (let i = liveParticles.length - 1; i >= 0; i--) {
+        const p = liveParticles[i];
+        if (!p.dead && Math.random() < 0.04 && particles.length < MAX_PARTICLES) {
+          const ember = new Particle(p.x, p.y, (Math.random()-0.5)*1.2, -0.8-Math.random()*1.5, '#ffcc00', 2, 25, -0.03, 0.97);
+          ember.element = 'fire'; particles.push(ember);
         }
-        ctx.lineTo(b.x, b.y);
-        ctx.stroke();
       }
     }
-  }
 
-  // Star twinkle flashes
-  if (spell.element === 'star' && gameState === 'result') {
-    for (const p of particles) {
-      if (!p.dead && Math.random() < 0.03) {
-        ctx.globalAlpha = 0.7;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 8, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
+    // Lightning bolts
+    if (spell.element === 'lightning' && Math.random() < 0.35) {
+      const live = liveParticles.filter(p => !p.dead && p.alpha > 0.25);
+      if (live.length > 2) {
+        const a = live[Math.floor(Math.random()*live.length)], b = live[Math.floor(Math.random()*live.length)];
+        const d = Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+        if (d < 200 && d > 10) {
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5 + Math.random(); ctx.globalAlpha = 0.6;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y);
+          const segs = 4 + Math.floor(Math.random()*4);
+          for (let s = 1; s <= segs; s++) { const t = s/(segs+1); ctx.lineTo(a.x+(b.x-a.x)*t+(Math.random()-0.5)*35, a.y+(b.y-a.y)*t+(Math.random()-0.5)*35); }
+          ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    }
+
+    // Star twinkle
+    if (spell.element === 'star') {
+      for (const p of liveParticles) {
+        if (!p.dead && Math.random() < 0.03) { ctx.globalAlpha = 0.7; ctx.beginPath(); ctx.arc(p.x, p.y, p.size*8, 0, Math.PI*2); ctx.fillStyle = '#ffffff'; ctx.fill(); }
+      }
+    }
+
+    // Ice frost crystals
+    if (spell.element === 'ice') {
+      for (const p of liveParticles) {
+        if (!p.dead && Math.random() < 0.02 && particles.length < MAX_PARTICLES) {
+          const frost = new Particle(p.x, p.y, 0, 0, '#ccf4ff', 1.5, 40, 0, 1);
+          frost.element = 'ice'; particles.push(frost);
+        }
+      }
+    }
+
+    // Blood drips
+    if (spell.element === 'blood') {
+      for (const p of liveParticles) {
+        if (!p.dead && Math.random() < 0.03 && particles.length < MAX_PARTICLES) {
+          const drip = new Particle(p.x, p.y, (Math.random()-0.5)*0.3, 1+Math.random()*2, '#990000', 1.5, 30, 0.08, 0.99);
+          drip.element = 'blood'; particles.push(drip);
+        }
+      }
+    }
+
+    // Wind streaks
+    if (spell.element === 'wind') {
+      for (const p of liveParticles) {
+        if (!p.dead && Math.random() < 0.06) {
+          const spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+          if (spd > 1) {
+            ctx.strokeStyle = '#ddeeff'; ctx.lineWidth = 0.5; ctx.globalAlpha = p.alpha * 0.3;
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 5, p.y - p.vy * 5); ctx.stroke();
+          }
+        }
+      }
+    }
+
+    // Chaos random mini-bursts
+    if (spell.element === 'chaos') {
+      for (const p of liveParticles) {
+        if (!p.dead && Math.random() < 0.008 && particles.length < MAX_PARTICLES) {
+          for (let j = 0; j < 5; j++) {
+            const a = Math.random() * Math.PI * 2;
+            const mini = new Particle(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3,
+              ELEMENTS.chaos.colors[Math.floor(Math.random()*ELEMENTS.chaos.colors.length)], 2, 20, (Math.random()-0.5)*0.05, 0.96);
+            mini.element = 'chaos'; particles.push(mini);
+          }
+        }
+      }
+    }
+
+    // Nature leaf bursts
+    if (spell.element === 'nature') {
+      for (const p of liveParticles) {
+        if (!p.dead && Math.random() < 0.015 && particles.length < MAX_PARTICLES) {
+          const leaf = new Particle(p.x, p.y, (Math.random()-0.5)*1.5, -0.5+Math.random(), '#66ff33', 2.5, 35, 0.02, 0.98);
+          leaf.wobbleSpeed = 0.1; leaf.element = 'nature'; particles.push(leaf);
+        }
       }
     }
   }
 
   ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = 1;
-
   requestAnimationFrame(render);
 }
 
 function drawRune(x, y, alpha, color) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(runeAngle);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(runeAngle);
+  ctx.strokeStyle = color; ctx.lineWidth = 1.5;
   const breath = 0.85 + Math.sin(runeBreath) * 0.15;
   ctx.globalAlpha = alpha * breath;
-
-  // Outer circle
-  ctx.beginPath();
-  ctx.arc(0, 0, 70, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // Inner circle
-  ctx.beginPath();
-  ctx.arc(0, 0, 48, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // Tick marks
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.moveTo(Math.cos(a) * 52, Math.sin(a) * 52);
-    ctx.lineTo(Math.cos(a) * 66, Math.sin(a) * 66);
-    ctx.stroke();
-  }
-
-  // Inner star
-  ctx.rotate(-runeAngle * 1.7); // counter-rotate for effect
-  ctx.lineWidth = 1;
-  ctx.globalAlpha = alpha * breath * 0.6;
-  for (let i = 0; i < 4; i++) {
-    const a = (i / 4) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.moveTo(Math.cos(a) * -30, Math.sin(a) * -30);
-    ctx.lineTo(Math.cos(a) * 30, Math.sin(a) * 30);
-    ctx.stroke();
-  }
-
-  // Glow
-  ctx.globalAlpha = alpha * 0.08 + runePulse * 0.2;
-  ctx.beginPath();
-  ctx.arc(0, 0, 85, 0, Math.PI * 2);
-  ctx.fillStyle = color;
-  ctx.fill();
-
+  ctx.beginPath(); ctx.arc(0, 0, 70, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, 48, 0, Math.PI*2); ctx.stroke();
+  for (let i = 0; i < 8; i++) { const a = (i/8)*Math.PI*2; ctx.beginPath(); ctx.moveTo(Math.cos(a)*52, Math.sin(a)*52); ctx.lineTo(Math.cos(a)*66, Math.sin(a)*66); ctx.stroke(); }
+  ctx.rotate(-runeAngle * 1.7); ctx.lineWidth = 1; ctx.globalAlpha = alpha * breath * 0.6;
+  for (let i = 0; i < 4; i++) { const a = (i/4)*Math.PI*2; ctx.beginPath(); ctx.moveTo(Math.cos(a)*-30, Math.sin(a)*-30); ctx.lineTo(Math.cos(a)*30, Math.sin(a)*30); ctx.stroke(); }
+  ctx.globalAlpha = alpha * 0.08 + runePulse * 0.2; ctx.beginPath(); ctx.arc(0, 0, 85, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
   ctx.restore();
 }
 
 render();
 
 // ─── Spellbook ────────────────────────────────────────────
-const MAX_SLOTS = 8;
+const MAX_SLOTS = 12;
 let spellbook = [];
 try { spellbook = JSON.parse(localStorage.getItem('spellforge_book') || '[]'); } catch(e) {}
 while (spellbook.length < MAX_SLOTS) spellbook.push(null);
@@ -884,19 +877,10 @@ function renderBook() {
     div.className = 'book-slot' + (s ? '' : ' empty');
     if (s) {
       const sg = ELEMENTS[s.element] ? ELEMENTS[s.element].glow : '#aaa';
-      div.innerHTML =
-        '<div class="slot-name" style="color:' + sg + '">' + (s.name || '?') + '</div>' +
-        '<div class="slot-desc">' + s.element + ' · ' + s.shape + ' · ' + POWER_NAMES[s.power] + ' · ' + s.casting + '</div>' +
-        '<div class="slot-actions">' +
-          '<button data-act="load" data-i="' + i + '">Load</button>' +
-          '<button data-act="cast" data-i="' + i + '">Cast</button>' +
-          '<button data-act="del" data-i="' + i + '">✕</button>' +
-        '</div>';
-    } else {
-      div.textContent = 'tap to save current spell';
-      div.dataset.act = 'save';
-      div.dataset.i = i;
-    }
+      div.innerHTML = '<div class="slot-name" style="color:'+sg+'">'+(s.name||'?')+'</div>' +
+        '<div class="slot-desc">'+s.element+' · '+s.shape+' · '+POWER_NAMES[s.power]+' · '+s.casting+'</div>' +
+        '<div class="slot-actions"><button data-act="load" data-i="'+i+'">Load</button><button data-act="cast" data-i="'+i+'">Cast</button><button data-act="del" data-i="'+i+'">✕</button></div>';
+    } else { div.textContent = 'tap to save current spell'; div.dataset.act = 'save'; div.dataset.i = i; }
     el.appendChild(div);
   }
 }
@@ -904,59 +888,28 @@ function renderBook() {
 document.getElementById('book-slots').addEventListener('click', e => {
   const t = e.target.closest('[data-act]');
   if (!t) return;
-  const idx = parseInt(t.dataset.i);
-  const act = t.dataset.act;
-
-  if (act === 'save') {
-    spellbook[idx] = { ...spell, name: getSpellName() };
-    saveBook();
-    renderBook();
-  } else if (act === 'load') {
-    loadSpell(spellbook[idx]);
-    closeBook();
-  } else if (act === 'cast') {
-    loadSpell(spellbook[idx]);
-    closeBook();
-    setTimeout(() => document.getElementById('cast-btn').click(), 300);
-  } else if (act === 'del') {
-    spellbook[idx] = null;
-    saveBook();
-    renderBook();
-  }
+  const idx = parseInt(t.dataset.i), act = t.dataset.act;
+  if (act === 'save') { spellbook[idx] = { ...spell, name: getSpellName() }; saveBook(); renderBook(); }
+  else if (act === 'load') { loadSpell(spellbook[idx]); closeBook(); }
+  else if (act === 'cast') { loadSpell(spellbook[idx]); closeBook(); setTimeout(() => document.getElementById('cast-btn').click(), 300); }
+  else if (act === 'del') { spellbook[idx] = null; saveBook(); renderBook(); }
 });
 
 function loadSpell(s) {
   if (!s) return;
-  spell.element = s.element;
-  spell.shape = s.shape;
-  spell.power = s.power;
-  spell.casting = s.casting;
+  spell.element = s.element; spell.shape = s.shape; spell.power = s.power; spell.casting = s.casting;
   document.querySelectorAll('.prop-options').forEach(row => {
-    const prop = row.dataset.prop;
-    row.querySelectorAll('.prop-btn').forEach(btn => {
-      btn.classList.toggle('selected', btn.dataset.val === spell[prop]);
-    });
+    row.querySelectorAll('.prop-btn').forEach(btn => { btn.classList.toggle('selected', btn.dataset.val === spell[row.dataset.prop]); });
   });
   refreshUI();
 }
+function saveBook() { localStorage.setItem('spellforge_book', JSON.stringify(spellbook)); }
 
-function saveBook() {
-  localStorage.setItem('spellforge_book', JSON.stringify(spellbook));
-}
-
-document.getElementById('book-btn').addEventListener('click', () => {
-  document.getElementById('spellbook').classList.add('open');
-  document.getElementById('spellbook-backdrop').classList.add('open');
-  renderBook();
-});
-function closeBook() {
-  document.getElementById('spellbook').classList.remove('open');
-  document.getElementById('spellbook-backdrop').classList.remove('open');
-}
+document.getElementById('book-btn').addEventListener('click', () => { document.getElementById('spellbook').classList.add('open'); document.getElementById('spellbook-backdrop').classList.add('open'); renderBook(); });
+function closeBook() { document.getElementById('spellbook').classList.remove('open'); document.getElementById('spellbook-backdrop').classList.remove('open'); }
 document.getElementById('spellbook-close').addEventListener('click', closeBook);
 document.getElementById('spellbook-backdrop').addEventListener('click', closeBook);
 
-// Prevent scroll/zoom
 document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 </script>
 </body>
