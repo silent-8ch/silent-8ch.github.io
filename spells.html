@@ -11,15 +11,26 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 
 #spell-name{position:absolute;top:14px;left:50px;right:50px;text-align:center;font-size:20px;letter-spacing:3px;text-transform:uppercase;color:#fff;pointer-events:none;z-index:10;transition:text-shadow 0.5s}
 #power-pips{position:absolute;top:42px;left:0;right:0;text-align:center;font-size:12px;letter-spacing:6px;pointer-events:none;z-index:10;color:#aa8844}
-
 #combo-display{position:absolute;top:65px;left:0;right:0;text-align:center;font-size:32px;font-weight:bold;letter-spacing:4px;text-transform:uppercase;pointer-events:none;z-index:10;opacity:0;transition:opacity 0.2s}
 #combo-display.visible{opacity:1}
 
 #book-btn{position:absolute;top:12px;right:12px;width:44px;height:44px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;font-size:22px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;color:#ddd;-webkit-tap-highlight-color:transparent}
+#chain-btn{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(255,100,50,0.25),rgba(255,100,50,0.05));border:2px solid rgba(255,100,50,0.5);border-radius:28px;padding:12px 36px;color:#ff8844;font-size:18px;font-family:inherit;letter-spacing:4px;text-transform:uppercase;cursor:pointer;z-index:12;display:none;-webkit-tap-highlight-color:transparent;animation:pulse-chain 0.6s ease-in-out infinite}
+@keyframes pulse-chain{0%,100%{box-shadow:0 0 10px rgba(255,100,50,0.2);transform:translateX(-50%) scale(1)}50%{box-shadow:0 0 30px rgba(255,100,50,0.5);transform:translateX(-50%) scale(1.05)}}
+#chain-btn.visible{display:block}
 
-#build-panel{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(8,8,18,0.97) 28%);padding:32px 10px 16px;z-index:10;transition:transform 0.4s ease}
+#build-panel{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(8,8,18,0.97) 28%);padding:32px 10px 14px;z-index:10;transition:transform 0.4s ease}
 #build-panel.hidden{transform:translateY(110%)}
-.prop-row{margin-bottom:7px}
+
+#scroll-bar{display:flex;align-items:center;gap:6px;margin-bottom:8px;min-height:34px;padding:0 2px}
+#scroll-items{display:flex;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;min-height:28px;align-items:center}
+#scroll-items::-webkit-scrollbar{display:none}
+#scroll-items:empty::after{content:'scroll empty — add spells below';color:#444;font-size:11px;font-style:italic}
+.scroll-pip{display:inline-flex;align-items:center;gap:1px;padding:3px 8px;background:rgba(255,255,255,0.08);border:1px solid currentColor;border-radius:10px;font-size:14px;cursor:pointer;flex-shrink:0;transition:opacity 0.2s;-webkit-tap-highlight-color:transparent}
+.scroll-pip:active{opacity:0.5}
+#clear-scroll{background:none;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#666;font-size:12px;padding:4px 8px;cursor:pointer;flex-shrink:0;font-family:inherit;-webkit-tap-highlight-color:transparent}
+
+.prop-row{margin-bottom:6px}
 .prop-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#665;margin-bottom:3px;padding-left:4px}
 .prop-options{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none}
 .prop-options::-webkit-scrollbar{display:none}
@@ -27,13 +38,13 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 .prop-btn:active{transform:scale(0.94)}
 .prop-btn.selected{background:rgba(255,255,255,0.14);color:#fff}
 
-#cast-btn{display:block;margin:8px auto 0;background:radial-gradient(circle,rgba(255,200,100,0.15),rgba(255,150,50,0.05));border:2px solid rgba(255,200,100,0.35);border-radius:28px;padding:10px 40px;color:#eec87a;font-size:15px;font-family:inherit;letter-spacing:5px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;-webkit-tap-highlight-color:transparent;animation:pulse-btn 2.5s ease-in-out infinite}
-@keyframes pulse-btn{0%,100%{box-shadow:0 0 8px rgba(255,200,100,0.1)}50%{box-shadow:0 0 24px rgba(255,200,100,0.25)}}
-#cast-btn:active{transform:scale(0.95)}
-
-#chain-btn{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(255,100,50,0.25),rgba(255,100,50,0.05));border:2px solid rgba(255,100,50,0.5);border-radius:28px;padding:12px 36px;color:#ff8844;font-size:18px;font-family:inherit;letter-spacing:4px;text-transform:uppercase;cursor:pointer;z-index:12;display:none;-webkit-tap-highlight-color:transparent;animation:pulse-chain 0.6s ease-in-out infinite}
-@keyframes pulse-chain{0%,100%{box-shadow:0 0 10px rgba(255,100,50,0.2);transform:translateX(-50%) scale(1)}50%{box-shadow:0 0 30px rgba(255,100,50,0.5);transform:translateX(-50%) scale(1.05)}}
-#chain-btn.visible{display:block}
+#panel-buttons{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.panel-btn{border-radius:28px;padding:10px 28px;font-size:15px;font-family:inherit;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;-webkit-tap-highlight-color:transparent;border:2px solid}
+.panel-btn:active{transform:scale(0.95)}
+#add-btn{background:radial-gradient(circle,rgba(255,200,100,0.12),transparent);border-color:rgba(255,200,100,0.3);color:#eec87a}
+#cast-scroll-btn{background:radial-gradient(circle,rgba(100,255,150,0.12),transparent);border-color:rgba(100,255,150,0.3);color:#88eea0;animation:pulse-btn 2.5s ease-in-out infinite}
+#cast-scroll-btn:disabled{opacity:0.3;animation:none;cursor:default}
+@keyframes pulse-btn{0%,100%{box-shadow:0 0 8px rgba(100,255,150,0.1)}50%{box-shadow:0 0 24px rgba(100,255,150,0.25)}}
 
 #cast-overlay{position:absolute;top:0;left:0;right:0;bottom:0;z-index:15;display:none;pointer-events:none}
 #cast-overlay.active{display:block;pointer-events:auto}
@@ -45,23 +56,20 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 #spellbook.open{transform:translateX(0)}
 #spellbook h2{font-size:14px;letter-spacing:3px;text-transform:uppercase;color:#ddb870;margin-bottom:12px;font-weight:normal}
 #spellbook-close{position:absolute;top:10px;right:12px;background:none;border:none;color:#666;font-size:20px;cursor:pointer}
-.book-slot{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;margin-bottom:7px;cursor:default;transition:border-color 0.2s}
+.book-slot{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;margin-bottom:7px;cursor:default}
 .book-slot.empty{color:#444;text-align:center;font-style:italic;font-size:13px;cursor:pointer}
-.book-slot .slot-name{font-size:13px;letter-spacing:1px}
+.book-slot .slot-name{font-size:12px;letter-spacing:1px;line-height:1.4}
 .book-slot .slot-desc{font-size:10px;color:#666;margin-top:2px}
 .slot-actions{display:flex;gap:5px;margin-top:6px}
 .slot-actions button{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 10px;color:#999;font-size:10px;cursor:pointer;font-family:inherit}
-.slot-actions button:active{background:rgba(255,255,255,0.12)}
 
 #flash{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:100;opacity:0;transition:opacity 0.35s}
 #flash.active{opacity:1}
-
 @keyframes shake{0%,100%{transform:translate(0)}20%{transform:translate(-3px,2px)}40%{transform:translate(3px,-2px)}60%{transform:translate(-2px,1px)}80%{transform:translate(2px,-1px)}}
 body.shake{animation:shake 0.15s ease 2}
 </style>
 </head>
 <body>
-
 <canvas id="c"></canvas>
 <div id="spell-name"></div>
 <div id="power-pips"></div>
@@ -70,854 +78,456 @@ body.shake{animation:shake 0.15s ease 2}
 <button id="chain-btn">⚡ Chain!</button>
 
 <div id="build-panel">
-  <div class="prop-row">
-    <div class="prop-label">Element</div>
+  <div id="scroll-bar">
+    <div id="scroll-items"></div>
+    <button id="clear-scroll">Clear</button>
+  </div>
+  <div class="prop-row"><div class="prop-label">Element</div>
     <div class="prop-options" data-prop="element">
-      <button class="prop-btn selected" data-val="fire">🔥 Fire</button>
-      <button class="prop-btn" data-val="water">💧 Water</button>
-      <button class="prop-btn" data-val="lightning">⚡ Bolt</button>
-      <button class="prop-btn" data-val="nature">🌿 Nature</button>
-      <button class="prop-btn" data-val="shadow">🌑 Shadow</button>
-      <button class="prop-btn" data-val="star">✨ Star</button>
-      <button class="prop-btn" data-val="ice">❄️ Ice</button>
-      <button class="prop-btn" data-val="blood">🩸 Blood</button>
-      <button class="prop-btn" data-val="wind">💨 Wind</button>
-      <button class="prop-btn" data-val="chaos">🌈 Chaos</button>
+      <button class="prop-btn selected" data-val="fire">🔥 Fire</button><button class="prop-btn" data-val="water">💧 Water</button><button class="prop-btn" data-val="lightning">⚡ Bolt</button><button class="prop-btn" data-val="nature">🌿 Nature</button><button class="prop-btn" data-val="shadow">🌑 Shadow</button><button class="prop-btn" data-val="star">✨ Star</button><button class="prop-btn" data-val="ice">❄️ Ice</button><button class="prop-btn" data-val="blood">🩸 Blood</button><button class="prop-btn" data-val="wind">💨 Wind</button><button class="prop-btn" data-val="chaos">🌈 Chaos</button>
     </div>
   </div>
-  <div class="prop-row">
-    <div class="prop-label">Shape</div>
+  <div class="prop-row"><div class="prop-label">Shape</div>
     <div class="prop-options" data-prop="shape">
-      <button class="prop-btn selected" data-val="burst">💥 Burst</button>
-      <button class="prop-btn" data-val="beam">➡️ Beam</button>
-      <button class="prop-btn" data-val="shield">🛡 Shield</button>
-      <button class="prop-btn" data-val="vortex">🌀 Vortex</button>
-      <button class="prop-btn" data-val="rain">🌧 Rain</button>
-      <button class="prop-btn" data-val="wave">🌊 Wave</button>
-      <button class="prop-btn" data-val="spiral">🌪 Spiral</button>
-      <button class="prop-btn" data-val="nova">💫 Nova</button>
-      <button class="prop-btn" data-val="fountain">⛲ Fountain</button>
-      <button class="prop-btn" data-val="orbit">🪐 Orbit</button>
+      <button class="prop-btn selected" data-val="burst">💥 Burst</button><button class="prop-btn" data-val="beam">➡️ Beam</button><button class="prop-btn" data-val="shield">🛡 Shield</button><button class="prop-btn" data-val="vortex">🌀 Vortex</button><button class="prop-btn" data-val="rain">🌧 Rain</button><button class="prop-btn" data-val="wave">🌊 Wave</button><button class="prop-btn" data-val="spiral">🌪 Spiral</button><button class="prop-btn" data-val="nova">💫 Nova</button><button class="prop-btn" data-val="fountain">⛲ Fountain</button><button class="prop-btn" data-val="orbit">🪐 Orbit</button>
     </div>
   </div>
-  <div class="prop-row">
-    <div class="prop-label">Power</div>
+  <div class="prop-row"><div class="prop-label">Power</div>
     <div class="prop-options" data-prop="power">
-      <button class="prop-btn selected" data-val="spark">✦ Spark</button>
-      <button class="prop-btn" data-val="surge">✦✦ Surge</button>
-      <button class="prop-btn" data-val="storm">✦✦✦ Storm</button>
-      <button class="prop-btn" data-val="cataclysm">✦✦✦✦ Cataclysm</button>
+      <button class="prop-btn selected" data-val="spark">✦ Spark</button><button class="prop-btn" data-val="surge">✦✦ Surge</button><button class="prop-btn" data-val="storm">✦✦✦ Storm</button><button class="prop-btn" data-val="cataclysm">✦✦✦✦ Cataclysm</button>
     </div>
   </div>
-  <div class="prop-row">
-    <div class="prop-label">Casting</div>
+  <div class="prop-row"><div class="prop-label">Casting</div>
     <div class="prop-options" data-prop="casting">
-      <button class="prop-btn selected" data-val="tap">👆 Tap</button>
-      <button class="prop-btn" data-val="swipe">👉 Swipe</button>
-      <button class="prop-btn" data-val="draw">✏️ Draw</button>
-      <button class="prop-btn" data-val="hold">✊ Hold</button>
-      <button class="prop-btn" data-val="shake">🫨 Shake</button>
-      <button class="prop-btn" data-val="slash">⚔️ Slash</button>
-      <button class="prop-btn" data-val="spin">🔄 Spin</button>
-      <button class="prop-btn" data-val="clap">👏 Clap</button>
+      <button class="prop-btn selected" data-val="tap">👆 Tap</button><button class="prop-btn" data-val="swipe">👉 Swipe</button><button class="prop-btn" data-val="draw">✏️ Draw</button><button class="prop-btn" data-val="hold">✊ Hold</button><button class="prop-btn" data-val="shake">🫨 Shake</button><button class="prop-btn" data-val="slash">⚔️ Slash</button><button class="prop-btn" data-val="spin">🔄 Spin</button><button class="prop-btn" data-val="clap">👏 Clap</button>
     </div>
   </div>
-  <button id="cast-btn">Cast Spell</button>
+  <div id="panel-buttons">
+    <button class="panel-btn" id="add-btn">+ Add</button>
+    <button class="panel-btn" id="cast-scroll-btn" disabled>Cast Scroll ▶</button>
+  </div>
 </div>
 
-<div id="cast-overlay">
-  <div id="cast-instruction"></div>
-</div>
-
+<div id="cast-overlay"><div id="cast-instruction"></div></div>
 <div id="spellbook-backdrop"></div>
-<div id="spellbook">
-  <button id="spellbook-close">✕</button>
-  <h2>📖 Spellbook</h2>
-  <div id="book-slots"></div>
-</div>
-
+<div id="spellbook"><button id="spellbook-close">✕</button><h2>📖 Spellbook</h2><div id="book-slots"></div></div>
 <div id="flash"></div>
 
 <script>
 // ─── Canvas ───────────────────────────────────────────────
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
 let W, H;
-function resize() {
-  const dpr = window.devicePixelRatio || 1;
-  W = window.innerWidth; H = window.innerHeight;
-  canvas.width = W * dpr; canvas.height = H * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+function resize() { const d = window.devicePixelRatio||1; W = window.innerWidth; H = window.innerHeight; canvas.width = W*d; canvas.height = H*d; ctx.setTransform(d,0,0,d,0,0); }
+resize(); window.addEventListener('resize', resize);
+
+// ─── William sprite ──────────────────────────────────────
+const williamImg = new Image();
+williamImg.crossOrigin = 'anonymous';
+williamImg.src = 'birthday/sprites/expressions/sources/william-core.png';
+let williamSprite = null;
+williamImg.onload = () => {
+  const cw = Math.floor(williamImg.width / 4), ch = Math.floor(williamImg.height / 4);
+  const oc = document.createElement('canvas'); oc.width = cw; oc.height = ch;
+  const octx = oc.getContext('2d');
+  octx.drawImage(williamImg, 0, 0, cw, ch, 0, 0, cw, ch);
+  const id = octx.getImageData(0, 0, cw, ch), d = id.data;
+  for (let i = 0; i < d.length; i += 4) { if (d[i+1] > 180 && d[i] < 100 && d[i+2] < 100) d[i+3] = 0; }
+  octx.putImageData(id, 0, 0);
+  williamSprite = oc;
+};
+
+// ─── State ────────────────────────────────────────────────
+const spell = { element:'fire', shape:'burst', power:'spark', casting:'tap' };
+let gameState = 'build', activeElement = 'fire';
+
+// ─── Scroll ──────────────────────────────────────────────
+let scroll = []; // [{element, shape, power}, ...]
+const MAX_SCROLL = 8;
+const ELEM_EMOJI = {fire:'🔥',water:'💧',lightning:'⚡',nature:'🌿',shadow:'🌑',star:'✨',ice:'❄️',blood:'🩸',wind:'💨',chaos:'🌈'};
+const SHAPE_EMOJI = {burst:'💥',beam:'➡️',shield:'🛡',vortex:'🌀',rain:'🌧',wave:'🌊',spiral:'🌪',nova:'💫',fountain:'⛲',orbit:'🪐'};
+
+function renderScroll() {
+  const el = document.getElementById('scroll-items'); el.innerHTML = '';
+  scroll.forEach((s, i) => {
+    const pip = document.createElement('span');
+    pip.className = 'scroll-pip';
+    pip.style.color = ELEMENTS[s.element].glow;
+    pip.textContent = ELEM_EMOJI[s.element] + SHAPE_EMOJI[s.shape];
+    pip.title = spellNameFromConfig(s);
+    pip.addEventListener('click', () => { scroll.splice(i, 1); renderScroll(); });
+    el.appendChild(pip);
+  });
+  document.getElementById('cast-scroll-btn').disabled = scroll.length === 0;
 }
-resize();
-window.addEventListener('resize', resize);
+document.getElementById('add-btn').addEventListener('click', () => {
+  if (scroll.length >= MAX_SCROLL) return;
+  scroll.push({ element: spell.element, shape: spell.shape, power: spell.power });
+  activeElement = spell.element;
+  renderScroll();
+});
+document.getElementById('clear-scroll').addEventListener('click', () => { scroll = []; renderScroll(); });
+renderScroll();
 
-// ─── Spell state ──────────────────────────────────────────
-const spell = { element: 'fire', shape: 'burst', power: 'spark', casting: 'tap' };
-let gameState = 'build';
-
-// ─── Element configs ──────────────────────────────────────
+// ─── Configs ──────────────────────────────────────────────
 const ELEMENTS = {
-  fire:      { colors: ['#ff3300','#ff6600','#ff9900','#ffcc00','#ff4400'], gravity: -0.04, glow: '#ff6600', adj: ['Blazing','Infernal','Scorching','Embered'] },
-  water:     { colors: ['#0055ee','#0099ff','#00ccff','#00eeff','#3388ff'], gravity: 0.04,  glow: '#0099ff', adj: ['Frozen','Tidal','Abyssal','Torrential'] },
-  lightning: { colors: ['#ffff33','#ffffff','#ddddff','#ffee66','#eeeeff'], gravity: 0,     glow: '#ffee44', adj: ['Crackling','Voltaic','Thundering','Arc'] },
-  nature:    { colors: ['#00bb44','#66ff33','#44dd00','#22cc55','#88ff22'], gravity: 0.015, glow: '#44dd33', adj: ['Verdant','Wild','Ancient','Blooming'] },
-  shadow:    { colors: ['#8800cc','#aa22ff','#cc55ff','#7700bb','#dd77ff'], gravity: -0.015,glow: '#aa44ff', adj: ['Void','Spectral','Phantom','Dark'] },
-  star:      { colors: ['#ffdd22','#ffffff','#ffffaa','#ffcc44','#fff4cc'], gravity: -0.025,glow: '#ffdd44', adj: ['Astral','Celestial','Radiant','Cosmic'] },
-  ice:       { colors: ['#88ddff','#aaeeff','#ffffff','#66ccff','#ccf4ff'], gravity: 0.03,  glow: '#88ddff', adj: ['Glacial','Frostbitten','Crystal','Shattered'] },
-  blood:     { colors: ['#cc0000','#990000','#ff2222','#880022','#dd3333'], gravity: 0.06,  glow: '#cc2222', adj: ['Crimson','Sanguine','Scarlet','Wrathful'] },
-  wind:      { colors: ['#ccddee','#eeeeff','#aabbcc','#ddeeff','#ffffff'], gravity: 0,     glow: '#bbccdd', adj: ['Gale','Tempest','Zephyr','Howling'] },
-  chaos:     { colors: ['#ff0066','#00ff88','#ffaa00','#0088ff','#ff00ff','#00ffff'], gravity: 0, glow: '#ff44aa', adj: ['Chaotic','Unstable','Entropic','Wild'] }
+  fire:      { colors:['#ff3300','#ff6600','#ff9900','#ffcc00','#ff4400'], gravity:-0.04, glow:'#ff6600', adj:['Blazing','Infernal','Scorching','Embered'] },
+  water:     { colors:['#0055ee','#0099ff','#00ccff','#00eeff','#3388ff'], gravity:0.04,  glow:'#0099ff', adj:['Frozen','Tidal','Abyssal','Torrential'] },
+  lightning: { colors:['#ffff33','#ffffff','#ddddff','#ffee66','#eeeeff'], gravity:0,     glow:'#ffee44', adj:['Crackling','Voltaic','Thundering','Arc'] },
+  nature:    { colors:['#00bb44','#66ff33','#44dd00','#22cc55','#88ff22'], gravity:0.015, glow:'#44dd33', adj:['Verdant','Wild','Ancient','Blooming'] },
+  shadow:    { colors:['#8800cc','#aa22ff','#cc55ff','#7700bb','#dd77ff'], gravity:-0.015,glow:'#aa44ff', adj:['Void','Spectral','Phantom','Dark'] },
+  star:      { colors:['#ffdd22','#ffffff','#ffffaa','#ffcc44','#fff4cc'], gravity:-0.025,glow:'#ffdd44', adj:['Astral','Celestial','Radiant','Cosmic'] },
+  ice:       { colors:['#88ddff','#aaeeff','#ffffff','#66ccff','#ccf4ff'], gravity:0.03,  glow:'#88ddff', adj:['Glacial','Frostbitten','Crystal','Shattered'] },
+  blood:     { colors:['#cc0000','#990000','#ff2222','#880022','#dd3333'], gravity:0.06,  glow:'#cc2222', adj:['Crimson','Sanguine','Scarlet','Wrathful'] },
+  wind:      { colors:['#ccddee','#eeeeff','#aabbcc','#ddeeff','#ffffff'], gravity:0,     glow:'#bbccdd', adj:['Gale','Tempest','Zephyr','Howling'] },
+  chaos:     { colors:['#ff0066','#00ff88','#ffaa00','#0088ff','#ff00ff','#00ffff'], gravity:0, glow:'#ff44aa', adj:['Chaotic','Unstable','Entropic','Wild'] }
 };
-
-const SHAPES = {
-  burst:'Burst', beam:'Beam', shield:'Shield', vortex:'Vortex', rain:'Rain',
-  wave:'Wave', spiral:'Spiral', nova:'Nova', fountain:'Fountain', orbit:'Orbit'
-};
-
-const POWERS = {
-  spark:     { count: 150,  size: 4,   life: 80 },
-  surge:     { count: 400,  size: 5.5, life: 110 },
-  storm:     { count: 800,  size: 7,   life: 150 },
-  cataclysm: { count: 1200, size: 9,   life: 200 }
-};
-const POWER_NAMES = { spark:'Spark', surge:'Surge', storm:'Storm', cataclysm:'Cataclysm' };
+const SHAPES = {burst:'Burst',beam:'Beam',shield:'Shield',vortex:'Vortex',rain:'Rain',wave:'Wave',spiral:'Spiral',nova:'Nova',fountain:'Fountain',orbit:'Orbit'};
+const POWERS = {spark:{count:150,size:4,life:80},surge:{count:400,size:5.5,life:110},storm:{count:800,size:7,life:150},cataclysm:{count:1200,size:9,life:200}};
+const POWER_NAMES = {spark:'Spark',surge:'Surge',storm:'Storm',cataclysm:'Cataclysm'};
 
 // ─── Particles ────────────────────────────────────────────
-let particles = [];
-let pending = [];
-const MAX_PARTICLES = 3500;
-
+let particles = [], pending = [];
+const MAX_P = 3500;
 class Particle {
-  constructor(x, y, vx, vy, color, size, life, gravity, drag) {
-    this.x = x; this.y = y; this.vx = vx; this.vy = vy;
-    this.color = color; this.size = size;
-    this.life = life; this.maxLife = life;
-    this.gravity = gravity; this.drag = drag || 0.985;
-    this.tx = []; this.ty = [];
-    this.wobble = 0; this.wobbleSpeed = 0; this.flicker = 0;
-    this.element = '';
+  constructor(x,y,vx,vy,color,size,life,gravity,drag) {
+    this.x=x;this.y=y;this.vx=vx;this.vy=vy;this.color=color;this.size=size;
+    this.life=life;this.maxLife=life;this.gravity=gravity;this.drag=drag||0.985;
+    this.tx=[];this.ty=[];this.wobble=0;this.wobbleSpeed=0;this.flicker=0;this.element='';
   }
-  update() {
-    this.tx.push(this.x); this.ty.push(this.y);
-    if (this.tx.length > 10) { this.tx.shift(); this.ty.shift(); }
-    this.x += this.vx; this.y += this.vy;
-    this.vy += this.gravity;
-    this.vx *= this.drag; this.vy *= this.drag;
-    if (this.wobbleSpeed) { this.wobble += this.wobbleSpeed; this.x += Math.sin(this.wobble) * 0.6; }
-    if (this.flicker) this.size *= (0.9 + Math.random() * 0.2);
-    this.life--;
-  }
-  get alpha() { return Math.max(0, this.life / this.maxLife); }
-  get dead() { return this.life <= 0; }
+  update(){this.tx.push(this.x);this.ty.push(this.y);if(this.tx.length>10){this.tx.shift();this.ty.shift();}this.x+=this.vx;this.y+=this.vy;this.vy+=this.gravity;this.vx*=this.drag;this.vy*=this.drag;if(this.wobbleSpeed){this.wobble+=this.wobbleSpeed;this.x+=Math.sin(this.wobble)*0.6;}if(this.flicker)this.size*=(0.9+Math.random()*0.2);this.life--;}
+  get alpha(){return Math.max(0,this.life/this.maxLife)}
+  get dead(){return this.life<=0}
 }
 
-// ─── Ambient stars ────────────────────────────────────────
-const stars = [];
-for (let i = 0; i < 70; i++) {
-  stars.push({ x: Math.random(), y: Math.random() * 0.75, s: Math.random() * 1.4 + 0.4,
-    phase: Math.random() * Math.PI * 2, speed: Math.random() * 0.015 + 0.005 });
+// ─── Ambient / rune state ─────────────────────────────────
+const stars=[];for(let i=0;i<70;i++)stars.push({x:Math.random(),y:Math.random()*0.75,s:Math.random()*1.4+0.4,phase:Math.random()*Math.PI*2,speed:Math.random()*0.015+0.005});
+let runeAngle=0, runePulse=0, runeBreath=0, chainCount=0, chainTimer=null;
+
+// ─── Naming ───────────────────────────────────────────────
+function spellNameFromConfig(cfg) {
+  const el = ELEMENTS[cfg.element], hash = cfg.element.charCodeAt(0)+cfg.shape.charCodeAt(0);
+  return el.adj[hash%el.adj.length]+' '+SHAPES[cfg.shape];
 }
-
-// ─── Rune state ───────────────────────────────────────────
-let runeAngle = 0, runePulse = 0, runeBreath = 0;
-
-// ─── Chain state ──────────────────────────────────────────
-let chainCount = 0;
-let chainTimer = null;
-
-// ─── Spell name ───────────────────────────────────────────
-function getSpellName() {
-  const el = ELEMENTS[spell.element];
-  const hash = spell.element.charCodeAt(0) + spell.shape.charCodeAt(0);
-  return el.adj[hash % el.adj.length] + ' ' + SHAPES[spell.shape];
+function getScrollName() {
+  return scroll.map(s => spellNameFromConfig(s)).join(' → ');
 }
-
 function refreshUI() {
-  document.getElementById('spell-name').textContent = getSpellName();
+  document.getElementById('spell-name').textContent = spellNameFromConfig(spell);
   const glow = ELEMENTS[spell.element].glow;
-  document.getElementById('spell-name').style.textShadow = '0 0 20px ' + glow + '80';
-  const pips = { spark:'✦', surge:'✦ ✦', storm:'✦ ✦ ✦', cataclysm:'✦ ✦ ✦ ✦' };
+  document.getElementById('spell-name').style.textShadow = '0 0 20px '+glow+'80';
+  const pips={spark:'✦',surge:'✦ ✦',storm:'✦ ✦ ✦',cataclysm:'✦ ✦ ✦ ✦'};
   document.getElementById('power-pips').textContent = pips[spell.power];
   document.getElementById('power-pips').style.color = glow;
-  document.querySelectorAll('.prop-btn.selected').forEach(b => {
-    b.style.color = '#fff'; b.style.borderColor = glow; b.style.boxShadow = '0 0 10px ' + glow + '50';
-  });
-  document.querySelectorAll('.prop-btn:not(.selected)').forEach(b => {
-    b.style.color = '#999'; b.style.borderColor = 'rgba(255,255,255,0.12)'; b.style.boxShadow = 'none';
-  });
-  const btn = document.getElementById('cast-btn');
-  btn.style.borderColor = glow + '60'; btn.style.color = glow;
+  document.querySelectorAll('.prop-btn.selected').forEach(b=>{b.style.color='#fff';b.style.borderColor=glow;b.style.boxShadow='0 0 10px '+glow+'50';});
+  document.querySelectorAll('.prop-btn:not(.selected)').forEach(b=>{b.style.color='#999';b.style.borderColor='rgba(255,255,255,0.12)';b.style.boxShadow='none';});
 }
 
-// ─── UI handlers ──────────────────────────────────────────
-document.querySelectorAll('.prop-options').forEach(row => {
-  row.addEventListener('click', e => {
-    const btn = e.target.closest('.prop-btn');
-    if (!btn) return;
-    row.querySelectorAll('.prop-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    spell[row.dataset.prop] = btn.dataset.val;
-    refreshUI();
-  });
-});
+document.querySelectorAll('.prop-options').forEach(row=>{row.addEventListener('click',e=>{const btn=e.target.closest('.prop-btn');if(!btn)return;row.querySelectorAll('.prop-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');spell[row.dataset.prop]=btn.dataset.val;refreshUI();});});
 refreshUI();
 
 // ─── Cast center ──────────────────────────────────────────
-function castCenter() {
-  return { x: W / 2, y: gameState === 'build' ? H * 0.28 : H * 0.38 };
-}
+function castCenter(){return{x:W/2,y:gameState==='build'?H*0.28:H*0.38};}
 
 // ─── Casting system ───────────────────────────────────────
-const castOverlay = document.getElementById('cast-overlay');
-const castInst = document.getElementById('cast-instruction');
-let castCleanup = null;
+const castOverlay=document.getElementById('cast-overlay'), castInst=document.getElementById('cast-instruction');
+let castCleanup=null;
 
-document.getElementById('cast-btn').addEventListener('click', () => {
-  if (gameState !== 'build') return;
-  chainCount = 0;
-  gameState = 'casting';
+document.getElementById('cast-scroll-btn').addEventListener('click',()=>{
+  if(gameState!=='build'||scroll.length===0)return;
+  chainCount=0; gameState='casting';
   document.getElementById('build-panel').classList.add('hidden');
   castOverlay.classList.add('active');
   startGesture();
 });
 
-function finishCast(success) {
-  if (castCleanup) { castCleanup(); castCleanup = null; }
+function finishCast(success){
+  if(castCleanup){castCleanup();castCleanup=null;}
   castOverlay.classList.remove('active');
-  if (success) {
-    gameState = 'result';
-    chainCount++;
-    const chainMult = 1 + (chainCount - 1) * 0.2;
-    screenFlash(ELEMENTS[spell.element].glow);
-    document.body.classList.add('shake');
-    setTimeout(() => document.body.classList.remove('shake'), 400);
-    emitSpell(chainMult);
-    showChainUI();
-    resetChainTimer();
-  } else {
-    gameState = 'build';
-    document.getElementById('build-panel').classList.remove('hidden');
-  }
+  if(success){gameState='result';chainCount=1;castScrollSequence(1);}
+  else{gameState='build';document.getElementById('build-panel').classList.remove('hidden');}
 }
 
-function showChainUI() {
+function castScrollSequence(chainMult){
+  const seq = scroll.length > 0 ? scroll : [{element:spell.element,shape:spell.shape,power:spell.power}];
+  seq.forEach((cfg,idx)=>{
+    setTimeout(()=>{
+      emitSpell(cfg, chainMult);
+      screenFlash(ELEMENTS[cfg.element].glow);
+      document.body.classList.add('shake');
+      setTimeout(()=>document.body.classList.remove('shake'),300);
+      activeElement = cfg.element;
+      document.getElementById('spell-name').textContent = spellNameFromConfig(cfg);
+      document.getElementById('spell-name').style.textShadow = '0 0 20px '+ELEMENTS[cfg.element].glow+'80';
+    }, idx * 500);
+  });
+  // Chain UI
+  const glow = ELEMENTS[seq[seq.length-1].element].glow;
   document.getElementById('chain-btn').classList.add('visible');
-  const glow = ELEMENTS[spell.element].glow;
-  const chainBtn = document.getElementById('chain-btn');
-  chainBtn.style.borderColor = glow;
-  chainBtn.style.color = glow;
+  document.getElementById('chain-btn').style.borderColor = glow;
+  document.getElementById('chain-btn').style.color = glow;
   const disp = document.getElementById('combo-display');
-  if (chainCount > 1) {
-    disp.textContent = 'CHAIN ×' + chainCount;
-    disp.style.color = glow;
-    disp.style.textShadow = '0 0 25px ' + glow;
-    disp.classList.add('visible');
-  } else {
-    disp.classList.remove('visible');
-  }
-}
-
-function resetChainTimer() {
+  if(chainCount>1){disp.textContent='CHAIN ×'+chainCount;disp.style.color=glow;disp.style.textShadow='0 0 25px '+glow;disp.classList.add('visible');}
+  else disp.classList.remove('visible');
   clearTimeout(chainTimer);
-  chainTimer = setTimeout(() => {
-    chainCount = 0;
-    document.getElementById('chain-btn').classList.remove('visible');
-    document.getElementById('combo-display').classList.remove('visible');
-    gameState = 'build';
-    document.getElementById('build-panel').classList.remove('hidden');
-  }, 4500);
+  chainTimer=setTimeout(()=>{chainCount=0;document.getElementById('chain-btn').classList.remove('visible');disp.classList.remove('visible');gameState='build';document.getElementById('build-panel').classList.remove('hidden');},(seq.length-1)*500+4500);
 }
 
-document.getElementById('chain-btn').addEventListener('click', () => {
-  if (gameState !== 'result') return;
+document.getElementById('chain-btn').addEventListener('click',()=>{
+  if(gameState!=='result')return;
   chainCount++;
-  const chainMult = 1 + (chainCount - 1) * 0.2;
-  screenFlash(ELEMENTS[spell.element].glow);
-  document.body.classList.add('shake');
-  setTimeout(() => document.body.classList.remove('shake'), 400);
-  emitSpell(chainMult);
-  showChainUI();
-  resetChainTimer();
+  castScrollSequence(1+(chainCount-1)*0.2);
 });
 
-function screenFlash(color) {
-  const f = document.getElementById('flash');
-  f.style.background = 'radial-gradient(circle at 50% 40%, ' + color + '88, ' + color + '44 40%, transparent 80%)';
-  f.classList.add('active');
-  setTimeout(() => f.classList.remove('active'), 350);
-}
+function screenFlash(color){const f=document.getElementById('flash');f.style.background='radial-gradient(circle at 50% 40%,'+color+'88,'+color+'44 40%,transparent 80%)';f.classList.add('active');setTimeout(()=>f.classList.remove('active'),350);}
 
 // ─── Gestures ─────────────────────────────────────────────
-let gestureState = {};
+let gestureState={};
+function startGesture(){gestureState={};const m=spell.casting;if(m==='tap')gestureTap();else if(m==='swipe')gestureSwipe();else if(m==='draw')gestureDraw();else if(m==='hold')gestureHold();else if(m==='shake')gestureShake();else if(m==='slash')gestureSlash();else if(m==='spin')gestureSpin();else if(m==='clap')gestureClap();}
 
-function startGesture() {
-  gestureState = {};
-  const m = spell.casting;
-  if (m === 'tap') gestureTap();
-  else if (m === 'swipe') gestureSwipe();
-  else if (m === 'draw') gestureDraw();
-  else if (m === 'hold') gestureHold();
-  else if (m === 'shake') gestureShake();
-  else if (m === 'slash') gestureSlash();
-  else if (m === 'spin') gestureSpin();
-  else if (m === 'clap') gestureClap();
-}
+function gestureTap(){gestureState.taps=0;castInst.textContent='Tap the rune 3 times!';const h=e=>{const c=castCenter(),dx=e.clientX-c.x,dy=e.clientY-c.y;if(Math.sqrt(dx*dx+dy*dy)<90){gestureState.taps++;runePulse=1;if(gestureState.taps>=3)finishCast(true);else castInst.textContent='Tap '+(3-gestureState.taps)+' more!';}};castOverlay.addEventListener('pointerdown',h);castCleanup=()=>castOverlay.removeEventListener('pointerdown',h);}
+function gestureSwipe(){castInst.textContent='Swipe across the screen! →';let s=null;const d=e=>{s={x:e.clientX,y:e.clientY}},u=e=>{if(!s)return;const dx=e.clientX-s.x,dy=e.clientY-s.y;if(Math.sqrt(dx*dx+dy*dy)>80){gestureState.swipeAngle=Math.atan2(dy,dx);finishCast(true);}s=null;};castOverlay.addEventListener('pointerdown',d);castOverlay.addEventListener('pointerup',u);castCleanup=()=>{castOverlay.removeEventListener('pointerdown',d);castOverlay.removeEventListener('pointerup',u);};}
+function gestureDraw(){castInst.textContent='Draw a circle around the rune!';let pts=[],drawing=false;const d=e=>{drawing=true;pts=[{x:e.clientX,y:e.clientY}]},m=e=>{if(drawing)pts.push({x:e.clientX,y:e.clientY})},u=()=>{drawing=false;if(pts.length>20){const f=pts[0],l=pts[pts.length-1];let td=0;for(let i=1;i<pts.length;i++)td+=Math.sqrt((pts[i].x-pts[i-1].x)**2+(pts[i].y-pts[i-1].y)**2);if(Math.sqrt((f.x-l.x)**2+(f.y-l.y)**2)<120&&td>180){finishCast(true);return;}}castInst.textContent='Try again — draw a circle!';pts=[];};gestureState.getDrawPoints=()=>drawing?pts:[];castOverlay.addEventListener('pointerdown',d);castOverlay.addEventListener('pointermove',m);castOverlay.addEventListener('pointerup',u);castCleanup=()=>{castOverlay.removeEventListener('pointerdown',d);castOverlay.removeEventListener('pointermove',m);castOverlay.removeEventListener('pointerup',u);};}
+function gestureHold(){gestureState.holdProgress=0;castInst.textContent='Press and hold the rune!';let holding=false;const d=e=>{const c=castCenter(),dx=e.clientX-c.x,dy=e.clientY-c.y;if(Math.sqrt(dx*dx+dy*dy)<90)holding=true;},u=()=>{holding=false;if(gestureState.holdProgress<1){gestureState.holdProgress=0;castInst.textContent='Press and hold the rune!';}},t=()=>{if(gameState!=='casting'||spell.casting!=='hold')return;if(holding){gestureState.holdProgress=Math.min(1,gestureState.holdProgress+0.012);castInst.textContent='Charging… '+Math.floor(gestureState.holdProgress*100)+'%';if(gestureState.holdProgress>=1){finishCast(true);return;}}requestAnimationFrame(t);};castOverlay.addEventListener('pointerdown',d);castOverlay.addEventListener('pointerup',u);castCleanup=()=>{castOverlay.removeEventListener('pointerdown',d);castOverlay.removeEventListener('pointerup',u);holding=false;};requestAnimationFrame(t);}
+function gestureShake(){gestureState.shakes=0;castInst.textContent='Shake your device! (or wiggle mouse)';const mh=e=>{const a=e.accelerationIncludingGravity;if(!a)return;if(Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)>18){gestureState.shakes++;if(gestureState.shakes>=10)finishCast(true);}};window.addEventListener('devicemotion',mh);let lx=null,dir=0;const mv=e=>{if(lx!==null){const d=Math.sign(e.clientX-lx);if(d!==0&&d!==dir){dir=d;gestureState.shakes++;castInst.textContent='Shake! '+Math.min(gestureState.shakes,12)+'/12';if(gestureState.shakes>=12)finishCast(true);}}lx=e.clientX;};castOverlay.addEventListener('pointermove',mv);castCleanup=()=>{window.removeEventListener('devicemotion',mh);castOverlay.removeEventListener('pointermove',mv);};}
+function gestureSlash(){castInst.textContent='Slash across the screen! ⚔️';let st=0,sp=null;const d=e=>{st=Date.now();sp={x:e.clientX,y:e.clientY}},u=e=>{if(!sp)return;const dt=Date.now()-st,dx=e.clientX-sp.x,dy=e.clientY-sp.y;if(Math.sqrt(dx*dx+dy*dy)>120&&dt<500){gestureState.swipeAngle=Math.atan2(dy,dx);finishCast(true);}else castInst.textContent='Faster! Slash hard! ⚔️';sp=null;};castOverlay.addEventListener('pointerdown',d);castOverlay.addEventListener('pointerup',u);castCleanup=()=>{castOverlay.removeEventListener('pointerdown',d);castOverlay.removeEventListener('pointerup',u);};}
+function gestureSpin(){gestureState.spinProgress=0;castInst.textContent='Spin your finger in circles!';let spinning=false,la=null;const cr=castCenter();const d=()=>{spinning=true;la=null},m=e=>{if(!spinning)return;const dx=e.clientX-cr.x,dy=e.clientY-cr.y,a=Math.atan2(dy,dx);if(la!==null){let dl=a-la;while(dl>Math.PI)dl-=Math.PI*2;while(dl<-Math.PI)dl+=Math.PI*2;gestureState.spinProgress+=Math.abs(dl);const p=Math.min(gestureState.spinProgress/(Math.PI*4),1);castInst.textContent='Spin! '+Math.floor(p*100)+'%';if(p>=1)finishCast(true);}la=a;},u=()=>{spinning=false;la=null;};castOverlay.addEventListener('pointerdown',d);castOverlay.addEventListener('pointermove',m);castOverlay.addEventListener('pointerup',u);castCleanup=()=>{castOverlay.removeEventListener('pointerdown',d);castOverlay.removeEventListener('pointermove',m);castOverlay.removeEventListener('pointerup',u);};}
+function gestureClap(){gestureState.clapTaps=0;gestureState.clapTime=0;castInst.textContent='Double-tap fast! 👏';const h=()=>{const n=Date.now();if(gestureState.clapTaps===0){gestureState.clapTaps=1;gestureState.clapTime=n;castInst.textContent='Again! 👏';}else if(n-gestureState.clapTime<500)finishCast(true);else{gestureState.clapTaps=1;gestureState.clapTime=n;castInst.textContent='Faster! 👏';}};castOverlay.addEventListener('pointerdown',h);castCleanup=()=>castOverlay.removeEventListener('pointerdown',h);}
 
-function gestureTap() {
-  gestureState.taps = 0;
-  castInst.textContent = 'Tap the rune 3 times!';
-  const handler = e => {
-    const c = castCenter();
-    const dx = e.clientX - c.x, dy = e.clientY - c.y;
-    if (Math.sqrt(dx * dx + dy * dy) < 90) {
-      gestureState.taps++;
-      runePulse = 1;
-      if (gestureState.taps >= 3) finishCast(true);
-      else castInst.textContent = 'Tap ' + (3 - gestureState.taps) + ' more!';
-    }
-  };
-  castOverlay.addEventListener('pointerdown', handler);
-  castCleanup = () => castOverlay.removeEventListener('pointerdown', handler);
-}
+// ─── Emit spell (config-driven) ──────────────────────────
+function emitSpell(cfg, chainMult) {
+  const el=ELEMENTS[cfg.element], pw=POWERS[cfg.power], c=castCenter();
+  let count=Math.floor(pw.count*(chainMult||1));
+  const room=MAX_P-particles.length;
+  if(count>room)count=Math.max(30,room);
 
-function gestureSwipe() {
-  castInst.textContent = 'Swipe across the screen! →';
-  let start = null;
-  const down = e => { start = { x: e.clientX, y: e.clientY }; };
-  const up = e => {
-    if (!start) return;
-    const dx = e.clientX - start.x, dy = e.clientY - start.y;
-    if (Math.sqrt(dx * dx + dy * dy) > 80) {
-      gestureState.swipeAngle = Math.atan2(dy, dx);
-      finishCast(true);
-    }
-    start = null;
-  };
-  castOverlay.addEventListener('pointerdown', down);
-  castOverlay.addEventListener('pointerup', up);
-  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointerup', up); };
-}
-
-function gestureDraw() {
-  castInst.textContent = 'Draw a circle around the rune!';
-  let pts = [], drawing = false;
-  const down = e => { drawing = true; pts = [{ x: e.clientX, y: e.clientY }]; };
-  const move = e => { if (drawing) pts.push({ x: e.clientX, y: e.clientY }); };
-  const up = () => {
-    drawing = false;
-    if (pts.length > 20) {
-      const first = pts[0], last = pts[pts.length - 1];
-      const closeDist = Math.sqrt((first.x - last.x) ** 2 + (first.y - last.y) ** 2);
-      let totalDist = 0;
-      for (let i = 1; i < pts.length; i++) totalDist += Math.sqrt((pts[i].x - pts[i-1].x)**2 + (pts[i].y - pts[i-1].y)**2);
-      if (closeDist < 120 && totalDist > 180) { finishCast(true); return; }
-    }
-    castInst.textContent = 'Try again — draw a circle!'; pts = [];
-  };
-  gestureState.getDrawPoints = () => drawing ? pts : [];
-  castOverlay.addEventListener('pointerdown', down);
-  castOverlay.addEventListener('pointermove', move);
-  castOverlay.addEventListener('pointerup', up);
-  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointermove', move); castOverlay.removeEventListener('pointerup', up); };
-}
-
-function gestureHold() {
-  gestureState.holdProgress = 0;
-  castInst.textContent = 'Press and hold the rune!';
-  let holding = false;
-  const down = e => { const c = castCenter(), dx = e.clientX - c.x, dy = e.clientY - c.y; if (Math.sqrt(dx*dx+dy*dy) < 90) holding = true; };
-  const up = () => { holding = false; if (gestureState.holdProgress < 1) { gestureState.holdProgress = 0; castInst.textContent = 'Press and hold the rune!'; } };
-  const tick = () => {
-    if (gameState !== 'casting' || spell.casting !== 'hold') return;
-    if (holding) {
-      gestureState.holdProgress = Math.min(1, gestureState.holdProgress + 0.012);
-      castInst.textContent = 'Charging… ' + Math.floor(gestureState.holdProgress * 100) + '%';
-      if (gestureState.holdProgress >= 1) { finishCast(true); return; }
-    }
-    requestAnimationFrame(tick);
-  };
-  castOverlay.addEventListener('pointerdown', down);
-  castOverlay.addEventListener('pointerup', up);
-  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointerup', up); holding = false; };
-  requestAnimationFrame(tick);
-}
-
-function gestureShake() {
-  gestureState.shakes = 0;
-  castInst.textContent = 'Shake your device! (or wiggle mouse)';
-  const motionHandler = e => { const a = e.accelerationIncludingGravity; if (!a) return; if (Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)>18) { gestureState.shakes++; if (gestureState.shakes>=10) finishCast(true); } };
-  window.addEventListener('devicemotion', motionHandler);
-  let lastX = null, dir = 0;
-  const moveHandler = e => {
-    if (lastX !== null) { const d = Math.sign(e.clientX - lastX); if (d !== 0 && d !== dir) { dir = d; gestureState.shakes++; castInst.textContent = 'Shake! ' + Math.min(gestureState.shakes,12) + '/12'; if (gestureState.shakes >= 12) finishCast(true); } }
-    lastX = e.clientX;
-  };
-  castOverlay.addEventListener('pointermove', moveHandler);
-  castCleanup = () => { window.removeEventListener('devicemotion', motionHandler); castOverlay.removeEventListener('pointermove', moveHandler); };
-}
-
-function gestureSlash() {
-  castInst.textContent = 'Slash across the screen! ⚔️';
-  let startTime = 0, startPos = null;
-  const down = e => { startTime = Date.now(); startPos = { x: e.clientX, y: e.clientY }; };
-  const up = e => {
-    if (!startPos) return;
-    const dt = Date.now() - startTime;
-    const dx = e.clientX - startPos.x, dy = e.clientY - startPos.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist > 120 && dt < 500) {
-      gestureState.swipeAngle = Math.atan2(dy, dx);
-      finishCast(true);
-    } else {
-      castInst.textContent = 'Faster! Slash hard! ⚔️';
-    }
-    startPos = null;
-  };
-  castOverlay.addEventListener('pointerdown', down);
-  castOverlay.addEventListener('pointerup', up);
-  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointerup', up); };
-}
-
-function gestureSpin() {
-  gestureState.spinProgress = 0;
-  castInst.textContent = 'Spin your finger in circles!';
-  let spinning = false, lastAngle = null;
-  const c_ref = castCenter();
-  const down = () => { spinning = true; lastAngle = null; };
-  const move = e => {
-    if (!spinning) return;
-    const dx = e.clientX - c_ref.x, dy = e.clientY - c_ref.y;
-    const angle = Math.atan2(dy, dx);
-    if (lastAngle !== null) {
-      let delta = angle - lastAngle;
-      while (delta > Math.PI) delta -= Math.PI * 2;
-      while (delta < -Math.PI) delta += Math.PI * 2;
-      gestureState.spinProgress += Math.abs(delta);
-      const pct = Math.min(gestureState.spinProgress / (Math.PI * 4), 1);
-      castInst.textContent = 'Spin! ' + Math.floor(pct * 100) + '%';
-      if (pct >= 1) finishCast(true);
-    }
-    lastAngle = angle;
-  };
-  const up = () => { spinning = false; lastAngle = null; };
-  castOverlay.addEventListener('pointerdown', down);
-  castOverlay.addEventListener('pointermove', move);
-  castOverlay.addEventListener('pointerup', up);
-  castCleanup = () => { castOverlay.removeEventListener('pointerdown', down); castOverlay.removeEventListener('pointermove', move); castOverlay.removeEventListener('pointerup', up); };
-}
-
-function gestureClap() {
-  gestureState.clapTaps = 0;
-  gestureState.clapTime = 0;
-  castInst.textContent = 'Double-tap fast! 👏';
-  const handler = () => {
-    const now = Date.now();
-    if (gestureState.clapTaps === 0) {
-      gestureState.clapTaps = 1;
-      gestureState.clapTime = now;
-      castInst.textContent = 'Again! 👏';
-    } else if (now - gestureState.clapTime < 500) {
-      finishCast(true);
-    } else {
-      gestureState.clapTaps = 1;
-      gestureState.clapTime = now;
-      castInst.textContent = 'Faster! 👏';
-    }
-  };
-  castOverlay.addEventListener('pointerdown', handler);
-  castCleanup = () => castOverlay.removeEventListener('pointerdown', handler);
-}
-
-// ─── Emit spell ───────────────────────────────────────────
-function emitSpell(chainMult) {
-  const el = ELEMENTS[spell.element];
-  const pw = POWERS[spell.power];
-  const c = castCenter();
-  let count = Math.floor(pw.count * (chainMult || 1));
-  const room = MAX_PARTICLES - particles.length;
-  if (count > room) count = Math.max(30, room);
-
-  if (spell.shape === 'nova') {
-    const half = Math.floor(count / 2);
-    for (let i = 0; i < half; i++) spawnParticle(i, half, c, el, pw, 'nova-in');
-    for (let i = 0; i < half; i++) {
-      const idx = i;
-      pending.push({ delay: 35, fn: () => spawnParticle(idx, half, c, el, pw, 'nova-out') });
-    }
+  if(cfg.shape==='nova'){
+    const half=Math.floor(count/2);
+    for(let i=0;i<half;i++)spawnP(i,half,c,cfg,'nova-in');
+    for(let i=0;i<half;i++){const idx=i;pending.push({delay:35,fn:()=>spawnP(idx,half,c,cfg,'nova-out')});}
     return;
   }
-
-  const stagger = { burst:0, beam:0.4, shield:0, vortex:0.2, rain:0.6, wave:0.5, spiral:0.15, fountain:0.3, orbit:0 };
-  const rate = stagger[spell.shape] || 0;
-  for (let i = 0; i < count; i++) {
-    const delay = Math.floor(rate * i);
-    if (delay === 0) spawnParticle(i, count, c, el, pw);
-    else pending.push({ delay, fn: () => spawnParticle(i, count, c, el, pw) });
-  }
+  const stagger={burst:0,beam:0.4,shield:0,vortex:0.2,rain:0.6,wave:0.5,spiral:0.15,fountain:0.3,orbit:0};
+  const rate=stagger[cfg.shape]||0;
+  for(let i=0;i<count;i++){const d=Math.floor(rate*i);if(d===0)spawnP(i,count,c,cfg);else pending.push({delay:d,fn:()=>spawnP(i,count,c,cfg)});}
 }
 
-function spawnParticle(i, count, c, el, pw, shapeOverride) {
-  if (particles.length >= MAX_PARTICLES) return;
-  const shape = shapeOverride || spell.shape;
-  const color = el.colors[Math.floor(Math.random() * el.colors.length)];
-  const size = pw.size * (0.5 + Math.random() * 0.8);
-  const life = pw.life * (0.6 + Math.random() * 0.6);
-  let x = c.x, y = c.y, vx = 0, vy = 0;
+function spawnP(i,count,c,cfg,shapeOv) {
+  if(particles.length>=MAX_P)return;
+  const el=ELEMENTS[cfg.element], pw=POWERS[cfg.power], shape=shapeOv||cfg.shape;
+  const color=el.colors[Math.floor(Math.random()*el.colors.length)];
+  const size=pw.size*(0.5+Math.random()*0.8), life=pw.life*(0.6+Math.random()*0.6);
+  let x=c.x,y=c.y,vx=0,vy=0;
 
-  switch (shape) {
-    case 'burst': {
-      const a = Math.random() * Math.PI * 2, spd = 3 + Math.random() * 9;
-      vx = Math.cos(a) * spd; vy = Math.sin(a) * spd; break;
-    }
-    case 'beam': {
-      const dir = gestureState.swipeAngle != null ? gestureState.swipeAngle : 0;
-      const spread = (Math.random() - 0.5) * 0.6, spd = 5 + Math.random() * 9;
-      vx = Math.cos(dir + spread) * spd; vy = Math.sin(dir + spread) * spd; break;
-    }
-    case 'shield': {
-      const a = (i / count) * Math.PI * 2, r = 90 + Math.random() * 50;
-      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
-      vx = Math.cos(a) * (0.8 + Math.random() * 1.5); vy = Math.sin(a) * (0.8 + Math.random() * 1.5); break;
-    }
-    case 'vortex': {
-      const a = (i / count) * Math.PI * 8 + Math.random() * 0.4, r = (i / count) * 180;
-      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
-      vx = Math.cos(a + Math.PI * 0.45) * (2.5 + Math.random() * 2); vy = Math.sin(a + Math.PI * 0.45) * (2.5 + Math.random() * 2); break;
-    }
-    case 'rain': {
-      x = Math.random() * W; y = -10 - Math.random() * 150;
-      vx = (Math.random() - 0.5) * 1.2; vy = 3 + Math.random() * 5; break;
-    }
-    case 'wave': {
-      x = -30 - Math.random() * 50; y = c.y - 120 + Math.random() * 240;
-      vx = 4 + Math.random() * 7; vy = Math.sin(i * 0.12) * 3; break;
-    }
-    case 'spiral': {
-      const arms = 3, arm = i % arms, t = i / count;
-      const a = arm * (Math.PI * 2 / arms) + t * Math.PI * 6;
-      const r = t * 160;
-      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
-      vx = Math.cos(a) * (1 + t * 4); vy = Math.sin(a) * (1 + t * 4); break;
-    }
-    case 'nova-in': {
-      const a = Math.random() * Math.PI * 2, r = 130 + Math.random() * 100;
-      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
-      const spd = 4 + Math.random() * 4;
-      vx = -Math.cos(a) * spd; vy = -Math.sin(a) * spd; break;
-    }
-    case 'nova-out': {
-      const a = Math.random() * Math.PI * 2, spd = 4 + Math.random() * 10;
-      vx = Math.cos(a) * spd; vy = Math.sin(a) * spd; break;
-    }
-    case 'fountain': {
-      const spreadX = (Math.random() - 0.5) * 4;
-      vx = spreadX; vy = -(7 + Math.random() * 7); break;
-    }
-    case 'orbit': {
-      const a = Math.random() * Math.PI * 2, r = 40 + Math.random() * 120;
-      x = c.x + Math.cos(a) * r; y = c.y + Math.sin(a) * r;
-      const orbitSpd = 2 + Math.random() * 2.5;
-      vx = Math.cos(a + Math.PI / 2) * orbitSpd; vy = Math.sin(a + Math.PI / 2) * orbitSpd; break;
-    }
+  switch(shape){
+    case 'burst':{const a=Math.random()*Math.PI*2,s=3+Math.random()*9;vx=Math.cos(a)*s;vy=Math.sin(a)*s;break;}
+    case 'beam':{const d=gestureState.swipeAngle!=null?gestureState.swipeAngle:0,sp=(Math.random()-0.5)*0.6,s=5+Math.random()*9;vx=Math.cos(d+sp)*s;vy=Math.sin(d+sp)*s;break;}
+    case 'shield':{const a=(i/count)*Math.PI*2,r=90+Math.random()*50;x=c.x+Math.cos(a)*r;y=c.y+Math.sin(a)*r;vx=Math.cos(a)*(0.8+Math.random()*1.5);vy=Math.sin(a)*(0.8+Math.random()*1.5);break;}
+    case 'vortex':{const a=(i/count)*Math.PI*8+Math.random()*0.4,r=(i/count)*180;x=c.x+Math.cos(a)*r;y=c.y+Math.sin(a)*r;vx=Math.cos(a+Math.PI*0.45)*(2.5+Math.random()*2);vy=Math.sin(a+Math.PI*0.45)*(2.5+Math.random()*2);break;}
+    case 'rain':{x=Math.random()*W;y=-10-Math.random()*150;vx=(Math.random()-0.5)*1.2;vy=3+Math.random()*5;break;}
+    case 'wave':{x=-30-Math.random()*50;y=c.y-120+Math.random()*240;vx=4+Math.random()*7;vy=Math.sin(i*0.12)*3;break;}
+    case 'spiral':{const arms=3,arm=i%arms,t=i/count,a=arm*(Math.PI*2/arms)+t*Math.PI*6,r=t*160;x=c.x+Math.cos(a)*r;y=c.y+Math.sin(a)*r;vx=Math.cos(a)*(1+t*4);vy=Math.sin(a)*(1+t*4);break;}
+    case 'nova-in':{const a=Math.random()*Math.PI*2,r=130+Math.random()*100;x=c.x+Math.cos(a)*r;y=c.y+Math.sin(a)*r;const s=4+Math.random()*4;vx=-Math.cos(a)*s;vy=-Math.sin(a)*s;break;}
+    case 'nova-out':{const a=Math.random()*Math.PI*2,s=4+Math.random()*10;vx=Math.cos(a)*s;vy=Math.sin(a)*s;break;}
+    case 'fountain':{vx=(Math.random()-0.5)*4;vy=-(7+Math.random()*7);break;}
+    case 'orbit':{const a=Math.random()*Math.PI*2,r=40+Math.random()*120;x=c.x+Math.cos(a)*r;y=c.y+Math.sin(a)*r;const os=2+Math.random()*2.5;vx=Math.cos(a+Math.PI/2)*os;vy=Math.sin(a+Math.PI/2)*os;break;}
   }
 
-  const p = new Particle(x, y, vx, vy, color, size, life, el.gravity, 0.99);
-  p.element = spell.element;
+  const p=new Particle(x,y,vx,vy,color,size,life,el.gravity,0.99);
+  p.element=cfg.element;
 
-  // Element-specific behaviors
-  if (spell.element === 'water') p.wobbleSpeed = 0.08 + Math.random() * 0.06;
-  if (spell.element === 'fire') p.flicker = 1;
-  if (spell.element === 'wind') { p.vx *= 1.6; p.vy *= 1.6; p.drag = 0.975; }
-  if (spell.element === 'blood') p.drag = 0.98;
-
-  if (spell.element === 'lightning') {
-    const orig = p.update.bind(p);
-    p.update = function() { orig(); if (Math.random() < 0.3) { this.vx += (Math.random()-0.5)*3; this.vy += (Math.random()-0.5)*3; } };
-  }
-  if (spell.element === 'shadow') {
-    Object.defineProperty(p, 'alpha', { get() { const base = Math.max(0, this.life / this.maxLife); return base * (0.5 + Math.sin(this.life * 0.4) * 0.5); } });
-  }
-  if (spell.element === 'chaos') {
-    const orig = p.update.bind(p);
-    p.update = function() { orig(); if (Math.random() < 0.15) this.color = el.colors[Math.floor(Math.random()*el.colors.length)]; this.gravity = (Math.random()-0.5)*0.08; };
-  }
-
-  // Shape-specific update overrides
-  if (shape === 'orbit') {
-    const orig = p.update.bind(p);
-    p.update = function() {
-      orig();
-      const dx = c.x - this.x, dy = c.y - this.y;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      this.vx += (dx / dist) * 0.18; this.vy += (dy / dist) * 0.18;
-    };
-  }
+  if(cfg.element==='water')p.wobbleSpeed=0.08+Math.random()*0.06;
+  if(cfg.element==='fire')p.flicker=1;
+  if(cfg.element==='wind'){p.vx*=1.6;p.vy*=1.6;p.drag=0.975;}
+  if(cfg.element==='blood')p.drag=0.98;
+  if(cfg.element==='lightning'){const o=p.update.bind(p);p.update=function(){o();if(Math.random()<0.3){this.vx+=(Math.random()-0.5)*3;this.vy+=(Math.random()-0.5)*3;}};}
+  if(cfg.element==='shadow'){Object.defineProperty(p,'alpha',{get(){const b=Math.max(0,this.life/this.maxLife);return b*(0.5+Math.sin(this.life*0.4)*0.5);}});}
+  if(cfg.element==='chaos'){const o=p.update.bind(p);p.update=function(){o();if(Math.random()<0.15)this.color=el.colors[Math.floor(Math.random()*el.colors.length)];this.gravity=(Math.random()-0.5)*0.08;};}
+  if(shape==='orbit'){const o=p.update.bind(p);p.update=function(){o();const dx=c.x-this.x,dy=c.y-this.y,d=Math.sqrt(dx*dx+dy*dy)||1;this.vx+=(dx/d)*0.18;this.vy+=(dy/d)*0.18;};}
 
   particles.push(p);
 }
 
 // ─── Render ───────────────────────────────────────────────
 function render() {
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.fillStyle = '#080812';
-  ctx.fillRect(0, 0, W, H);
-
-  const glow = ELEMENTS[spell.element].glow;
-  const c = castCenter();
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='#080812'; ctx.fillRect(0,0,W,H);
+  const glow=ELEMENTS[activeElement].glow, c=castCenter();
 
   // Ambient wash
-  const grad = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, Math.max(W, H) * 0.5);
-  grad.addColorStop(0, glow + '0a'); grad.addColorStop(1, 'transparent');
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  const gr=ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,Math.max(W,H)*0.5);
+  gr.addColorStop(0,glow+'0a');gr.addColorStop(1,'transparent');
+  ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
 
   // Stars
-  for (const s of stars) { s.phase += s.speed; const a = 0.25 + Math.sin(s.phase) * 0.2; ctx.beginPath(); ctx.arc(s.x*W, s.y*H, s.s, 0, Math.PI*2); ctx.fillStyle = 'rgba(180,180,240,'+a+')'; ctx.fill(); }
+  for(const s of stars){s.phase+=s.speed;const a=0.25+Math.sin(s.phase)*0.2;ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.s,0,Math.PI*2);ctx.fillStyle='rgba(180,180,240,'+a+')';ctx.fill();}
+
+  // William
+  if(williamSprite){
+    const sc=2.2, ww=williamSprite.width*sc, wh=williamSprite.height*sc;
+    const wx=c.x-ww/2, wy=c.y-wh+20;
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(williamSprite,wx,wy,ww,wh);
+    ctx.imageSmoothingEnabled=true;
+    drawWizardHat(c.x, wy+4, glow);
+  }
 
   // Rune
-  if (gameState === 'build' || gameState === 'casting') {
-    runeAngle += 0.008; runeBreath += 0.025;
-    if (runePulse > 0) runePulse *= 0.92;
-    drawRune(c.x, c.y, (gameState === 'casting' ? 0.45 : 0.15) + runePulse * 0.5, glow);
+  if(gameState==='build'||gameState==='casting'){
+    runeAngle+=0.008;runeBreath+=0.025;if(runePulse>0)runePulse*=0.92;
+    drawRune(c.x,c.y,(gameState==='casting'?0.45:0.15)+runePulse*0.5,glow);
   }
 
   // Hold ring
-  if (gameState === 'casting' && spell.casting === 'hold' && gestureState.holdProgress > 0) {
-    ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = 5; ctx.globalAlpha = 0.7;
-    ctx.beginPath(); ctx.arc(c.x, c.y, 82, -Math.PI/2, -Math.PI/2 + gestureState.holdProgress * Math.PI * 2); ctx.stroke(); ctx.restore();
-  }
-  // Tap dots
-  if (gameState === 'casting' && spell.casting === 'tap') {
-    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(c.x+(i-1)*22, c.y+100, i<gestureState.taps?6:4, 0, Math.PI*2); ctx.fillStyle = glow; ctx.globalAlpha = i<gestureState.taps?0.85:0.2; ctx.fill(); }
-    ctx.globalAlpha = 1;
-  }
-  // Draw trace
-  if (gameState === 'casting' && spell.casting === 'draw' && gestureState.getDrawPoints) {
-    const pts = gestureState.getDrawPoints();
-    if (pts.length > 1) { ctx.strokeStyle = glow; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = 0.7; ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke(); ctx.globalAlpha = 1; }
-    ctx.strokeStyle = glow; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.15; ctx.setLineDash([6,8]); ctx.beginPath(); ctx.arc(c.x, c.y, 65, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
-  }
-  // Shake meter
-  if (gameState === 'casting' && spell.casting === 'shake') {
-    const total = 12, filled = Math.min(gestureState.shakes||0, total), bw = 140, bh = 10;
-    ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(c.x-bw/2, c.y+90, bw, bh);
-    ctx.fillStyle = glow; ctx.globalAlpha = 0.7; ctx.fillRect(c.x-bw/2, c.y+90, bw*(filled/total), bh); ctx.globalAlpha = 1;
-  }
-  // Spin progress ring
-  if (gameState === 'casting' && spell.casting === 'spin' && gestureState.spinProgress > 0) {
-    const pct = Math.min(gestureState.spinProgress / (Math.PI * 4), 1);
-    ctx.save(); ctx.strokeStyle = glow; ctx.lineWidth = 5; ctx.globalAlpha = 0.7;
-    ctx.beginPath(); ctx.arc(c.x, c.y, 82, -Math.PI/2, -Math.PI/2 + pct * Math.PI * 2); ctx.stroke(); ctx.restore();
+  if(gameState==='casting'&&spell.casting==='hold'&&gestureState.holdProgress>0){ctx.save();ctx.strokeStyle=glow;ctx.lineWidth=5;ctx.globalAlpha=0.7;ctx.beginPath();ctx.arc(c.x,c.y,82,-Math.PI/2,-Math.PI/2+gestureState.holdProgress*Math.PI*2);ctx.stroke();ctx.restore();}
+  if(gameState==='casting'&&spell.casting==='tap'){for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(c.x+(i-1)*22,c.y+100,i<gestureState.taps?6:4,0,Math.PI*2);ctx.fillStyle=glow;ctx.globalAlpha=i<gestureState.taps?0.85:0.2;ctx.fill();}ctx.globalAlpha=1;}
+  if(gameState==='casting'&&spell.casting==='draw'&&gestureState.getDrawPoints){const pts=gestureState.getDrawPoints();if(pts.length>1){ctx.strokeStyle=glow;ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';ctx.globalAlpha=0.7;ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);ctx.stroke();ctx.globalAlpha=1;}ctx.strokeStyle=glow;ctx.lineWidth=1.5;ctx.globalAlpha=0.15;ctx.setLineDash([6,8]);ctx.beginPath();ctx.arc(c.x,c.y,65,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;}
+  if(gameState==='casting'&&spell.casting==='shake'){const tot=12,fil=Math.min(gestureState.shakes||0,tot),bw=140,bh=10;ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(c.x-bw/2,c.y+90,bw,bh);ctx.fillStyle=glow;ctx.globalAlpha=0.7;ctx.fillRect(c.x-bw/2,c.y+90,bw*(fil/tot),bh);ctx.globalAlpha=1;}
+  if(gameState==='casting'&&spell.casting==='spin'&&gestureState.spinProgress>0){const p=Math.min(gestureState.spinProgress/(Math.PI*4),1);ctx.save();ctx.strokeStyle=glow;ctx.lineWidth=5;ctx.globalAlpha=0.7;ctx.beginPath();ctx.arc(c.x,c.y,82,-Math.PI/2,-Math.PI/2+p*Math.PI*2);ctx.stroke();ctx.restore();}
+
+  // Pending spawns
+  for(let i=pending.length-1;i>=0;i--){if(--pending[i].delay<=0){pending[i].fn();pending.splice(i,1);}}
+
+  // ─── Particles (additive) ───────────────────────────
+  ctx.globalCompositeOperation='lighter';
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];p.update();if(p.dead){particles.splice(i,1);continue;}
+    const a=p.alpha;
+    if(p.tx.length>1){ctx.strokeStyle=p.color;ctx.lineWidth=p.size*(p.element==='blood'?1.2:0.7);ctx.globalAlpha=a*(p.element==='blood'?0.5:0.3);ctx.beginPath();ctx.moveTo(p.tx[0],p.ty[0]);for(let t=1;t<p.tx.length;t++)ctx.lineTo(p.tx[t],p.ty[t]);ctx.lineTo(p.x,p.y);ctx.stroke();}
+    ctx.globalAlpha=a*0.12;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*6,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=a*0.25;ctx.beginPath();ctx.arc(p.x,p.y,p.size*2.5,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=a*0.95;
+    if(p.element==='ice'){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.PI/4);ctx.fillRect(-p.size,-p.size,p.size*2,p.size*2);ctx.restore();}
+    else{ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();}
   }
 
-  // Pending
-  for (let i = pending.length - 1; i >= 0; i--) { if (--pending[i].delay <= 0) { pending[i].fn(); pending.splice(i, 1); } }
-
-  // ─── Particles ────────────────────────────────────────
-  ctx.globalCompositeOperation = 'lighter';
-
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    p.update();
-    if (p.dead) { particles.splice(i, 1); continue; }
-    const a = p.alpha;
-
-    // Trail
-    if (p.tx.length > 1) {
-      ctx.strokeStyle = p.color; ctx.lineWidth = p.size * (p.element === 'blood' ? 1.2 : 0.7); ctx.globalAlpha = a * (p.element === 'blood' ? 0.5 : 0.3);
-      ctx.beginPath(); ctx.moveTo(p.tx[0], p.ty[0]); for (let t = 1; t < p.tx.length; t++) ctx.lineTo(p.tx[t], p.ty[t]); ctx.lineTo(p.x, p.y); ctx.stroke();
-    }
-
-    // Outer glow
-    ctx.globalAlpha = a * 0.12; ctx.fillStyle = p.color;
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 6, 0, Math.PI * 2); ctx.fill();
-    // Mid glow
-    ctx.globalAlpha = a * 0.25;
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2); ctx.fill();
-
-    // Core — ice draws diamonds, everything else circles
-    ctx.globalAlpha = a * 0.95;
-    if (p.element === 'ice') {
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.PI / 4);
-      ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2); ctx.restore();
-    } else {
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
-    }
-  }
-
-  // ─── Element secondary effects ────────────────────────
-  if (gameState === 'result' || chainCount > 0) {
-    const liveParticles = particles;
-
+  // ─── Per-element secondary FX (check p.element) ────
+  if(gameState==='result'||particles.length>0){
     // Fire embers
-    if (spell.element === 'fire') {
-      for (let i = liveParticles.length - 1; i >= 0; i--) {
-        const p = liveParticles[i];
-        if (!p.dead && Math.random() < 0.04 && particles.length < MAX_PARTICLES) {
-          const ember = new Particle(p.x, p.y, (Math.random()-0.5)*1.2, -0.8-Math.random()*1.5, '#ffcc00', 2, 25, -0.03, 0.97);
-          ember.element = 'fire'; particles.push(ember);
-        }
-      }
-    }
-
+    for(let i=particles.length-1;i>=0;i--){const p=particles[i];if(p.element==='fire'&&!p.dead&&Math.random()<0.04&&particles.length<MAX_P){const e=new Particle(p.x,p.y,(Math.random()-0.5)*1.2,-0.8-Math.random()*1.5,'#ffcc00',2,25,-0.03,0.97);e.element='fire';particles.push(e);}}
     // Lightning bolts
-    if (spell.element === 'lightning' && Math.random() < 0.35) {
-      const live = liveParticles.filter(p => !p.dead && p.alpha > 0.25);
-      if (live.length > 2) {
-        const a = live[Math.floor(Math.random()*live.length)], b = live[Math.floor(Math.random()*live.length)];
-        const d = Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
-        if (d < 200 && d > 10) {
-          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5 + Math.random(); ctx.globalAlpha = 0.6;
-          ctx.beginPath(); ctx.moveTo(a.x, a.y);
-          const segs = 4 + Math.floor(Math.random()*4);
-          for (let s = 1; s <= segs; s++) { const t = s/(segs+1); ctx.lineTo(a.x+(b.x-a.x)*t+(Math.random()-0.5)*35, a.y+(b.y-a.y)*t+(Math.random()-0.5)*35); }
-          ctx.lineTo(b.x, b.y); ctx.stroke();
-        }
-      }
-    }
-
+    if(Math.random()<0.35){const lv=particles.filter(p=>p.element==='lightning'&&!p.dead&&p.alpha>0.25);if(lv.length>2){const a=lv[Math.floor(Math.random()*lv.length)],b=lv[Math.floor(Math.random()*lv.length)];const d=Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);if(d<200&&d>10){ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5+Math.random();ctx.globalAlpha=0.6;ctx.beginPath();ctx.moveTo(a.x,a.y);const sg=4+Math.floor(Math.random()*4);for(let s=1;s<=sg;s++){const t=s/(sg+1);ctx.lineTo(a.x+(b.x-a.x)*t+(Math.random()-0.5)*35,a.y+(b.y-a.y)*t+(Math.random()-0.5)*35);}ctx.lineTo(b.x,b.y);ctx.stroke();}}}
     // Star twinkle
-    if (spell.element === 'star') {
-      for (const p of liveParticles) {
-        if (!p.dead && Math.random() < 0.03) { ctx.globalAlpha = 0.7; ctx.beginPath(); ctx.arc(p.x, p.y, p.size*8, 0, Math.PI*2); ctx.fillStyle = '#ffffff'; ctx.fill(); }
-      }
-    }
-
-    // Ice frost crystals
-    if (spell.element === 'ice') {
-      for (const p of liveParticles) {
-        if (!p.dead && Math.random() < 0.02 && particles.length < MAX_PARTICLES) {
-          const frost = new Particle(p.x, p.y, 0, 0, '#ccf4ff', 1.5, 40, 0, 1);
-          frost.element = 'ice'; particles.push(frost);
-        }
-      }
-    }
-
+    for(const p of particles){if(p.element==='star'&&!p.dead&&Math.random()<0.03){ctx.globalAlpha=0.7;ctx.beginPath();ctx.arc(p.x,p.y,p.size*8,0,Math.PI*2);ctx.fillStyle='#ffffff';ctx.fill();}}
+    // Ice frost
+    for(const p of particles){if(p.element==='ice'&&!p.dead&&Math.random()<0.02&&particles.length<MAX_P){const f=new Particle(p.x,p.y,0,0,'#ccf4ff',1.5,40,0,1);f.element='ice';particles.push(f);}}
     // Blood drips
-    if (spell.element === 'blood') {
-      for (const p of liveParticles) {
-        if (!p.dead && Math.random() < 0.03 && particles.length < MAX_PARTICLES) {
-          const drip = new Particle(p.x, p.y, (Math.random()-0.5)*0.3, 1+Math.random()*2, '#990000', 1.5, 30, 0.08, 0.99);
-          drip.element = 'blood'; particles.push(drip);
-        }
-      }
-    }
-
+    for(const p of particles){if(p.element==='blood'&&!p.dead&&Math.random()<0.03&&particles.length<MAX_P){const d=new Particle(p.x,p.y,(Math.random()-0.5)*0.3,1+Math.random()*2,'#990000',1.5,30,0.08,0.99);d.element='blood';particles.push(d);}}
     // Wind streaks
-    if (spell.element === 'wind') {
-      for (const p of liveParticles) {
-        if (!p.dead && Math.random() < 0.06) {
-          const spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
-          if (spd > 1) {
-            ctx.strokeStyle = '#ddeeff'; ctx.lineWidth = 0.5; ctx.globalAlpha = p.alpha * 0.3;
-            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 5, p.y - p.vy * 5); ctx.stroke();
-          }
-        }
-      }
-    }
-
-    // Chaos random mini-bursts
-    if (spell.element === 'chaos') {
-      for (const p of liveParticles) {
-        if (!p.dead && Math.random() < 0.008 && particles.length < MAX_PARTICLES) {
-          for (let j = 0; j < 5; j++) {
-            const a = Math.random() * Math.PI * 2;
-            const mini = new Particle(p.x, p.y, Math.cos(a)*3, Math.sin(a)*3,
-              ELEMENTS.chaos.colors[Math.floor(Math.random()*ELEMENTS.chaos.colors.length)], 2, 20, (Math.random()-0.5)*0.05, 0.96);
-            mini.element = 'chaos'; particles.push(mini);
-          }
-        }
-      }
-    }
-
-    // Nature leaf bursts
-    if (spell.element === 'nature') {
-      for (const p of liveParticles) {
-        if (!p.dead && Math.random() < 0.015 && particles.length < MAX_PARTICLES) {
-          const leaf = new Particle(p.x, p.y, (Math.random()-0.5)*1.5, -0.5+Math.random(), '#66ff33', 2.5, 35, 0.02, 0.98);
-          leaf.wobbleSpeed = 0.1; leaf.element = 'nature'; particles.push(leaf);
-        }
-      }
-    }
+    for(const p of particles){if(p.element==='wind'&&!p.dead&&Math.random()<0.06){const s=Math.sqrt(p.vx*p.vx+p.vy*p.vy);if(s>1){ctx.strokeStyle='#ddeeff';ctx.lineWidth=0.5;ctx.globalAlpha=p.alpha*0.3;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx*5,p.y-p.vy*5);ctx.stroke();}}}
+    // Chaos mini-bursts
+    for(const p of particles){if(p.element==='chaos'&&!p.dead&&Math.random()<0.008&&particles.length<MAX_P){for(let j=0;j<5;j++){const a=Math.random()*Math.PI*2;const m=new Particle(p.x,p.y,Math.cos(a)*3,Math.sin(a)*3,ELEMENTS.chaos.colors[Math.floor(Math.random()*ELEMENTS.chaos.colors.length)],2,20,(Math.random()-0.5)*0.05,0.96);m.element='chaos';particles.push(m);}}}
+    // Nature leaves
+    for(const p of particles){if(p.element==='nature'&&!p.dead&&Math.random()<0.015&&particles.length<MAX_P){const l=new Particle(p.x,p.y,(Math.random()-0.5)*1.5,-0.5+Math.random(),'#66ff33',2.5,35,0.02,0.98);l.wobbleSpeed=0.1;l.element='nature';particles.push(l);}}
   }
 
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
   requestAnimationFrame(render);
 }
 
-function drawRune(x, y, alpha, color) {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(runeAngle);
-  ctx.strokeStyle = color; ctx.lineWidth = 1.5;
-  const breath = 0.85 + Math.sin(runeBreath) * 0.15;
-  ctx.globalAlpha = alpha * breath;
-  ctx.beginPath(); ctx.arc(0, 0, 70, 0, Math.PI*2); ctx.stroke();
-  ctx.beginPath(); ctx.arc(0, 0, 48, 0, Math.PI*2); ctx.stroke();
-  for (let i = 0; i < 8; i++) { const a = (i/8)*Math.PI*2; ctx.beginPath(); ctx.moveTo(Math.cos(a)*52, Math.sin(a)*52); ctx.lineTo(Math.cos(a)*66, Math.sin(a)*66); ctx.stroke(); }
-  ctx.rotate(-runeAngle * 1.7); ctx.lineWidth = 1; ctx.globalAlpha = alpha * breath * 0.6;
-  for (let i = 0; i < 4; i++) { const a = (i/4)*Math.PI*2; ctx.beginPath(); ctx.moveTo(Math.cos(a)*-30, Math.sin(a)*-30); ctx.lineTo(Math.cos(a)*30, Math.sin(a)*30); ctx.stroke(); }
-  ctx.globalAlpha = alpha * 0.08 + runePulse * 0.2; ctx.beginPath(); ctx.arc(0, 0, 85, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
+function drawWizardHat(x, y, color) {
+  ctx.save();
+  // Hat cone
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.moveTo(x + 2, y - 38);
+  ctx.quadraticCurveTo(x + 8, y - 18, x + 20, y + 2);
+  ctx.lineTo(x - 16, y + 2);
+  ctx.quadraticCurveTo(x - 4, y - 18, x + 2, y - 38);
+  ctx.fill();
+  // Brim
+  ctx.beginPath();
+  ctx.ellipse(x + 2, y + 3, 24, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Band
+  ctx.fillStyle = '#000000';
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(x - 15, y - 4, 34, 5);
+  // Star
+  ctx.fillStyle = '#ffffff';
+  ctx.globalAlpha = 0.9;
+  ctx.font = '11px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('✦', x + 2, y - 14);
   ctx.restore();
 }
 
+function drawRune(x,y,alpha,color){
+  ctx.save();ctx.translate(x,y);ctx.rotate(runeAngle);ctx.strokeStyle=color;ctx.lineWidth=1.5;
+  const br=0.85+Math.sin(runeBreath)*0.15;ctx.globalAlpha=alpha*br;
+  ctx.beginPath();ctx.arc(0,0,70,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,48,0,Math.PI*2);ctx.stroke();
+  for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;ctx.beginPath();ctx.moveTo(Math.cos(a)*52,Math.sin(a)*52);ctx.lineTo(Math.cos(a)*66,Math.sin(a)*66);ctx.stroke();}
+  ctx.rotate(-runeAngle*1.7);ctx.lineWidth=1;ctx.globalAlpha=alpha*br*0.6;
+  for(let i=0;i<4;i++){const a=(i/4)*Math.PI*2;ctx.beginPath();ctx.moveTo(Math.cos(a)*-30,Math.sin(a)*-30);ctx.lineTo(Math.cos(a)*30,Math.sin(a)*30);ctx.stroke();}
+  ctx.globalAlpha=alpha*0.08+runePulse*0.2;ctx.beginPath();ctx.arc(0,0,85,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+  ctx.restore();
+}
 render();
 
-// ─── Spellbook ────────────────────────────────────────────
-const MAX_SLOTS = 12;
-let spellbook = [];
-try { spellbook = JSON.parse(localStorage.getItem('spellforge_book') || '[]'); } catch(e) {}
-while (spellbook.length < MAX_SLOTS) spellbook.push(null);
+// ─── Spellbook (saves scrolls) ───────────────────────────
+const MAX_SLOTS=12;
+let spellbook=[];
+try{spellbook=JSON.parse(localStorage.getItem('spellforge_book2')||'[]');}catch(e){}
+while(spellbook.length<MAX_SLOTS)spellbook.push(null);
 
-function renderBook() {
-  const el = document.getElementById('book-slots');
-  el.innerHTML = '';
-  for (let i = 0; i < MAX_SLOTS; i++) {
-    const s = spellbook[i];
-    const div = document.createElement('div');
-    div.className = 'book-slot' + (s ? '' : ' empty');
-    if (s) {
-      const sg = ELEMENTS[s.element] ? ELEMENTS[s.element].glow : '#aaa';
-      div.innerHTML = '<div class="slot-name" style="color:'+sg+'">'+(s.name||'?')+'</div>' +
-        '<div class="slot-desc">'+s.element+' · '+s.shape+' · '+POWER_NAMES[s.power]+' · '+s.casting+'</div>' +
+function renderBook(){
+  const el=document.getElementById('book-slots');el.innerHTML='';
+  for(let i=0;i<MAX_SLOTS;i++){
+    const s=spellbook[i], div=document.createElement('div');
+    div.className='book-slot'+(s?' ':' empty');
+    if(s){
+      const scrollArr=s.scroll||[{element:s.element,shape:s.shape,power:s.power}];
+      const firstGlow=ELEMENTS[scrollArr[0].element]?ELEMENTS[scrollArr[0].element].glow:'#aaa';
+      const pips=scrollArr.map(e=>ELEM_EMOJI[e.element]+SHAPE_EMOJI[e.shape]).join(' ');
+      const name=scrollArr.map(e=>spellNameFromConfig(e)).join(' → ');
+      div.innerHTML='<div class="slot-name" style="color:'+firstGlow+'">'+name+'</div>'+
+        '<div class="slot-desc">'+pips+' · '+(s.casting||'tap')+'</div>'+
         '<div class="slot-actions"><button data-act="load" data-i="'+i+'">Load</button><button data-act="cast" data-i="'+i+'">Cast</button><button data-act="del" data-i="'+i+'">✕</button></div>';
-    } else { div.textContent = 'tap to save current spell'; div.dataset.act = 'save'; div.dataset.i = i; }
+    } else{div.textContent='tap to save current scroll';div.dataset.act='save';div.dataset.i=i;}
     el.appendChild(div);
   }
 }
 
-document.getElementById('book-slots').addEventListener('click', e => {
-  const t = e.target.closest('[data-act]');
-  if (!t) return;
-  const idx = parseInt(t.dataset.i), act = t.dataset.act;
-  if (act === 'save') { spellbook[idx] = { ...spell, name: getSpellName() }; saveBook(); renderBook(); }
-  else if (act === 'load') { loadSpell(spellbook[idx]); closeBook(); }
-  else if (act === 'cast') { loadSpell(spellbook[idx]); closeBook(); setTimeout(() => document.getElementById('cast-btn').click(), 300); }
-  else if (act === 'del') { spellbook[idx] = null; saveBook(); renderBook(); }
+document.getElementById('book-slots').addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const idx=parseInt(t.dataset.i),act=t.dataset.act;
+  if(act==='save'){
+    if(scroll.length===0)return;
+    spellbook[idx]={scroll:[...scroll],casting:spell.casting,name:getScrollName()};
+    saveBook();renderBook();
+  }else if(act==='load'){
+    const entry=spellbook[idx];if(!entry)return;
+    scroll=entry.scroll?[...entry.scroll]:[{element:entry.element,shape:entry.shape,power:entry.power}];
+    if(entry.casting){spell.casting=entry.casting;document.querySelectorAll('[data-prop="casting"] .prop-btn').forEach(b=>b.classList.toggle('selected',b.dataset.val===spell.casting));}
+    if(scroll.length>0){const last=scroll[scroll.length-1];spell.element=last.element;spell.shape=last.shape;spell.power=last.power;
+    document.querySelectorAll('.prop-options').forEach(row=>{row.querySelectorAll('.prop-btn').forEach(btn=>{btn.classList.toggle('selected',btn.dataset.val===spell[row.dataset.prop]);});});}
+    activeElement=scroll[scroll.length-1].element;
+    refreshUI();renderScroll();closeBook();
+  }else if(act==='cast'){
+    const entry=spellbook[idx];if(!entry)return;
+    scroll=entry.scroll?[...entry.scroll]:[{element:entry.element,shape:entry.shape,power:entry.power}];
+    if(entry.casting)spell.casting=entry.casting;
+    activeElement=scroll[scroll.length-1].element;
+    renderScroll();closeBook();
+    setTimeout(()=>document.getElementById('cast-scroll-btn').click(),300);
+  }else if(act==='del'){spellbook[idx]=null;saveBook();renderBook();}
 });
 
-function loadSpell(s) {
-  if (!s) return;
-  spell.element = s.element; spell.shape = s.shape; spell.power = s.power; spell.casting = s.casting;
-  document.querySelectorAll('.prop-options').forEach(row => {
-    row.querySelectorAll('.prop-btn').forEach(btn => { btn.classList.toggle('selected', btn.dataset.val === spell[row.dataset.prop]); });
-  });
-  refreshUI();
-}
-function saveBook() { localStorage.setItem('spellforge_book', JSON.stringify(spellbook)); }
+function saveBook(){localStorage.setItem('spellforge_book2',JSON.stringify(spellbook));}
 
-document.getElementById('book-btn').addEventListener('click', () => { document.getElementById('spellbook').classList.add('open'); document.getElementById('spellbook-backdrop').classList.add('open'); renderBook(); });
-function closeBook() { document.getElementById('spellbook').classList.remove('open'); document.getElementById('spellbook-backdrop').classList.remove('open'); }
-document.getElementById('spellbook-close').addEventListener('click', closeBook);
-document.getElementById('spellbook-backdrop').addEventListener('click', closeBook);
+document.getElementById('book-btn').addEventListener('click',()=>{document.getElementById('spellbook').classList.add('open');document.getElementById('spellbook-backdrop').classList.add('open');renderBook();});
+function closeBook(){document.getElementById('spellbook').classList.remove('open');document.getElementById('spellbook-backdrop').classList.remove('open');}
+document.getElementById('spellbook-close').addEventListener('click',closeBook);
+document.getElementById('spellbook-backdrop').addEventListener('click',closeBook);
 
-// Prevent all Safari zoom: pinch, double-tap, and scroll
-document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-document.addEventListener('gesturestart', e => e.preventDefault());
-document.addEventListener('gesturechange', e => e.preventDefault());
-document.addEventListener('gestureend', e => e.preventDefault());
-document.addEventListener('dblclick', e => e.preventDefault());
-// Prevent iOS focus zoom on buttons
-document.querySelectorAll('button').forEach(b => b.addEventListener('touchend', e => { e.target.blur(); }));
+// Prevent Safari zoom
+document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('gesturechange',e=>e.preventDefault());
+document.addEventListener('gestureend',e=>e.preventDefault());
+document.addEventListener('dblclick',e=>e.preventDefault());
+document.querySelectorAll('button').forEach(b=>b.addEventListener('touchend',e=>{e.target.blur();}));
 </script>
 </body>
 </html>
