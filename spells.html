@@ -403,7 +403,7 @@ function render() {
     // Nature leaves
     for(const p of particles){if(p.element==='nature'&&!p.dead&&Math.random()<0.015&&particles.length<MAX_P){const l=new Particle(p.x,p.y,(Math.random()-0.5)*1.5,-0.5+Math.random(),'#66ff33',2.5,35,0.02,0.98);l.wobbleSpeed=0.1;l.element='nature';particles.push(l);}}
     // Galaxy nebula puffs
-    for(const p of particles){if(p.element==='galaxy'&&!p.dead&&Math.random()<0.02&&particles.length<MAX_P){const n=new Particle(p.x,p.y,0,0,ELEMENTS.galaxy.colors[Math.floor(Math.random()*ELEMENTS.galaxy.colors.length)],3,50,0,1);n.element='galaxy';particles.push(n);}}
+    for(const p of particles){if(p.element==='galaxy'&&!p.dead&&Math.random()<0.02&&particles.length<MAX_P){const n=new Particle(p.x,p.y,0,0,ELEMENTS.galaxy.colors[Math.floor(Math.random()*ELEMENTS.galaxy.colors.length)],3,15,0,1);n.element='galaxy';particles.push(n);}}
   }
 
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
