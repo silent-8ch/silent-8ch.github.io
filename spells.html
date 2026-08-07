@@ -67,6 +67,15 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 #flash.active{opacity:1}
 @keyframes shake{0%,100%{transform:translate(0)}20%{transform:translate(-3px,2px)}40%{transform:translate(3px,-2px)}60%{transform:translate(-2px,1px)}80%{transform:translate(2px,-1px)}}
 body.shake{animation:shake 0.15s ease 2}
+
+#draw-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(8,8,18,0.85);z-index:18;display:none}
+#draw-overlay.active{display:block}
+#draw-canvas{position:absolute;top:0;left:0;width:100%;height:100%}
+#draw-instructions{position:absolute;top:20px;left:0;right:0;text-align:center;font-size:16px;letter-spacing:2px;color:rgba(255,220,150,0.7);pointer-events:none}
+#draw-buttons{position:absolute;bottom:30px;left:0;right:0;display:flex;gap:12px;justify-content:center}
+#draw-buttons button{border-radius:24px;padding:10px 28px;font-size:15px;font-family:inherit;letter-spacing:3px;cursor:pointer;border:2px solid;-webkit-tap-highlight-color:transparent}
+#draw-redo{background:rgba(255,100,100,0.1);border-color:rgba(255,100,100,0.3);color:#ff8888}
+#draw-done{background:rgba(100,255,150,0.1);border-color:rgba(100,255,150,0.3);color:#88eea0}
 </style>
 </head>
 <body>
@@ -89,7 +98,7 @@ body.shake{animation:shake 0.15s ease 2}
   </div>
   <div class="prop-row"><div class="prop-label">Shape</div>
     <div class="prop-options" data-prop="shape">
-      <button class="prop-btn selected" data-val="burst">💥 Burst</button><button class="prop-btn" data-val="beam">➡️ Beam</button><button class="prop-btn" data-val="shield">🛡 Shield</button><button class="prop-btn" data-val="vortex">🌀 Vortex</button><button class="prop-btn" data-val="rain">🌧 Rain</button><button class="prop-btn" data-val="wave">🌊 Wave</button><button class="prop-btn" data-val="spiral">🌪 Spiral</button><button class="prop-btn" data-val="nova">💫 Nova</button><button class="prop-btn" data-val="fountain">⛲ Fountain</button><button class="prop-btn" data-val="orbit">🪐 Orbit</button>
+      <button class="prop-btn selected" data-val="burst">💥 Burst</button><button class="prop-btn" data-val="beam">➡️ Beam</button><button class="prop-btn" data-val="shield">🛡 Shield</button><button class="prop-btn" data-val="vortex">🌀 Vortex</button><button class="prop-btn" data-val="rain">🌧 Rain</button><button class="prop-btn" data-val="wave">🌊 Wave</button><button class="prop-btn" data-val="spiral">🌪 Spiral</button><button class="prop-btn" data-val="nova">💫 Nova</button><button class="prop-btn" data-val="fountain">⛲ Fountain</button><button class="prop-btn" data-val="orbit">🪐 Orbit</button><button class="prop-btn" data-val="custom">✏️ Custom</button>
     </div>
   </div>
   <div class="prop-row"><div class="prop-label">Power</div>
@@ -109,8 +118,9 @@ body.shake{animation:shake 0.15s ease 2}
 </div>
 
 <div id="cast-overlay"><div id="cast-instruction"></div></div>
+<div id="draw-overlay"><canvas id="draw-canvas"></canvas><div id="draw-instructions">Draw your spell shape!</div><div id="draw-buttons"><button id="draw-redo">↩ Redo</button><button id="draw-done">✓ Done</button></div></div>
 <div id="spellbook-backdrop"></div>
-<div id="spellbook"><button id="spellbook-close">✕</button><h2>📖 Spellbook</h2><div id="book-slots"></div></div>
+<div id="spellbook"><button id="spellbook-close">✕</button><h2>📖 Spellbook</h2><div id="book-slots"></div><h2 style="margin-top:18px">⚡ Combos</h2><div id="combo-collection"></div></div>
 <div id="flash"></div>
 
 <script>
@@ -129,7 +139,7 @@ let gameState = 'build', activeElement = 'fire';
 let scroll = []; // [{element, shape, power}, ...]
 const MAX_SCROLL = 8;
 const ELEM_EMOJI = {fire:'🔥',water:'💧',lightning:'⚡',nature:'🌿',shadow:'🌑',star:'✨',ice:'❄️',blood:'🩸',wind:'💨',chaos:'🌈',galaxy:'🌌'};
-const SHAPE_EMOJI = {burst:'💥',beam:'➡️',shield:'🛡',vortex:'🌀',rain:'🌧',wave:'🌊',spiral:'🌪',nova:'💫',fountain:'⛲',orbit:'🪐'};
+const SHAPE_EMOJI = {burst:'💥',beam:'➡️',shield:'🛡',vortex:'🌀',rain:'🌧',wave:'🌊',spiral:'🌪',nova:'💫',fountain:'⛲',orbit:'🪐',custom:'✏️'};
 
 function renderScroll() {
   const el = document.getElementById('scroll-items'); el.innerHTML = '';
@@ -146,6 +156,14 @@ function renderScroll() {
 }
 document.getElementById('add-btn').addEventListener('click', () => {
   if (scroll.length >= MAX_SCROLL) return;
+  if (spell.shape === 'custom') {
+    openDrawOverlay(() => {
+      scroll.push({ element: spell.element, shape: 'custom', power: spell.power, customPath: currentCustomPath });
+      activeElement = spell.element;
+      renderScroll();
+    });
+    return;
+  }
   scroll.push({ element: spell.element, shape: spell.shape, power: spell.power });
   activeElement = spell.element;
   renderScroll();
@@ -167,9 +185,168 @@ const ELEMENTS = {
   chaos:     { colors:['#ff0066','#00ff88','#ffaa00','#0088ff','#ff00ff','#00ffff'], gravity:0, glow:'#ff44aa', adj:['Chaotic','Unstable','Entropic','Wild'] },
   galaxy:    { colors:['#6633cc','#ff88dd','#4400aa','#dd44ff','#8866ff','#ffaaee'], gravity:-0.008, glow:'#9955ff', adj:['Nebula','Cosmic','Stellar','Galactic'] }
 };
-const SHAPES = {burst:'Burst',beam:'Beam',shield:'Shield',vortex:'Vortex',rain:'Rain',wave:'Wave',spiral:'Spiral',nova:'Nova',fountain:'Fountain',orbit:'Orbit'};
+const SHAPES = {burst:'Burst',beam:'Beam',shield:'Shield',vortex:'Vortex',rain:'Rain',wave:'Wave',spiral:'Spiral',nova:'Nova',fountain:'Fountain',orbit:'Orbit',custom:'Custom'};
 const POWERS = {spark:{count:8,size:1.5,life:30},surge:{count:20,size:2,life:40},storm:{count:60,size:2.5,life:50},cataclysm:{count:150,size:3,life:65}};
 const POWER_NAMES = {spark:'Spark',surge:'Surge',storm:'Storm',cataclysm:'Cataclysm'};
+
+// ─── Combos ──────────────────────────────────────────────
+const COMBOS = {
+  'fire+ice':       {name:'Obsidian Fury',   emoji:'🌋',  colors:['#ff4400','#88ddff','#cc6633','#ffffff'],   shape:'burst',    desc:'Fire and ice collide!'},
+  'fire+nature':    {name:'Wildfire',        emoji:'🔥🌿', colors:['#ff6600','#66ff33','#ffaa00','#44dd00'],   shape:'wave',     desc:'The forest burns!'},
+  'fire+wind':      {name:'Firestorm',       emoji:'🌪🔥', colors:['#ff3300','#ff9900','#ddeeff','#ffcc00'],   shape:'vortex',   desc:'A tornado of flame!'},
+  'lightning+water': {name:'Thunderstorm',   emoji:'⛈',   colors:['#0099ff','#ffff33','#ffffff','#00ccff'],   shape:'rain',     desc:'Lightning strikes the sea!'},
+  'ice+wind':       {name:'Blizzard',        emoji:'🌨',   colors:['#88ddff','#ffffff','#ccf4ff','#ddeeff'],   shape:'spiral',   desc:'A howling blizzard!'},
+  'fire+lightning':  {name:'Plasma Bolt',    emoji:'⚡🔥', colors:['#ff6600','#ffff33','#ffffff','#ffee66'],   shape:'beam',     desc:'Pure plasma energy!'},
+  'shadow+star':    {name:'Eclipse',         emoji:'🌑✨', colors:['#aa22ff','#ffdd22','#000000','#ffffff'],   shape:'nova',     desc:'Day becomes night!'},
+  'nature+water':   {name:'Overgrowth',      emoji:'🌊🌿', colors:['#00bb44','#0099ff','#66ff33','#00ccff'],   shape:'fountain', desc:'Life springs forth!'},
+  'blood+shadow':   {name:'Hex',             emoji:'💀',   colors:['#cc0000','#8800cc','#990000','#aa22ff'],   shape:'orbit',    desc:'A dark curse unleashed!'},
+  'chaos+galaxy':   {name:'Big Bang',        emoji:'💫🌌', colors:['#ff0066','#6633cc','#00ff88','#ff88dd'],   shape:'nova',     desc:'The universe is born!'},
+  'ice+star':       {name:'Aurora',          emoji:'🌌❄️', colors:['#88ddff','#ffdd22','#44ff88','#ff88dd'],   shape:'wave',     desc:'Northern lights dance!'},
+  'blood+fire':     {name:'Dragon\'s Breath',emoji:'🐉',   colors:['#cc0000','#ff3300','#ff9900','#880022'],   shape:'beam',     desc:'The dragon awakens!'},
+  'lightning+wind': {name:'Tempest',         emoji:'⛈💨', colors:['#ffff33','#ccddee','#ffffff','#eeeeff'],   shape:'spiral',   desc:'The sky tears open!'},
+  'nature+shadow':  {name:'Blight',          emoji:'🍂',   colors:['#00bb44','#8800cc','#444400','#aa22ff'],   shape:'rain',     desc:'Nature turns dark!'},
+  'chaos+star':     {name:'Supernova',       emoji:'💥✨', colors:['#ff0066','#ffdd22','#ffffff','#00ff88'],   shape:'nova',     desc:'A star explodes!'}
+};
+
+function detectCombos(scrollArr) {
+  const elems = [...new Set(scrollArr.map(s => s.element))];
+  const found = [];
+  for (let i = 0; i < elems.length; i++)
+    for (let j = i + 1; j < elems.length; j++) {
+      const key = [elems[i], elems[j]].sort().join('+');
+      if (COMBOS[key]) found.push(key);
+    }
+  return found;
+}
+
+function getDiscovered() {
+  try { return JSON.parse(localStorage.getItem('spellforge_combos') || '[]'); } catch(e) { return []; }
+}
+function discoverCombo(key) {
+  const d = getDiscovered();
+  if (!d.includes(key)) { d.push(key); localStorage.setItem('spellforge_combos', JSON.stringify(d)); }
+}
+
+function fireCombo(comboKey, chainMult) {
+  const combo = COMBOS[comboKey];
+  const tempKey = '_combo_' + comboKey;
+  ELEMENTS[tempKey] = { colors: combo.colors, gravity: 0, glow: combo.colors[0], adj: [combo.name] };
+  emitSpell({ element: tempKey, shape: combo.shape, power: 'storm' }, chainMult);
+  screenFlash(combo.colors[0]);
+  document.body.classList.add('shake');
+  setTimeout(() => document.body.classList.remove('shake'), 300);
+  showComboNotification(combo, comboKey);
+  discoverCombo(comboKey);
+  setTimeout(() => delete ELEMENTS[tempKey], 6000);
+}
+
+function showComboNotification(combo, key) {
+  const disp = document.getElementById('combo-display');
+  const isNew = !getDiscovered().includes(key);
+  if (isNew) {
+    disp.innerHTML = combo.emoji + ' NEW COMBO! ' + combo.emoji + '<br><span style="font-size:18px;letter-spacing:2px;text-transform:none">' + combo.name + '</span>';
+  } else {
+    disp.innerHTML = combo.emoji + ' ' + combo.name;
+  }
+  disp.style.color = combo.colors[0];
+  disp.style.textShadow = '0 0 25px ' + combo.colors[0];
+  disp.classList.add('visible');
+  setTimeout(() => disp.classList.remove('visible'), 2500);
+}
+
+// ─── Custom shape drawing ────────────────────────────────
+let currentCustomPath = null;
+let drawCallback = null;
+
+function smoothPath(pts, passes) {
+  for (let p = 0; p < passes; p++) {
+    const out = [pts[0]];
+    for (let i = 0; i < pts.length - 1; i++) {
+      out.push({ x: pts[i].x*0.75+pts[i+1].x*0.25, y: pts[i].y*0.75+pts[i+1].y*0.25 });
+      out.push({ x: pts[i].x*0.25+pts[i+1].x*0.75, y: pts[i].y*0.25+pts[i+1].y*0.75 });
+    }
+    out.push(pts[pts.length-1]);
+    pts = out;
+  }
+  return pts;
+}
+
+function resamplePath(pts, n) {
+  // Calculate total length
+  const dists = [0];
+  for (let i = 1; i < pts.length; i++) {
+    dists.push(dists[i-1] + Math.sqrt((pts[i].x-pts[i-1].x)**2 + (pts[i].y-pts[i-1].y)**2));
+  }
+  const total = dists[dists.length-1];
+  if (total === 0) return pts.slice(0, n);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const target = (i / (n-1)) * total;
+    let j = 1;
+    while (j < dists.length - 1 && dists[j] < target) j++;
+    const frac = (target - dists[j-1]) / (dists[j] - dists[j-1] || 1);
+    out.push({ x: pts[j-1].x*(1-frac)+pts[j].x*frac, y: pts[j-1].y*(1-frac)+pts[j].y*frac });
+  }
+  return out;
+}
+
+function normalizePath(pts) {
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const p of pts){minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);}
+  const scale=Math.max(maxX-minX,maxY-minY)||1;
+  const cx=(minX+maxX)/2,cy=(minY+maxY)/2;
+  return pts.map(p=>({nx:(p.x-cx)/scale*2, ny:(p.y-cy)/scale*2}));
+}
+
+function openDrawOverlay(cb) {
+  drawCallback = cb;
+  const overlay = document.getElementById('draw-overlay');
+  const dc = document.getElementById('draw-canvas');
+  const dpr = window.devicePixelRatio||1;
+  dc.width = W*dpr; dc.height = H*dpr;
+  dc.style.width = W+'px'; dc.style.height = H+'px';
+  const dctx = dc.getContext('2d');
+  dctx.setTransform(dpr,0,0,dpr,0,0);
+  dctx.clearRect(0,0,W,H);
+  overlay.classList.add('active');
+
+  let rawPts = [], drawing = false;
+  const glow = ELEMENTS[spell.element].glow;
+
+  function onDown(e) { drawing = true; rawPts = [{x:e.clientX,y:e.clientY}]; }
+  function onMove(e) {
+    if(!drawing) return;
+    const prev = rawPts[rawPts.length-1];
+    rawPts.push({x:e.clientX,y:e.clientY});
+    dctx.strokeStyle = glow; dctx.lineWidth = 4; dctx.lineCap = 'round';
+    dctx.globalAlpha = 0.8;
+    dctx.beginPath(); dctx.moveTo(prev.x,prev.y); dctx.lineTo(e.clientX,e.clientY); dctx.stroke();
+  }
+  function onUp() { drawing = false; }
+
+  dc.addEventListener('pointerdown', onDown);
+  dc.addEventListener('pointermove', onMove);
+  dc.addEventListener('pointerup', onUp);
+
+  function cleanup() {
+    dc.removeEventListener('pointerdown', onDown);
+    dc.removeEventListener('pointermove', onMove);
+    dc.removeEventListener('pointerup', onUp);
+    overlay.classList.remove('active');
+  }
+
+  document.getElementById('draw-redo').onclick = () => {
+    rawPts = []; dctx.clearRect(0,0,W,H);
+  };
+  document.getElementById('draw-done').onclick = () => {
+    if (rawPts.length < 5) return; // need some points
+    const smoothed = smoothPath(rawPts, 2);
+    const resampled = resamplePath(smoothed, 64);
+    currentCustomPath = normalizePath(resampled);
+    cleanup();
+    if (drawCallback) { drawCallback(); drawCallback = null; }
+  };
+}
 
 // ─── Particles ────────────────────────────────────────────
 let particles = [], pending = [];
@@ -260,8 +437,16 @@ function castScrollSequence(chainMult){
   const disp = document.getElementById('combo-display');
   if(chainCount>1){disp.textContent='CHAIN ×'+chainCount;disp.style.color=glow;disp.style.textShadow='0 0 25px '+glow;disp.classList.add('visible');}
   else disp.classList.remove('visible');
+  // Combo detection — fire bonus spells after scroll sequence
+  const combos = detectCombos(seq);
+  const totalSeqTime = (seq.length - 1) * 500;
+  combos.forEach((key, ci) => {
+    setTimeout(() => fireCombo(key, chainMult), totalSeqTime + 800 + ci * 700);
+  });
+
   clearTimeout(chainTimer);
-  chainTimer=setTimeout(()=>{chainCount=0;document.getElementById('chain-btn').classList.remove('visible');disp.classList.remove('visible');gameState='build';document.getElementById('build-panel').classList.remove('hidden');},(seq.length-1)*500+4500);
+  const comboExtra = combos.length * 700;
+  chainTimer=setTimeout(()=>{chainCount=0;document.getElementById('chain-btn').classList.remove('visible');disp.classList.remove('visible');gameState='build';document.getElementById('build-panel').classList.remove('hidden');},totalSeqTime+comboExtra+4500);
 }
 
 document.getElementById('chain-btn').addEventListener('click',()=>{
@@ -298,7 +483,7 @@ function emitSpell(cfg, chainMult) {
     for(let i=0;i<half;i++){const idx=i;pending.push({delay:35,fn:()=>spawnP(idx,half,c,cfg,'nova-out')});}
     return;
   }
-  const stagger={burst:0,beam:0.4,shield:0,vortex:0.2,rain:0.6,wave:0.5,spiral:0.15,fountain:0.3,orbit:0};
+  const stagger={burst:0,beam:0.4,shield:0,vortex:0.2,rain:0.6,wave:0.5,spiral:0.15,fountain:0.3,orbit:0,custom:1.2};
   const rate=stagger[cfg.shape]||0;
   for(let i=0;i<count;i++){const d=Math.floor(rate*i);if(d===0)spawnP(i,count,c,cfg);else pending.push({delay:d,fn:()=>spawnP(i,count,c,cfg)});}
 }
@@ -322,6 +507,20 @@ function spawnP(i,count,c,cfg,shapeOv) {
     case 'nova-out':{const a=Math.random()*Math.PI*2,s=4+Math.random()*10;vx=Math.cos(a)*s;vy=Math.sin(a)*s;break;}
     case 'fountain':{vx=(Math.random()-0.5)*4;vy=-(7+Math.random()*7);break;}
     case 'orbit':{const a=Math.random()*Math.PI*2,r=40+Math.random()*120;x=c.x+Math.cos(a)*r;y=c.y+Math.sin(a)*r;const os=2+Math.random()*2.5;vx=Math.cos(a+Math.PI/2)*os;vy=Math.sin(a+Math.PI/2)*os;break;}
+    case 'custom':{
+      const path=cfg.customPath;
+      if(!path||path.length<2){const a=Math.random()*Math.PI*2,s=3+Math.random()*9;vx=Math.cos(a)*s;vy=Math.sin(a)*s;break;}
+      const t=i/count,pidx=t*(path.length-1),lo=Math.floor(pidx),hi=Math.min(lo+1,path.length-1),frac=pidx-lo;
+      const px=path[lo].nx*(1-frac)+path[hi].nx*frac, py=path[lo].ny*(1-frac)+path[hi].ny*frac;
+      const RAD=130;
+      x=c.x+px*RAD; y=c.y+py*RAD;
+      let tdx=0,tdy=0;
+      if(hi>lo){tdx=path[hi].nx-path[lo].nx;tdy=path[hi].ny-path[lo].ny;}
+      const tl=Math.sqrt(tdx*tdx+tdy*tdy)||1, spd=1+Math.random()*1.5;
+      vx=(tdx/tl)*spd+(Math.random()-0.5)*1.2;
+      vy=(tdy/tl)*spd+(Math.random()-0.5)*1.2;
+      break;
+    }
   }
 
   const p=new Particle(x,y,vx,vy,color,size,life,el.gravity,0.99);
@@ -336,6 +535,16 @@ function spawnP(i,count,c,cfg,shapeOv) {
   if(cfg.element==='chaos'){const o=p.update.bind(p);p.update=function(){o();if(Math.random()<0.15)this.color=el.colors[Math.floor(Math.random()*el.colors.length)];this.gravity=(Math.random()-0.5)*0.08;};}
   if(cfg.element==='galaxy'){p.wobbleSpeed=0.04+Math.random()*0.03;p.drag=0.995;}
   if(shape==='orbit'){const o=p.update.bind(p);p.update=function(){o();const dx=c.x-this.x,dy=c.y-this.y,d=Math.sqrt(dx*dx+dy*dy)||1;this.vx+=(dx/d)*0.18;this.vy+=(dy/d)*0.18;};}
+
+  // Custom shape tween: size grows in, holds, shrinks out
+  if(shape==='custom'){
+    p.drag=0.97;
+    p.baseSize=p.size;
+    const ou=p.update.bind(p);
+    p.update=function(){ou();const t=1-(this.life/this.maxLife);if(t<0.2)this.size=this.baseSize*(t/0.2);else if(t>0.7)this.size=this.baseSize*((1-t)/0.3);else this.size=this.baseSize;};
+    // Flash particle at spawn point
+    if(particles.length<MAX_P-1){const fl=new Particle(p.x,p.y,0,0,'#ffffff',size*2.5,5,0,1);fl.element=cfg.element;particles.push(fl);}
+  }
 
   particles.push(p);
 }
@@ -367,6 +576,14 @@ function render() {
   if(gameState==='casting'&&spell.casting==='draw'&&gestureState.getDrawPoints){const pts=gestureState.getDrawPoints();if(pts.length>1){ctx.strokeStyle=glow;ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';ctx.globalAlpha=0.7;ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);ctx.stroke();ctx.globalAlpha=1;}ctx.strokeStyle=glow;ctx.lineWidth=1.5;ctx.globalAlpha=0.15;ctx.setLineDash([6,8]);ctx.beginPath();ctx.arc(c.x,c.y,65,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;}
   if(gameState==='casting'&&spell.casting==='shake'){const tot=12,fil=Math.min(gestureState.shakes||0,tot),bw=140,bh=10;ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(c.x-bw/2,c.y+90,bw,bh);ctx.fillStyle=glow;ctx.globalAlpha=0.7;ctx.fillRect(c.x-bw/2,c.y+90,bw*(fil/tot),bh);ctx.globalAlpha=1;}
   if(gameState==='casting'&&spell.casting==='spin'&&gestureState.spinProgress>0){const p=Math.min(gestureState.spinProgress/(Math.PI*4),1);ctx.save();ctx.strokeStyle=glow;ctx.lineWidth=5;ctx.globalAlpha=0.7;ctx.beginPath();ctx.arc(c.x,c.y,82,-Math.PI/2,-Math.PI/2+p*Math.PI*2);ctx.stroke();ctx.restore();}
+
+  // Ambient idle particles
+  if(gameState==='build'&&particles.length<MAX_P&&Math.random()<0.08){
+    const el=ELEMENTS[activeElement],col=el.colors[Math.floor(Math.random()*el.colors.length)];
+    const a=Math.random()*Math.PI*2,spd=0.3+Math.random()*0.7;
+    const ap=new Particle(c.x,c.y,Math.cos(a)*spd,Math.sin(a)*spd,col,1+Math.random()*0.5,20+Math.random()*10,el.gravity*0.3,0.98);
+    ap.element=activeElement;particles.push(ap);
+  }
 
   // Pending spawns
   for(let i=pending.length-1;i>=0;i--){if(--pending[i].delay<=0){pending[i].fn();pending.splice(i,1);}}
@@ -404,6 +621,8 @@ function render() {
     for(const p of particles){if(p.element==='nature'&&!p.dead&&Math.random()<0.015&&particles.length<MAX_P){const l=new Particle(p.x,p.y,(Math.random()-0.5)*1.5,-0.5+Math.random(),'#66ff33',2.5,35,0.02,0.98);l.wobbleSpeed=0.1;l.element='nature';particles.push(l);}}
     // Galaxy nebula puffs
     for(const p of particles){if(p.element==='galaxy'&&!p.dead&&Math.random()<0.02&&particles.length<MAX_P){const n=new Particle(p.x,p.y,0,0,ELEMENTS.galaxy.colors[Math.floor(Math.random()*ELEMENTS.galaxy.colors.length)],3,15,0,1);n.element='galaxy';particles.push(n);}}
+    // Combo sparkle trail
+    for(const p of particles){if(typeof p.element==='string'&&p.element.startsWith('_combo_')&&!p.dead&&Math.random()<0.05&&particles.length<MAX_P){const s=new Particle(p.x,p.y,(Math.random()-0.5)*0.5,(Math.random()-0.5)*0.5,'#ffffff',1.5,12,0,0.98);s.element=p.element;particles.push(s);}}
   }
 
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
@@ -445,6 +664,18 @@ function renderBook(){
     } else{div.textContent='tap to save current scroll';div.dataset.act='save';div.dataset.i=i;}
     el.appendChild(div);
   }
+  // Combo collection
+  const cc=document.getElementById('combo-collection');cc.innerHTML='';
+  const disc=getDiscovered(), keys=Object.keys(COMBOS).sort();
+  keys.forEach(key=>{
+    const combo=COMBOS[key],found=disc.includes(key),div=document.createElement('div');
+    div.className='book-slot';
+    if(found){div.style.borderColor=combo.colors[0]+'44';div.innerHTML='<div class="slot-name" style="color:'+combo.colors[0]+'">'+combo.emoji+' '+combo.name+'</div><div class="slot-desc">'+combo.desc+'</div><div class="slot-desc" style="color:#555">'+key.replace('+',' + ')+'</div>';}
+    else{div.style.opacity='0.4';div.innerHTML='<div class="slot-name" style="color:#444">❓ ???</div><div class="slot-desc">Try combining different elements...</div>';}
+    cc.appendChild(div);
+  });
+  const ctr=document.createElement('div');ctr.style.cssText='text-align:center;color:#665;font-size:11px;margin-top:8px;letter-spacing:1px';
+  ctr.textContent=disc.length+' / '+keys.length+' discovered';cc.appendChild(ctr);
 }
 
 document.getElementById('book-slots').addEventListener('click',e=>{
