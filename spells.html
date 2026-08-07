@@ -84,7 +84,7 @@ body.shake{animation:shake 0.15s ease 2}
   </div>
   <div class="prop-row"><div class="prop-label">Element</div>
     <div class="prop-options" data-prop="element">
-      <button class="prop-btn selected" data-val="fire">🔥 Fire</button><button class="prop-btn" data-val="water">💧 Water</button><button class="prop-btn" data-val="lightning">⚡ Bolt</button><button class="prop-btn" data-val="nature">🌿 Nature</button><button class="prop-btn" data-val="shadow">🌑 Shadow</button><button class="prop-btn" data-val="star">✨ Star</button><button class="prop-btn" data-val="ice">❄️ Ice</button><button class="prop-btn" data-val="blood">🩸 Blood</button><button class="prop-btn" data-val="wind">💨 Wind</button><button class="prop-btn" data-val="chaos">🌈 Chaos</button>
+      <button class="prop-btn selected" data-val="fire">🔥 Fire</button><button class="prop-btn" data-val="water">💧 Water</button><button class="prop-btn" data-val="lightning">⚡ Bolt</button><button class="prop-btn" data-val="nature">🌿 Nature</button><button class="prop-btn" data-val="shadow">🌑 Shadow</button><button class="prop-btn" data-val="star">✨ Star</button><button class="prop-btn" data-val="ice">❄️ Ice</button><button class="prop-btn" data-val="blood">🩸 Blood</button><button class="prop-btn" data-val="wind">💨 Wind</button><button class="prop-btn" data-val="chaos">🌈 Chaos</button><button class="prop-btn" data-val="galaxy">🌌 Galaxy</button>
     </div>
   </div>
   <div class="prop-row"><div class="prop-label">Shape</div>
@@ -128,7 +128,7 @@ let gameState = 'build', activeElement = 'fire';
 // ─── Scroll ──────────────────────────────────────────────
 let scroll = []; // [{element, shape, power}, ...]
 const MAX_SCROLL = 8;
-const ELEM_EMOJI = {fire:'🔥',water:'💧',lightning:'⚡',nature:'🌿',shadow:'🌑',star:'✨',ice:'❄️',blood:'🩸',wind:'💨',chaos:'🌈'};
+const ELEM_EMOJI = {fire:'🔥',water:'💧',lightning:'⚡',nature:'🌿',shadow:'🌑',star:'✨',ice:'❄️',blood:'🩸',wind:'💨',chaos:'🌈',galaxy:'🌌'};
 const SHAPE_EMOJI = {burst:'💥',beam:'➡️',shield:'🛡',vortex:'🌀',rain:'🌧',wave:'🌊',spiral:'🌪',nova:'💫',fountain:'⛲',orbit:'🪐'};
 
 function renderScroll() {
@@ -164,10 +164,11 @@ const ELEMENTS = {
   ice:       { colors:['#88ddff','#aaeeff','#ffffff','#66ccff','#ccf4ff'], gravity:0.03,  glow:'#88ddff', adj:['Glacial','Frostbitten','Crystal','Shattered'] },
   blood:     { colors:['#cc0000','#990000','#ff2222','#880022','#dd3333'], gravity:0.06,  glow:'#cc2222', adj:['Crimson','Sanguine','Scarlet','Wrathful'] },
   wind:      { colors:['#ccddee','#eeeeff','#aabbcc','#ddeeff','#ffffff'], gravity:0,     glow:'#bbccdd', adj:['Gale','Tempest','Zephyr','Howling'] },
-  chaos:     { colors:['#ff0066','#00ff88','#ffaa00','#0088ff','#ff00ff','#00ffff'], gravity:0, glow:'#ff44aa', adj:['Chaotic','Unstable','Entropic','Wild'] }
+  chaos:     { colors:['#ff0066','#00ff88','#ffaa00','#0088ff','#ff00ff','#00ffff'], gravity:0, glow:'#ff44aa', adj:['Chaotic','Unstable','Entropic','Wild'] },
+  galaxy:    { colors:['#6633cc','#ff88dd','#4400aa','#dd44ff','#8866ff','#ffaaee'], gravity:-0.008, glow:'#9955ff', adj:['Nebula','Cosmic','Stellar','Galactic'] }
 };
 const SHAPES = {burst:'Burst',beam:'Beam',shield:'Shield',vortex:'Vortex',rain:'Rain',wave:'Wave',spiral:'Spiral',nova:'Nova',fountain:'Fountain',orbit:'Orbit'};
-const POWERS = {spark:{count:150,size:4,life:80},surge:{count:400,size:5.5,life:110},storm:{count:800,size:7,life:150},cataclysm:{count:1200,size:9,life:200}};
+const POWERS = {spark:{count:8,size:1.5,life:30},surge:{count:20,size:2,life:40},storm:{count:60,size:2.5,life:50},cataclysm:{count:150,size:3,life:65}};
 const POWER_NAMES = {spark:'Spark',surge:'Surge',storm:'Storm',cataclysm:'Cataclysm'};
 
 // ─── Particles ────────────────────────────────────────────
@@ -333,6 +334,7 @@ function spawnP(i,count,c,cfg,shapeOv) {
   if(cfg.element==='lightning'){const o=p.update.bind(p);p.update=function(){o();if(Math.random()<0.3){this.vx+=(Math.random()-0.5)*3;this.vy+=(Math.random()-0.5)*3;}};}
   if(cfg.element==='shadow'){Object.defineProperty(p,'alpha',{get(){const b=Math.max(0,this.life/this.maxLife);return b*(0.5+Math.sin(this.life*0.4)*0.5);}});}
   if(cfg.element==='chaos'){const o=p.update.bind(p);p.update=function(){o();if(Math.random()<0.15)this.color=el.colors[Math.floor(Math.random()*el.colors.length)];this.gravity=(Math.random()-0.5)*0.08;};}
+  if(cfg.element==='galaxy'){p.wobbleSpeed=0.04+Math.random()*0.03;p.drag=0.995;}
   if(shape==='orbit'){const o=p.update.bind(p);p.update=function(){o();const dx=c.x-this.x,dy=c.y-this.y,d=Math.sqrt(dx*dx+dy*dy)||1;this.vx+=(dx/d)*0.18;this.vy+=(dy/d)*0.18;};}
 
   particles.push(p);
@@ -400,6 +402,8 @@ function render() {
     for(const p of particles){if(p.element==='chaos'&&!p.dead&&Math.random()<0.008&&particles.length<MAX_P){for(let j=0;j<5;j++){const a=Math.random()*Math.PI*2;const m=new Particle(p.x,p.y,Math.cos(a)*3,Math.sin(a)*3,ELEMENTS.chaos.colors[Math.floor(Math.random()*ELEMENTS.chaos.colors.length)],2,20,(Math.random()-0.5)*0.05,0.96);m.element='chaos';particles.push(m);}}}
     // Nature leaves
     for(const p of particles){if(p.element==='nature'&&!p.dead&&Math.random()<0.015&&particles.length<MAX_P){const l=new Particle(p.x,p.y,(Math.random()-0.5)*1.5,-0.5+Math.random(),'#66ff33',2.5,35,0.02,0.98);l.wobbleSpeed=0.1;l.element='nature';particles.push(l);}}
+    // Galaxy nebula puffs
+    for(const p of particles){if(p.element==='galaxy'&&!p.dead&&Math.random()<0.02&&particles.length<MAX_P){const n=new Particle(p.x,p.y,0,0,ELEMENTS.galaxy.colors[Math.floor(Math.random()*ELEMENTS.galaxy.colors.length)],3,50,0,1);n.element='galaxy';particles.push(n);}}
   }
 
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
