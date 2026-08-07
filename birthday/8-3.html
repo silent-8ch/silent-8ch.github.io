@@ -97,6 +97,32 @@
     <div id="padGallery"></div>
   </div>
 
+  <div id="authPanel" class="hide">
+    <div id="authHead"><span>🔑 Sign In</span><span id="authClose">✕</span></div>
+    <div id="authHint">Sign in to sync progress across devices</div>
+    <div id="authError"></div>
+    <button id="authGoogle" class="authBtn google">Sign in with Google</button>
+    <div class="authDivider">or</div>
+    <input type="email" id="authEmail" placeholder="Email" class="authInput">
+    <div id="authPasswordRow">
+      <input type="password" id="authPassword" placeholder="Password" class="authInput">
+    </div>
+    <button id="authSubmit" class="authBtn">Sign In</button>
+    <div id="authFooter">
+      <span id="authToggle" class="authLink">Don't have an account? Sign Up</span>
+      <span id="authLinkToggle" class="authLink">Use email link instead</span>
+    </div>
+    <div id="authLinkSent" style="display:none">✅ Sign-in link sent! Check your email.</div>
+  </div>
+
+  <div id="authNamePanel" class="hide">
+    <div id="authNameHead"><span>👤 Choose a Name</span></div>
+    <div id="authNameHint">Pick a display name for your account</div>
+    <div id="authNameError"></div>
+    <input type="text" id="authNameInput" placeholder="Display name" maxlength="20" class="authInput">
+    <button id="authNameSubmit" class="authBtn">Set Name</button>
+  </div>
+
 </div>
 
 
@@ -127,5 +153,9 @@
 <script src="js/sprite-editor.js"></script>
 <script src="js/sprite-library.js"></script>
 <script src="js/main.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>

@@ -436,4 +436,18 @@ _Each place below has these tappable objects (emoji = the little burst you'll se
 
 ---
 
+## 🔑 Sign in & cloud sync
+
+_Optional — you can play without signing in and everything saves locally. Sign in to sync your progress across devices._
+
+- Open **⚙️ Settings** and tap **🔑 Sign in**.
+- Three sign-in methods: **Google**, **email + password**, or **email link** (passwordless).
+- After signing in for the first time, pick a **display name** (unique, 2+ characters).
+- Your existing local progress is automatically **migrated to the cloud** on first sign-in.
+- While signed in, progress syncs every 30 seconds and when you leave the page.
+- Tap your **👤 name** in Settings to change it. Tap **🚪 Sign out** to stop syncing (local progress stays).
+- **Reset progress** in Settings also clears your cloud save.
+
+---
+
 _This guide is generated from the game itself, so it stays honest. Happy exploring, my love. 💛_

@@ -234,3 +234,26 @@
   .csRow .csChars{color:rgba(255,255,255,.5);font-size:10px;font-style:italic;}
   .csRow .csReplay{border:none;background:var(--accent);color:#fff;font-weight:700;font-size:11px;padding:4px 12px;border-radius:12px;cursor:pointer;}
   .csRow .csReplay:hover{filter:brightness(1.15);}
+  /* ---- auth panels ---- */
+  #authPanel{position:absolute;inset:0;background:rgba(42,33,28,.92);z-index:30;display:flex;flex-direction:column;padding:20px;backdrop-filter:blur(4px);gap:10px;justify-content:center;}
+  #authPanel.hide{display:none;}
+  #authHead{color:#fff;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center;}
+  #authClose{cursor:pointer;font-size:18px;padding:0 4px;color:#fff;}
+  #authHint{color:rgba(255,255,255,.6);font-size:12px;font-weight:500;}
+  #authError{color:#ff9a9a;font-size:12px;min-height:1em;}
+  .authBtn{border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;width:100%;color:#fff;background:var(--accent);}
+  .authBtn.google{background:#4285f4;}
+  .authBtn:active{filter:brightness(.9);}
+  .authDivider{text-align:center;color:rgba(255,255,255,.4);font-size:12px;font-weight:600;}
+  .authInput{display:block;width:100%;padding:10px 12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;font-size:14px;outline:none;}
+  .authInput::placeholder{color:rgba(255,255,255,.4);}
+  .authInput:focus{border-color:var(--accent);}
+  #authFooter{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+  .authLink{color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;}
+  .authLink:hover{text-decoration:underline;}
+  #authLinkSent{color:#7fb77e;font-size:12px;font-weight:600;}
+  #authNamePanel{position:absolute;inset:0;background:rgba(42,33,28,.92);z-index:31;display:flex;flex-direction:column;padding:20px;backdrop-filter:blur(4px);gap:10px;justify-content:center;}
+  #authNamePanel.hide{display:none;}
+  #authNameHead{color:#fff;font-weight:700;font-size:16px;}
+  #authNameHint{color:rgba(255,255,255,.6);font-size:12px;font-weight:500;}
+  #authNameError{color:#ff9a9a;font-size:12px;min-height:1em;}

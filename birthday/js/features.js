@@ -410,6 +410,23 @@ function saveKeepsake(){
 }
 function buildSettings(){
   const list=document.getElementById('setList'); if(!list) return; list.innerHTML='';
+  if(typeof BpetAuth!=='undefined'){
+    if(BpetAuth.user){
+      const nr=document.createElement('div'); nr.className='setRow';
+      nr.innerHTML=`<span>👤 ${BpetAuth.name||'Signed in'}<small>Tap to change name</small></span><span class="sv">☁️ Synced</span>`;
+      nr.addEventListener('click',()=>BpetAuth.editName());
+      list.appendChild(nr);
+      const or=document.createElement('div'); or.className='setRow';
+      or.innerHTML=`<span>🚪 Sign out<small>Progress stays saved locally</small></span><span class="sv">→</span>`;
+      or.addEventListener('click',()=>{ BpetAuth.logout(); closeSettings(); });
+      list.appendChild(or);
+    } else {
+      const ir=document.createElement('div'); ir.className='setRow';
+      ir.innerHTML=`<span>🔑 Sign in<small>Sync progress across devices</small></span><span class="sv">→</span>`;
+      ir.addEventListener('click',()=>BpetAuth.openLogin());
+      list.appendChild(ir);
+    }
+  }
   const toggle=(label, key, sub)=>{
     const row=document.createElement('div'); row.className='setRow';
     row.innerHTML=`<span>${label}${sub?`<small>${sub}</small>`:''}</span><span class="sv">${settings[key]?'On':'Off'}</span>`;
@@ -424,7 +441,7 @@ function buildSettings(){
   list.appendChild(keep);
   const reset=document.createElement('div'); reset.className='setRow danger';
   reset.innerHTML=`<span>♻️ Reset progress<small>Clears stats, days, passport & collection</small></span><span class="sv">Reset</span>`;
-  reset.addEventListener('click',()=>{ if(confirm('Reset all progress? This can’t be undone.')){ ['bpet','bpet_disabled','bpet_visited','bpet_meta','bpet_collection','bpet_outfit','bpet_settings','bpet_achieved'].forEach(k=>{ try{localStorage.removeItem(k);}catch(e){} }); location.reload(); } });
+  reset.addEventListener('click',()=>{ if(confirm('Reset all progress? This can’t be undone.')){ ['bpet','bpet_disabled','bpet_visited','bpet_meta','bpet_collection','bpet_outfit','bpet_settings','bpet_achieved'].forEach(k=>{ try{localStorage.removeItem(k);}catch(e){} }); if(typeof BpetAuth!=='undefined') BpetAuth.clearCloud(); location.reload(); } });
   list.appendChild(reset);
   // achievements
   const hdr=document.createElement('div'); hdr.id='setSection'; hdr.textContent=`🏆 Achievements ${achieved.size}/${ACHIEVEMENTS.length}`; list.appendChild(hdr);
