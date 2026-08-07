@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Spell Forge</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -23,7 +23,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 .prop-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#665;margin-bottom:3px;padding-left:4px}
 .prop-options{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none}
 .prop-options::-webkit-scrollbar{display:none}
-.prop-btn{flex-shrink:0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:6px 11px;color:#999;font-size:12px;font-family:inherit;cursor:pointer;transition:all 0.25s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.prop-btn{flex-shrink:0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:6px 11px;color:#999;font-size:16px;font-family:inherit;cursor:pointer;transition:all 0.25s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .prop-btn:active{transform:scale(0.94)}
 .prop-btn.selected{background:rgba(255,255,255,0.14);color:#fff}
 
@@ -910,7 +910,14 @@ function closeBook() { document.getElementById('spellbook').classList.remove('op
 document.getElementById('spellbook-close').addEventListener('click', closeBook);
 document.getElementById('spellbook-backdrop').addEventListener('click', closeBook);
 
+// Prevent all Safari zoom: pinch, double-tap, and scroll
 document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+document.addEventListener('gestureend', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault());
+// Prevent iOS focus zoom on buttons
+document.querySelectorAll('button').forEach(b => b.addEventListener('touchend', e => { e.target.blur(); }));
 </script>
 </body>
 </html>
