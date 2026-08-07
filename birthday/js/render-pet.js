@@ -235,7 +235,7 @@ function drawPlaceholder(gx, gy, size){
 }
 
 /* ---------- hat position adjuster (press Shift+H to toggle) ---------- */
-let _hatAdj = false, _hatTopFactor = 0.175, _hatOffsetFactor = 0.3, _hatSizeMul = 22;
+let _hatAdj = false, _hatTopFactor = -0.005, _hatOffsetFactor = 0.355, _hatSizeMul = 25.5;
 window.addEventListener('keydown', e => {
   if (e.key === 'H' && e.shiftKey) { _hatAdj = !_hatAdj; return; }
   if (!_hatAdj) return;
