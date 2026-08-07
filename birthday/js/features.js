@@ -459,7 +459,55 @@ function buildSettings(){
     }
     list.appendChild(row);
   });
+  // leaderboard
+  if(typeof BpetAuth!=='undefined' && BpetAuth.user){
+    const lbHdr=document.createElement('div'); lbHdr.id='setSection'; lbHdr.textContent='📊 Leaderboards'; list.appendChild(lbHdr);
+    const lbWrap=document.createElement('div'); lbWrap.id='lbWrap'; list.appendChild(lbWrap);
+    buildLeaderboard(lbWrap);
+  }
 }
+const LB_STATS=[
+  {key:'hugs',label:'🤗 Hugs'},{key:'cookies',label:'🍪 Cookies'},{key:'draws',label:'🎨 Draws'},
+  {key:'rests',label:'💤 Rests'},{key:'days',label:'💛 Days'},{key:'streak',label:'🔥 Streak'},
+  {key:'visited',label:'🗺️ Visited'},{key:'achievements',label:'🏆 Achievements'},{key:'trinkets',label:'🧺 Trinkets'},
+];
+let lbCache=null, lbCacheT=0, lbTab='hugs';
+async function buildLeaderboard(wrap){
+  wrap.innerHTML='<div class="lbLoading">Loading…</div>';
+  // cache for 60s
+  if(!lbCache || Date.now()-lbCacheT>60000){
+    try{ lbCache=await BpetAuth.fetchLeaderboard(); lbCacheT=Date.now(); }
+    catch(e){ wrap.innerHTML='<div class="lbLoading">Could not load leaderboards</div>'; return; }
+  }
+  renderLeaderboard(wrap);
+}
+function renderLeaderboard(wrap){
+  wrap.innerHTML='';
+  const tabs=document.createElement('div'); tabs.className='lbTabs';
+  LB_STATS.forEach(s=>{
+    const t=document.createElement('span'); t.className='lbTab'+(s.key===lbTab?' sel':'');
+    t.textContent=s.label; t.addEventListener('click',()=>{ lbTab=s.key; renderLeaderboard(wrap); });
+    tabs.appendChild(t);
+  });
+  wrap.appendChild(tabs);
+  const rows=[...lbCache].sort((a,b)=>(b[lbTab]||0)-(a[lbTab]||0));
+  const myUid=BpetAuth.uid;
+  let myRank=-1;
+  rows.forEach((r,i)=>{
+    const rank=i+1;
+    const isMe=r.uid===myUid;
+    if(isMe) myRank=rank;
+    const row=document.createElement('div'); row.className='lbRow'+(isMe?' me':'');
+    row.innerHTML=`<span class="lbRank">${rank}</span><span class="lbName">${esc(r.name)}</span><span class="lbVal">${r[lbTab]||0}</span>`;
+    wrap.appendChild(row);
+  });
+  if(myRank<0 && myUid){
+    const me=document.createElement('div'); me.className='lbRow me lbPinned';
+    me.innerHTML=`<span class="lbRank">—</span><span class="lbName">${esc(BpetAuth.name||'You')}</span><span class="lbVal">not ranked</span>`;
+    wrap.appendChild(me);
+  }
+}
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 function openSettings(){ ensureAudio(); buildSettings(); document.getElementById('setPanel').classList.remove('hide'); }
 function closeSettings(){ document.getElementById('setPanel').classList.add('hide'); }
 

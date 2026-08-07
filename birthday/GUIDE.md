@@ -447,6 +447,7 @@ _Optional — you can play without signing in and everything saves locally. Sign
 - While signed in, progress syncs every 30 seconds and when you leave the page.
 - Tap your **👤 name** in Settings to change it. Tap **🚪 Sign out** to stop syncing (local progress stays).
 - **Reset progress** in Settings also clears your cloud save.
+- **📊 Leaderboards** appear in Settings when signed in — tabs for hugs, cookies, draws, rests, days, streak, visited, achievements, and trinkets. Your row is highlighted wherever you rank.
 
 ---
 

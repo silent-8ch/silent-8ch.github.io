@@ -21,11 +21,21 @@
       gallery, cutscenesSeen:typeof seenCutscenes!=='undefined'?seenCutscenes:{}
     };
   }
+  function leaderboardEntry(){
+    return {
+      name:displayName||'???',
+      hugs:state.hugs||0, cookies:state.feeds||0, draws:state.draws||0, rests:state.rests||0,
+      days:(meta&&meta.totalDays)||0, streak:(meta&&meta.streak)||0,
+      visited:visited.size, achievements:achieved.size,
+      trinkets:typeof collectedKinds==='function'?collectedKinds():Object.keys(collection).length
+    };
+  }
   function sync(){
     if(!currentUser) return;
     const d=gather(), h=JSON.stringify(d);
     if(h===lastHash) return; lastHash=h;
     db.ref('birthday/players/'+currentUser.uid+'/data').set(d).catch(e=>console.warn('sync',e));
+    db.ref('birthday/leaderboard/'+currentUser.uid).set(leaderboardEntry()).catch(e=>console.warn('lb sync',e));
   }
   function applyCloud(d){
     if(!d) return;
@@ -175,12 +185,27 @@
   $('authEmail')?.addEventListener('keydown',e=>{ if(e.key==='Enter'&&isLink) emailLogin(); });
   $('authNameInput')?.addEventListener('keydown',e=>{ if(e.key==='Enter') submitName(); });
 
+  /* ── leaderboard fetch ────────────────────────────────────── */
+  async function fetchLeaderboard(){
+    const snap=await db.ref('birthday/leaderboard').once('value');
+    if(!snap.exists()) return [];
+    const out=[];
+    snap.forEach(c=>{ out.push({uid:c.key,...c.val()}); });
+    return out;
+  }
+
   /* ── public API ──────────────────────────────────────────── */
   window.BpetAuth={
     get user(){ return currentUser; },
+    get uid(){ return currentUser?currentUser.uid:null; },
     get name(){ return displayName; },
     sync, openLogin:openAuth, logout(){ sync(); fbAuth.signOut(); },
-    editName,
-    clearCloud(){ if(currentUser){ db.ref('birthday/players/'+currentUser.uid+'/data').remove().catch(()=>{}); lastHash=''; } },
+    editName, fetchLeaderboard,
+    clearCloud(){
+      if(!currentUser) return; const uid=currentUser.uid;
+      db.ref('birthday/players/'+uid+'/data').remove().catch(()=>{});
+      db.ref('birthday/leaderboard/'+uid).remove().catch(()=>{});
+      lastHash='';
+    },
   };
 })();

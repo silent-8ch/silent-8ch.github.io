@@ -257,3 +257,15 @@
   #authNameHead{color:#fff;font-weight:700;font-size:16px;}
   #authNameHint{color:rgba(255,255,255,.6);font-size:12px;font-weight:500;}
   #authNameError{color:#ff9a9a;font-size:12px;min-height:1em;}
+  /* ---- leaderboard ---- */
+  .lbTabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
+  .lbTab{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);font-size:11px;font-weight:600;padding:4px 8px;border-radius:8px;cursor:pointer;white-space:nowrap;}
+  .lbTab.sel{background:var(--accent);color:#fff;}
+  .lbTab:hover:not(.sel){background:rgba(255,255,255,.15);}
+  .lbRow{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border-radius:8px;padding:7px 10px;color:#fff;font-size:13px;margin-bottom:3px;}
+  .lbRow.me{background:rgba(224,122,139,.35);font-weight:700;}
+  .lbRow.lbPinned{margin-top:6px;border-top:1px solid rgba(255,255,255,.12);}
+  .lbRank{width:28px;text-align:center;font-weight:700;color:rgba(255,255,255,.5);font-size:12px;flex:none;}
+  .lbName{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lbVal{font-weight:700;color:var(--accent);font-size:13px;flex:none;}
+  .lbLoading{color:rgba(255,255,255,.5);font-size:12px;font-weight:600;padding:8px 0;}
