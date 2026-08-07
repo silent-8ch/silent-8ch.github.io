@@ -120,21 +120,6 @@ let W, H;
 function resize() { const d = window.devicePixelRatio||1; W = window.innerWidth; H = window.innerHeight; canvas.width = W*d; canvas.height = H*d; ctx.setTransform(d,0,0,d,0,0); }
 resize(); window.addEventListener('resize', resize);
 
-// ─── William sprite ──────────────────────────────────────
-const williamImg = new Image();
-williamImg.crossOrigin = 'anonymous';
-williamImg.src = 'birthday/sprites/expressions/sources/william-core.png';
-let williamSprite = null;
-williamImg.onload = () => {
-  const cw = Math.floor(williamImg.width / 4), ch = Math.floor(williamImg.height / 4);
-  const oc = document.createElement('canvas'); oc.width = cw; oc.height = ch;
-  const octx = oc.getContext('2d');
-  octx.drawImage(williamImg, 0, 0, cw, ch, 0, 0, cw, ch);
-  const id = octx.getImageData(0, 0, cw, ch), d = id.data;
-  for (let i = 0; i < d.length; i += 4) { if (d[i+1] > 180 && d[i] < 100 && d[i+2] < 100) d[i+3] = 0; }
-  octx.putImageData(id, 0, 0);
-  williamSprite = oc;
-};
 
 // ─── State ────────────────────────────────────────────────
 const spell = { element:'fire', shape:'burst', power:'spark', casting:'tap' };
@@ -226,7 +211,13 @@ document.querySelectorAll('.prop-options').forEach(row=>{row.addEventListener('c
 refreshUI();
 
 // ─── Cast center ──────────────────────────────────────────
-function castCenter(){return{x:W/2,y:gameState==='build'?H*0.28:H*0.38};}
+function castCenter(){
+  // Center William in the visible area above the build panel
+  // Build panel is ~300px tall; center in the remaining space
+  const panelH = gameState==='build' ? Math.min(320, H*0.45) : 0;
+  const available = H - panelH;
+  return {x:W/2, y:available*0.45};
+}
 
 // ─── Casting system ───────────────────────────────────────
 const castOverlay=document.getElementById('cast-overlay'), castInst=document.getElementById('cast-instruction');
@@ -361,15 +352,6 @@ function render() {
   // Stars
   for(const s of stars){s.phase+=s.speed;const a=0.25+Math.sin(s.phase)*0.2;ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.s,0,Math.PI*2);ctx.fillStyle='rgba(180,180,240,'+a+')';ctx.fill();}
 
-  // William
-  if(williamSprite){
-    const sc=2.2, ww=williamSprite.width*sc, wh=williamSprite.height*sc;
-    const wx=c.x-ww/2, wy=c.y-wh+20;
-    ctx.imageSmoothingEnabled=false;
-    ctx.drawImage(williamSprite,wx,wy,ww,wh);
-    ctx.imageSmoothingEnabled=true;
-    drawWizardHat(c.x, wy+4, glow);
-  }
 
   // Rune
   if(gameState==='build'||gameState==='casting'){
@@ -422,34 +404,6 @@ function render() {
 
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
   requestAnimationFrame(render);
-}
-
-function drawWizardHat(x, y, color) {
-  ctx.save();
-  // Hat cone
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.85;
-  ctx.beginPath();
-  ctx.moveTo(x + 2, y - 38);
-  ctx.quadraticCurveTo(x + 8, y - 18, x + 20, y + 2);
-  ctx.lineTo(x - 16, y + 2);
-  ctx.quadraticCurveTo(x - 4, y - 18, x + 2, y - 38);
-  ctx.fill();
-  // Brim
-  ctx.beginPath();
-  ctx.ellipse(x + 2, y + 3, 24, 7, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Band
-  ctx.fillStyle = '#000000';
-  ctx.globalAlpha = 0.3;
-  ctx.fillRect(x - 15, y - 4, 34, 5);
-  // Star
-  ctx.fillStyle = '#ffffff';
-  ctx.globalAlpha = 0.9;
-  ctx.font = '11px serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('✦', x + 2, y - 14);
-  ctx.restore();
 }
 
 function drawRune(x,y,alpha,color){
@@ -521,13 +475,15 @@ function closeBook(){document.getElementById('spellbook').classList.remove('open
 document.getElementById('spellbook-close').addEventListener('click',closeBook);
 document.getElementById('spellbook-backdrop').addEventListener('click',closeBook);
 
-// Prevent Safari zoom
+// Prevent ALL Safari/iOS zoom
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+document.addEventListener('touchstart',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault());
 document.addEventListener('gesturechange',e=>e.preventDefault());
 document.addEventListener('gestureend',e=>e.preventDefault());
 document.addEventListener('dblclick',e=>e.preventDefault());
-document.querySelectorAll('button').forEach(b=>b.addEventListener('touchend',e=>{e.target.blur();}));
+// Prevent focus zoom on all buttons (delegation catches dynamic buttons too)
+document.addEventListener('touchend',e=>{if(e.target.closest('button'))e.target.blur();});
 </script>
 </body>
 </html>
