@@ -106,7 +106,7 @@ function drawPet(){
 
   // accessory on her head (skip while she's crying or mid-nap so it doesn't clash)
   if (!(isCrying()) && !pet.restPhase){
-    const topY = (feetY - dispH - bob) + dispH*0.175;   // approx top of her head
+    const topY = (feetY - dispH - bob) + dispH*_hatTopFactor;
     drawAccessory(activeAccessory(), feetX, topY, dispW/46);
   }
 
@@ -233,6 +233,32 @@ function drawPlaceholder(gx, gy, size){
   }
   ctx.restore();
 }
+
+/* ---------- hat position adjuster (press Shift+H to toggle) ---------- */
+let _hatAdj = false, _hatTopFactor = 0.175, _hatOffsetFactor = 0.3, _hatSizeMul = 22;
+window.addEventListener('keydown', e => {
+  if (e.key === 'H' && e.shiftKey) { _hatAdj = !_hatAdj; return; }
+  if (!_hatAdj) return;
+  const step = e.shiftKey ? 0.001 : 0.005;
+  if (e.key === 'ArrowUp')    { _hatTopFactor -= step; e.preventDefault(); }
+  if (e.key === 'ArrowDown')  { _hatTopFactor += step; e.preventDefault(); }
+  if (e.key === 'ArrowLeft')  { _hatOffsetFactor += step; e.preventDefault(); }
+  if (e.key === 'ArrowRight') { _hatOffsetFactor -= step; e.preventDefault(); }
+  if (e.key === '+' || e.key === '=') _hatSizeMul += 0.5;
+  if (e.key === '-' || e.key === '_') _hatSizeMul -= 0.5;
+});
+EXTRA_DRAWERS.push(function(){
+  if (!_hatAdj) return;
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.75)';
+  ctx.fillRect(4, H - 62, 220, 58);
+  ctx.fillStyle = '#0f0'; ctx.font = '11px monospace'; ctx.textAlign = 'left';
+  ctx.fillText('HAT ADJUST (Shift+arrows=fine)', 8, H - 49);
+  ctx.fillText(`topFactor: ${_hatTopFactor.toFixed(3)}  (↑↓)`, 8, H - 36);
+  ctx.fillText(`offsetFactor: ${_hatOffsetFactor.toFixed(3)}  (←→)`, 8, H - 23);
+  ctx.fillText(`sizeMul: ${_hatSizeMul.toFixed(1)}  (+/-)`, 8, H - 10);
+  ctx.restore();
+});
 
 /* utils */
 function roundRect(x,y,w,h,rr){ ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr); ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath(); }

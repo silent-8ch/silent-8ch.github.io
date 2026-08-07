@@ -592,8 +592,10 @@ function drawAccessory(kind, cx, topY, s){
   // Try sprite-based hat first
   const hat = _loadHat(kind);
   if (hat.ready) {
-    const size = 22 * s;  // scale relative to character
-    ctx.drawImage(hat.img, cx - size / 2, topY - size * 0.3, size, size);
+    const sm = (typeof _hatSizeMul!=='undefined') ? _hatSizeMul : 22;
+    const of = (typeof _hatOffsetFactor!=='undefined') ? _hatOffsetFactor : 0.3;
+    const size = sm * s;
+    ctx.drawImage(hat.img, cx - size / 2, topY - size * of, size, size);
     return;
   }
   // Fallback to canvas primitives while sprite loads
